@@ -1213,14 +1213,27 @@ async function handleDesktopChatInput({
     status?: string
     turnId?: string | null
     session?: DesktopSessionOption
+    routing?: string
   }
-  if (result.accepted || (result.duplicate && ['accepted', 'running'].includes(result.status || ''))) {
+  if (result.status === 'human') {
+    await sendText(
+      chatId,
+      '消息已转入人工处理，请等待管理员在 Moss 中回复。',
+      undefined,
+      result.turnId ? `human-${result.turnId}` : undefined,
+    )
+    return
+  }
+  if (result.accepted && ['queued', 'running'].includes(result.status || '')) {
+    if (result.routing === 'ai_draft_review') return
     const card = getOrCreateStreamingCard(chatId, result.turnId || undefined, result.session?.title)
     void card.ensureCreated().catch((error) => {
       console.error('[Feishu] Unable to create Moss response card:', error)
     })
   }
 }
+
+desktopBridge.on('turn.accepted', () => {})
 
 desktopBridge.on('turn.completed', (payload: any) => {
   const chatId = typeof payload?.chatId === 'string' ? payload.chatId : ''
@@ -1245,7 +1258,12 @@ desktopBridge.on('turn.review_requested', (payload: any) => {
   if (!chatId) return
   enqueue(chatId, async () => {
     clearTransientChatState(chatId)
-    const delivered = Boolean(await sendText(chatId, 'AI 草稿已生成，正在等待 Moss 中的人工确认。'))
+    const delivered = Boolean(await sendText(
+      chatId,
+      'AI 草稿已生成，正在等待 Moss 中的人工确认。',
+      undefined,
+      turnId ? `review-${turnId}` : undefined,
+    ))
     if (delivered && turnId) {
       await desktopBridge.request('turn.delivery.ack', { turnId, chatId })
     }

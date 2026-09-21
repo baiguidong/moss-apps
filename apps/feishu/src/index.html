@@ -354,8 +354,12 @@
     let defaultAgentBinding = null
     let pendingDrafts = []
     const memberBindings = new Map()
+    const dirtyResourceKinds = new Set()
     let agentBusy = false
     let disposed = false
+    let statusRequestVersion = 0
+    let agentSettingsRequestVersion = 0
+    let draftsRequestVersion = 0
     const eventCleanups = []
 
     function errorMessage(error) {
@@ -491,11 +495,12 @@
     function statusText(status) {
       const location = status.location === 'server' ? 'Moss Server' : '本机'
       if (status.transportConnected) return { text: `${location}飞书长连接已就绪`, kind: 'success' }
+      if (status.transportError) return { text: `飞书长连接失败：${status.transportError}`, kind: 'error' }
+      if (status.status === 'error') return { text: `飞书 App 启动失败：${status.error || '未知错误'}`, kind: 'error' }
       if (status.bridgeReady) return { text: `${location}桥接已连接，正在等待飞书长连接`, kind: 'warning' }
-      if (status.status === 'error') return { text: `Adapter 启动失败：${status.error || '未知错误'}`, kind: 'error' }
-      if (status.status === 'running') return { text: 'Adapter 正在启动', kind: 'warning' }
-      if (status.status === 'disabled') return { text: 'Adapter 未配置', kind: '' }
-      return { text: 'Adapter 未启动', kind: '' }
+      if (status.status === 'running') return { text: '飞书 App 正在启动', kind: 'warning' }
+      if (status.status === 'disabled') return { text: '飞书 App 未启用', kind: '' }
+      return { text: '飞书 App 未启动', kind: '' }
     }
 
     function renderStatus() {
@@ -527,27 +532,47 @@
       return hostBridge.request(agentInstanceId, AGENT_PROTOCOL, method, input)
     }
 
-    function renderResourceList(elementId, items, selected, unrestricted) {
+    function renderResourceList(elementId, kind, items, selected, unrestricted) {
       const list = $(elementId)
       list.replaceChildren()
-      if (!items.length) {
+      const selectedValues = Array.isArray(selected) ? selected : []
+      const categoryUnrestricted = selected === null
+      if (!items.length && !selectedValues.length) {
         const empty = document.createElement('span')
         empty.className = 'hint'
         empty.textContent = '暂无可用项'
         list.append(empty)
         return
       }
-      const selectedSet = new Set(Array.isArray(selected) ? selected : [])
+      const selectedSet = new Set(selectedValues)
+      const renderedValues = new Set()
       for (const item of items) {
         const label = document.createElement('label')
         label.className = 'resource-item'
         const checkbox = document.createElement('input')
         checkbox.type = 'checkbox'
         checkbox.value = String(item.id || item.name || '')
-        checkbox.checked = unrestricted || selectedSet.has(checkbox.value) || selectedSet.has(String(item.name || ''))
+        renderedValues.add(checkbox.value)
+        renderedValues.add(String(item.name || ''))
+        checkbox.checked = categoryUnrestricted || selectedSet.has(checkbox.value) || selectedSet.has(String(item.name || ''))
         checkbox.disabled = unrestricted
+        checkbox.addEventListener('change', () => dirtyResourceKinds.add(kind))
         const copy = document.createElement('span')
         copy.textContent = String(item.displayName || item.title || item.name || item.id || '')
+        label.append(checkbox, copy)
+        list.append(label)
+      }
+      for (const value of selectedValues.filter((entry) => !renderedValues.has(String(entry)))) {
+        const label = document.createElement('label')
+        label.className = 'resource-item'
+        const checkbox = document.createElement('input')
+        checkbox.type = 'checkbox'
+        checkbox.value = String(value)
+        checkbox.checked = true
+        checkbox.disabled = unrestricted
+        checkbox.addEventListener('change', () => dirtyResourceKinds.add(kind))
+        const copy = document.createElement('span')
+        copy.textContent = `${value}（当前不可用）`
         label.append(checkbox, copy)
         list.append(label)
       }
@@ -563,7 +588,13 @@
 
     function renderAgentPolicy() {
       const effective = defaultAgentBinding?.effective || {}
-      const resources = effective.resources || {}
+      const storedResources = defaultAgentBinding?.binding?.policy?.resources
+      const resources = storedResources && typeof storedResources === 'object'
+        ? Object.fromEntries(['tools', 'skills', 'connectors'].map((key) => [
+            key,
+            Array.isArray(storedResources[key]) ? storedResources[key] : null,
+          ]))
+        : { tools: null, skills: null, connectors: null }
       const unrestricted = ['tools', 'skills', 'connectors'].every((key) => resources[key] === null)
       $('replyMode').value = effective.replyMode || 'ai_auto'
       $('sessionMode').value = effective.session?.mode || 'fixed'
@@ -577,10 +608,14 @@
       for (const agent of agentCatalog.agents || []) {
         agentSelect.append(new Option(agent.name || agent.id, agent.id))
       }
+      if (selectedAgent && !(agentCatalog.agents || []).some((agent) => agent.id === selectedAgent)) {
+        agentSelect.append(new Option(`${selectedAgent}（当前不可用）`, selectedAgent))
+      }
       agentSelect.value = selectedAgent
-      renderResourceList('toolResources', agentCatalog.tools || [], resources.tools, unrestricted)
-      renderResourceList('skillResources', agentCatalog.skills || [], resources.skills, unrestricted)
-      renderResourceList('connectorResources', agentCatalog.connectors || [], resources.connectors, unrestricted)
+      renderResourceList('toolResources', 'tools', agentCatalog.tools || [], resources.tools, unrestricted)
+      renderResourceList('skillResources', 'skills', agentCatalog.skills || [], resources.skills, unrestricted)
+      renderResourceList('connectorResources', 'connectors', agentCatalog.connectors || [], resources.connectors, unrestricted)
+      dirtyResourceKinds.clear()
       updateResourcePickerState()
     }
 
@@ -675,7 +710,9 @@
     }
 
     async function refreshAgentDrafts() {
+      const requestVersion = ++draftsRequestVersion
       const result = await agentRequest('turn.list', { statuses: ['human', 'awaiting_review'], limit: 100 })
+      if (disposed || requestVersion !== draftsRequestVersion) return
       pendingDrafts = Array.isArray(result?.turns) ? result.turns : []
       renderDrafts()
     }
@@ -684,11 +721,13 @@
       if (agentBusy) return
       setAgentBusy(true)
       setAgentMessage('')
+      const requestVersion = ++agentSettingsRequestVersion
       try {
         const [catalog, binding] = await Promise.all([
           agentRequest('catalog.list', {}),
           agentRequest('binding.get', { externalConversationId: INSTANCE_BINDING_ID }),
         ])
+        if (disposed || requestVersion !== agentSettingsRequestVersion) return
         agentCatalog = catalog || agentCatalog
         defaultAgentBinding = binding || null
         const users = configuredUsers()
@@ -715,6 +754,23 @@
       return [...$(elementId).querySelectorAll('input[type="checkbox"]:checked')].map((input) => input.value)
     }
 
+    function resourcesForSave(unrestricted) {
+      if (unrestricted) return { tools: null, skills: null, connectors: null }
+      const stored = defaultAgentBinding?.binding?.policy?.resources
+      return Object.fromEntries([
+        ['tools', 'toolResources'],
+        ['skills', 'skillResources'],
+        ['connectors', 'connectorResources'],
+      ].map(([kind, elementId]) => [
+        kind,
+        !dirtyResourceKinds.has(kind)
+          ? stored && typeof stored === 'object' && Array.isArray(stored[kind])
+            ? [...stored[kind]]
+            : null
+          : checkedResourceIds(elementId),
+      ]))
+    }
+
     async function saveAgentPolicy() {
       if (agentBusy) return
       setAgentBusy(true)
@@ -728,11 +784,7 @@
             replyMode: $('replyMode').value,
             agentId: $('agentId').value || null,
             permissionMode: $('permissionMode').value,
-            resources: unrestricted ? { tools: null, skills: null, connectors: null } : {
-              tools: checkedResourceIds('toolResources'),
-              skills: checkedResourceIds('skillResources'),
-              connectors: checkedResourceIds('connectorResources'),
-            },
+            resources: resourcesForSave(unrestricted),
             session: {
               mode: $('sessionMode').value,
               rotateAfterTurns: Math.min(1000, Math.max(1, Number($('rotateAfterTurns').value) || 24)),
@@ -846,11 +898,15 @@
 
     async function refreshStatus() {
       if (!bridge) return
+      const requestVersion = ++statusRequestVersion
       try {
-        adapterStatus = await bridge.getStatus()
+        const status = await bridge.getStatus()
+        if (disposed || requestVersion !== statusRequestVersion) return
+        adapterStatus = status
         renderStatus()
         renderPairing()
       } catch (error) {
+        if (disposed || requestVersion !== statusRequestVersion) return
         $('status').textContent = errorMessage(error)
         $('statusLine').className = 'status-line error'
       }
@@ -860,10 +916,14 @@
       if (!bridge) throw new Error('当前 Moss 版本不支持飞书 App 配置，请升级后重试。')
       adapterConfig = await bridge.getConfig() || {}
       hydrateForm(adapterConfig)
+      const requestVersion = ++statusRequestVersion
       try {
-        adapterStatus = await bridge.getStatus() || adapterStatus
+        const status = await bridge.getStatus()
+        if (!disposed && requestVersion === statusRequestVersion) adapterStatus = status || adapterStatus
       } catch (error) {
-        adapterStatus = { ...adapterStatus, status: 'error', error: errorMessage(error) }
+        if (!disposed && requestVersion === statusRequestVersion) {
+          adapterStatus = { ...adapterStatus, status: 'error', error: errorMessage(error) }
+        }
       }
       renderStatus()
       renderPairing()
@@ -894,6 +954,7 @@
       $('statusLine').className = 'status-line warning'
       try {
         const result = await bridge.updateConfig({ feishu: collectFeishuConfig() })
+        statusRequestVersion += 1
         adapterConfig = result.config || adapterConfig
         adapterStatus = result.status || adapterStatus
         hydrateForm(adapterConfig)
@@ -915,6 +976,7 @@
       setMessage('')
       try {
         const result = await bridge.applyRuntime({ runLocation: nextLocation })
+        statusRequestVersion += 1
         adapterConfig = result.config || adapterConfig
         adapterStatus = result.status || adapterStatus
         $('runLocation').value = nextLocation
@@ -944,6 +1006,7 @@
         const result = await bridge.updateConfig({
           pairing: { code: pairingCode, createdAt: now, expiresAt: now + 60 * 60 * 1000 },
         })
+        statusRequestVersion += 1
         adapterConfig = result.config || adapterConfig
         adapterStatus = result.status || adapterStatus
         renderStatus()
@@ -964,8 +1027,15 @@
       setMessage('')
       try {
         const feishu = adapterConfig?.feishu || {}
-        const pairedUsers = (feishu.pairedUsers || []).filter((user) => String(user?.userId || '') !== String(userId))
-        const result = await bridge.updateConfig({ feishu: { ...feishu, pairedUsers } })
+        const currentPairedUsers = Array.isArray(adapterStatus?.pairedUsers)
+          ? adapterStatus.pairedUsers
+          : feishu.pairedUsers || []
+        const pairedUsers = currentPairedUsers
+          .filter((user) => String(user?.userId || '') !== String(userId))
+        const allowedUsers = (feishu.allowedUsers || [])
+          .filter((entry) => String(entry || '') !== String(userId))
+        const result = await bridge.updateConfig({ feishu: { ...feishu, pairedUsers, allowedUsers } })
+        statusRequestVersion += 1
         adapterConfig = result.config || adapterConfig
         adapterStatus = result.status || adapterStatus
         renderStatus()
@@ -1015,6 +1085,7 @@
 
     subscribeHostEvent('runtime', () => void refreshStatus())
     subscribeHostEvent('feishu-status', (status) => {
+      statusRequestVersion += 1
       adapterStatus = status || adapterStatus
       renderStatus()
       renderPairing()

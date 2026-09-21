@@ -5,7 +5,7 @@ import {
   mapLegacyRequestToChannel,
 } from './app-channel-bridge.js'
 import { loadConfigFromAppContext } from './config.js'
-import { createEnvelope, validateChannelHostInput } from '@moss/app-sdk'
+import { createEnvelope, validateAgentHostInput, validateChannelHostInput } from '@moss/app-sdk'
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
 
@@ -98,6 +98,28 @@ describe('Feishu App Channel compatibility bridge', () => {
     expect(() => validateChannelHostInput('delivery.ack', {
       kind: 'turn', deliveryId: 'turn-1', ok: true,
     })).toThrow('externalConversationId')
+  })
+
+  it('rejects spoofed member identities and unbounded message payloads', () => {
+    const identity = {
+      externalUserId: 'ou_user',
+      externalConversationId: 'oc_chat',
+      externalEventId: 'om_message',
+    }
+    expect(() => validateChannelHostInput('message.receive', {
+      ...identity,
+      text: 'hello',
+      externalMemberId: 'ou_other',
+    })).toThrow(/unknown field: externalMemberId/)
+    expect(() => validateAgentHostInput('turn.start', {
+      ...identity,
+      text: 'hello',
+      extra: true,
+    })).toThrow(/unknown field: extra/)
+    expect(() => validateChannelHostInput('message.receive', {
+      ...identity,
+      attachments: Array.from({ length: 33 }, () => ({ type: 'image' })),
+    })).toThrow(/at most 32/)
   })
 
   it('maps Host events back to the transport payload shape', () => {

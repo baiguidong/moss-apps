@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
 
 const source = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
+const backendSource = readFileSync(new URL('../backend/feishu/index.ts', import.meta.url), 'utf8')
 
 describe('Feishu App UI contract', () => {
   test('uses the Moss appearance tokens without a separate Feishu color palette', () => {
@@ -51,5 +52,21 @@ describe('Feishu App UI contract', () => {
     ]) {
       expect(source.match(new RegExp(`id="${id}"`, 'g'))).toHaveLength(1)
     }
+  })
+
+  test('preserves unavailable AI selections and reports the real connection state', () => {
+    expect(source).toContain('（当前不可用）')
+    expect(source).toContain('dirtyResourceKinds')
+    expect(source).toContain('status.transportError')
+    expect(source).toContain('飞书 App 未启用')
+    expect(source).toContain(".filter((entry) => String(entry || '') !== String(userId))")
+    expect(source).toContain('requestVersion !== statusRequestVersion')
+    expect(source).toContain('requestVersion !== draftsRequestVersion')
+  })
+
+  test('acknowledges accepted turns and uses stable ids for human handoff notices', () => {
+    expect(backendSource).toContain("desktopBridge.on('turn.accepted', () => {})")
+    expect(backendSource).toContain('`human-${result.turnId}`')
+    expect(backendSource).toContain('`review-${turnId}`')
   })
 })

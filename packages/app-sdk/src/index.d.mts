@@ -510,6 +510,8 @@ export function getChannelHostMethodPermission(method: ChannelHostMethod): Chann
 export function getChannelBackendEventPermission(name: ChannelBackendEvent): ChannelPermission
 export function validateChannelProtocol(value: unknown): 'moss.channel/v1'
 export function validateChannelData(value: unknown, label?: string): Record<string, unknown>
+export function validateChannelAttachments(value: unknown, method: string): void
+export function validateChannelMessageContent(input: Record<string, unknown>, method: string): void
 export function validateChannelHostInput(method: ChannelHostMethod, value: unknown): Record<string, unknown>
 export function validateChannelBackendEventData(name: ChannelBackendEvent, value: unknown): Record<string, unknown>
 export function requireChannelPermission(permissions: string[], requiredPermission: ChannelPermission): true

@@ -54,6 +54,18 @@ function optionalLimit(input, method) {
   }
 }
 
+function rejectUnknownFields(input, fields, method) {
+  const allowed = new Set(fields)
+  for (const field of Object.keys(input)) {
+    if (!allowed.has(field)) {
+      throw new AppServiceError(
+        APP_ERROR_CODES.invalidInput,
+        `${method} contains an unknown field: ${field}`,
+      )
+    }
+  }
+}
+
 export function validateAccountHostMethod(value) {
   return requireKnownName(value, ACCOUNT_HOST_METHOD_PERMISSIONS, 'Host method')
 }
@@ -73,11 +85,15 @@ export function validateAccountHostInput(method, value) {
       )
     }
   }
-  if (normalizedMethod === 'directory.list') {
+  if (normalizedMethod === 'identity.current') {
+    rejectUnknownFields(input, [], normalizedMethod)
+  } else if (normalizedMethod === 'directory.list') {
+    rejectUnknownFields(input, ['departmentId', 'cursor', 'limit'], normalizedMethod)
     optionalString(input, 'departmentId', normalizedMethod)
     optionalString(input, 'cursor', normalizedMethod)
     optionalLimit(input, normalizedMethod)
   } else if (normalizedMethod === 'directory.search') {
+    rejectUnknownFields(input, ['query', 'departmentId', 'limit'], normalizedMethod)
     if (typeof input.query !== 'string' || !input.query.trim() || input.query.length > 200) {
       throw new AppServiceError(APP_ERROR_CODES.invalidInput, 'directory.search requires a query')
     }
