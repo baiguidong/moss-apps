@@ -261,6 +261,36 @@
       linear-gradient(180deg, color-mix(in oklab, var(--background) 98%, transparent), var(--background));
   }
 
+  [data-css-theme='grid-theme'] .app-shell {
+    background-color: var(--background);
+    background-image:
+      linear-gradient(rgba(var(--foreground-rgb, 0, 0, 0), 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(var(--foreground-rgb, 0, 0, 0), 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-attachment: fixed;
+  }
+
+  [data-theme='dark'][data-css-theme='grid-theme'] .app-shell {
+    background-image:
+      linear-gradient(rgb(255 255 255 / 5%) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 5%) 1px, transparent 1px);
+  }
+
+  [data-css-theme='dot-theme'] .app-shell {
+    background-color: var(--background);
+    background-image: radial-gradient(rgba(var(--foreground-rgb, 0, 0, 0), 0.08) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-attachment: fixed;
+  }
+
+  [data-theme='dark'][data-css-theme='dot-theme'] .app-shell {
+    background-image: radial-gradient(rgb(255 255 255 / 6%) 1px, transparent 1px);
+  }
+
+  [data-css-theme='gradient-theme'] .app-shell {
+    background: linear-gradient(135deg, var(--background) 0%, var(--secondary) 100%);
+  }
+
   .moss-window-chrome {
     background:
       linear-gradient(

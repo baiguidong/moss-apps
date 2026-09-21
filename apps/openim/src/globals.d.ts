@@ -28,7 +28,15 @@ declare global {
 
   interface Window {
     mossApp: {
-      app: { getInfo: () => Promise<{ appearance?: { theme?: "light" | "dark" | "system" } }> };
+      app: {
+        getInfo: () => Promise<{
+          appearance?: {
+            themeMode?: "light" | "dark" | "system";
+            theme?: "light" | "dark" | "system";
+            cssThemeId?: "default" | "grid-theme" | "dot-theme" | "gradient-theme";
+          };
+        }>;
+      };
       events: { on: (name: string, callback: (payload: any) => void) => () => void };
       host: { request: <T = unknown>(instanceId: string, protocol: string, method: string, input?: Record<string, unknown>) => Promise<T> };
       instances: {
