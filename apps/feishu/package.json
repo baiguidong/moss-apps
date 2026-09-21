@@ -13,11 +13,9 @@
   },
   "dependencies": {
     "@moss/app-sdk": "file:../../packages/app-sdk",
-    "@larksuiteoapi/node-sdk": "^1.60.0",
-    "ws": "^8.18.0"
+    "@larksuiteoapi/node-sdk": "^1.60.0"
   },
   "devDependencies": {
-    "@types/ws": "^8.5.0",
     "bun-types": "latest",
     "typescript": "^5.9.3"
   }

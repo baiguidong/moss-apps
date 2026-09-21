@@ -8,7 +8,7 @@ describe('extractInboundPayload', () => {
       'text',
     )
     expect(result.text).toBe('hello world')
-    expect(result.pendingDownloads).toEqual([])
+    expect(result.hasAttachments).toBe(false)
   })
 
   it('pulls text out of a post (rich text) message', () => {
@@ -19,35 +19,29 @@ describe('extractInboundPayload', () => {
     })
     const result = extractInboundPayload(content, 'post')
     expect(result.text).toBe('hi there')
-    expect(result.pendingDownloads).toEqual([])
+    expect(result.hasAttachments).toBe(false)
   })
 
-  it('identifies an image message as a pending image download', () => {
+  it('marks an image message as unsupported attachment input', () => {
     const content = JSON.stringify({ image_key: 'img_key_abc' })
     const result = extractInboundPayload(content, 'image')
     expect(result.text).toBe('')
-    expect(result.pendingDownloads).toEqual([
-      { kind: 'image', fileKey: 'img_key_abc' },
-    ])
+    expect(result.hasAttachments).toBe(true)
   })
 
-  it('identifies a file message as a pending file download with file_name', () => {
+  it('marks a file message as unsupported attachment input', () => {
     const content = JSON.stringify({
       file_key: 'file_key_xyz',
       file_name: 'spec.pdf',
     })
     const result = extractInboundPayload(content, 'file')
-    expect(result.pendingDownloads).toEqual([
-      { kind: 'file', fileKey: 'file_key_xyz', fileName: 'spec.pdf' },
-    ])
+    expect(result.hasAttachments).toBe(true)
   })
 
   it('identifies file_archive the same way as file', () => {
     const content = JSON.stringify({ file_key: 'fk1', file_name: 'x.zip' })
     const result = extractInboundPayload(content, 'file_archive')
-    expect(result.pendingDownloads).toEqual([
-      { kind: 'file', fileKey: 'fk1', fileName: 'x.zip' },
-    ])
+    expect(result.hasAttachments).toBe(true)
   })
 
   it('extracts img + file elements from a post message', () => {
@@ -63,15 +57,12 @@ describe('extractInboundPayload', () => {
     })
     const result = extractInboundPayload(content, 'post')
     expect(result.text).toBe('look:  and ')
-    expect(result.pendingDownloads).toEqual([
-      { kind: 'image', fileKey: 'img_post_1' },
-      { kind: 'file', fileKey: 'file_post_1', fileName: 'note.txt' },
-    ])
+    expect(result.hasAttachments).toBe(true)
   })
 
   it('returns empty on malformed JSON', () => {
     const result = extractInboundPayload('not json', 'text')
     expect(result.text).toBe('')
-    expect(result.pendingDownloads).toEqual([])
+    expect(result.hasAttachments).toBe(false)
   })
 })

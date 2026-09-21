@@ -3,7 +3,7 @@
   "id": "moss.feishu",
   "version": "0.2.0",
   "displayName": "飞书",
-  "description": "通过飞书机器人连接 Moss 会话、通知与决策。",
+  "description": "通过飞书私聊连接一个固定 Moss 会话并自动回复。",
   "icon": "assets/icon.svg",
   "hostApi": "^1.2.0",
   "publisher": {
@@ -35,17 +35,11 @@
   "permissions": [
     "channel:connection",
     "channel:pairing",
-    "channel:sessions:read",
-    "channel:sessions:write",
     "channel:messages",
     "channel:deliveries",
-    "channel:notifications",
-    "channel:decisions",
     "agent:catalog:read",
     "agent:bindings:read",
-    "agent:bindings:write",
-    "agent:turns:read",
-    "agent:turns:write"
+    "agent:bindings:write"
   ],
   "contributes": {
     "views": [

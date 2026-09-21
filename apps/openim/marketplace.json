@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.openim",
+  "summary": "组织即时消息与每联系人个人 AI 回复。",
+  "description": "独立 OpenIM App，提供通讯录、单聊、群聊、文件和媒体能力，以及每联系人独立的 AI 自动回复、草稿审核、资源权限和长期上下文。",
+  "categories": ["沟通", "效率"],
+  "keywords": ["OpenIM", "即时消息", "通讯录", "Agent", "自动回复"],
+  "platforms": ["darwin-arm64", "darwin-x64", "win32-x64"],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/openim",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT",
+  "featured": true
+}

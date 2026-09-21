@@ -72,39 +72,6 @@ export function mapLegacyRequestToChannel(
           ...(asText(payload.displayName) ? { displayName: asText(payload.displayName) } : {}),
         },
       }
-    case 'conversation.list':
-    case 'conversation.current':
-      return {
-        method: type,
-        input: {
-          ...externalIdentity(payload, createEventId),
-          ...(payload.category !== undefined ? { category: payload.category } : {}),
-          ...(payload.page !== undefined ? { page: payload.page } : {}),
-          ...(payload.pageSize !== undefined ? { pageSize: payload.pageSize } : {}),
-          ...(payload.query !== undefined ? { query: payload.query } : {}),
-        },
-      }
-    case 'conversation.new':
-      return {
-        method: 'conversation.create',
-        input: {
-          ...externalIdentity(payload, createEventId),
-          ...(payload.title !== undefined ? { title: payload.title } : {}),
-        },
-      }
-    case 'conversation.select':
-      return {
-        method: 'conversation.select',
-        input: {
-          ...externalIdentity(payload, createEventId),
-          sessionId: asText(payload.sessionId),
-        },
-      }
-    case 'session.abort':
-      return {
-        method: 'session.abort',
-        input: externalIdentity(payload, createEventId),
-      }
     case 'chat.message.received':
       return {
         method: 'message.receive',
@@ -112,7 +79,6 @@ export function mapLegacyRequestToChannel(
           ...externalIdentity(payload, createEventId, true),
           ...(typeof payload.text === 'string' ? { text: payload.text } : {}),
           ...(Array.isArray(payload.attachments) ? { attachments: payload.attachments } : {}),
-          ...(typeof payload.mentioned === 'boolean' ? { mentioned: payload.mentioned } : {}),
         },
       }
     case 'turn.delivery.ack':
@@ -124,28 +90,6 @@ export function mapLegacyRequestToChannel(
           kind: 'turn',
           ...(asText(payload.chatId) ? { externalConversationId: asText(payload.chatId) } : {}),
           ...(typeof payload.error === 'string' ? { error: payload.error } : {}),
-        },
-      }
-    case 'delivery.ack':
-      return {
-        method: 'delivery.ack',
-        input: {
-          deliveryId: asText(payload.deliveryId),
-          ok: payload.ok !== false,
-          kind: 'notification',
-          ...(asText(payload.messageId) ? { externalMessageId: asText(payload.messageId) } : {}),
-          ...(asText(payload.cardId) ? { externalCardId: asText(payload.cardId) } : {}),
-          ...(typeof payload.error === 'string' ? { error: payload.error } : {}),
-        },
-      }
-    case 'decision.respond':
-      return {
-        method: 'decision.respond',
-        input: {
-          ...externalIdentity(payload, createEventId, true),
-          decisionId: asText(payload.decisionId),
-          actionToken: asText(payload.actionToken),
-          allowed: Boolean(payload.allowed),
         },
       }
     default:

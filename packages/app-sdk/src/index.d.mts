@@ -202,12 +202,15 @@ export type AgentHostMethod =
   | 'catalog.list'
   | 'binding.get'
   | 'binding.update'
+  | 'binding.reset'
+  | 'context.observe'
   | 'turn.start'
   | 'turn.list'
   | 'turn.get'
   | 'turn.abort'
   | 'turn.reply'
   | 'turn.review'
+  | 'turn.delivery.ack'
 export type AgentBackendEvent =
   | 'binding.changed'
   | 'turn.accepted'
@@ -223,6 +226,7 @@ export interface AgentBindingResources {
 }
 
 export interface AgentBindingPolicy {
+  inheritDefault?: boolean
   replyMode: AgentReplyMode
   agentId: string | null
   permissionMode: AgentChannelPermissionMode
@@ -232,6 +236,7 @@ export interface AgentBindingPolicy {
 }
 
 export interface AgentBindingPatch {
+  inheritDefault?: boolean
   replyMode?: AgentReplyMode
   agentId?: string | null
   permissionMode?: AgentChannelPermissionMode | null
@@ -270,6 +275,17 @@ export interface AgentHostRequestMap {
     expectedRevision?: number
     patch: AgentBindingPatch
   }
+  'binding.reset': {
+    externalConversationId: string
+    externalMemberId?: string
+    expectedRevision?: number
+  }
+  'context.observe': {
+    externalUserId: string
+    externalConversationId: string
+    externalEventId: string
+    text: string
+  }
   'turn.start': {
     externalUserId: string
     externalConversationId: string
@@ -289,18 +305,22 @@ export interface AgentHostRequestMap {
   'turn.abort': { turnId: string }
   'turn.reply': { turnId: string; action: 'send' | 'dismiss'; text?: string }
   'turn.review': { turnId: string; action: 'approve' | 'reject'; text?: string }
+  'turn.delivery.ack': { turnId: string; externalConversationId: string; ok: boolean; externalMessageId?: string; error?: string }
 }
 
 export interface AgentHostResultMap {
   'catalog.list': { agents?: unknown[]; tools?: unknown[]; skills?: unknown[]; connectors?: unknown[] }
   'binding.get': { binding: AgentBindingRecord | null; effective: AgentEffectiveBinding }
   'binding.update': { binding: AgentBindingRecord; effective: AgentEffectiveBinding }
+  'binding.reset': { reset: boolean; binding: null; effective: AgentEffectiveBinding }
+  'context.observe': { observed: boolean; duplicate: boolean }
   'turn.start': Record<string, unknown>
   'turn.list': { turns: Array<Record<string, unknown>> }
   'turn.get': { turn: Record<string, unknown> | null }
   'turn.abort': { turn: Record<string, unknown>; aborted: boolean }
   'turn.reply': { turn: Record<string, unknown> }
   'turn.review': { turn: Record<string, unknown> }
+  'turn.delivery.ack': { acknowledged: boolean; turnId: string; status: string }
 }
 
 export interface AppAgentApi {
@@ -473,6 +493,7 @@ export const APP_BACKEND_API_VERSION: 1
 export const MOSS_CHANNEL_PROTOCOL: 'moss.channel/v1'
 export const MOSS_ACCOUNT_PROTOCOL: 'moss.account/v1'
 export const MOSS_AGENT_PROTOCOL: 'moss.agent/v1'
+export const MOSS_OPENIM_PROTOCOL: 'moss.openim/v1'
 export const CHANNEL_PERMISSIONS: Readonly<Record<string, ChannelPermission>>
 export const CHANNEL_HOST_METHOD_PERMISSIONS: Readonly<Record<ChannelHostMethod, ChannelPermission>>
 export const CHANNEL_BACKEND_EVENT_PERMISSIONS: Readonly<Record<ChannelBackendEvent, ChannelPermission>>
@@ -492,6 +513,16 @@ export const AGENT_HOST_METHOD_PERMISSIONS: Readonly<Record<AgentHostMethod, Age
 export const AGENT_BACKEND_EVENT_PERMISSIONS: Readonly<Record<AgentBackendEvent, AgentPermission>>
 export const AGENT_HOST_METHODS: readonly AgentHostMethod[]
 export const AGENT_BACKEND_EVENTS: readonly AgentBackendEvent[]
+export const OPENIM_PERMISSIONS: Readonly<Record<string, string>>
+export const OPENIM_HOST_METHOD_PERMISSIONS: Readonly<Record<string, string>>
+export const OPENIM_BACKEND_EVENT_PERMISSIONS: Readonly<Record<string, string>>
+export const OPENIM_HOST_METHODS: readonly string[]
+export const OPENIM_BACKEND_EVENTS: readonly string[]
+export function openIMConversationScope(userId: string): string
+export function openIMDefaultConversationId(userId: string): string
+export function openIMDirectConversationId(userId: string, peerUserId: string): string
+export function parseOpenIMDirectConversationId(value: unknown): { userId: string; peerUserId: string } | null
+export function openIMDefaultConversationIdFor(value: unknown): string | null
 export const DEFAULT_MAX_MESSAGE_BYTES: number
 export const APP_HOST_API_VERSION: string
 export const APP_MANIFEST_SCHEMA: Record<string, unknown>
@@ -523,6 +554,10 @@ export function validateAgentHostMethod(value: unknown): AgentHostMethod
 export function validateAgentBackendEvent(value: unknown): AgentBackendEvent
 export function validateAgentHostInput(method: AgentHostMethod, value: unknown): Record<string, unknown>
 export function validateAgentBackendEventData(name: AgentBackendEvent, value: unknown): Record<string, unknown>
+export function validateOpenIMHostMethod(value: unknown): string
+export function validateOpenIMBackendEvent(value: unknown): string
+export function validateOpenIMHostInput(method: string, value: unknown): Record<string, unknown>
+export function validateOpenIMBackendEventData(name: string, value: unknown): Record<string, unknown>
 export function validateHostProtocol(value: unknown): string
 export function validateHostMember(value: unknown, label?: string): string
 export function validateHostData(value: unknown, label?: string): Record<string, unknown>

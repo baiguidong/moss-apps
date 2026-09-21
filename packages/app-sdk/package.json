@@ -9,6 +9,8 @@
     "./channel": { "types": "./src/index.d.mts", "import": "./src/channel/index.mjs" },
     "./account": { "types": "./src/index.d.mts", "import": "./src/account/index.mjs" },
     "./agent": { "types": "./src/index.d.mts", "import": "./src/agent/index.mjs" },
+    "./openim": { "types": "./src/index.d.mts", "import": "./src/openim/index.mjs" },
+    "./openim/identifiers": { "types": "./src/openim/identifiers.d.mts", "import": "./src/openim/identifiers.mjs" },
     "./host": { "types": "./src/index.d.mts", "import": "./src/host/index.mjs" },
     "./client": { "types": "./src/index.d.mts", "import": "./src/client/index.mjs" },
     "./schemas": { "types": "./src/index.d.mts", "import": "./src/schemas/index.mjs" },

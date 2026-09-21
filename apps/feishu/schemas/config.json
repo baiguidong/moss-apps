@@ -10,11 +10,6 @@
       "maxLength": 160,
       "title": "飞书 App ID"
     },
-    "streamingCard": {
-      "type": "boolean",
-      "default": false,
-      "title": "流式消息卡片"
-    },
     "allowedUsers": {
       "type": "array",
       "items": { "type": "string", "minLength": 1, "maxLength": 256 },

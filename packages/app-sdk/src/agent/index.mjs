@@ -22,12 +22,15 @@ export const AGENT_HOST_METHOD_PERMISSIONS = Object.freeze({
   'catalog.list': AGENT_PERMISSIONS.catalogRead,
   'binding.get': AGENT_PERMISSIONS.bindingsRead,
   'binding.update': AGENT_PERMISSIONS.bindingsWrite,
+  'binding.reset': AGENT_PERMISSIONS.bindingsWrite,
+  'context.observe': AGENT_PERMISSIONS.turnsWrite,
   'turn.start': AGENT_PERMISSIONS.turnsWrite,
   'turn.list': AGENT_PERMISSIONS.turnsRead,
   'turn.get': AGENT_PERMISSIONS.turnsRead,
   'turn.abort': AGENT_PERMISSIONS.turnsWrite,
   'turn.reply': AGENT_PERMISSIONS.turnsWrite,
   'turn.review': AGENT_PERMISSIONS.turnsWrite,
+  'turn.delivery.ack': AGENT_PERMISSIONS.turnsWrite,
 })
 
 export const AGENT_BACKEND_EVENT_PERMISSIONS = Object.freeze({
@@ -93,9 +96,12 @@ function rejectUnknownFields(input, fields, method) {
 
 function validateBindingPatch(value) {
   const patch = record(value, 'binding.update patch')
-  const allowed = new Set(['replyMode', 'agentId', 'permissionMode', 'resources', 'session', 'proactive'])
+  const allowed = new Set(['inheritDefault', 'replyMode', 'agentId', 'permissionMode', 'resources', 'session', 'proactive'])
   for (const key of Object.keys(patch)) {
     if (!allowed.has(key)) fail(`binding.update patch contains an unknown field: ${key}`)
+  }
+  if (patch.inheritDefault !== undefined && typeof patch.inheritDefault !== 'boolean') {
+    fail('binding.update patch.inheritDefault must be a boolean')
   }
   if (patch.replyMode !== undefined && !AGENT_REPLY_MODES.includes(patch.replyMode)) {
     fail('binding.update patch has an invalid replyMode')
@@ -185,6 +191,23 @@ export function validateAgentHostInput(method, value) {
         fail('binding.update expectedRevision must be a non-negative integer')
       }
       break
+    case 'binding.reset':
+      rejectUnknownFields(input, [
+        'externalConversationId', 'externalMemberId', 'expectedRevision',
+      ], normalizedMethod)
+      validateBindingTarget(input, normalizedMethod)
+      if (input.expectedRevision !== undefined
+        && (!Number.isInteger(input.expectedRevision) || input.expectedRevision < 0)) {
+        fail('binding.reset expectedRevision must be a non-negative integer')
+      }
+      break
+    case 'context.observe':
+      rejectUnknownFields(input, ['externalUserId', 'externalConversationId', 'externalEventId', 'text'], normalizedMethod)
+      requireText(input, 'externalUserId', normalizedMethod)
+      requireText(input, 'externalConversationId', normalizedMethod)
+      requireText(input, 'externalEventId', normalizedMethod)
+      requireText(input, 'text', normalizedMethod, { maxLength: 100_000 })
+      break
     case 'turn.start':
       rejectUnknownFields(input, [
         'externalUserId', 'externalConversationId', 'externalEventId',
@@ -213,6 +236,16 @@ export function validateAgentHostInput(method, value) {
       rejectUnknownFields(input, ['turnId'], normalizedMethod)
       requireText(input, 'turnId', normalizedMethod)
       break
+    case 'turn.delivery.ack':
+      rejectUnknownFields(input, [
+        'turnId', 'externalConversationId', 'ok', 'externalMessageId', 'error',
+      ], normalizedMethod)
+      requireText(input, 'turnId', normalizedMethod)
+      requireText(input, 'externalConversationId', normalizedMethod)
+      if (typeof input.ok !== 'boolean') fail('turn.delivery.ack requires ok')
+      requireText(input, 'externalMessageId', normalizedMethod, { optional: true, maxLength: 512 })
+      requireText(input, 'error', normalizedMethod, { optional: true, maxLength: 2_000 })
+      break
     case 'turn.reply':
       rejectUnknownFields(input, ['turnId', 'action', 'text'], normalizedMethod)
       requireText(input, 'turnId', normalizedMethod)
@@ -235,7 +268,7 @@ export function validateAgentBackendEventData(name, value) {
   const data = record(value, `${normalizedName} data`)
   if (normalizedName === 'binding.changed') {
     requireText(data, 'externalConversationId', normalizedName)
-    if (!Number.isInteger(data.revision) || data.revision < 1) fail('binding.changed requires a positive revision')
+    if (!Number.isInteger(data.revision) || data.revision < 0) fail('binding.changed requires a non-negative revision')
   } else {
     requireText(data, 'turnId', normalizedName)
     requireText(data, 'externalConversationId', normalizedName)

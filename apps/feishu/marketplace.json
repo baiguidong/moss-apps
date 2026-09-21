@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "appId": "moss.feishu",
-  "summary": "通过飞书连接 Moss Agent，支持自动回复、人工接管与草稿审核。",
-  "description": "提供飞书机器人长连接、账号配对、会话切换、流式卡片、通知与决策处理，并可按成员配置 AI 回复方式、资源权限和上下文策略。配置和凭据由 Moss Host 统一管理。",
+  "summary": "通过飞书私聊连接固定 Moss 会话并自动回复。",
+  "description": "提供飞书机器人长连接、账号配对和纯文本自动回复，并可在 Moss 中限制 Agent 使用的工具、技能和连接器。配置和凭据由 Moss Host 统一管理。",
   "categories": ["沟通", "效率"],
-  "keywords": ["飞书", "机器人", "消息", "Agent", "人工审核", "移动端"],
+  "keywords": ["飞书", "机器人", "消息", "Agent", "移动端"],
   "platforms": ["darwin-arm64", "win32-x64"],
   "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/feishu",
   "repository": "https://github.com/baiguidong/moss-apps",

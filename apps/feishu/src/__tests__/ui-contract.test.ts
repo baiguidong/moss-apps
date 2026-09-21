@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs'
 
 const source = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
 const backendSource = readFileSync(new URL('../backend/feishu/index.ts', import.meta.url), 'utf8')
+const manifest = JSON.parse(readFileSync(new URL('../../app.moss.json', import.meta.url), 'utf8'))
+const configSchema = JSON.parse(readFileSync(new URL('../../schemas/config.json', import.meta.url), 'utf8'))
 
 describe('Feishu App UI contract', () => {
   test('uses the Moss appearance tokens without a separate Feishu color palette', () => {
@@ -47,26 +49,63 @@ describe('Feishu App UI contract', () => {
       'encryptKey',
       'verificationToken',
       'allowedUsers',
-      'streamingCard',
       'runLocation',
     ]) {
       expect(source.match(new RegExp(`id="${id}"`, 'g'))).toHaveLength(1)
     }
   })
 
-  test('preserves unavailable AI selections and reports the real connection state', () => {
+  test('preserves unavailable resource selections and reports the real connection state', () => {
     expect(source).toContain('（当前不可用）')
     expect(source).toContain('dirtyResourceKinds')
     expect(source).toContain('status.transportError')
     expect(source).toContain('飞书 App 未启用')
     expect(source).toContain(".filter((entry) => String(entry || '') !== String(userId))")
     expect(source).toContain('requestVersion !== statusRequestVersion')
-    expect(source).toContain('requestVersion !== draftsRequestVersion')
   })
 
-  test('acknowledges accepted turns and uses stable ids for human handoff notices', () => {
-    expect(backendSource).toContain("desktopBridge.on('turn.accepted', () => {})")
-    expect(backendSource).toContain('`human-${result.turnId}`')
-    expect(backendSource).toContain('`review-${turnId}`')
+  test('keeps Feishu private chats automatic and only exposes execution limits', () => {
+    for (const id of ['streamingCard', 'replyMode', 'agentId', 'sessionMode', 'rotateAfterTurns', 'memberPolicies', 'reviewList']) {
+      expect(source).not.toContain(`id="${id}"`)
+    }
+    expect(configSchema.properties).not.toHaveProperty('streamingCard')
+    for (const scope of ['im:message.p2p_msg:readonly', 'im:message:send_as_bot', 'im:message']) {
+      expect(source).toContain(scope)
+    }
+    expect(source).not.toContain('im:resource')
+    expect(source).not.toContain('cardkit:card:write')
+    expect(source).toContain("replyMode: 'ai_auto'")
+    expect(source).toContain("session: { mode: 'fixed'")
+    expect(source).toContain('normalizeAutomaticPolicy(binding)')
+    expect(source).toContain('neutralizeLegacyMemberPolicies()')
+    expect(source).toContain("kinds: ['tools', 'skills', 'connectors']")
+    expect(source).toContain('id="permissionMode"')
+    expect(source).toContain('id="unrestrictedResources"')
+    expect(manifest.permissions).toEqual([
+      'channel:connection',
+      'channel:pairing',
+      'channel:messages',
+      'channel:deliveries',
+      'agent:catalog:read',
+      'agent:bindings:read',
+      'agent:bindings:write',
+    ])
+    expect(backendSource).toContain("if (chatType !== 'p2p') return")
+    expect(backendSource).toContain("desktopBridge.on('turn.completed'")
+    expect(backendSource).toContain("msg_type: 'text'")
+    for (const removed of [
+      'StreamingCard',
+      'conversation.list',
+      'conversation.new',
+      'conversation.select',
+      'session.abort',
+      'card.action.trigger',
+      'application.bot.menu_v6',
+      'notification.deliver',
+      'decision.resolved',
+      'turn.review_requested',
+    ]) {
+      expect(backendSource).not.toContain(removed)
+    }
   })
 })

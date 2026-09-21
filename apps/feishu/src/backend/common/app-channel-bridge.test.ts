@@ -46,6 +46,7 @@ describe('Feishu App Channel compatibility bridge', () => {
       chatId: 'oc_chat',
       eventId: 'om_message',
       text: 'hello',
+      mentioned: true,
     })).toEqual({
       method: 'message.receive',
       input: {
@@ -55,21 +56,12 @@ describe('Feishu App Channel compatibility bridge', () => {
         text: 'hello',
       },
     })
-
-    expect(mapLegacyRequestToChannel('conversation.new', {
-      openId: 'ou_user', chatId: 'oc_chat', title: 'New',
-    }, () => 'generated-event')).toMatchObject({
-      method: 'conversation.create',
-      input: {
-        externalUserId: 'ou_user',
-        externalConversationId: 'oc_chat',
-        externalEventId: 'generated-event',
-        title: 'New',
-      },
-    })
+    expect(() => mapLegacyRequestToChannel('conversation.list', {})).toThrow('Unsupported')
+    expect(() => mapLegacyRequestToChannel('session.abort', {})).toThrow('Unsupported')
+    expect(() => mapLegacyRequestToChannel('decision.respond', {})).toThrow('Unsupported')
   })
 
-  it('distinguishes terminal turn acknowledgements from notification deliveries', () => {
+  it('maps terminal turn acknowledgements', () => {
     expect(mapLegacyRequestToChannel('turn.delivery.ack', {
       turnId: 'turn-1', chatId: 'chat-1',
     })).toMatchObject({
@@ -79,17 +71,6 @@ describe('Feishu App Channel compatibility bridge', () => {
         deliveryId: 'turn-1',
         externalConversationId: 'chat-1',
         ok: true,
-      },
-    })
-    expect(mapLegacyRequestToChannel('delivery.ack', {
-      deliveryId: 'delivery-1', messageId: 'message-1', ok: false,
-    })).toMatchObject({
-      method: 'delivery.ack',
-      input: {
-        kind: 'notification',
-        deliveryId: 'delivery-1',
-        externalMessageId: 'message-1',
-        ok: false,
       },
     })
     expect(validateChannelHostInput('delivery.ack', {
@@ -132,7 +113,6 @@ describe('Feishu App Channel compatibility bridge', () => {
     const config = loadConfigFromAppContext({
       config: {
         appId: 'cli_app',
-        streamingCard: true,
         allowedUsers: ['ou_allowed'],
         pairedUsers: [{ userId: 'ou_paired', displayName: 'User', pairedAt: 10 }],
         pairing: { code: 'ABC234', createdAt: 10, expiresAt: 20 },
@@ -140,10 +120,8 @@ describe('Feishu App Channel compatibility bridge', () => {
       secrets: {
         appSecret: 'secret', encryptKey: 'encrypt', verificationToken: 'verify',
       },
-      dataDir: '/app/data',
     })
     expect(config).toMatchObject({
-      pairing: { code: 'ABC234', createdAt: 10, expiresAt: 20 },
       feishu: {
         appId: 'cli_app',
         appSecret: 'secret',
@@ -151,8 +129,6 @@ describe('Feishu App Channel compatibility bridge', () => {
         verificationToken: 'verify',
         allowedUsers: ['ou_allowed'],
         pairedUsers: [{ userId: 'ou_paired' }],
-        defaultWorkDir: '/app/data',
-        streamingCard: true,
       },
     })
   })
