@@ -38,8 +38,8 @@ App 版本来自其 `app.moss.json`。发布标签格式为：
 例如：
 
 ```bash
-git tag moss.feishu-v0.1.2
-git push origin moss.feishu-v0.1.2
+git tag moss.feishu-v0.1.3
+git push origin moss.feishu-v0.1.3
 ```
 
 `release-app.yml` 会校验、测试、构建并签名 App，将不可变 ZIP 上传到 GitHub Releases，然后把市场索引部署到 GitHub Pages：

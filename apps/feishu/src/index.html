@@ -5,179 +5,252 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
   <title>飞书设置</title>
+  <script>
+    (() => {
+      const theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      document.documentElement.dataset.theme = theme
+      document.documentElement.dataset.backgroundStyle = 'grid-theme'
+      document.documentElement.style.colorScheme = theme
+    })()
+  </script>
   <style>
     :root {
-      color-scheme: light;
-      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-      --bg: #f5f7fb;
-      --surface: #ffffff;
-      --surface-muted: #f7f8fa;
-      --surface-hover: #eef2f8;
-      --border: #e2e6ed;
-      --text: #172033;
-      --muted: #687386;
-      --primary: #3370ff;
-      --primary-hover: #2862df;
-      --primary-soft: #edf3ff;
-      --success: #1b9a59;
-      --success-soft: #ecf9f2;
-      --warning: #cc8a14;
-      --warning-soft: #fff7e5;
-      --danger: #d64242;
-      --danger-soft: #fff0f0;
-      --shadow: 0 10px 30px rgba(32, 50, 84, .08);
+      --background: oklch(0.978 0.012 126);
+      --foreground: oklch(0.23 0.02 145);
+      --card: oklch(0.995 0.008 126);
+      --card-foreground: oklch(0.23 0.02 145);
+      --popover: oklch(0.995 0.008 126);
+      --popover-foreground: oklch(0.23 0.02 145);
+      --primary: oklch(0.62 0.16 151);
+      --primary-foreground: oklch(0.985 0 0);
+      --secondary: oklch(0.945 0.018 145);
+      --secondary-foreground: oklch(0.24 0.02 145);
+      --muted: oklch(0.95 0.01 130);
+      --muted-foreground: oklch(0.48 0.01 150);
+      --accent: oklch(0.72 0.13 80);
+      --accent-foreground: oklch(0.985 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --destructive-foreground: oklch(0.985 0 0);
+      --border: oklch(0.88 0.01 145);
+      --input: oklch(0.93 0.012 130);
+      --ring: oklch(0.62 0.16 151);
+      --radius: 0.625rem;
+      --color-surface: var(--card);
+      --color-surface-container: color-mix(in oklab, var(--card) 88%, var(--muted));
+      --color-surface-hover: color-mix(in oklab, var(--primary) 8%, var(--card));
+      --color-text-primary: var(--foreground);
+      --color-text-secondary: color-mix(in oklab, var(--foreground) 78%, var(--muted-foreground));
+      --color-text-tertiary: var(--muted-foreground);
+      --color-success: oklch(0.66 0.18 152);
+      --color-warning: oklch(0.76 0.16 86);
+      --color-error: var(--destructive);
     }
-    :root[data-theme="dark"] {
-      color-scheme: dark;
-      --bg: #0d1117;
-      --surface: #161b22;
-      --surface-muted: #10151d;
-      --surface-hover: #202733;
-      --border: #30363d;
-      --text: #e6edf3;
-      --muted: #8b949e;
-      --primary: #5b8cff;
-      --primary-hover: #75a0ff;
-      --primary-soft: #17264b;
-      --success: #3fb950;
-      --success-soft: #14291d;
-      --warning: #d29922;
-      --warning-soft: #30250f;
-      --danger: #ff7b72;
-      --danger-soft: #35191b;
-      --shadow: 0 12px 34px rgba(0, 0, 0, .28);
+    :root[data-theme='dark'] {
+      --background: oklch(0.18 0.012 155);
+      --foreground: oklch(0.95 0.006 126);
+      --card: oklch(0.22 0.012 155);
+      --card-foreground: oklch(0.95 0.006 126);
+      --popover: oklch(0.22 0.012 155);
+      --popover-foreground: oklch(0.95 0.006 126);
+      --primary: oklch(0.68 0.15 151);
+      --primary-foreground: oklch(0.985 0 0);
+      --secondary: oklch(0.28 0.012 155);
+      --secondary-foreground: oklch(0.95 0.006 126);
+      --muted: oklch(0.25 0.01 155);
+      --muted-foreground: oklch(0.72 0.01 145);
+      --accent: oklch(0.78 0.13 85);
+      --accent-foreground: oklch(0.15 0 0);
+      --destructive: oklch(0.55 0.22 25);
+      --destructive-foreground: oklch(0.985 0 0);
+      --border: oklch(0.31 0.012 155);
+      --input: oklch(0.24 0.01 155);
+      --ring: oklch(0.68 0.15 151);
+      --color-surface: var(--card);
+      --color-surface-container: color-mix(in oklab, var(--card) 74%, var(--muted));
+      --color-surface-hover: color-mix(in oklab, var(--primary) 12%, var(--card));
+      --color-text-primary: var(--foreground);
+      --color-text-secondary: color-mix(in oklab, var(--foreground) 82%, var(--muted-foreground));
+      --color-text-tertiary: var(--muted-foreground);
+      --color-success: oklch(0.72 0.17 152);
+      --color-warning: oklch(0.8 0.16 86);
+      --color-error: var(--destructive);
     }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
-    main { width: min(720px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 48px; }
-    header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-    .logo { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: #3370ff; box-shadow: 0 8px 22px rgba(51, 112, 255, .24); }
-    .logo svg { width: 27px; height: 27px; fill: white; }
-    h1, h2, h3, p { margin: 0; }
-    h1 { font-size: 22px; line-height: 1.3; }
-    h2 { font-size: 15px; }
-    h3 { font-size: 13px; }
-    p { color: var(--muted); font-size: 12px; line-height: 1.65; }
-    .card { overflow: hidden; margin-top: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); }
-    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--border); background: var(--surface-muted); }
-    .card-body { padding: 16px; }
-    .row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
-    .setting-row { padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
+    html, body { min-height: 100%; }
+    * { box-sizing: border-box; border-color: var(--border); }
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--foreground);
+      font-family: 'Geist', 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: color-mix(in oklab, var(--primary) 30%, transparent); }
+    :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+    .app-shell { min-height: 100vh; background-color: var(--background); }
+    :root[data-background-style='grid-theme'] .app-shell {
+      background-image:
+        linear-gradient(color-mix(in oklab, var(--foreground) 5%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in oklab, var(--foreground) 5%, transparent) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-attachment: fixed;
+    }
+    :root[data-background-style='dot-theme'] .app-shell {
+      background-image: radial-gradient(color-mix(in oklab, var(--foreground) 8%, transparent) 1px, transparent 1px);
+      background-size: 20px 20px;
+      background-attachment: fixed;
+    }
+    :root[data-background-style='gradient-theme'] .app-shell {
+      background-image: linear-gradient(135deg, var(--background), var(--secondary));
+    }
+    main { width: min(720px, calc(100% - 32px)); margin: 0 auto; padding: 22px 0 48px; }
+    h2, h3, p { margin: 0; }
+    h2 { color: var(--foreground); font-size: 15px; font-weight: 600; }
+    h3 { color: var(--foreground); font-size: 13px; font-weight: 600; }
+    p { color: var(--muted-foreground); font-size: 12px; line-height: 1.65; }
+    .section { margin-top: 22px; }
+    .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 4px 10px; }
+    .section-heading p { margin-top: 3px; }
+    .settings-group {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: color-mix(in oklab, var(--card) 88%, transparent);
+      color: var(--card-foreground);
+      backdrop-filter: blur(18px);
+    }
+    .settings-group > * + * { border-top: 1px solid var(--border); }
+    .settings-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 14px 16px; }
+    .settings-row-copy { min-width: 0; }
+    .settings-row-copy p { margin-top: 2px; }
+    .settings-block { padding: 16px; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .full { grid-column: 1 / -1; }
-    label.field { display: grid; gap: 6px; color: var(--text); font-size: 13px; font-weight: 600; }
-    .required::after { content: " *"; color: var(--danger); }
+    label.field { display: grid; gap: 6px; color: var(--foreground); font-size: 13px; font-weight: 500; }
+    .required::after { content: ' *'; color: var(--destructive); }
     input, select {
-      width: 100%; height: 38px; padding: 0 11px; border: 1px solid var(--border); border-radius: 9px;
-      background: var(--surface); color: var(--text); outline: none; font: inherit; font-size: 13px;
+      width: 100%; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 12px;
+      background: color-mix(in oklab, var(--input) 70%, var(--card)); color: var(--foreground); outline: none; font: inherit; font-size: 13px;
     }
-    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent); }
-    input::placeholder { color: var(--muted); opacity: .78; }
-    .hint { margin-top: -2px; font-size: 11px; }
-    .switch-row { display: flex; align-items: center; gap: 10px; margin-top: 15px; cursor: pointer; }
-    .switch-row input { width: 16px; height: 16px; accent-color: var(--primary); }
-    .switch-row span { font-size: 13px; font-weight: 600; }
-    .status-line { display: flex; align-items: flex-start; gap: 9px; padding: 11px 12px; margin-bottom: 15px; border-radius: 10px; background: var(--surface-muted); font-size: 12px; color: var(--muted); }
-    .status-line.success { color: var(--success); background: var(--success-soft); }
-    .status-line.warning { color: var(--warning); background: var(--warning-soft); }
-    .status-line.error { color: var(--danger); background: var(--danger-soft); }
+    input:hover, select:hover { border-color: color-mix(in oklab, var(--foreground) 22%, var(--border)); }
+    input:focus, select:focus { border-color: var(--ring); box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 15%, transparent); }
+    input::placeholder { color: var(--muted-foreground); opacity: .72; }
+    .hint { margin-top: -2px; color: var(--muted-foreground); font-size: 11px; font-weight: 400; }
+    .status-line { display: flex; align-items: flex-start; gap: 9px; padding: 12px 16px; font-size: 12px; color: var(--muted-foreground); }
+    .status-line.success { color: var(--color-success); background: color-mix(in oklab, var(--color-success) 9%, transparent); }
+    .status-line.warning { color: color-mix(in oklab, var(--color-warning) 82%, var(--foreground)); background: color-mix(in oklab, var(--color-warning) 10%, transparent); }
+    .status-line.error { color: var(--color-error); background: color-mix(in oklab, var(--color-error) 9%, transparent); }
     .dot { width: 8px; height: 8px; margin-top: 4px; border-radius: 50%; background: currentColor; flex: 0 0 auto; }
-    .actions { display: flex; align-items: center; gap: 10px; margin-top: 17px; flex-wrap: wrap; }
-    button { height: 36px; border: 0; border-radius: 9px; padding: 0 15px; color: white; background: var(--primary); cursor: pointer; font: inherit; font-size: 13px; font-weight: 600; }
-    button:hover { background: var(--primary-hover); }
-    button.secondary { color: var(--text); background: var(--surface-hover); }
-    button.danger { color: var(--danger); background: transparent; padding: 0 6px; }
-    button:disabled { opacity: .55; cursor: wait; }
-    .message { min-height: 18px; color: var(--muted); font-size: 12px; }
-    .message.error { color: var(--danger); }
-    .message.ok { color: var(--success); }
+    .toggle { position: relative; display: inline-flex; width: 44px; height: 24px; flex: 0 0 auto; cursor: pointer; }
+    .toggle input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .toggle-track { width: 100%; height: 100%; border-radius: 999px; background: color-mix(in oklab, var(--foreground) 13%, transparent); transition: background-color 160ms ease; }
+    .toggle-track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--card); box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 22%, transparent); transition: transform 160ms ease; }
+    .toggle input:checked + .toggle-track { background: var(--primary); }
+    .toggle input:checked + .toggle-track::after { transform: translateX(20px); background: var(--primary-foreground); }
+    .toggle input:focus-visible + .toggle-track { outline: 2px solid var(--ring); outline-offset: 2px; }
+    .actions { display: flex; align-items: center; gap: 10px; padding: 14px 16px; flex-wrap: wrap; }
+    button { height: 36px; border: 1px solid transparent; border-radius: 12px; padding: 0 15px; color: var(--primary-foreground); background: var(--primary); cursor: pointer; font: inherit; font-size: 13px; font-weight: 600; transition: background-color 140ms ease, border-color 140ms ease, transform 80ms ease; }
+    button:hover { background: color-mix(in oklab, var(--primary) 88%, var(--foreground)); }
+    button:active { transform: translateY(1px); }
+    button.secondary { border-color: var(--border); color: var(--foreground); background: color-mix(in oklab, var(--card) 78%, var(--muted)); }
+    button.secondary:hover { background: var(--color-surface-hover); }
+    button.danger { width: auto; height: 30px; color: var(--destructive); background: transparent; padding: 0 7px; }
+    button.danger:hover { background: color-mix(in oklab, var(--destructive) 10%, transparent); }
+    button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .message { min-height: 18px; color: var(--muted-foreground); font-size: 12px; }
+    .message.error { color: var(--color-error); }
+    .message.ok { color: var(--color-success); }
     .pairing { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
     .code { font: 700 24px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 5px; color: var(--primary); }
-    .users { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-    .user { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-muted); }
+    .users-heading { margin-top: 18px; }
+    .users { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+    .user { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; background: color-mix(in oklab, var(--card) 68%, var(--muted)); }
     .user-main { min-width: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
-    .badge { border-radius: 5px; padding: 2px 6px; background: var(--surface-hover); color: var(--muted); font-size: 10px; }
-    .user-id { color: var(--muted); font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
-    .empty { padding: 12px; border-radius: 9px; background: var(--surface-muted); color: var(--muted); font-size: 12px; }
+    .badge { border-radius: 5px; padding: 2px 6px; background: var(--muted); color: var(--muted-foreground); font-size: 10px; }
+    .user-id { color: var(--muted-foreground); font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+    .empty { padding: 12px; border: 1px dashed var(--border); border-radius: 10px; color: var(--muted-foreground); font-size: 12px; text-align: center; }
     details { border-top: 1px solid var(--border); }
     details:first-of-type { border-top: 0; }
     summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; cursor: pointer; font-size: 13px; font-weight: 600; list-style: none; }
     summary::-webkit-details-marker { display: none; }
-    summary::after { content: "+"; color: var(--muted); font-size: 18px; font-weight: 400; }
-    details[open] summary::after { content: "−"; }
-    .guide-content { padding: 0 16px 16px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    summary:hover { background: var(--color-surface-hover); }
+    summary::after { content: '+'; color: var(--muted-foreground); font-size: 18px; font-weight: 400; }
+    details[open] summary::after { content: '−'; }
+    .guide-content { padding: 0 16px 16px; color: var(--muted-foreground); font-size: 12px; line-height: 1.7; }
     .guide-content ol, .guide-content ul { margin: 0; padding-left: 20px; }
     .guide-content li + li { margin-top: 5px; }
-    code { padding: 2px 5px; border-radius: 5px; background: var(--surface-hover); color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; overflow-wrap: anywhere; }
+    code { padding: 2px 5px; border-radius: 5px; background: var(--muted); color: var(--foreground); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; overflow-wrap: anywhere; }
     a { color: var(--primary); text-decoration: none; }
     a:hover { text-decoration: underline; }
-    .notice { margin-top: 12px; padding: 10px 12px; border-radius: 9px; background: var(--primary-soft); color: var(--muted); font-size: 11px; line-height: 1.65; }
-    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface-muted); }
-    .tab { height: 34px; color: var(--muted); background: transparent; font-weight: 500; }
-    .tab:hover { color: var(--text); background: var(--surface-hover); }
-    .tab.active { color: var(--text); background: var(--surface); box-shadow: 0 2px 7px rgba(22, 32, 51, .08); font-weight: 600; }
+    .notice { margin-top: 14px; padding: 10px 12px; border-radius: 12px; background: color-mix(in oklab, var(--primary) 8%, transparent); color: var(--color-text-secondary); font-size: 11px; line-height: 1.65; }
+    .settings-block > .notice:only-child { margin-top: 0; }
+    .tabs { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--border); border-radius: 12px; background: color-mix(in oklab, var(--muted) 78%, transparent); }
+    .tab { height: 32px; padding: 0 14px; border-radius: 9px; color: var(--muted-foreground); background: transparent; font-weight: 500; }
+    .tab:hover { color: var(--foreground); background: var(--color-surface-hover); }
+    .tab.active { color: var(--foreground); background: var(--card); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--border) 75%, transparent); font-weight: 600; }
     [hidden] { display: none !important; }
     @media (max-width: 620px) {
-      main { width: min(100% - 24px, 720px); padding-top: 20px; }
+      main { width: min(100% - 24px, 720px); padding-top: 16px; }
       .grid { grid-template-columns: 1fr; }
       .full { grid-column: auto; }
-      .row { align-items: flex-start; flex-direction: column; }
-      .row select { width: 100%; }
+      .settings-row { align-items: flex-start; flex-direction: column; gap: 10px; }
+      .settings-row select { width: 100% !important; }
+      .toggle { align-self: flex-end; margin-top: -34px; }
+      .section-heading { align-items: flex-end; }
     }
   </style>
 </head>
 <body>
+  <div class="app-shell">
   <main>
-    <header>
-      <div class="logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M5.3 3.7A7.7 7.7 0 0 1 18 9.6c0 4.3-3.5 7.7-7.7 7.7H9l-3.5 2.3.9-3.5A7.7 7.7 0 0 1 5.3 3.7Zm5 2.7a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Zm5.2 6.1a2.3 2.3 0 1 0 0 4.6 2.3 2.3 0 0 0 0-4.6Z"/></svg>
-      </div>
-      <div><h1>飞书</h1><p>连接飞书机器人，在移动端继续使用 Moss 会话。</p></div>
-    </header>
-
-    <nav class="tabs" aria-label="飞书设置导航">
-      <button id="configurationTab" class="tab active" type="button" aria-selected="true">连接与配对</button>
-      <button id="guideTab" class="tab" type="button" aria-selected="false">配置说明</button>
+    <nav class="tabs" role="tablist" aria-label="飞书设置导航">
+      <button id="configurationTab" class="tab active" type="button" role="tab" aria-controls="configurationPanel" aria-selected="true">连接与配对</button>
+      <button id="guideTab" class="tab" type="button" role="tab" aria-controls="guidePanel" aria-selected="false">配置说明</button>
     </nav>
 
-    <div id="configurationPanel">
-    <section class="card">
-      <div class="card-head"><h2>连接配置</h2><button id="refresh" class="secondary" type="button">刷新状态</button></div>
-      <div class="card-body">
-        <div class="setting-row row">
-          <div><h3>运行位置</h3><p>同一时间只运行一个飞书实例。</p></div>
+    <div id="configurationPanel" role="tabpanel" aria-labelledby="configurationTab">
+    <section class="section" aria-labelledby="connectionTitle">
+      <div class="section-heading">
+        <div><h2 id="connectionTitle">连接配置</h2><p>配置机器人凭据与运行方式。</p></div>
+        <button id="refresh" class="secondary" type="button">刷新状态</button>
+      </div>
+      <div class="settings-group">
+        <div class="settings-row">
+          <div class="settings-row-copy"><h3>运行位置</h3><p>同一时间只运行一个飞书实例。</p></div>
           <select id="runLocation" aria-label="飞书运行位置" style="width: 150px">
             <option value="desktop">本机</option>
             <option value="server">Moss Server</option>
           </select>
         </div>
         <div id="statusLine" class="status-line"><i class="dot"></i><span id="status">正在读取运行状态…</span></div>
-        <div class="grid">
+        <div class="settings-block"><div class="grid">
           <label class="field"><span class="required">App ID</span><input id="appId" autocomplete="off" placeholder="cli_xxxxxxxx"></label>
           <label class="field"><span class="required">App Secret</span><input id="appSecret" type="password" autocomplete="new-password" placeholder="请输入 App Secret"><p class="hint">已保存的密钥以掩码显示，不会向页面返回明文。</p></label>
           <label class="field"><span>Encrypt Key</span><input id="encryptKey" type="password" autocomplete="new-password" placeholder="长连接模式无需填写"></label>
           <label class="field"><span>Verification Token</span><input id="verificationToken" type="password" autocomplete="new-password" placeholder="长连接模式无需填写"></label>
           <label class="field full"><span>允许的用户 ID</span><input id="allowedUsers" autocomplete="off" placeholder="ou_xxx, ou_yyy（可选，逗号分隔）"><p class="hint">通常留空，再使用下方配对码绑定飞书账号。</p></label>
+        </div></div>
+        <div class="settings-row">
+          <div class="settings-row-copy"><h3>流式卡片</h3><p>实时更新回复内容；缺少 CardKit 权限时会自动降级。</p></div>
+          <label class="toggle" aria-label="启用流式卡片"><input id="streamingCard" type="checkbox"><span class="toggle-track"></span></label>
         </div>
-        <label class="switch-row"><input id="streamingCard" type="checkbox"><span>流式卡片</span></label>
-        <p class="hint" style="margin: 4px 0 0 26px">开启后实时更新回复内容；缺少 CardKit 权限时会自动降级。</p>
-        <div class="notice">这里沿用原“设置 → IM 接入 → 飞书”的配置。保存后，Moss 会自动校验必填项并启动当前运行位置，不需要在 Backend 实例中单独填写或启用。</div>
-        <div class="actions"><button id="save" type="button">保存配置</button><span id="message" class="message" role="status"></span></div>
+        <div class="settings-block"><div class="notice">飞书配置仅在此页面维护。保存后，Moss 会校验必填项并启动当前运行位置；Backend 实例页只负责运行控制和日志。</div></div>
+        <div class="actions"><button id="save" type="button">保存配置</button><span id="message" class="message" role="status" aria-live="polite"></span></div>
       </div>
     </section>
 
-    <section class="card">
-      <div class="card-head"><div><h2>配对管理</h2><p>生成配对码后，在飞书机器人私聊中发送该码。</p></div><button id="pair" class="secondary" type="button">生成配对码</button></div>
-      <div class="card-body">
+    <section class="section" aria-labelledby="pairingTitle">
+      <div class="section-heading"><div><h2 id="pairingTitle">配对管理</h2><p>生成配对码后，在飞书机器人私聊中发送该码。</p></div><button id="pair" class="secondary" type="button">生成配对码</button></div>
+      <div class="settings-group"><div class="settings-block">
         <div class="pairing"><span id="pairCode" class="code">------</span><span id="pairHint" class="message">配对码 60 分钟内有效，只能成功使用一次。</span></div>
-        <h3 style="margin-top: 18px">已配对用户</h3>
+        <h3 class="users-heading">已配对用户</h3>
         <ul id="users" class="users"><li class="empty">正在读取…</li></ul>
-      </div>
+      </div></div>
     </section>
     </div>
 
-    <section id="guidePanel" class="card" aria-label="飞书配置说明" hidden>
-      <div class="card-head"><div><h2>配置说明</h2><p>按顺序完成以下设置，然后再生成配对码。</p></div><a href="https://open.feishu.cn/app" target="_blank" rel="noreferrer">打开飞书开放平台</a></div>
+    <section id="guidePanel" class="section" role="tabpanel" aria-labelledby="guideTab" hidden>
+      <div class="section-heading"><div><h2>配置说明</h2><p>按顺序完成以下设置，然后再生成配对码。</p></div><a href="https://open.feishu.cn/app" target="_blank" rel="noreferrer">打开飞书开放平台</a></div>
+      <div class="settings-group">
       <details open>
         <summary>1. 创建应用并添加机器人</summary>
         <div class="guide-content"><ol><li>在飞书开放平台创建“企业自建应用”，并添加机器人能力。</li><li>进入“凭证与基础信息”，复制 <code>App ID</code> 和 <code>App Secret</code> 到上方。</li><li>长连接模式不需要填写公网回调地址、Encrypt Key 或 Verification Token。</li></ol></div>
@@ -202,17 +275,27 @@
         <summary>数据存储与安全</summary>
         <div class="guide-content"><p>App ID、白名单和配对关系等配置由 Moss Host 持久化；App Secret 等敏感字段会写入 App 凭据库。配置页只会收到 <code>****</code> 掩码，飞书 Backend 启动时才会在隔离的实例上下文中取得明文。迁移期间，原“IM 接入”配置仍作为兼容数据源。</p></div>
       </details>
+      </div>
     </section>
   </main>
+  </div>
 
   <script>
     const $ = (id) => document.getElementById(id)
     const bridge = window.mossApp?.feishu
     const SAFE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
+    const THEME_MODES = new Set(['light', 'dark', 'system'])
+    const BACKGROUNDS = new Set(['default', 'grid-theme', 'dot-theme', 'gradient-theme'])
+    const systemColorScheme = matchMedia('(prefers-color-scheme: dark)')
     let adapterConfig = {}
     let adapterStatus = { status: 'stopped', location: 'desktop', bridgeReady: false, transportConnected: false }
     let pairingCode = null
     let busy = true
+    let currentAppearance = null
+    let currentResolvedTheme = ''
+    let appearanceRefreshPromise = null
+    let disposed = false
+    const eventCleanups = []
 
     function errorMessage(error) {
       let message = error?.message || String(error || '未知错误')
@@ -261,13 +344,55 @@
       return value
     }
 
-    function applyTheme(appearance = {}) {
-      const mode = appearance.themeMode || 'system'
-      const resolved = mode === 'system'
-        ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-        : mode
-      document.documentElement.dataset.theme = resolved
-      document.documentElement.style.colorScheme = resolved
+    function systemTheme() {
+      return systemColorScheme.matches ? 'dark' : 'light'
+    }
+
+    function normalizeAppearance(value) {
+      const input = value && typeof value === 'object' ? value : {}
+      return {
+        themeMode: THEME_MODES.has(input.themeMode) ? input.themeMode : 'system',
+        cssThemeId: BACKGROUNDS.has(input.cssThemeId) ? input.cssThemeId : 'grid-theme',
+      }
+    }
+
+    function applyAppearance(appearance) {
+      const next = normalizeAppearance(appearance)
+      const resolvedTheme = next.themeMode === 'system' ? systemTheme() : next.themeMode
+      if (
+        currentAppearance?.themeMode === next.themeMode
+        && currentAppearance?.cssThemeId === next.cssThemeId
+        && currentResolvedTheme === resolvedTheme
+      ) return
+
+      currentAppearance = next
+      currentResolvedTheme = resolvedTheme
+      const root = document.documentElement
+      root.dataset.theme = resolvedTheme
+      root.dataset.backgroundStyle = next.cssThemeId
+      root.style.colorScheme = resolvedTheme
+    }
+
+    async function refreshAppearance() {
+      if (appearanceRefreshPromise) return appearanceRefreshPromise
+      appearanceRefreshPromise = (async () => {
+        const getInfo = window.mossApp?.app?.getInfo
+        if (!getInfo) {
+          applyAppearance(null)
+          return
+        }
+        try {
+          const info = await getInfo()
+          if (!disposed) applyAppearance(info?.appearance)
+        } catch {
+          if (!disposed) applyAppearance(null)
+        }
+      })()
+      try {
+        await appearanceRefreshPromise
+      } finally {
+        appearanceRefreshPromise = null
+      }
     }
 
     function hydrateForm(config) {
@@ -496,17 +621,40 @@
     $('configurationTab').addEventListener('click', () => selectTab('configuration'))
     $('guideTab').addEventListener('click', () => selectTab('guide'))
 
-    window.mossApp?.events?.on('runtime', () => void refreshStatus())
-    window.mossApp?.events?.on('feishu-status', (status) => {
+    function subscribeHostEvent(eventName, callback) {
+      try {
+        const unsubscribe = window.mossApp?.events?.on(eventName, callback)
+        if (typeof unsubscribe === 'function') eventCleanups.push(unsubscribe)
+      } catch {
+        // Host events are an enhancement; the page remains usable with manual refresh.
+      }
+    }
+
+    function handleWindowFocus() {
+      void refreshAppearance()
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') void refreshAppearance()
+    }
+
+    function handleSystemThemeChange() {
+      if (!currentAppearance || currentAppearance.themeMode === 'system') {
+        applyAppearance(currentAppearance)
+      }
+    }
+
+    subscribeHostEvent('runtime', () => void refreshStatus())
+    subscribeHostEvent('feishu-status', (status) => {
       adapterStatus = status || adapterStatus
       renderStatus()
       renderPairing()
     })
-    window.mossApp?.events?.on('appearance', applyTheme)
-    window.mossApp?.app?.getInfo().then((info) => applyTheme(info?.appearance)).catch(() => applyTheme())
-    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      void window.mossApp?.app?.getInfo().then((info) => applyTheme(info?.appearance)).catch(() => applyTheme())
-    })
+    subscribeHostEvent('appearance', (appearance) => applyAppearance(appearance))
+    window.addEventListener('focus', handleWindowFocus)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    systemColorScheme.addEventListener('change', handleSystemThemeChange)
+    void refreshAppearance()
     for (const id of ['appSecret', 'encryptKey', 'verificationToken']) {
       $(id).addEventListener('focus', selectMaskedSecret)
     }
@@ -518,7 +666,15 @@
         $('statusLine').className = 'status-line error'
       })
       .finally(() => setBusy(false))
-    setInterval(() => void refreshStatus(), 5000)
+    const statusPollTimer = setInterval(() => void refreshStatus(), 5000)
+    window.addEventListener('beforeunload', () => {
+      disposed = true
+      clearInterval(statusPollTimer)
+      window.removeEventListener('focus', handleWindowFocus)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      systemColorScheme.removeEventListener('change', handleSystemThemeChange)
+      for (const cleanup of eventCleanups) cleanup()
+    }, { once: true })
   </script>
 </body>
 </html>

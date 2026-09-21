@@ -161,6 +161,6 @@ export function releaseNotesForVersion(appRoot, version) {
   const match = heading.exec(content)
   if (!match) return ''
   const remaining = content.slice(match.index + match[0].length)
-  const nextHeading = remaining.search(/^##\\s+/m)
+  const nextHeading = remaining.search(/^##\s+/m)
   return remaining.slice(0, nextHeading < 0 ? undefined : nextHeading).trim()
 }
