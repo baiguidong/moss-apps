@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.feishu",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "displayName": "飞书",
   "description": "通过飞书私聊连接一个固定 Moss 会话并自动回复。",
   "icon": "assets/icon.svg",

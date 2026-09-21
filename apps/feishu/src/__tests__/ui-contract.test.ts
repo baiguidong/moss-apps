@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
+import { compileJsonSchema } from '@moss/app-sdk'
 
 const source = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
 const backendSource = readFileSync(new URL('../backend/feishu/index.ts', import.meta.url), 'utf8')
@@ -69,6 +70,7 @@ describe('Feishu App UI contract', () => {
       expect(source).not.toContain(`id="${id}"`)
     }
     expect(configSchema.properties).not.toHaveProperty('streamingCard')
+    expect(configSchema.additionalProperties).toBe(true)
     for (const scope of ['im:message.p2p_msg:readonly', 'im:message:send_as_bot', 'im:message']) {
       expect(source).toContain(scope)
     }
@@ -107,5 +109,17 @@ describe('Feishu App UI contract', () => {
     ]) {
       expect(backendSource).not.toContain(removed)
     }
+  })
+
+  test('accepts and preserves configuration fields from older versions', () => {
+    const legacyConfig = {
+      appId: 'cli_example',
+      streamingCard: false,
+      allowedUsers: [],
+    }
+    const validate = compileJsonSchema(configSchema)
+
+    expect(validate(legacyConfig)).toBe(true)
+    expect(legacyConfig).toHaveProperty('streamingCard', false)
   })
 })

@@ -113,6 +113,7 @@ describe('Feishu App Channel compatibility bridge', () => {
     const config = loadConfigFromAppContext({
       config: {
         appId: 'cli_app',
+        streamingCard: false,
         allowedUsers: ['ou_allowed'],
         pairedUsers: [{ userId: 'ou_paired', displayName: 'User', pairedAt: 10 }],
         pairing: { code: 'ABC234', createdAt: 10, expiresAt: 20 },
@@ -131,5 +132,6 @@ describe('Feishu App Channel compatibility bridge', () => {
         pairedUsers: [{ userId: 'ou_paired' }],
       },
     })
+    expect(config.feishu).not.toHaveProperty('streamingCard')
   })
 })
