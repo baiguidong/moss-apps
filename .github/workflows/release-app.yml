@@ -1,0 +1,65 @@
+name: Release App
+
+on:
+  push:
+    tags:
+      - 'moss.*-v*'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: moss-app-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+      - run: bun install --frozen-lockfile
+      - id: release
+        run: node scripts/release-context.mjs "$GITHUB_REF_NAME"
+      - run: node scripts/validate-apps.mjs --app "${{ steps.release.outputs.app_id }}"
+      - run: node scripts/run-apps.mjs check --app "${{ steps.release.outputs.app_id }}"
+      - run: node scripts/run-apps.mjs test --app "${{ steps.release.outputs.app_id }}"
+      - name: Build signed App package
+        env:
+          MOSS_APP_SIGNING_PRIVATE_KEY: ${{ secrets.MOSS_APP_SIGNING_PRIVATE_KEY }}
+          MOSS_APP_SIGNING_KEY_ID: release-1
+          MOSS_APP_PUBLISHED_AT: ${{ github.event.head_commit.timestamp }}
+        run: node scripts/package-app.mjs --app "${{ steps.release.outputs.app_id }}" --require-signature
+      - name: Publish immutable release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_ID: ${{ steps.release.outputs.app_id }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          root="artifacts/$APP_ID/$VERSION"
+          gh release create "$GITHUB_REF_NAME" \
+            "$root/$APP_ID-$VERSION.zip" \
+            "$root/$APP_ID-$VERSION.sha256" \
+            "$root/$APP_ID-$VERSION.release.json" \
+            --title "$APP_ID v$VERSION" \
+            --notes-file "${{ steps.release.outputs.app_dir }}/CHANGELOG.md" \
+            --verify-tag
+      - name: Build marketplace catalog
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/build-catalog.mjs --github-repository "$GITHUB_REPOSITORY" --release "artifacts/${{ steps.release.outputs.app_id }}/${{ steps.release.outputs.version }}/${{ steps.release.outputs.app_id }}-${{ steps.release.outputs.version }}.release.json"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["appId"],
+  "properties": {
+    "appId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "title": "飞书 App ID"
+    },
+    "streamingCard": {
+      "type": "boolean",
+      "default": false,
+      "title": "流式消息卡片"
+    },
+    "allowedUsers": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 256 },
+      "uniqueItems": true,
+      "default": []
+    },
+    "pairedUsers": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["userId", "displayName", "pairedAt"],
+        "properties": {
+          "userId": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "displayName": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "pairedAt": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "pairing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "expiresAt", "createdAt"],
+      "properties": {
+        "code": { "type": ["string", "null"], "maxLength": 32 },
+        "expiresAt": { "type": ["number", "null"] },
+        "createdAt": { "type": ["number", "null"] }
+      }
+    }
+  }
+}

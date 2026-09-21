@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.feishu",
+  "version": "0.1.2",
+  "displayName": "飞书",
+  "description": "通过飞书机器人连接 Moss 会话、通知与决策。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^1.1.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 760,
+      "height": 720,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "instanceMode": "single",
+    "targets": ["desktop"],
+    "protocols": ["moss.channel/v1"],
+    "actions": [],
+    "configuration": {
+      "schema": "schemas/config.json",
+      "secrets": "schemas/secrets.json"
+    }
+  },
+  "permissions": [
+    "channel:connection",
+    "channel:pairing",
+    "channel:sessions:read",
+    "channel:sessions:write",
+    "channel:messages",
+    "channel:deliveries",
+    "channel:notifications",
+    "channel:decisions"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "settings",
+        "title": "飞书",
+        "route": "#/settings",
+        "location": "more",
+        "icon": "forum",
+        "order": 200
+      }
+    ],
+    "settings": [
+      {
+        "id": "configuration",
+        "title": "飞书设置",
+        "viewId": "settings",
+        "order": 200
+      }
+    ]
+  }
+}
