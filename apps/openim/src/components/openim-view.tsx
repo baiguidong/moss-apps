@@ -345,6 +345,66 @@ export function OpenIMView() {
   activeConversationRef.current = activeConversation;
   selfUserIDRef.current = profile?.userID || selfInfo?.userID || "";
 
+  const resetAccountState = React.useCallback(() => {
+    accountGenerationRef.current += 1;
+    historyRequestRef.current += 1;
+    activeConversationRef.current = null;
+    selfUserIDRef.current = "";
+    loadingOlderRef.current = false;
+    if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+    if (remoteTypingTimerRef.current) clearTimeout(remoteTypingTimerRef.current);
+    typingTimerRef.current = null;
+    remoteTypingTimerRef.current = null;
+    setSelfInfo(null);
+    setConversations([]);
+    setActiveConversation(null);
+    setMessages([]);
+    setMessagesLoading(false);
+    setOlderMessagesLoading(false);
+    setHasMoreHistory(false);
+    setQuery("");
+    setMessageSearchOpen(false);
+    setMessageQuery("");
+    setSearchResults(null);
+    setSending(false);
+    setUploadProgress({});
+    setBusyLabel("");
+    setSidebarTab("messages");
+    setDirectory({ departments: [], users: [] });
+    setCollapsedDepartmentIDs(new Set());
+    setCreatingConversationUserID("");
+    setGroupCreateOpen(false);
+    setGroupName("");
+    setSelectedGroupUserIDs(new Set());
+    setCreatingGroup(false);
+    setReplyTo(null);
+    setGroupMembers([]);
+    setGroupManageOpen(false);
+    setGroupNameDraft("");
+    setSelectedInviteUserIDs(new Set());
+    setGroupManaging(false);
+    setCardPickerOpen(false);
+    setMentionPickerOpen(false);
+    setMentionIDs([]);
+    setComposerInsertion(null);
+    setLocationOpen(false);
+    setLocationDescription("");
+    setLocationLatitude("");
+    setLocationLongitude("");
+    setImagePreview("");
+    setMergePreview(null);
+    setCardPreview(null);
+    setContextMenu(null);
+    setMultiSelect(false);
+    setSelectedMessageIDs(new Set());
+    setForwardMessages(null);
+    setForwardMode("forward");
+    setTypingLabel("");
+    setRtcCall(null);
+    setPolicyTarget(null);
+    lastManualTakeoverRef.current.clear();
+  }, []);
+
   const refreshAppInstance = React.useCallback(async () => {
     const instances = await window.mossApp.instances.list();
     const instance = instances[0];
@@ -417,31 +477,23 @@ export function OpenIMView() {
       if (requestId !== bootstrapRequestRef.current) return;
       const nextUserID = String(session.userID || "");
       if (accountUserIDRef.current && accountUserIDRef.current !== nextUserID) {
-        accountGenerationRef.current += 1;
-        historyRequestRef.current += 1;
-        setSelfInfo(null);
-        setConversations([]);
-        setActiveConversation(null);
-        setMessages([]);
-        setHasMoreHistory(false);
-        setDirectory({ departments: [], users: [] });
-        setPolicyTarget(null);
-        setReplyTo(null);
-        setGroupMembers([]);
-        setRtcCall(null);
-        lastManualTakeoverRef.current.clear();
+        resetAccountState();
       }
       accountUserIDRef.current = nextUserID;
+      selfUserIDRef.current = nextUserID;
       setProfile(session);
     } catch (error) {
       if (requestId !== bootstrapRequestRef.current) return;
       await logoutOpenIMSession().catch(() => {});
+      if (requestId !== bootstrapRequestRef.current) return;
+      resetAccountState();
+      accountUserIDRef.current = "";
       setProfile(null);
       setConnection("failed");
       setConnectionError(errorMessage(error));
       setInitializing(false);
     }
-  }, []);
+  }, [resetAccountState]);
 
   React.useEffect(() => {
     void bootstrap();
@@ -461,28 +513,36 @@ export function OpenIMView() {
   React.useEffect(() => {
     if (!profile) return;
     let cancelled = false;
+    const generation = accountGenerationRef.current;
+    const isCurrentAccount = () => (
+      !cancelled
+      && generation === accountGenerationRef.current
+      && accountUserIDRef.current === profile.userID
+    );
 
-    const handleConnecting = () => setConnection("connecting");
+    const handleConnecting = () => {
+      if (isCurrentAccount()) setConnection("connecting");
+    };
     const handleConnected = () => {
+      if (!isCurrentAccount()) return;
       setConnection("connected");
       setConnectionError("");
     };
     const handleConnectFailed = (event: WSEvent) => {
+      if (!isCurrentAccount()) return;
       setConnection("failed");
       setConnectionError(event.errMsg || "OpenIM 连接失败");
     };
     const handleSessionExpired = () => {
+      if (!isCurrentAccount()) return;
+      resetAccountState();
+      accountUserIDRef.current = "";
       setProfile(null);
-      setSelfInfo(null);
-      setConversations([]);
-      setActiveConversation(null);
-      setMessages([]);
-      setPolicyTarget(null);
-      lastManualTakeoverRef.current.clear();
       setConnectionError("即时消息登录已失效，正在重新连接");
       void logoutOpenIMSession().catch(() => {}).finally(() => bootstrap());
     };
     const handleConversationChanged = (event: WSEvent<ConversationItem[]>) => {
+      if (!isCurrentAccount()) return;
       const incoming = Array.isArray(event.data) ? event.data : [];
       setConversations((current) => mergeConversations(current, incoming));
       setActiveConversation((current) => current
@@ -490,6 +550,7 @@ export function OpenIMView() {
         : current);
     };
     const handleNewMessages = (event: WSEvent<MessageItem | MessageItem[]>) => {
+      if (!isCurrentAccount()) return;
       const incoming = normalizeEventItems(event);
       incoming.forEach((message) => {
         const callSignal = parseOpenIMCallSignal(message);
@@ -518,6 +579,7 @@ export function OpenIMView() {
       void refreshConversations().catch(() => {});
     };
     const handleRevoked = (event: WSEvent<RevokedInfo>) => {
+      if (!isCurrentAccount()) return;
       const revokedID = event.data?.clientMsgID;
       if (!revokedID) return;
       setMessages((current) => current.map((message) => message.clientMsgID === revokedID
@@ -525,6 +587,7 @@ export function OpenIMView() {
         : message));
     };
     const handleReadReceipt = (event: WSEvent<ReceiptInfo | ReceiptInfo[]>) => {
+      if (!isCurrentAccount()) return;
       const readIDs = new Set(normalizeEventItems(event).flatMap((item) => item.msgIDList || []));
       if (!readIDs.size) return;
       setMessages((current) => current.map((message) => readIDs.has(message.clientMsgID)
@@ -532,6 +595,7 @@ export function OpenIMView() {
         : message));
     };
     const handleOnlineMessage = (event: WSEvent<MessageItem>) => {
+      if (!isCurrentAccount()) return;
       const message = event.data;
       const currentConversation = activeConversationRef.current;
       if (!message || !currentConversation || message.contentType !== MessageType.TypingMessage) return;
@@ -541,6 +605,7 @@ export function OpenIMView() {
       remoteTypingTimerRef.current = setTimeout(() => setTypingLabel(""), 1200);
     };
     const handleUploadProgress = (event: WSEvent<{ progress: number; clientMsgID: string }>) => {
+      if (!isCurrentAccount()) return;
       const clientMsgID = event.data?.clientMsgID;
       if (!clientMsgID) return;
       setUploadProgress((current) => ({
@@ -549,6 +614,7 @@ export function OpenIMView() {
       }));
     };
     const handleGroupChanged = (event: WSEvent<GroupMemberItem>) => {
+      if (!isCurrentAccount()) return;
       const currentConversation = activeConversationRef.current;
       if (!currentConversation?.groupID || event.data?.groupID !== currentConversation.groupID) return;
       void openIMSDK.getGroupMemberList({
@@ -556,9 +622,14 @@ export function OpenIMView() {
         filter: GroupMemberFilter.All,
         offset: 0,
         count: 1000,
-      }).then((result) => setGroupMembers(result.data || [])).catch(() => {});
+      }).then((result) => {
+        if (isCurrentAccount() && activeConversationRef.current?.groupID === currentConversation.groupID) {
+          setGroupMembers(result.data || []);
+        }
+      }).catch(() => {});
     };
     const handleSyncFinished = () => {
+      if (!isCurrentAccount()) return;
       void refreshConversations().catch(() => {});
       const currentConversation = activeConversationRef.current;
       if (!currentConversation) return;
@@ -605,17 +676,17 @@ export function OpenIMView() {
         const config = { ...localConfig, apiAddr: profile.apiAddr, wsAddr: profile.wsAddr };
         if (!config.available) throw new Error(config.error || "OpenIM SDK 不可用");
         const info = await ensureOpenIMSession(profile, config);
-        if (cancelled) return;
+        if (!isCurrentAccount()) return;
         setSelfInfo(info);
         setConnection("connected");
         await Promise.all([refreshConversations(), refreshDirectory()]);
       } catch (error) {
-        if (!cancelled) {
+        if (isCurrentAccount()) {
           setConnection("failed");
           setConnectionError(errorMessage(error));
         }
       } finally {
-        if (!cancelled) setInitializing(false);
+        if (isCurrentAccount()) setInitializing(false);
       }
     })();
 
@@ -641,7 +712,7 @@ export function OpenIMView() {
       void openIMSDK.off(CbEvents.OnGroupMemberInfoChanged, handleGroupChanged);
       void openIMSDK.off(CbEvents.OnSyncServerFinish, handleSyncFinished);
     };
-  }, [bootstrap, profile, refreshConversations, refreshDirectory]);
+  }, [bootstrap, profile, refreshConversations, refreshDirectory, resetAccountState]);
 
   React.useEffect(() => {
     if (!activeConversation || connection !== "connected") {
@@ -677,12 +748,21 @@ export function OpenIMView() {
     });
 
     if (activeConversation.conversationType !== SessionType.Single) {
+      const conversationID = activeConversation.conversationID;
       void openIMSDK.getGroupMemberList({
         groupID: activeConversation.groupID,
         filter: GroupMemberFilter.All,
         offset: 0,
         count: 1000,
-      }).then((result) => setGroupMembers(result.data || [])).catch(() => setGroupMembers([]));
+      }).then((result) => {
+        if (historyRequestRef.current === requestId && activeConversationRef.current?.conversationID === conversationID) {
+          setGroupMembers(result.data || []);
+        }
+      }).catch(() => {
+        if (historyRequestRef.current === requestId && activeConversationRef.current?.conversationID === conversationID) {
+          setGroupMembers([]);
+        }
+      });
     } else {
       setGroupMembers([]);
     }
@@ -690,28 +770,40 @@ export function OpenIMView() {
 
   const loadOlderMessages = React.useCallback(async () => {
     if (!activeConversation || !hasMoreHistory || olderMessagesLoading || loadingOlderRef.current || !messages.length) return;
+    const generation = accountGenerationRef.current;
+    const conversationID = activeConversation.conversationID;
     const scroller = messageScrollRef.current;
     const previousHeight = scroller?.scrollHeight || 0;
+    let scrollAdjustmentScheduled = false;
     loadingOlderRef.current = true;
     setOlderMessagesLoading(true);
     try {
       const result = await openIMSDK.getAdvancedHistoryMessageList({
         count: 50,
         startClientMsgID: messages[0].clientMsgID,
-        conversationID: activeConversation.conversationID,
+        conversationID,
         viewType: ViewType.History,
       });
+      if (generation !== accountGenerationRef.current || activeConversationRef.current?.conversationID !== conversationID) return;
       setMessages((current) => appendMessages(current, result.data.messageList || []));
       setHasMoreHistory(!result.data.isEnd);
+      scrollAdjustmentScheduled = true;
       requestAnimationFrame(() => {
-        if (scroller) scroller.scrollTop += scroller.scrollHeight - previousHeight;
+        if (
+          generation === accountGenerationRef.current
+          && activeConversationRef.current?.conversationID === conversationID
+          && scroller
+        ) {
+          scroller.scrollTop += scroller.scrollHeight - previousHeight;
+        }
         loadingOlderRef.current = false;
       });
     } catch (error) {
       loadingOlderRef.current = false;
-      setConnectionError(errorMessage(error));
+      if (generation === accountGenerationRef.current) setConnectionError(errorMessage(error));
     } finally {
-      setOlderMessagesLoading(false);
+      if (!scrollAdjustmentScheduled) loadingOlderRef.current = false;
+      if (generation === accountGenerationRef.current) setOlderMessagesLoading(false);
     }
   }, [activeConversation, hasMoreHistory, messages, olderMessagesLoading]);
 
@@ -720,17 +812,22 @@ export function OpenIMView() {
       setSearchResults(null);
       return;
     }
+    const generation = accountGenerationRef.current;
+    const conversationID = activeConversation.conversationID;
     const timer = setTimeout(() => {
       void openIMSDK.searchLocalMessages({
-        conversationID: activeConversation.conversationID,
+        conversationID,
         keywordList: [messageQuery.trim()],
         keywordListMatchType: 0,
         pageIndex: 1,
         count: 100,
       }).then((result) => {
+        if (generation !== accountGenerationRef.current || activeConversationRef.current?.conversationID !== conversationID) return;
         const items = result.data.searchResultItems || result.data.findResultItems || [];
         setSearchResults(items.flatMap((item) => item.messageList || []).sort((a, b) => a.sendTime - b.sendTime));
-      }).catch((error) => setConnectionError(errorMessage(error)));
+      }).catch((error) => {
+        if (generation === accountGenerationRef.current) setConnectionError(errorMessage(error));
+      });
     }, 250);
     return () => clearTimeout(timer);
   }, [messageSearchOpen, messageQuery, activeConversation?.conversationID]);
@@ -1437,7 +1534,7 @@ export function OpenIMView() {
                   <div className="text-xs text-muted-foreground">已选择 {selectedMessageIDs.size} 条消息</div>
                   <div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => { setMultiSelect(false); setSelectedMessageIDs(new Set()); }}>取消</Button><Button variant="outline" size="sm" disabled={!selectedMessages.length} onClick={() => startForward(selectedMessages, "forward")}>逐条转发</Button><Button size="sm" disabled={!selectedMessages.length} onClick={() => startForward(selectedMessages, "merge")}>合并转发</Button></div>
                 </div>
-              ) : <OpenIMComposer conversation={activeConversation} disabled={connection !== "connected" || sending} sending={sending} replyTo={replyTo} insertion={composerInsertion} onCancelReply={() => setReplyTo(null)} onSend={sendText} onTyping={notifyTyping} onPickAttachment={(kind) => void pickAttachments(kind)} onPickCard={() => setCardPickerOpen(true)} onPickLocation={() => setLocationOpen(true)} onPickMention={() => setMentionPickerOpen(true)} onSendLocalAttachments={(files) => void sendLocalAttachments(files)} onError={setConnectionError} />}
+              ) : <OpenIMComposer key={`${profile.userID}:${activeConversation.conversationID}`} conversation={activeConversation} disabled={connection !== "connected" || sending} sending={sending} replyTo={replyTo} insertion={composerInsertion} onCancelReply={() => setReplyTo(null)} onSend={sendText} onTyping={notifyTyping} onPickAttachment={(kind) => void pickAttachments(kind)} onPickCard={() => setCardPickerOpen(true)} onPickLocation={() => setLocationOpen(true)} onPickMention={() => setMentionPickerOpen(true)} onSendLocalAttachments={(files) => void sendLocalAttachments(files)} onError={setConnectionError} />}
             </>
           ) : <div className="flex h-full flex-col items-center justify-center text-sm text-muted-foreground"><MessageSquareText className="mb-3 h-8 w-8" />选择一个会话</div>}
         </main>
