@@ -29,6 +29,7 @@ export const CHANNEL_HOST_METHOD_PERMISSIONS = Object.freeze({
 export const CHANNEL_BACKEND_EVENT_PERMISSIONS = Object.freeze({
   'turn.accepted': CHANNEL_PERMISSIONS.messages,
   'turn.output': CHANNEL_PERMISSIONS.messages,
+  'turn.review_requested': CHANNEL_PERMISSIONS.messages,
   'turn.completed': CHANNEL_PERMISSIONS.messages,
   'turn.failed': CHANNEL_PERMISSIONS.messages,
   'notification.deliver': CHANNEL_PERMISSIONS.notifications,
@@ -135,6 +136,16 @@ export function validateChannelHostInput(method, value) {
         && (!Array.isArray(input.attachments) || input.attachments.length === 0)
       ) {
         throw new AppServiceError(APP_ERROR_CODES.invalidInput, 'message.receive requires text or attachments')
+      }
+      if (input.mentioned !== undefined && typeof input.mentioned !== 'boolean') {
+        throw new AppServiceError(APP_ERROR_CODES.invalidInput, 'message.receive mentioned must be a boolean')
+      }
+      if (input.source !== undefined && !['human', 'agent', 'system'].includes(input.source)) {
+        throw new AppServiceError(APP_ERROR_CODES.invalidInput, 'message.receive source must be human, agent, or system')
+      }
+      if (input.hop !== undefined
+        && (!Number.isInteger(input.hop) || input.hop < 0 || input.hop > 20)) {
+        throw new AppServiceError(APP_ERROR_CODES.invalidInput, 'message.receive hop must be between 0 and 20')
       }
       break
     case 'delivery.ack':

@@ -112,6 +112,7 @@ export function mapLegacyRequestToChannel(
           ...externalIdentity(payload, createEventId, true),
           ...(typeof payload.text === 'string' ? { text: payload.text } : {}),
           ...(Array.isArray(payload.attachments) ? { attachments: payload.attachments } : {}),
+          ...(typeof payload.mentioned === 'boolean' ? { mentioned: payload.mentioned } : {}),
         },
       }
     case 'turn.delivery.ack':

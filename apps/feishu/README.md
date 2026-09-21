@@ -9,17 +9,18 @@
 ```text
 Moss App Settings
   -> moss.feishu instance config + encrypted secrets
-  -> 本机：App Runtime -> moss.channel/v1 -> Desktop session
+  -> 本机：App Runtime -> moss.channel/v1 + moss.agent/v1 -> Desktop session
   -> Server：托管 API -> Feishu Adapter -> Moss Server session
 ```
 
 注意：
 
-- Desktop 的平台配置和配对由 `moss.feishu` App 管理；迁移期仍兼容 `Settings -> IM 接入`
+- Desktop 的平台配置、配对和 AI 回复策略统一由 `moss.feishu` App 的“打开”页面管理
 - Server 管理后台不提供飞书凭据配置；Desktop 只在选择 Server 运行时推送完整配置快照
 - Desktop 会先停止另一端再启动目标端，避免本机与 Server 同时连接同一个飞书应用
 - Server 托管实例在 Desktop 退出后继续运行，并在 Server 重启后自动恢复
-- Desktop App Backend 使用 `moss.channel/v1`；旧 Server 托管路径暂由版本化进程 IPC 回退
+- Desktop App Backend 使用 `moss.channel/v1` 和 `moss.agent/v1`；需要 Moss Host API `1.2.0` 或更高版本
+- 旧 Server 托管路径暂由版本化进程 IPC 回退；Server Agent Host 执行链完成后再切换到同一协议
 - 紧急回退可在启动 Moss 前设置 `MOSS_FEISHU_LEGACY_ADAPTER=1`；移除该变量后会恢复此前启用的 App 实例
 
 ## 目录边界
@@ -88,15 +89,36 @@ Adapter 已接入 `application.bot.menu_v6`，并提供会话中心卡片。菜�
 
 配置完成后，手机端用户可以通过菜单和卡片按钮完成分类、分页、搜索、切换和新建会话，不需要输入会话 ID 或斜杠命令。旧命令仍保留用于兼容。菜单事件格式见飞书官方[机器人自定义菜单事件](https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/application-v6/bot/events/menu)。
 
+## AI 回复与人工接管
+
+在 `Apps -> 飞书 -> 打开 -> AI 回复` 中配置；App 管理页只负责启停、刷新、重启和日志，不重复展示业务配置。
+
+| 设置 | 行为 |
+| --- | --- |
+| 仅人工回复 | 外部消息进入“人工处理”，不调用模型。 |
+| AI 自动回复 | Agent 完成后直接交给飞书投递。 |
+| AI 起草，人工确认 | 生成草稿但不发送，必须在 App 中批准、编辑后批准或拒绝。 |
+| 仅 @ AI 时回复 | 明确 @ 时调用 Agent，其余消息转人工。 |
+
+默认策略可选择 Agent、Tool、Skill、Connector、确认模式和会话模式；已配对用户及白名单用户可单独覆盖回复方式。会话支持固定会话、达到阈值后携带 Core 可信摘要自动轮换，以及每条消息新建会话。成员覆盖只能收窄默认资源和主动回复权限，不能扩大它们。
+
+### 数据存储与安全边界
+
+- `App ID`、流式卡片、白名单、配对关系等普通配置保存在 Moss App instance 配置中。
+- `App Secret`、`Encrypt Key`、`Verification Token` 保存在 Moss 加密凭据存储中；页面只收到 `****` 掩码，留在掩码状态保存时不会覆盖原值。
+- 回复策略、成员覆盖、外部会话映射和 Turn 状态由 Moss Core 写入 `sessions.db` 的 `agent_channel_*` 表，并按 App ID 与实例 ID 隔离。
+- Agent system prompt、Moss 登录 Token、模型密钥、Connector 凭据、内部连续性摘要和附件本地路径不会返回给飞书 App。
+- App 更新新增权限时不会自动获得授权，需要用户确认新增 grant。
+
 如果“机器人配置”中没有“机器人自定义菜单”，依次检查：当前应用是否为企业自建应用、是否已添加机器人能力、当前账号是否具有应用管理员或开发者权限。个人账号所在租户不开放企业自建应用能力时，该入口不会出现。
 
 ### 发布检查
 
-权限、事件、回调或菜单发生变化后，必须在飞书开发者后台创建并发布新版本；仅保存草稿不会对手机端生效。发布后检查应用可用范围包含实际验收用户，然后在 Moss 的 `设置 -> IM 接入` 中保存 `App ID` 和 `App Secret`。客户端会按选定的运行位置启动 Adapter 和飞书长连接。
+权限、事件、回调或菜单发生变化后，必须在飞书开发者后台创建并发布新版本；仅保存草稿不会对手机端生效。发布后检查应用可用范围包含实际验收用户，然后在 Moss 的 `Apps -> 飞书 -> 打开` 中保存 `App ID` 和 `App Secret`。客户端会按选定的运行位置启动 Adapter 和飞书长连接。
 
 ### Moss 客户端配置
 
-打开飞书 App 的设置页（迁移期也可从 `设置 -> IM 接入 -> 飞书` 进入），逐项核对：
+打开 `Apps -> 飞书 -> 打开`，逐项核对：
 
 | 配置项 | 是否必填 | 填写方式 |
 | --- | --- | --- |
@@ -127,7 +149,7 @@ Adapter 已接入 `application.bot.menu_v6`，并提供会话中心卡片。菜�
 按顺序执行以下用例；前一项失败时先不要继续，按对应配置项排查。
 
 1. **长连接与配对**
-   - 操作：启动 Moss，打开 `设置 -> IM 接入`，生成配对码并在飞书私聊机器人发送。
+   - 操作：启动 Moss，打开 `Apps -> 飞书 -> 打开`，生成配对码并在飞书私聊机器人发送。
    - 预期：Moss 显示“飞书长连接已就绪”；机器人回复配对成功；该用户出现在“已配对用户”中。
 2. **会话中心入口**
    - 操作：发送“会话中心”，再点击机器人菜单“会话中心”。

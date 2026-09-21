@@ -127,12 +127,13 @@
     .full { grid-column: 1 / -1; }
     label.field { display: grid; gap: 6px; color: var(--foreground); font-size: 13px; font-weight: 500; }
     .required::after { content: ' *'; color: var(--destructive); }
-    input, select {
+    input, select, textarea {
       width: 100%; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 12px;
       background: color-mix(in oklab, var(--input) 70%, var(--card)); color: var(--foreground); outline: none; font: inherit; font-size: 13px;
     }
-    input:hover, select:hover { border-color: color-mix(in oklab, var(--foreground) 22%, var(--border)); }
-    input:focus, select:focus { border-color: var(--ring); box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 15%, transparent); }
+    textarea { min-height: 96px; height: auto; padding: 10px 12px; line-height: 1.55; resize: vertical; }
+    input:hover, select:hover, textarea:hover { border-color: color-mix(in oklab, var(--foreground) 22%, var(--border)); }
+    input:focus, select:focus, textarea:focus { border-color: var(--ring); box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 15%, transparent); }
     input::placeholder { color: var(--muted-foreground); opacity: .72; }
     .hint { margin-top: -2px; color: var(--muted-foreground); font-size: 11px; font-weight: 400; }
     .status-line { display: flex; align-items: flex-start; gap: 9px; padding: 12px 16px; font-size: 12px; color: var(--muted-foreground); }
@@ -167,7 +168,19 @@
     .user-main { min-width: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
     .badge { border-radius: 5px; padding: 2px 6px; background: var(--muted); color: var(--muted-foreground); font-size: 10px; }
     .user-id { color: var(--muted-foreground); font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+    .member-policy { width: 168px; flex: 0 0 auto; }
     .empty { padding: 12px; border: 1px dashed var(--border); border-radius: 10px; color: var(--muted-foreground); font-size: 12px; text-align: center; }
+    .resource-columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+    .resource-box { min-width: 0; border: 1px solid var(--border); border-radius: 12px; padding: 10px; }
+    .resource-list { max-height: 170px; overflow: auto; display: grid; gap: 7px; margin-top: 9px; }
+    .resource-item { display: flex; align-items: flex-start; gap: 7px; color: var(--color-text-secondary); font-size: 12px; line-height: 1.35; }
+    .resource-item input { width: 15px; height: 15px; margin: 1px 0 0; flex: 0 0 auto; }
+    .review-list { display: grid; gap: 10px; }
+    .review-card { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: color-mix(in oklab, var(--card) 70%, var(--muted)); }
+    .review-meta { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 8px; color: var(--muted-foreground); font-size: 11px; }
+    .review-source { margin-bottom: 8px; color: var(--color-text-secondary); font-size: 12px; white-space: pre-wrap; }
+    .review-actions { display: flex; gap: 8px; margin-top: 9px; }
+    .review-actions button { height: 32px; }
     details { border-top: 1px solid var(--border); }
     details:first-of-type { border-top: 0; }
     summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; cursor: pointer; font-size: 13px; font-weight: 600; list-style: none; }
@@ -191,6 +204,7 @@
     @media (max-width: 620px) {
       main { width: min(100% - 24px, 720px); padding-top: 16px; }
       .grid { grid-template-columns: 1fr; }
+      .resource-columns { grid-template-columns: 1fr; }
       .full { grid-column: auto; }
       .settings-row { align-items: flex-start; flex-direction: column; gap: 10px; }
       .settings-row select { width: 100% !important; }
@@ -204,6 +218,7 @@
   <main>
     <nav class="tabs" role="tablist" aria-label="飞书设置导航">
       <button id="configurationTab" class="tab active" type="button" role="tab" aria-controls="configurationPanel" aria-selected="true">连接与配对</button>
+      <button id="agentTab" class="tab" type="button" role="tab" aria-controls="agentPanel" aria-selected="false">AI 回复</button>
       <button id="guideTab" class="tab" type="button" role="tab" aria-controls="guidePanel" aria-selected="false">配置说明</button>
     </nav>
 
@@ -248,6 +263,43 @@
     </section>
     </div>
 
+    <div id="agentPanel" role="tabpanel" aria-labelledby="agentTab" hidden>
+      <section class="section" aria-labelledby="agentPolicyTitle">
+        <div class="section-heading"><div><h2 id="agentPolicyTitle">默认回复策略</h2><p>由 Moss Core 执行 Agent，并在执行层限制工具、技能和连接器。</p></div><button id="refreshAgent" class="secondary" type="button">刷新</button></div>
+        <div class="settings-group">
+          <div class="settings-block"><div class="grid">
+            <label class="field"><span>回复方式</span><select id="replyMode"><option value="human_only">仅人工回复</option><option value="ai_auto">AI 自动回复</option><option value="ai_draft_review">AI 起草，人工确认</option><option value="mention_only">仅 @ AI 时回复</option></select></label>
+            <label class="field"><span>Agent</span><select id="agentId"><option value="">默认 Agent</option></select></label>
+            <label class="field"><span>会话上下文</span><select id="sessionMode"><option value="fixed">固定会话</option><option value="rotating">自动轮换</option><option value="new_each_turn">每条消息新会话</option></select></label>
+            <label class="field"><span>轮换阈值</span><input id="rotateAfterTurns" type="number" min="1" max="1000" value="24"><p class="hint">仅“自动轮换”生效。</p></label>
+            <label class="field full"><span>工具确认策略</span><select id="permissionMode"><option value="default">遵循 Moss 默认确认</option><option value="acceptEdits">自动允许文件编辑</option><option value="dontAsk">不弹窗，需要确认时拒绝</option></select></label>
+          </div></div>
+          <div class="settings-row">
+            <div class="settings-row-copy"><h3>使用全部可用资源</h3><p>关闭后，仅允许下方明确勾选的工具、技能和连接器。</p></div>
+            <label class="toggle" aria-label="使用全部可用资源"><input id="unrestrictedResources" type="checkbox"><span class="toggle-track"></span></label>
+          </div>
+          <div id="resourcePicker" class="settings-block">
+            <div class="resource-columns">
+              <div class="resource-box"><h3>工具</h3><div id="toolResources" class="resource-list"></div></div>
+              <div class="resource-box"><h3>技能</h3><div id="skillResources" class="resource-list"></div></div>
+              <div class="resource-box"><h3>连接器</h3><div id="connectorResources" class="resource-list"></div></div>
+            </div>
+          </div>
+          <div class="actions"><button id="saveAgent" type="button">保存 AI 策略</button><span id="agentMessage" class="message" role="status" aria-live="polite"></span></div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="memberPolicyTitle">
+        <div class="section-heading"><div><h2 id="memberPolicyTitle">成员回复方式</h2><p>覆盖默认回复方式；权限和会话策略仍由上方统一限制。</p></div></div>
+        <div class="settings-group"><div class="settings-block"><ul id="memberPolicies" class="users"><li class="empty">正在读取…</li></ul></div></div>
+      </section>
+
+      <section class="section" aria-labelledby="reviewTitle">
+        <div class="section-heading"><div><h2 id="reviewTitle">人工处理</h2><p>处理仅人工消息，或审核 AI 草稿；所有操作都会保留 Turn 状态。</p></div></div>
+        <div class="settings-group"><div class="settings-block"><div id="reviewList" class="review-list"><div class="empty">暂无待处理消息</div></div></div></div>
+      </section>
+    </div>
+
     <section id="guidePanel" class="section" role="tabpanel" aria-labelledby="guideTab" hidden>
       <div class="section-heading"><div><h2>配置说明</h2><p>按顺序完成以下设置，然后再生成配对码。</p></div><a href="https://open.feishu.cn/app" target="_blank" rel="noreferrer">打开飞书开放平台</a></div>
       <div class="settings-group">
@@ -283,6 +335,9 @@
   <script>
     const $ = (id) => document.getElementById(id)
     const bridge = window.mossApp?.feishu
+    const hostBridge = window.mossApp?.host
+    const AGENT_PROTOCOL = 'moss.agent/v1'
+    const INSTANCE_BINDING_ID = '*'
     const SAFE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
     const THEME_MODES = new Set(['light', 'dark', 'system'])
     const BACKGROUNDS = new Set(['default', 'grid-theme', 'dot-theme', 'gradient-theme'])
@@ -294,6 +349,12 @@
     let currentAppearance = null
     let currentResolvedTheme = ''
     let appearanceRefreshPromise = null
+    let agentInstanceId = ''
+    let agentCatalog = { agents: [], tools: [], skills: [], connectors: [] }
+    let defaultAgentBinding = null
+    let pendingDrafts = []
+    const memberBindings = new Map()
+    let agentBusy = false
     let disposed = false
     const eventCleanups = []
 
@@ -324,14 +385,31 @@
       $('runLocation').disabled = value
     }
 
+    function setAgentMessage(value, kind = '') {
+      $('agentMessage').textContent = value
+      $('agentMessage').className = `message ${kind}`
+    }
+
+    function setAgentBusy(value) {
+      agentBusy = value
+      $('saveAgent').disabled = value
+      $('refreshAgent').disabled = value
+      $('saveAgent').textContent = value ? '处理中…' : '保存 AI 策略'
+    }
+
     function selectTab(tab) {
       const guide = tab === 'guide'
-      $('configurationPanel').hidden = guide
+      const agent = tab === 'agent'
+      $('configurationPanel').hidden = guide || agent
+      $('agentPanel').hidden = !agent
       $('guidePanel').hidden = !guide
-      $('configurationTab').classList.toggle('active', !guide)
+      $('configurationTab').classList.toggle('active', !guide && !agent)
+      $('agentTab').classList.toggle('active', agent)
       $('guideTab').classList.toggle('active', guide)
-      $('configurationTab').setAttribute('aria-selected', String(!guide))
+      $('configurationTab').setAttribute('aria-selected', String(!guide && !agent))
+      $('agentTab').setAttribute('aria-selected', String(agent))
       $('guideTab').setAttribute('aria-selected', String(guide))
+      if (agent) void refreshAgentSettings()
     }
 
     function createPairingCode() {
@@ -427,10 +505,295 @@
     }
 
     function configuredUsers() {
-      if (adapterStatus?.enabled !== false && Array.isArray(adapterStatus?.pairedUsers)) {
-        return adapterStatus.pairedUsers
+      const paired = adapterStatus?.enabled !== false && Array.isArray(adapterStatus?.pairedUsers)
+        ? adapterStatus.pairedUsers
+        : Array.isArray(adapterConfig?.feishu?.pairedUsers) ? adapterConfig.feishu.pairedUsers : []
+      const users = new Map(paired.map((user) => [String(user.userId || ''), user]))
+      for (const userId of adapterConfig?.feishu?.allowedUsers || []) {
+        const id = String(userId || '').trim()
+        if (id && !users.has(id)) users.set(id, { userId: id, displayName: '白名单用户', pairedAt: 0 })
       }
-      return Array.isArray(adapterConfig?.feishu?.pairedUsers) ? adapterConfig.feishu.pairedUsers : []
+      return [...users.values()].filter((user) => String(user.userId || '').trim())
+    }
+
+    async function agentRequest(method, input = {}) {
+      if (!hostBridge?.request) throw new Error('当前 Moss 版本不支持 Agent Channel 设置，请升级后重试。')
+      if (!agentInstanceId) {
+        const instances = await window.mossApp.instances.list()
+        const instance = instances.find((entry) => entry?.id === 'moss.feishu--default') || instances[0]
+        agentInstanceId = String(instance?.id || '')
+      }
+      if (!agentInstanceId) throw new Error('飞书 Backend 实例尚未创建。')
+      return hostBridge.request(agentInstanceId, AGENT_PROTOCOL, method, input)
+    }
+
+    function renderResourceList(elementId, items, selected, unrestricted) {
+      const list = $(elementId)
+      list.replaceChildren()
+      if (!items.length) {
+        const empty = document.createElement('span')
+        empty.className = 'hint'
+        empty.textContent = '暂无可用项'
+        list.append(empty)
+        return
+      }
+      const selectedSet = new Set(Array.isArray(selected) ? selected : [])
+      for (const item of items) {
+        const label = document.createElement('label')
+        label.className = 'resource-item'
+        const checkbox = document.createElement('input')
+        checkbox.type = 'checkbox'
+        checkbox.value = String(item.id || item.name || '')
+        checkbox.checked = unrestricted || selectedSet.has(checkbox.value) || selectedSet.has(String(item.name || ''))
+        checkbox.disabled = unrestricted
+        const copy = document.createElement('span')
+        copy.textContent = String(item.displayName || item.title || item.name || item.id || '')
+        label.append(checkbox, copy)
+        list.append(label)
+      }
+    }
+
+    function updateResourcePickerState() {
+      const unrestricted = $('unrestrictedResources').checked
+      $('resourcePicker').hidden = unrestricted
+      for (const input of $('resourcePicker').querySelectorAll('input[type="checkbox"]')) {
+        input.disabled = unrestricted
+      }
+    }
+
+    function renderAgentPolicy() {
+      const effective = defaultAgentBinding?.effective || {}
+      const resources = effective.resources || {}
+      const unrestricted = ['tools', 'skills', 'connectors'].every((key) => resources[key] === null)
+      $('replyMode').value = effective.replyMode || 'ai_auto'
+      $('sessionMode').value = effective.session?.mode || 'fixed'
+      $('rotateAfterTurns').value = String(effective.session?.rotateAfterTurns || 24)
+      $('permissionMode').value = effective.permissionMode || 'default'
+      $('unrestrictedResources').checked = unrestricted
+
+      const agentSelect = $('agentId')
+      const selectedAgent = effective.agentId || ''
+      agentSelect.replaceChildren(new Option('默认 Agent', ''))
+      for (const agent of agentCatalog.agents || []) {
+        agentSelect.append(new Option(agent.name || agent.id, agent.id))
+      }
+      agentSelect.value = selectedAgent
+      renderResourceList('toolResources', agentCatalog.tools || [], resources.tools, unrestricted)
+      renderResourceList('skillResources', agentCatalog.skills || [], resources.skills, unrestricted)
+      renderResourceList('connectorResources', agentCatalog.connectors || [], resources.connectors, unrestricted)
+      updateResourcePickerState()
+    }
+
+    function memberReplyModeLabel(value) {
+      return ({
+        inherit: '继承默认',
+        human_only: '仅人工回复',
+        ai_auto: 'AI 自动回复',
+        ai_draft_review: 'AI 起草，人工确认',
+        mention_only: '仅 @ AI 时回复',
+      })[value] || value
+    }
+
+    function renderMemberPolicies() {
+      const list = $('memberPolicies')
+      list.replaceChildren()
+      const users = configuredUsers()
+      if (!users.length) {
+        const empty = document.createElement('li')
+        empty.className = 'empty'
+        empty.textContent = '完成配对后可为成员设置独立回复方式'
+        list.append(empty)
+        return
+      }
+      for (const user of users) {
+        const userId = String(user.userId || '')
+        const entry = memberBindings.get(userId)
+        const item = document.createElement('li')
+        item.className = 'user'
+        const main = document.createElement('div')
+        main.className = 'user-main'
+        const name = document.createElement('span')
+        name.textContent = user.displayName || 'Feishu User'
+        const id = document.createElement('span')
+        id.className = 'user-id'
+        id.textContent = userId
+        const select = document.createElement('select')
+        select.className = 'member-policy'
+        select.setAttribute('aria-label', `${name.textContent}的回复方式`)
+        for (const mode of ['inherit', 'human_only', 'ai_auto', 'ai_draft_review', 'mention_only']) {
+          select.append(new Option(memberReplyModeLabel(mode), mode))
+        }
+        select.value = entry?.binding?.policy?.replyMode || 'inherit'
+        select.addEventListener('change', () => void saveMemberPolicy(userId, select.value, select))
+        main.append(name, id)
+        item.append(main, select)
+        list.append(item)
+      }
+    }
+
+    function renderDrafts() {
+      const list = $('reviewList')
+      list.replaceChildren()
+      if (!pendingDrafts.length) {
+        const empty = document.createElement('div')
+        empty.className = 'empty'
+        empty.textContent = '暂无待处理消息'
+        list.append(empty)
+        return
+      }
+      for (const turn of pendingDrafts) {
+        const card = document.createElement('article')
+        card.className = 'review-card'
+        const meta = document.createElement('div')
+        meta.className = 'review-meta'
+        const member = document.createElement('span')
+        member.textContent = turn.externalUserId || '未知成员'
+        const time = document.createElement('span')
+        time.textContent = new Date(turn.updatedAt || Date.now()).toLocaleString()
+        meta.append(member, time)
+        const source = document.createElement('div')
+        source.className = 'review-source'
+        source.textContent = `原消息：${turn.input?.message?.text || '（附件消息）'}`
+        const draft = document.createElement('textarea')
+        draft.value = turn.resultText || ''
+        draft.setAttribute('aria-label', '待确认回复内容')
+        const actions = document.createElement('div')
+        actions.className = 'review-actions'
+        const approve = document.createElement('button')
+        approve.type = 'button'
+        approve.textContent = turn.status === 'human' ? '人工回复' : '批准并发送'
+        approve.addEventListener('click', () => void resolvePendingTurn(turn, 'send', draft.value))
+        const reject = document.createElement('button')
+        reject.type = 'button'
+        reject.className = 'secondary'
+        reject.textContent = '拒绝'
+        reject.addEventListener('click', () => void resolvePendingTurn(turn, 'dismiss'))
+        actions.append(approve, reject)
+        card.append(meta, source, draft, actions)
+        list.append(card)
+      }
+    }
+
+    async function refreshAgentDrafts() {
+      const result = await agentRequest('turn.list', { statuses: ['human', 'awaiting_review'], limit: 100 })
+      pendingDrafts = Array.isArray(result?.turns) ? result.turns : []
+      renderDrafts()
+    }
+
+    async function refreshAgentSettings() {
+      if (agentBusy) return
+      setAgentBusy(true)
+      setAgentMessage('')
+      try {
+        const [catalog, binding] = await Promise.all([
+          agentRequest('catalog.list', {}),
+          agentRequest('binding.get', { externalConversationId: INSTANCE_BINDING_ID }),
+        ])
+        agentCatalog = catalog || agentCatalog
+        defaultAgentBinding = binding || null
+        const users = configuredUsers()
+        const bindings = await Promise.all(users.map(async (user) => [
+          String(user.userId || ''),
+          await agentRequest('binding.get', {
+            externalConversationId: INSTANCE_BINDING_ID,
+            externalMemberId: String(user.userId || ''),
+          }),
+        ]))
+        memberBindings.clear()
+        for (const [userId, value] of bindings) memberBindings.set(userId, value)
+        renderAgentPolicy()
+        renderMemberPolicies()
+        await refreshAgentDrafts()
+      } catch (error) {
+        setAgentMessage(errorMessage(error), 'error')
+      } finally {
+        setAgentBusy(false)
+      }
+    }
+
+    function checkedResourceIds(elementId) {
+      return [...$(elementId).querySelectorAll('input[type="checkbox"]:checked')].map((input) => input.value)
+    }
+
+    async function saveAgentPolicy() {
+      if (agentBusy) return
+      setAgentBusy(true)
+      setAgentMessage('')
+      try {
+        const unrestricted = $('unrestrictedResources').checked
+        const result = await agentRequest('binding.update', {
+          externalConversationId: INSTANCE_BINDING_ID,
+          expectedRevision: defaultAgentBinding?.binding?.revision || 0,
+          patch: {
+            replyMode: $('replyMode').value,
+            agentId: $('agentId').value || null,
+            permissionMode: $('permissionMode').value,
+            resources: unrestricted ? { tools: null, skills: null, connectors: null } : {
+              tools: checkedResourceIds('toolResources'),
+              skills: checkedResourceIds('skillResources'),
+              connectors: checkedResourceIds('connectorResources'),
+            },
+            session: {
+              mode: $('sessionMode').value,
+              rotateAfterTurns: Math.min(1000, Math.max(1, Number($('rotateAfterTurns').value) || 24)),
+            },
+          },
+        })
+        defaultAgentBinding = result
+        renderAgentPolicy()
+        setAgentMessage('AI 回复策略已保存。', 'ok')
+      } catch (error) {
+        setAgentMessage(errorMessage(error), 'error')
+      } finally {
+        setAgentBusy(false)
+      }
+    }
+
+    async function saveMemberPolicy(userId, replyMode, select) {
+      select.disabled = true
+      try {
+        const current = memberBindings.get(userId)
+        const result = await agentRequest('binding.update', {
+          externalConversationId: INSTANCE_BINDING_ID,
+          externalMemberId: userId,
+          expectedRevision: current?.binding?.revision || 0,
+          patch: { replyMode },
+        })
+        memberBindings.set(userId, result)
+        setAgentMessage('成员回复方式已保存。', 'ok')
+      } catch (error) {
+        setAgentMessage(errorMessage(error), 'error')
+        await refreshAgentSettings()
+      } finally {
+        select.disabled = false
+      }
+    }
+
+    async function resolvePendingTurn(turn, action, text) {
+      if (agentBusy) return
+      setAgentBusy(true)
+      setAgentMessage('')
+      try {
+        if (turn.status === 'human') {
+          await agentRequest('turn.reply', {
+            turnId: turn.id,
+            action,
+            ...(action === 'send' ? { text } : {}),
+          })
+        } else {
+          await agentRequest('turn.review', {
+            turnId: turn.id,
+            action: action === 'send' ? 'approve' : 'reject',
+            ...(action === 'send' ? { text } : {}),
+          })
+        }
+        await refreshAgentDrafts()
+        setAgentMessage(action === 'send' ? '回复已发送。' : '消息已忽略。', 'ok')
+      } catch (error) {
+        setAgentMessage(errorMessage(error), 'error')
+      } finally {
+        setAgentBusy(false)
+      }
     }
 
     function renderPairing() {
@@ -504,6 +867,7 @@
       }
       renderStatus()
       renderPairing()
+      await refreshAgentSettings()
     }
 
     function collectFeishuConfig() {
@@ -606,6 +970,7 @@
         adapterStatus = result.status || adapterStatus
         renderStatus()
         renderPairing()
+        await refreshAgentSettings()
         setMessage('已解绑该飞书用户。', 'ok')
       } catch (error) {
         setMessage(errorMessage(error), 'error')
@@ -619,7 +984,11 @@
     $('pair').addEventListener('click', () => void generatePairingCode())
     $('runLocation').addEventListener('change', (event) => void changeRunLocation(event.target.value === 'server' ? 'server' : 'desktop'))
     $('configurationTab').addEventListener('click', () => selectTab('configuration'))
+    $('agentTab').addEventListener('click', () => selectTab('agent'))
     $('guideTab').addEventListener('click', () => selectTab('guide'))
+    $('saveAgent').addEventListener('click', () => void saveAgentPolicy())
+    $('refreshAgent').addEventListener('click', () => void refreshAgentSettings())
+    $('unrestrictedResources').addEventListener('change', updateResourcePickerState)
 
     function subscribeHostEvent(eventName, callback) {
       try {
@@ -666,7 +1035,10 @@
         $('statusLine').className = 'status-line error'
       })
       .finally(() => setBusy(false))
-    const statusPollTimer = setInterval(() => void refreshStatus(), 5000)
+    const statusPollTimer = setInterval(() => {
+      void refreshStatus()
+      if (!$('agentPanel').hidden) void refreshAgentDrafts().catch(() => {})
+    }, 5000)
     window.addEventListener('beforeunload', () => {
       disposed = true
       clearInterval(statusPollTimer)

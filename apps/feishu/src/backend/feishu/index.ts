@@ -1135,12 +1135,14 @@ async function handleDesktopChatInput({
   eventId,
   text,
   hasAttachments,
+  mentioned,
 }: {
   chatId: string
   openId: string
   eventId: string
   text: string
   hasAttachments: boolean
+  mentioned: boolean
 }): Promise<void> {
   if (hasAttachments) {
     await sendText(chatId, '当前 Moss 客户端飞书通道先支持文本消息，附件将在后续版本接入。')
@@ -1204,6 +1206,7 @@ async function handleDesktopChatInput({
   const result = await desktopBridge.request('chat.message.received', {
     ...desktopIdentity(chatId, openId, eventId),
     text,
+    mentioned,
   }) as {
     accepted?: boolean
     duplicate?: boolean
@@ -1230,6 +1233,19 @@ desktopBridge.on('turn.completed', (payload: any) => {
       await handleServerMessage(chatId, { type: 'content_delta', text: payload.text })
     }
     const delivered = await handleServerMessage(chatId, { type: 'message_complete' })
+    if (delivered && turnId) {
+      await desktopBridge.request('turn.delivery.ack', { turnId, chatId })
+    }
+  })
+})
+
+desktopBridge.on('turn.review_requested', (payload: any) => {
+  const chatId = typeof payload?.chatId === 'string' ? payload.chatId : ''
+  const turnId = typeof payload?.turnId === 'string' ? payload.turnId : ''
+  if (!chatId) return
+  enqueue(chatId, async () => {
+    clearTransientChatState(chatId)
+    const delivered = Boolean(await sendText(chatId, 'AI 草稿已生成，正在等待 Moss 中的人工确认。'))
     if (delivered && turnId) {
       await desktopBridge.request('turn.delivery.ack', { turnId, chatId })
     }
@@ -1383,6 +1399,7 @@ async function handleMessage(data: any): Promise<void> {
               eventId: messageId,
               text: pairText,
               hasAttachments: false,
+              mentioned: true,
             })
           }
         } else {
@@ -1427,6 +1444,7 @@ async function handleMessage(data: any): Promise<void> {
         eventId: safeMessageId,
         text: msgText,
         hasAttachments,
+        mentioned: chatType === 'p2p' || isBotMentioned(event.message?.mentions),
       })
     } catch (error) {
       console.error('[Feishu] Moss Desktop request failed:', error)

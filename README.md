@@ -38,8 +38,8 @@ App 版本来自其 `app.moss.json`。发布标签格式为：
 例如：
 
 ```bash
-git tag moss.feishu-v0.1.3
-git push origin moss.feishu-v0.1.3
+git tag moss.feishu-v0.2.0
+git push origin moss.feishu-v0.2.0
 ```
 
 `release-app.yml` 会校验、测试、构建并签名 App，将不可变 ZIP 上传到 GitHub Releases，然后把市场索引部署到 GitHub Pages：
@@ -97,4 +97,4 @@ App ZIP 与 Moss 桌面安装包分开：Moss 仍分别构建 macOS arm64 和 Wi
 
 ## SDK
 
-`packages/app-sdk` 是当前 Host API `1.1.0` 的发布快照，供本仓库 App 构建和测试。后续可迁移为正式发布的 `@moss/app-sdk` npm 包而不改变 App 代码。
+`packages/app-sdk` 是当前 Host API `1.2.0` 的发布快照，供本仓库 App 构建和测试。后续可迁移为正式发布的 `@moss/app-sdk` npm 包而不改变 App 代码。

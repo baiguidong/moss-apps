@@ -20,6 +20,25 @@ import {
   validateChannelProtocol,
 } from '../channel/index.mjs'
 import {
+  ACCOUNT_BACKEND_EVENT_PERMISSIONS,
+  ACCOUNT_HOST_METHOD_PERMISSIONS,
+  MOSS_ACCOUNT_PROTOCOL,
+  validateAccountBackendEvent,
+  validateAccountBackendEventData,
+  validateAccountHostInput,
+  validateAccountHostMethod,
+} from '../account/index.mjs'
+import {
+  AGENT_BACKEND_EVENT_PERMISSIONS,
+  AGENT_HOST_METHOD_PERMISSIONS,
+  MOSS_AGENT_PROTOCOL,
+  validateAgentBackendEvent,
+  validateAgentBackendEventData,
+  validateAgentHostInput,
+  validateAgentHostMethod,
+} from '../agent/index.mjs'
+import {
+  requireHostPermission,
   requireHostProtocol,
   validateHostData,
   validateHostMember,
@@ -93,6 +112,14 @@ export class AppBackendClient {
       request: (method, input, requestOptions) => this.requestChannelHost(method, input, requestOptions),
       on: (name, handler) => this.onChannelEvent(name, handler),
     })
+    this.account = Object.freeze({
+      request: (method, input, requestOptions) => this.requestAccountHost(method, input, requestOptions),
+      on: (name, handler) => this.onAccountEvent(name, handler),
+    })
+    this.agent = Object.freeze({
+      request: (method, input, requestOptions) => this.requestAgentHost(method, input, requestOptions),
+      on: (name, handler) => this.onAgentEvent(name, handler),
+    })
     this.host = Object.freeze({
       request: (protocol, method, input, requestOptions) => this.requestHost(protocol, method, input, requestOptions),
       on: (protocol, name, handler) => this.onHostEvent(protocol, name, handler),
@@ -111,6 +138,22 @@ export class AppBackendClient {
       permission: getChannelBackendEventPermission(normalized),
       validateData: (data) => validateChannelBackendEventData(normalized, data),
       channel: true,
+    })
+  }
+
+  onAccountEvent(name, handler) {
+    const normalized = validateAccountBackendEvent(name)
+    return this.registerHostEvent(MOSS_ACCOUNT_PROTOCOL, normalized, handler, {
+      permission: ACCOUNT_BACKEND_EVENT_PERMISSIONS[normalized],
+      validateData: (data) => validateAccountBackendEventData(normalized, data),
+    })
+  }
+
+  onAgentEvent(name, handler) {
+    const normalized = validateAgentBackendEvent(name)
+    return this.registerHostEvent(MOSS_AGENT_PROTOCOL, normalized, handler, {
+      permission: AGENT_BACKEND_EVENT_PERMISSIONS[normalized],
+      validateData: (data) => validateAgentBackendEventData(normalized, data),
     })
   }
 
@@ -154,6 +197,38 @@ export class AppBackendClient {
         label: 'Channel Host',
       },
     )
+  }
+
+  requestAccountHost(method, input = {}, options = {}) {
+    const normalizedMethod = validateAccountHostMethod(method)
+    return this.requestTypedHost(
+      MOSS_ACCOUNT_PROTOCOL,
+      normalizedMethod,
+      validateAccountHostInput(normalizedMethod, input),
+      ACCOUNT_HOST_METHOD_PERMISSIONS[normalizedMethod],
+      options,
+      'Account Host',
+    )
+  }
+
+  requestAgentHost(method, input = {}, options = {}) {
+    const normalizedMethod = validateAgentHostMethod(method)
+    return this.requestTypedHost(
+      MOSS_AGENT_PROTOCOL,
+      normalizedMethod,
+      validateAgentHostInput(normalizedMethod, input),
+      AGENT_HOST_METHOD_PERMISSIONS[normalizedMethod],
+      options,
+      'Agent Host',
+    )
+  }
+
+  requestTypedHost(protocol, method, input, permission, options, label) {
+    if (this.context && !this.channelClosed) {
+      requireHostPermission(this.context.permissions, permission)
+      requireHostPermission(this.context.grants ?? this.context.permissions, permission, { source: 'grant' })
+    }
+    return this.requestHostInternal(protocol, method, input, { ...options, label })
   }
 
   async requestHost(protocol, method, input = {}, options = {}) {
@@ -544,7 +619,13 @@ export class AppBackendClient {
     const payload = message.payload || {}
     if (message.type === 'service.init') {
       if (this.context) throw new AppServiceError(APP_ERROR_CODES.handshakeFailed, 'App Backend was initialized more than once')
-      this.context = Object.freeze({ ...payload, host: this.host, channel: this.channel })
+      this.context = Object.freeze({
+        ...payload,
+        host: this.host,
+        channel: this.channel,
+        account: this.account,
+        agent: this.agent,
+      })
       this.channelClosed = false
       if (this.onInitialize) await this.onInitialize(this.context)
       this.send(createEnvelope('service.ready', { ...this.identity() }, { id: message.id }))
@@ -621,6 +702,8 @@ export class AppBackendClient {
         ...this.context,
         host: this.host,
         channel: this.channel,
+        account: this.account,
+        agent: this.agent,
         signal: controller.signal,
         requestId: message.id,
         emit: (name, data) => this.emit(name, data),
