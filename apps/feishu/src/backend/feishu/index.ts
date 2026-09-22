@@ -9,43 +9,44 @@
 
 import * as Lark from '@larksuiteoapi/node-sdk'
 import { MessageDedup } from '../common/message-dedup.js'
-import { ProcessBridge } from '../common/process-bridge.js'
-import { AppChannelBridge } from '../common/app-channel-bridge.js'
+import { FeishuHostBridge } from '../common/app-channel-bridge.js'
 import { enqueue } from '../common/chat-queue.js'
 import {
-  loadConfig,
   loadConfigFromAppContext,
   type AdapterConfig,
+  type AppBackendConfigurationContext,
 } from '../common/config.js'
 import { splitMessage } from '../common/format.js'
-import { isAllowedUser as isLegacyAllowedUser } from '../common/pairing.js'
 import { extractInboundPayload } from './extract-payload.js'
 import { createFeishuConnectionLifecycle } from './connection-lifecycle.js'
+import { createFeishuStateStore } from './state-store.js'
 
 const MAX_REPLY_CHARS = 4_000
-const runsAsMossApp = process.env.MOSS_APP_ID === 'moss.feishu'
 
 let config!: AdapterConfig
 let larkClient!: InstanceType<typeof Lark.Client>
 let wsClient: InstanceType<typeof Lark.WSClient> | null = null
+let stateStore!: ReturnType<typeof createFeishuStateStore>
+let target = 'desktop'
+let transportConnected = false
+let transportError: string | null = null
+let transportUpdatedAt: number | null = null
 
-const desktopBridge = runsAsMossApp
-  ? new AppChannelBridge({ onShutdown: () => shutdown(false, false) })
-  : new ProcessBridge()
+const hostBridge = new FeishuHostBridge({ onShutdown: () => shutdown(false, false) })
 const dedup = new MessageDedup()
-const appAuthorizedUsers = new Set<string>()
 
-function initializeTransport(context?: unknown): void {
-  config = runsAsMossApp
-    ? loadConfigFromAppContext((context || {}) as Parameters<typeof loadConfigFromAppContext>[0])
-    : loadConfig()
+function initializeTransport(context: AppBackendConfigurationContext): void {
+  config = loadConfigFromAppContext(context)
   if (!config.feishu.appId || !config.feishu.appSecret) {
     throw new Error('Missing Feishu App ID or App Secret. Configure the moss.feishu App instance first.')
   }
-
-  appAuthorizedUsers.clear()
-  for (const userId of config.feishu.allowedUsers) appAuthorizedUsers.add(String(userId))
-  for (const user of config.feishu.pairedUsers) appAuthorizedUsers.add(String(user.userId))
+  if (!context.dataDir) throw new Error('Moss App data directory is unavailable.')
+  target = context.target?.type === 'server' ? 'server' : 'desktop'
+  stateStore = createFeishuStateStore(context.dataDir)
+  stateStore.importLegacy({
+    pairedUsers: config.feishu.pairedUsers,
+    pairing: (context.config as Record<string, unknown> | undefined)?.pairing,
+  })
 
   larkClient = new Lark.Client({
     appId: config.feishu.appId,
@@ -56,10 +57,58 @@ function initializeTransport(context?: unknown): void {
 }
 
 function isAllowedUser(userId: string): boolean {
-  return runsAsMossApp
-    ? appAuthorizedUsers.has(String(userId))
-    : isLegacyAllowedUser(userId)
+  return config.feishu.allowedUsers.includes(String(userId)) || stateStore.isPaired(String(userId))
 }
+
+async function ensureAgentPolicy(): Promise<void> {
+  const current = await hostBridge.requestAgent('binding.get', { externalConversationId: '*' })
+  const effective = current?.effective || {}
+  if (
+    effective.replyMode === 'ai_auto'
+    && effective.agentId == null
+    && effective.session?.mode === 'fixed'
+    && effective.proactive?.enabled === false
+  ) return
+  await hostBridge.requestAgent('binding.update', {
+    externalConversationId: '*',
+    expectedRevision: current?.binding?.revision || 0,
+    patch: {
+      replyMode: 'ai_auto',
+      agentId: null,
+      session: { mode: 'fixed', rotateAfterTurns: 24 },
+      proactive: { enabled: false, maxConsecutiveReplies: 1, cooldownMs: 30_000 },
+    },
+  })
+}
+
+hostBridge.registerAction('status.get', () => ({
+  target,
+  transportConnected,
+  transportError,
+  transportUpdatedAt,
+  pairedUsers: stateStore.listPairedUsers(),
+  pairing: stateStore.pairingStatus(),
+}))
+
+hostBridge.registerAction('pairing.issue', () => ({
+  pairing: stateStore.issuePairingCode(),
+  pairedUsers: stateStore.listPairedUsers(),
+}))
+
+hostBridge.registerAction('pairing.list', () => ({
+  pairing: stateStore.pairingStatus(),
+  pairedUsers: stateStore.listPairedUsers(),
+}))
+
+hostBridge.registerAction('pairing.revoke', (input: { userId?: unknown } = {}) => {
+  const userId = typeof input.userId === 'string' ? input.userId.trim() : ''
+  if (!userId) throw new Error('A Feishu user ID is required.')
+  return {
+    revoked: stateStore.revoke(userId),
+    pairing: stateStore.pairingStatus(),
+    pairedUsers: stateStore.listPairedUsers(),
+  }
+})
 
 function messageUuid(turnId: string | undefined, index: number): string | undefined {
   if (!turnId) return undefined
@@ -110,7 +159,7 @@ async function forwardMessage({
     return
   }
 
-  await desktopBridge.request('chat.message.received', {
+  await hostBridge.request('chat.message.received', {
     chatId,
     openId,
     eventId,
@@ -118,7 +167,7 @@ async function forwardMessage({
   })
 }
 
-desktopBridge.on('turn.completed', (payload: any) => {
+hostBridge.on('turn.completed', (payload: any) => {
   const chatId = typeof payload?.chatId === 'string' ? payload.chatId : ''
   const turnId = typeof payload?.turnId === 'string' ? payload.turnId : ''
   const text = typeof payload?.text === 'string' ? payload.text : ''
@@ -126,12 +175,12 @@ desktopBridge.on('turn.completed', (payload: any) => {
   enqueue(chatId, async () => {
     const delivered = await sendText(chatId, text, turnId || undefined)
     if (delivered && turnId) {
-      await desktopBridge.request('turn.delivery.ack', { turnId, chatId })
+      await hostBridge.request('turn.delivery.ack', { turnId, chatId })
     }
   })
 })
 
-desktopBridge.on('turn.failed', (payload: any) => {
+hostBridge.on('turn.failed', (payload: any) => {
   const chatId = typeof payload?.chatId === 'string' ? payload.chatId : ''
   const turnId = typeof payload?.turnId === 'string' ? payload.turnId : ''
   if (!chatId) return
@@ -139,7 +188,7 @@ desktopBridge.on('turn.failed', (payload: any) => {
     const message = typeof payload?.message === 'string' ? payload.message : 'Moss 会话处理失败。'
     const delivered = await sendText(chatId, `❌ ${message}`, turnId || undefined)
     if (delivered && turnId) {
-      await desktopBridge.request('turn.delivery.ack', { turnId, chatId })
+      await hostBridge.request('turn.delivery.ack', { turnId, chatId })
     }
   })
 })
@@ -174,29 +223,15 @@ async function handleMessage(data: any): Promise<void> {
   if (!isAllowedUser(senderOpenId)) {
     const pairText = extractInboundPayload(content, msgType).text.trim()
     if (!pairText) return
-    const result = desktopBridge.available
-      ? await desktopBridge.request('pairing.attempt', {
-        chatId,
-        openId: senderOpenId,
-        eventId: messageId,
-        code: pairText,
-        displayName: 'Feishu User',
-      }).catch((error) => {
-        console.error('[Feishu] Unable to pair with Moss:', error)
-        return { paired: false }
-      }) as { paired?: boolean; alreadyPaired?: boolean; duplicate?: boolean }
-      : { paired: false, alreadyPaired: false, duplicate: false }
-
-    if (result.duplicate) {
-      if (result.paired) await sendText(chatId, '已完成配对，可以直接发送消息。')
-      return
-    }
+    const result = stateStore.tryPair(pairText, {
+      userId: senderOpenId,
+      displayName: 'Feishu User',
+    })
     if (!result.paired) {
       await sendText(chatId, '🔒 未授权。请在 Moss 中生成配对码后发送给我。')
       return
     }
 
-    appAuthorizedUsers.add(senderOpenId)
     if (!result.alreadyPaired) {
       await sendText(chatId, '配对成功，可以直接发送消息。')
       return
@@ -209,7 +244,7 @@ async function handleMessage(data: any): Promise<void> {
   if (!text && !hasAttachments) return
 
   enqueue(chatId, async () => {
-    if (!desktopBridge.available) {
+    if (!hostBridge.available) {
       await sendText(chatId, 'Moss 客户端连接已断开，请启动或重启 Moss 后再试。')
       return
     }
@@ -229,12 +264,20 @@ async function handleMessage(data: any): Promise<void> {
 }
 
 async function reportConnection(connected: boolean, error?: unknown, required = false): Promise<void> {
-  if (!desktopBridge.available) {
+  transportConnected = connected
+  transportError = error ? (error instanceof Error ? error.message : String(error)) : null
+  transportUpdatedAt = Date.now()
+  hostBridge.status(connected ? 'connected' : 'disconnected', {
+    connected,
+    error: transportError,
+    target,
+  })
+  if (!hostBridge.available) {
     if (required) throw new Error('Moss host bridge disconnected during Feishu startup.')
     return
   }
   try {
-    await desktopBridge.request('adapter.connection', {
+    await hostBridge.request('adapter.connection', {
       connected,
       ...(error ? { error: error instanceof Error ? error.message : String(error) } : {}),
     })
@@ -246,11 +289,12 @@ async function reportConnection(connected: boolean, error?: unknown, required = 
 
 async function start(): Promise<void> {
   console.log('[Feishu] Starting bot...')
-  console.log(`[Feishu] Moss bridge: ${runsAsMossApp ? 'moss.channel/v1' : 'legacy process IPC'}`)
+  console.log('[Feishu] Moss bridge: App Host')
 
-  if (!desktopBridge.available) throw new Error('Feishu Adapter must be started by a Moss host process.')
-  const context = await desktopBridge.hello({ adapter: 'feishu' })
+  if (!hostBridge.available) throw new Error('Feishu App must be started by a Moss host process.')
+  const context = await hostBridge.hello()
   initializeTransport(context)
+  await ensureAgentPolicy()
   console.log(`[Feishu] App ID: ${config.feishu.appId}`)
   console.log('[Feishu] Moss host bridge ready')
 
@@ -282,20 +326,20 @@ async function start(): Promise<void> {
 
   await wsClient.start({ eventDispatcher: dispatcher })
   await connection.initialReady
-  if (desktopBridge instanceof AppChannelBridge) desktopBridge.ready()
+  hostBridge.ready()
   console.log('[Feishu] Bot is running! (WebSocket connected)')
 }
 
 start().catch((error) => {
   console.error('[Feishu] Failed to start:', error)
-  if (desktopBridge instanceof AppChannelBridge) desktopBridge.fail(error)
+  hostBridge.fail(error)
   process.exit(1)
 })
 
 function shutdown(exitProcess = true, destroyHostBridge = true): void {
   console.log('[Feishu] Shutting down...')
   wsClient?.close({ force: true })
-  if (destroyHostBridge) desktopBridge.destroy()
+  if (destroyHostBridge) hostBridge.destroy()
   dedup.destroy()
   if (exitProcess) process.exit(0)
 }

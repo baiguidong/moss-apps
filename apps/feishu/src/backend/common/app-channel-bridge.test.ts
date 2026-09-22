@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'bun:test'
 import {
-  AppChannelBridge,
-  mapChannelEventToLegacy,
-  mapLegacyRequestToChannel,
+  FeishuHostBridge,
+  mapChannelEventToTransport,
+  mapTransportRequestToChannel,
 } from './app-channel-bridge.js'
 import { loadConfigFromAppContext } from './config.js'
 import { createEnvelope, validateAgentHostInput, validateChannelHostInput } from '@moss/app-sdk'
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
 
-describe('Feishu App Channel compatibility bridge', () => {
+describe('Feishu App Host bridge', () => {
   it('does not report the App Backend ready until the transport is connected', async () => {
     const sent: any[] = []
     let receive: ((message: any) => void) | undefined
-    const bridge = new AppChannelBridge({
+    const bridge = new FeishuHostBridge({
       clientOptions: {
         send: (message: any) => sent.push(message),
         onMessage: (handler: (message: any) => void) => { receive = handler },
@@ -41,7 +41,7 @@ describe('Feishu App Channel compatibility bridge', () => {
   })
 
   it('maps legacy request names and external identities to moss.channel/v1', () => {
-    expect(mapLegacyRequestToChannel('chat.message.received', {
+    expect(mapTransportRequestToChannel('chat.message.received', {
       openId: 'ou_user',
       chatId: 'oc_chat',
       eventId: 'om_message',
@@ -56,13 +56,13 @@ describe('Feishu App Channel compatibility bridge', () => {
         text: 'hello',
       },
     })
-    expect(() => mapLegacyRequestToChannel('conversation.list', {})).toThrow('Unsupported')
-    expect(() => mapLegacyRequestToChannel('session.abort', {})).toThrow('Unsupported')
-    expect(() => mapLegacyRequestToChannel('decision.respond', {})).toThrow('Unsupported')
+    expect(() => mapTransportRequestToChannel('conversation.list', {})).toThrow('Unsupported')
+    expect(() => mapTransportRequestToChannel('session.abort', {})).toThrow('Unsupported')
+    expect(() => mapTransportRequestToChannel('decision.respond', {})).toThrow('Unsupported')
   })
 
   it('maps terminal turn acknowledgements', () => {
-    expect(mapLegacyRequestToChannel('turn.delivery.ack', {
+    expect(mapTransportRequestToChannel('turn.delivery.ack', {
       turnId: 'turn-1', chatId: 'chat-1',
     })).toMatchObject({
       method: 'delivery.ack',
@@ -104,7 +104,7 @@ describe('Feishu App Channel compatibility bridge', () => {
   })
 
   it('maps Host events back to the transport payload shape', () => {
-    expect(mapChannelEventToLegacy('turn.completed', {
+    expect(mapChannelEventToTransport('turn.completed', {
       turnId: 'turn-1', externalConversationId: 'chat-1', text: 'done',
     })).toEqual({ turnId: 'turn-1', chatId: 'chat-1', text: 'done' })
   })

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.feishu",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "displayName": "飞书",
   "description": "通过飞书私聊连接一个固定 Moss 会话并自动回复。",
   "icon": "assets/icon.svg",
@@ -24,9 +24,14 @@
     "apiVersion": 1,
     "lifecycle": "persistent",
     "instanceMode": "single",
-    "targets": ["desktop"],
+    "targets": ["desktop", "server"],
     "protocols": ["moss.channel/v1", "moss.agent/v1"],
-    "actions": [],
+    "actions": [
+      { "name": "status.get" },
+      { "name": "pairing.issue" },
+      { "name": "pairing.list" },
+      { "name": "pairing.revoke" }
+    ],
     "configuration": {
       "schema": "schemas/config.json",
       "secrets": "schemas/secrets.json"
@@ -34,7 +39,6 @@
   },
   "permissions": [
     "channel:connection",
-    "channel:pairing",
     "channel:messages",
     "channel:deliveries",
     "agent:catalog:read",

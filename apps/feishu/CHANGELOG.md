@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- 飞书配置、配对状态和运行状态全部由独立 App 管理，不再依赖 Moss 中的飞书专用 IPC 或 Adapter 进程。
+- 同一个 App Backend 现在可由 Desktop 或 Moss Server 的通用 App Runtime 托管。
+- 移除旧独立进程启动模式，统一使用 Node.js App Backend 协议。
+
 ## 0.2.1
 
 - 允许保留新版不识别的历史配置字段，避免升级因旧配置校验失败，并确保回滚后原配置仍可使用。

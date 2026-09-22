@@ -1,11 +1,3 @@
-/**
- * Adapter 配置加载
- *
- * 优先级：环境变量 > ~/.moss/settings.json 的 adapters 字段 > 默认值
- */
-
-import { readAdapterConfig } from './config-store.js'
-
 export type PairedUser = {
   userId: string | number
   displayName: string
@@ -31,9 +23,11 @@ export type AdapterConfig = {
   feishu: FeishuConfig
 }
 
-type AppBackendConfigurationContext = {
+export type AppBackendConfigurationContext = {
   config?: Record<string, unknown>
   secrets?: Record<string, unknown>
+  dataDir?: string
+  target?: { type?: string; id?: string }
 }
 
 function stringList(value: unknown): string[] {
@@ -59,7 +53,6 @@ function pairedUsers(value: unknown): PairedUser[] {
   })
 }
 
-/** Build the legacy transport configuration from an App Runtime init context. */
 export function loadConfigFromAppContext(context: AppBackendConfigurationContext): AdapterConfig {
   const appConfig = context.config && typeof context.config === 'object' ? context.config : {}
   const secrets = context.secrets && typeof context.secrets === 'object' ? context.secrets : {}
@@ -71,21 +64,6 @@ export function loadConfigFromAppContext(context: AppBackendConfigurationContext
       verificationToken: String(secrets.verificationToken || ''),
       allowedUsers: stringList(appConfig.allowedUsers),
       pairedUsers: pairedUsers(appConfig.pairedUsers),
-    },
-  }
-}
-
-export function loadConfig(): AdapterConfig {
-  const file = readAdapterConfig()
-  const fs_ = file.feishu ?? {}
-  return {
-    feishu: {
-      appId: process.env.FEISHU_APP_ID || fs_.appId || '',
-      appSecret: process.env.FEISHU_APP_SECRET || fs_.appSecret || '',
-      encryptKey: process.env.FEISHU_ENCRYPT_KEY || fs_.encryptKey || '',
-      verificationToken: process.env.FEISHU_VERIFICATION_TOKEN || fs_.verificationToken || '',
-      allowedUsers: fs_.allowedUsers ?? [],
-      pairedUsers: fs_.pairedUsers ?? [],
     },
   }
 }

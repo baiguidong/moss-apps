@@ -222,11 +222,8 @@
       </div>
       <div class="settings-group">
         <div class="settings-row">
-          <div class="settings-row-copy"><h3>运行位置</h3><p>同一时间只运行一个飞书实例。</p></div>
-          <select id="runLocation" aria-label="飞书运行位置" style="width: 150px">
-            <option value="desktop">本机</option>
-            <option value="server">Moss Server</option>
-          </select>
+          <div class="settings-row-copy"><h3>运行位置</h3><p>可在 Moss 的 App 管理页移动实例。</p></div>
+          <span id="runLocation" class="badge">本机</span>
         </div>
         <div id="statusLine" class="status-line"><i class="dot"></i><span id="status">正在读取运行状态…</span></div>
         <div class="settings-block"><div class="grid">
@@ -304,16 +301,17 @@
 
   <script>
     const $ = (id) => document.getElementById(id)
-    const bridge = window.mossApp?.feishu
+    const bridge = window.mossApp
     const hostBridge = window.mossApp?.host
     const AGENT_PROTOCOL = 'moss.agent/v1'
     const INSTANCE_BINDING_ID = '*'
-    const SAFE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
     const THEME_MODES = new Set(['light', 'dark', 'system'])
     const BACKGROUNDS = new Set(['default', 'grid-theme', 'dot-theme', 'gradient-theme'])
     const systemColorScheme = matchMedia('(prefers-color-scheme: dark)')
     let adapterConfig = {}
     let adapterStatus = { status: 'stopped', location: 'desktop', bridgeReady: false, transportConnected: false }
+    let activeTarget = 'desktop'
+    let activeInstance = null
     let pairingCode = null
     let busy = true
     let currentAppearance = null
@@ -353,7 +351,6 @@
       $('save').textContent = value ? '处理中…' : '保存配置'
       $('pair').disabled = value
       $('refresh').disabled = value
-      $('runLocation').disabled = value
     }
 
     function setAgentMessage(value, kind = '') {
@@ -381,16 +378,6 @@
       $('agentTab').setAttribute('aria-selected', String(agent))
       $('guideTab').setAttribute('aria-selected', String(guide))
       if (agent) void refreshAgentSettings()
-    }
-
-    function createPairingCode() {
-      const maxValid = Math.floor(256 / SAFE_ALPHABET.length) * SAFE_ALPHABET.length
-      let value = ''
-      while (value.length < 6) {
-        const byte = crypto.getRandomValues(new Uint8Array(1))[0]
-        if (byte < maxValid) value += SAFE_ALPHABET[byte % SAFE_ALPHABET.length]
-      }
-      return value
     }
 
     function systemTheme() {
@@ -447,11 +434,14 @@
     function hydrateForm(config) {
       const feishu = config?.feishu || {}
       $('appId').value = feishu.appId || ''
-      $('appSecret').value = feishu.appSecret || ''
-      $('encryptKey').value = feishu.encryptKey || ''
-      $('verificationToken').value = feishu.verificationToken || ''
+      $('appSecret').value = ''
+      $('appSecret').placeholder = activeInstance?.secretRefs?.appSecret?.configured ? '已配置' : '请输入 App Secret'
+      $('encryptKey').value = ''
+      $('encryptKey').placeholder = activeInstance?.secretRefs?.encryptKey?.configured ? '已配置' : '长连接模式无需填写'
+      $('verificationToken').value = ''
+      $('verificationToken').placeholder = activeInstance?.secretRefs?.verificationToken?.configured ? '已配置' : '长连接模式无需填写'
       $('allowedUsers').value = Array.isArray(feishu.allowedUsers) ? feishu.allowedUsers.join(', ') : ''
-      $('runLocation').value = feishu.runLocation === 'server' ? 'server' : 'desktop'
+      $('runLocation').textContent = activeTarget === 'server' ? 'Moss Server' : '本机'
     }
 
     function selectMaskedSecret(event) {
@@ -490,12 +480,12 @@
     async function agentRequest(method, input = {}) {
       if (!hostBridge?.request) throw new Error('当前 Moss 版本不支持 Agent Channel 设置，请升级后重试。')
       if (!agentInstanceId) {
-        const instances = await window.mossApp.instances.list()
+        const instances = await window.mossApp.instances.list({ target: activeTarget })
         const instance = instances.find((entry) => entry?.id === 'moss.feishu--default') || instances[0]
         agentInstanceId = String(instance?.id || '')
       }
       if (!agentInstanceId) throw new Error('飞书 Backend 实例尚未创建。')
-      return hostBridge.request(agentInstanceId, AGENT_PROTOCOL, method, input)
+      return hostBridge.request(agentInstanceId, AGENT_PROTOCOL, method, input, { target: activeTarget })
     }
 
     function renderResourceList(elementId, kind, items, selected, unrestricted) {
@@ -753,9 +743,24 @@
       if (!bridge) return
       const requestVersion = ++statusRequestVersion
       try {
-        const status = await bridge.getStatus()
+        const statuses = await bridge.instances.getStatus(activeInstance.id, { target: activeTarget })
+        const runtime = Array.isArray(statuses) ? statuses[0]?.runtime : null
+        let details = {}
+        if (runtime?.state === 'running') {
+          details = await bridge.actions.invoke(activeInstance.id, 'status.get', {}, { target: activeTarget }) || {}
+        }
         if (disposed || requestVersion !== statusRequestVersion) return
-        adapterStatus = status
+        adapterStatus = {
+          status: runtime?.state || 'stopped',
+          location: activeTarget,
+          bridgeReady: runtime?.state === 'running',
+          transportConnected: details.transportConnected === true,
+          transportError: details.transportError || runtime?.lastError || null,
+          transportUpdatedAt: details.transportUpdatedAt || null,
+          pairedUsers: details.pairedUsers || [],
+          pairing: details.pairing || {},
+          enabled: activeInstance.enabled,
+        }
         renderStatus()
         renderPairing()
       } catch (error) {
@@ -765,21 +770,31 @@
       }
     }
 
-    async function load() {
-      if (!bridge) throw new Error('当前 Moss 版本不支持飞书 App 配置，请升级后重试。')
-      adapterConfig = await bridge.getConfig() || {}
-      hydrateForm(adapterConfig)
-      const requestVersion = ++statusRequestVersion
+    async function loadTargetInstances(target) {
       try {
-        const status = await bridge.getStatus()
-        if (!disposed && requestVersion === statusRequestVersion) adapterStatus = status || adapterStatus
-      } catch (error) {
-        if (!disposed && requestVersion === statusRequestVersion) {
-          adapterStatus = { ...adapterStatus, status: 'error', error: errorMessage(error) }
-        }
+        return await bridge.instances.list({ target })
+      } catch {
+        return []
       }
-      renderStatus()
-      renderPairing()
+    }
+
+    async function load() {
+      if (!bridge?.instances?.list || !bridge?.actions?.invoke) {
+        throw new Error('当前 Moss 版本不支持飞书 App 配置，请升级后重试。')
+      }
+      const [desktopInstances, serverInstances] = await Promise.all([
+        loadTargetInstances('desktop'),
+        loadTargetInstances('server'),
+      ])
+      const local = desktopInstances.find((entry) => entry?.id === 'moss.feishu--default') || desktopInstances[0]
+      const remote = serverInstances.find((entry) => entry?.id === 'moss.feishu--default') || serverInstances[0]
+      activeTarget = remote?.enabled && !local?.enabled ? 'server' : 'desktop'
+      activeInstance = activeTarget === 'server' ? remote : local
+      if (!activeInstance) throw new Error('飞书 Backend 实例尚未创建，请先在 App 管理页创建实例。')
+      agentInstanceId = String(activeInstance.id || '')
+      adapterConfig = { feishu: activeInstance.config || {} }
+      hydrateForm(adapterConfig)
+      await refreshStatus()
       await refreshAgentSettings()
     }
 
@@ -787,14 +802,21 @@
       const appId = $('appId').value.trim()
       const appSecret = $('appSecret').value
       if (!appId) throw new Error('请填写飞书 App ID（通常以 cli_ 开头）。')
-      if (!appSecret) throw new Error('请填写飞书 App Secret。')
+      if (!appSecret && !activeInstance?.secretRefs?.appSecret?.configured) {
+        throw new Error('请填写飞书 App Secret。')
+      }
       const allowedUsers = [...new Set($('allowedUsers').value.split(',').map((value) => value.trim()).filter(Boolean))]
       return {
-        appId,
-        appSecret,
-        encryptKey: $('encryptKey').value || undefined,
-        verificationToken: $('verificationToken').value || undefined,
-        allowedUsers,
+        config: {
+          ...(activeInstance?.config || {}),
+          appId,
+          allowedUsers,
+        },
+        secrets: Object.fromEntries([
+          ['appSecret', appSecret],
+          ['encryptKey', $('encryptKey').value],
+          ['verificationToken', $('verificationToken').value],
+        ].filter(([, value]) => value)),
       }
     }
 
@@ -805,13 +827,17 @@
       $('status').textContent = '正在应用配置并启动…'
       $('statusLine').className = 'status-line warning'
       try {
-        const result = await bridge.updateConfig({ feishu: collectFeishuConfig() })
+        const patch = collectFeishuConfig()
+        activeInstance = await bridge.instances.update(activeInstance.id, patch, { target: activeTarget })
+        if (!activeInstance.enabled) {
+          await bridge.instances.setEnabled(activeInstance.id, true, { target: activeTarget })
+          const instances = await bridge.instances.list({ target: activeTarget })
+          activeInstance = instances.find((entry) => entry?.id === agentInstanceId) || activeInstance
+        }
         statusRequestVersion += 1
-        adapterConfig = result.config || adapterConfig
-        adapterStatus = result.status || adapterStatus
+        adapterConfig = { feishu: activeInstance.config || {} }
         hydrateForm(adapterConfig)
-        renderStatus()
-        renderPairing()
+        await refreshStatus()
         setMessage('配置已保存，并已应用到当前运行位置。', 'ok')
       } catch (error) {
         setMessage(errorMessage(error), 'error')
@@ -821,47 +847,19 @@
       }
     }
 
-    async function changeRunLocation(nextLocation) {
-      if (busy) return
-      const previous = adapterConfig?.feishu?.runLocation === 'server' ? 'server' : 'desktop'
-      setBusy(true)
-      setMessage('')
-      try {
-        const result = await bridge.applyRuntime({ runLocation: nextLocation })
-        statusRequestVersion += 1
-        adapterConfig = result.config || adapterConfig
-        adapterStatus = result.status || adapterStatus
-        $('runLocation').value = nextLocation
-        renderStatus()
-        renderPairing()
-        setMessage(`运行位置已切换到${nextLocation === 'server' ? ' Moss Server' : '本机'}。`, 'ok')
-      } catch (error) {
-        $('runLocation').value = previous
-        setMessage(errorMessage(error), 'error')
-        await refreshStatus()
-      } finally {
-        setBusy(false)
-      }
-    }
-
     async function generatePairingCode() {
       if (busy) return
-      if (!adapterConfig?.feishu?.appId || !adapterConfig?.feishu?.appSecret) {
+      if (!adapterConfig?.feishu?.appId || !activeInstance?.secretRefs?.appSecret?.configured) {
         setMessage('请先填写 App ID 和 App Secret，并保存配置。', 'error')
         return
       }
       setBusy(true)
       setMessage('')
-      const now = Date.now()
-      pairingCode = createPairingCode()
       try {
-        const result = await bridge.updateConfig({
-          pairing: { code: pairingCode, createdAt: now, expiresAt: now + 60 * 60 * 1000 },
-        })
+        const result = await bridge.actions.invoke(activeInstance.id, 'pairing.issue', {}, { target: activeTarget })
+        pairingCode = result?.pairing?.code || null
         statusRequestVersion += 1
-        adapterConfig = result.config || adapterConfig
-        adapterStatus = result.status || adapterStatus
-        renderStatus()
+        adapterStatus = { ...adapterStatus, ...result, pairing: result?.pairing || {} }
         renderPairing()
         setMessage('配对码已生成，请在飞书机器人私聊中发送。', 'ok')
       } catch (error) {
@@ -879,19 +877,17 @@
       setMessage('')
       try {
         const feishu = adapterConfig?.feishu || {}
-        const currentPairedUsers = Array.isArray(adapterStatus?.pairedUsers)
-          ? adapterStatus.pairedUsers
-          : feishu.pairedUsers || []
-        const pairedUsers = currentPairedUsers
+        const pairedUsers = (Array.isArray(feishu.pairedUsers) ? feishu.pairedUsers : [])
           .filter((user) => String(user?.userId || '') !== String(userId))
         const allowedUsers = (feishu.allowedUsers || [])
           .filter((entry) => String(entry || '') !== String(userId))
-        const result = await bridge.updateConfig({ feishu: { ...feishu, pairedUsers, allowedUsers } })
+        await bridge.actions.invoke(activeInstance.id, 'pairing.revoke', { userId }, { target: activeTarget })
+        activeInstance = await bridge.instances.update(activeInstance.id, {
+          config: { ...activeInstance.config, pairedUsers, allowedUsers },
+        }, { target: activeTarget })
         statusRequestVersion += 1
-        adapterConfig = result.config || adapterConfig
-        adapterStatus = result.status || adapterStatus
-        renderStatus()
-        renderPairing()
+        adapterConfig = { feishu: activeInstance.config || {} }
+        await refreshStatus()
         await refreshAgentSettings()
         setMessage('已解绑该飞书用户。', 'ok')
       } catch (error) {
@@ -904,7 +900,6 @@
     $('save').addEventListener('click', () => void save())
     $('refresh').addEventListener('click', () => void refreshStatus())
     $('pair').addEventListener('click', () => void generatePairingCode())
-    $('runLocation').addEventListener('change', (event) => void changeRunLocation(event.target.value === 'server' ? 'server' : 'desktop'))
     $('configurationTab').addEventListener('click', () => selectTab('configuration'))
     $('agentTab').addEventListener('click', () => selectTab('agent'))
     $('guideTab').addEventListener('click', () => selectTab('guide'))
@@ -936,12 +931,6 @@
     }
 
     subscribeHostEvent('runtime', () => void refreshStatus())
-    subscribeHostEvent('feishu-status', (status) => {
-      statusRequestVersion += 1
-      adapterStatus = status || adapterStatus
-      renderStatus()
-      renderPairing()
-    })
     subscribeHostEvent('appearance', (appearance) => applyAppearance(appearance))
     window.addEventListener('focus', handleWindowFocus)
     document.addEventListener('visibilitychange', handleVisibilityChange)

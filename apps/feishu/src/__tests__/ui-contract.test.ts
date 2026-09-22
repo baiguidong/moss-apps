@@ -85,7 +85,6 @@ describe('Feishu App UI contract', () => {
     expect(source).toContain('id="unrestrictedResources"')
     expect(manifest.permissions).toEqual([
       'channel:connection',
-      'channel:pairing',
       'channel:messages',
       'channel:deliveries',
       'agent:catalog:read',
@@ -93,7 +92,8 @@ describe('Feishu App UI contract', () => {
       'agent:bindings:write',
     ])
     expect(backendSource).toContain("if (chatType !== 'p2p') return")
-    expect(backendSource).toContain("desktopBridge.on('turn.completed'")
+    expect(backendSource).toContain("hostBridge.on('turn.completed'")
+    expect(backendSource).toContain("hostBridge.registerAction('pairing.issue'")
     expect(backendSource).toContain("msg_type: 'text'")
     for (const removed of [
       'StreamingCard',

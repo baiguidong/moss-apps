@@ -9,9 +9,9 @@ import {
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 15_000
 
-type LegacyPayload = Record<string, any>
+type TransportPayload = Record<string, any>
 
-type LegacyBridgeEvent = {
+type TransportEvent = {
   version: number
   id: string
   type: string
@@ -19,12 +19,12 @@ type LegacyBridgeEvent = {
   payload?: unknown
 }
 
-export type AppChannelBridgeEventHandler = (
+export type FeishuHostBridgeEventHandler = (
   payload: any,
-  event: LegacyBridgeEvent,
+  event: TransportEvent,
 ) => void | Promise<void>
 
-type AppChannelBridgeOptions = {
+type FeishuHostBridgeOptions = {
   clientOptions?: Record<string, unknown>
   createEventId?: () => string
   onShutdown?: (context: AppBackendContext | null) => void | Promise<void>
@@ -34,7 +34,7 @@ function asText(value: unknown): string {
   return typeof value === 'string' ? value.trim() : ''
 }
 
-function externalIdentity(payload: LegacyPayload, createEventId: () => string, requireConversation = false) {
+function externalIdentity(payload: TransportPayload, createEventId: () => string, requireConversation = false) {
   const externalUserId = asText(payload.externalUserId || payload.openId)
   const externalConversationId = asText(payload.externalConversationId || payload.chatId)
   const externalEventId = asText(payload.externalEventId || payload.eventId) || createEventId()
@@ -45,13 +45,13 @@ function externalIdentity(payload: LegacyPayload, createEventId: () => string, r
   }
 }
 
-export function mapLegacyRequestToChannel(
+export function mapTransportRequestToChannel(
   type: string,
   value: unknown,
   createEventId: () => string = randomUUID,
 ): { method: ChannelHostMethod; input: Record<string, unknown> } {
   const payload = value && typeof value === 'object' && !Array.isArray(value)
-    ? value as LegacyPayload
+    ? value as TransportPayload
     : {}
 
   switch (type) {
@@ -61,15 +61,6 @@ export function mapLegacyRequestToChannel(
         input: {
           connected: Boolean(payload.connected),
           ...(typeof payload.error === 'string' ? { error: payload.error } : {}),
-        },
-      }
-    case 'pairing.attempt':
-      return {
-        method: 'pairing.attempt',
-        input: {
-          ...externalIdentity(payload, createEventId, true),
-          code: asText(payload.code),
-          ...(asText(payload.displayName) ? { displayName: asText(payload.displayName) } : {}),
         },
       }
     case 'chat.message.received':
@@ -93,16 +84,16 @@ export function mapLegacyRequestToChannel(
         },
       }
     default:
-      throw new Error(`Unsupported Moss Desktop bridge request: ${type}`)
+      throw new Error(`Unsupported Moss Host bridge request: ${type}`)
   }
 }
 
-export function mapChannelEventToLegacy(
+export function mapChannelEventToTransport(
   name: ChannelBackendEvent,
   value: unknown,
-): LegacyPayload {
+): TransportPayload {
   const data = value && typeof value === 'object' && !Array.isArray(value)
-    ? value as LegacyPayload
+    ? value as TransportPayload
     : {}
   const { externalConversationId, ...payload } = data
   return {
@@ -112,13 +103,11 @@ export function mapChannelEventToLegacy(
 }
 
 /**
- * Compatibility facade used by the existing Feishu transport. It preserves
- * the old ProcessBridge surface while routing requests and events through the
- * versioned moss.channel/v1 App protocol.
+ * Feishu transport facade over the versioned Moss Host protocols.
  */
-export class AppChannelBridge {
+export class FeishuHostBridge {
   private client: AppBackendClient
-  private handlers = new Map<string, Set<AppChannelBridgeEventHandler>>()
+  private handlers = new Map<string, Set<FeishuHostBridgeEventHandler>>()
   private eventSubscriptions = new Map<string, () => void>()
   private contextValue: AppBackendContext | null = null
   private initializePromise: Promise<AppBackendContext>
@@ -131,7 +120,7 @@ export class AppChannelBridge {
   private destroyed = false
   private createEventId: () => string
 
-  constructor(options: AppChannelBridgeOptions = {}) {
+  constructor(options: FeishuHostBridgeOptions = {}) {
     this.createEventId = options.createEventId || randomUUID
     this.initializePromise = new Promise((resolve, reject) => {
       this.resolveInitialize = resolve
@@ -155,7 +144,7 @@ export class AppChannelBridge {
       onFatalError: (error: unknown) => {
         const normalized = error instanceof Error ? error : new Error(String(error))
         this.rejectInitialize(normalized)
-        console.error('[AppChannelBridge] Fatal App Backend error:', normalized)
+        console.error('[FeishuHostBridge] Fatal App Backend error:', normalized)
         setImmediate(() => process.exit(1))
       },
     })
@@ -170,11 +159,10 @@ export class AppChannelBridge {
     return this.contextValue
   }
 
-  async hello(payload: Record<string, unknown>): Promise<AppBackendContext> {
+  async hello(): Promise<AppBackendContext> {
     if (!this.available) throw new Error('Moss App Channel bridge is unavailable.')
     const context = await this.initializePromise
-    const expectedAppId = asText(payload.appId)
-    if (context.appId !== 'moss.feishu' || (expectedAppId && expectedAppId !== asText(context.config.appId))) {
+    if (context.appId !== 'moss.feishu') {
       throw new Error('Moss App Channel bridge identity mismatch.')
     }
     return context
@@ -182,8 +170,21 @@ export class AppChannelBridge {
 
   request(type: string, payload: unknown = {}, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS): Promise<any> {
     if (!this.available) return Promise.reject(new Error('Moss App Channel bridge is unavailable.'))
-    const mapped = mapLegacyRequestToChannel(type, payload, this.createEventId)
+    const mapped = mapTransportRequestToChannel(type, payload, this.createEventId)
     return this.client.requestChannelHost(mapped.method, mapped.input as any, { timeoutMs })
+  }
+
+  requestAgent(method: string, payload: unknown = {}, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS): Promise<any> {
+    if (!this.available) return Promise.reject(new Error('Moss App Agent bridge is unavailable.'))
+    return this.client.requestAgentHost(method as any, payload as any, { timeoutMs })
+  }
+
+  registerAction(name: string, handler: (input: any) => unknown | Promise<unknown>): void {
+    this.client.registerAction(name, handler)
+  }
+
+  status(state: string, details?: Record<string, unknown>): void {
+    this.client.status(state, details)
   }
 
   ready(): void {
@@ -198,16 +199,16 @@ export class AppChannelBridge {
     this.rejectStartup(error instanceof Error ? error : new Error(String(error)))
   }
 
-  on(type: string, handler: AppChannelBridgeEventHandler): () => void {
+  on(type: string, handler: FeishuHostBridgeEventHandler): () => void {
     if (!(CHANNEL_BACKEND_EVENTS as readonly string[]).includes(type)) {
       throw new Error(`Unsupported Moss App Channel event: ${type}`)
     }
-    const entries = this.handlers.get(type) ?? new Set<AppChannelBridgeEventHandler>()
+    const entries = this.handlers.get(type) ?? new Set<FeishuHostBridgeEventHandler>()
     entries.add(handler)
     this.handlers.set(type, entries)
     if (!this.eventSubscriptions.has(type)) {
       const unsubscribe = this.client.onChannelEvent(type as ChannelBackendEvent, async (data, context) => {
-        const event: LegacyBridgeEvent = {
+        const event: TransportEvent = {
           version: 1,
           id: context.eventId,
           type,
@@ -215,7 +216,7 @@ export class AppChannelBridge {
           payload: data,
         }
         for (const entry of [...(this.handlers.get(type) || [])]) {
-          await entry(mapChannelEventToLegacy(type as ChannelBackendEvent, data), event)
+          await entry(mapChannelEventToTransport(type as ChannelBackendEvent, data), event)
         }
         return { handled: true }
       })

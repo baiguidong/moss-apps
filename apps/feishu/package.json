@@ -1,11 +1,10 @@
 {
   "name": "@moss/feishu-app",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "start": "bun run src/backend/feishu/index.ts",
     "test": "bun test",
     "test:common": "bun test src/backend/common/",
     "test:feishu": "bun test src/backend/feishu/",
