@@ -281,6 +281,7 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "remote
       action: "session.issue",
       input: { platformId: platformId() },
       timeoutMs: 30_000,
+      ownerScope: "org",
     }, { timeoutMs: 35_000 });
   }
 

@@ -472,8 +472,16 @@ export function OpenIMView() {
 
   const refreshDirectory = React.useCallback(async () => {
     const generation = accountGenerationRef.current;
-    const result = await openIMHost.listDirectory();
-    if (generation !== accountGenerationRef.current) return { departments: [], users: [] };
+    const result: OpenIMDirectory = { departments: [], users: [] };
+    let cursor: string | undefined;
+    do {
+      const page = await openIMHost.listDirectory(cursor);
+      if (generation !== accountGenerationRef.current) return { departments: [], users: [] };
+      result.users.push(...page.users);
+      if (!result.departments.length) result.departments = page.departments;
+      result.revision = page.revision || result.revision;
+      cursor = page.nextCursor;
+    } while (cursor);
     setDirectory(result);
     return result;
   }, []);

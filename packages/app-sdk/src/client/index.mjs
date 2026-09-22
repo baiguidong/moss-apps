@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto'
+import { AsyncLocalStorage } from 'node:async_hooks'
 import {
   APP_ERROR_CODES,
   AppServiceError,
@@ -86,6 +87,7 @@ export class AppBackendClient {
     this.hostRequests = new Map()
     this.hostEvents = new Map()
     this.hostEventReplies = new Map()
+    this.actionContext = new AsyncLocalStorage()
     this.context = null
     this.hostClosed = true
     this.started = false
@@ -242,7 +244,14 @@ export class AppBackendClient {
     const timeoutMs = boundedTimeout(options.timeoutMs, this.hostRequestTimeoutMs)
     let message
     try {
-      message = createEnvelope('host.request', { protocol, method, input, ...this.identity() }, { id: requestId })
+      message = createEnvelope('host.request', {
+        protocol,
+        method,
+        input,
+        timeoutMs,
+        actionRequestId: this.actionContext.getStore()?.requestId,
+        ...this.identity(),
+      }, { id: requestId })
       validateEnvelope(message, { allowedTypes: ['host.request'] })
     } catch (error) {
       throw new AppServiceError(APP_ERROR_CODES.invalidInput, `${label} request cannot be serialized: ${error.message}`)
@@ -576,18 +585,19 @@ export class AppBackendClient {
     const controller = new AbortController()
     this.controllers.set(message.id, controller)
     try {
-      const result = await handler(payload.input, {
-        ...this.context,
-        host: this.host,
-        account: this.account,
-        agent: this.agent,
-        desktop: this.desktop,
-        remote: this.remote,
-        signal: controller.signal,
-        requestId: message.id,
-        emit: (name, data) => this.emit(name, data),
-        log: (level, text, details) => this.log(level, text, details),
-      })
+      const result = await this.actionContext.run({ requestId: message.id }, () => handler(payload.input, {
+          ...this.context,
+          principal: payload.principal || null,
+          host: this.host,
+          account: this.account,
+          agent: this.agent,
+          desktop: this.desktop,
+          remote: this.remote,
+          signal: controller.signal,
+          requestId: message.id,
+          emit: (name, data) => this.emit(name, data),
+          log: (level, text, details) => this.log(level, text, details),
+        }))
       this.send(createEnvelope('action.result', { requestId: message.id, result, ...this.identity() }, { id: message.id }))
     } catch (error) {
       this.send(createEnvelope('action.error', {

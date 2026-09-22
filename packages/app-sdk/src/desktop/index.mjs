@@ -1,6 +1,7 @@
 import { APP_ERROR_CODES, AppServiceError } from '../protocol/index.mjs'
 
 export const MOSS_DESKTOP_PROTOCOL = 'moss.desktop/v1'
+export const MAX_INLINE_FILE_BASE64_LENGTH = 512 * 1024
 
 export const DESKTOP_PERMISSIONS = Object.freeze({
   files: 'desktop:files',
@@ -61,9 +62,20 @@ export function validateDesktopHostInput(method, value) {
     if (input.kind !== undefined && !['image', 'video', 'audio', 'file'].includes(input.kind)) fail('file.pick has an invalid kind')
     if (input.multiple !== undefined && typeof input.multiple !== 'boolean') fail('file.pick multiple must be a boolean')
   } else if (normalizedMethod === 'file.materialize') {
-    rejectUnknown(input, ['fileName', 'dataBase64'], normalizedMethod)
+    rejectUnknown(input, ['fileName', 'dataBase64', 'transferId', 'offset', 'complete'], normalizedMethod)
     text(input, 'fileName', normalizedMethod, { maxLength: 300 })
-    text(input, 'dataBase64', normalizedMethod, { maxLength: 140_000_000 })
+    text(input, 'dataBase64', normalizedMethod, { maxLength: MAX_INLINE_FILE_BASE64_LENGTH })
+    if (input.transferId !== undefined
+      && (typeof input.transferId !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(input.transferId))) {
+      fail('file.materialize has an invalid transferId')
+    }
+    if (input.offset !== undefined
+      && (!Number.isInteger(input.offset) || input.offset < 0 || input.offset > 100 * 1024 * 1024)) {
+      fail('file.materialize has an invalid offset')
+    }
+    if (input.complete !== undefined && typeof input.complete !== 'boolean') {
+      fail('file.materialize has an invalid complete flag')
+    }
   } else if (normalizedMethod === 'file.thumbnail') {
     rejectUnknown(input, ['path', 'width', 'height'], normalizedMethod)
     text(input, 'path', normalizedMethod)

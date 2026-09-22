@@ -15,6 +15,7 @@ export const ACCOUNT_HOST_METHOD_PERMISSIONS = Object.freeze({
 
 export const ACCOUNT_BACKEND_EVENT_PERMISSIONS = Object.freeze({
   'directory.changed': ACCOUNT_PERMISSIONS.directoryRead,
+  'directory.user-changed': ACCOUNT_PERMISSIONS.directoryRead,
 })
 
 export const ACCOUNT_HOST_METHODS = Object.freeze(Object.keys(ACCOUNT_HOST_METHOD_PERMISSIONS))
@@ -106,6 +107,22 @@ export function validateAccountHostInput(method, value) {
 export function validateAccountBackendEventData(name, value) {
   const normalizedName = validateAccountBackendEvent(name)
   const data = record(value, `${normalizedName} data`)
-  optionalString(data, 'revision', normalizedName, 256)
+  if (normalizedName === 'directory.changed') {
+    rejectUnknownFields(data, ['revision'], normalizedName)
+    optionalString(data, 'revision', normalizedName, 256)
+  } else if (normalizedName === 'directory.user-changed') {
+    rejectUnknownFields(data, ['user'], normalizedName)
+    const user = record(data.user, `${normalizedName} user`)
+    rejectUnknownFields(user, ['id', 'name', 'email', 'departmentId', 'status'], normalizedName)
+    if (typeof user.id !== 'string' || !user.id.trim() || user.id.length > 512) {
+      throw new AppServiceError(APP_ERROR_CODES.invalidInput, `${normalizedName} has an invalid user id`)
+    }
+    if (!['active', 'disabled'].includes(user.status)) {
+      throw new AppServiceError(APP_ERROR_CODES.invalidInput, `${normalizedName} has an invalid user status`)
+    }
+    optionalString(user, 'name', normalizedName, 512)
+    optionalString(user, 'email', normalizedName, 512)
+    optionalString(user, 'departmentId', normalizedName, 512)
+  }
   return data
 }

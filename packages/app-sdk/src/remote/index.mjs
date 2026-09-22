@@ -25,7 +25,7 @@ export function validateRemoteHostInput(method, value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new AppServiceError(APP_ERROR_CODES.invalidInput, `${normalizedMethod} input must be an object`)
   }
-  const allowed = new Set(['action', 'input', 'timeoutMs'])
+  const allowed = new Set(['action', 'input', 'timeoutMs', 'ownerScope'])
   for (const field of Object.keys(value)) {
     if (!allowed.has(field)) throw new AppServiceError(APP_ERROR_CODES.invalidInput, `${normalizedMethod} contains an unknown field: ${field}`)
   }
@@ -39,9 +39,13 @@ export function validateRemoteHostInput(method, value) {
     && (!Number.isInteger(value.timeoutMs) || value.timeoutMs < 100 || value.timeoutMs > 300_000)) {
     throw new AppServiceError(APP_ERROR_CODES.invalidInput, 'action.invoke timeoutMs must be between 100 and 300000')
   }
+  if (value.ownerScope !== undefined && !['user', 'org'].includes(value.ownerScope)) {
+    throw new AppServiceError(APP_ERROR_CODES.invalidInput, 'action.invoke ownerScope must be user or org')
+  }
   return {
     action: value.action,
     input: value.input || {},
     ...(value.timeoutMs === undefined ? {} : { timeoutMs: value.timeoutMs }),
+    ...(value.ownerScope === undefined ? {} : { ownerScope: value.ownerScope }),
   }
 }

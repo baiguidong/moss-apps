@@ -178,6 +178,7 @@
         "apiVersion": { "const": 1 },
         "lifecycle": { "enum": ["on-demand", "persistent"] },
         "instanceMode": { "enum": ["single", "multiple"] },
+        "serverOwnerScope": { "enum": ["user", "org"] },
         "targets": {
           "type": "array",
           "minItems": 1,

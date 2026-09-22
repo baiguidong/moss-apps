@@ -192,6 +192,7 @@ function normalizeBackend(backend) {
     apiVersion: 1,
     lifecycle: backend.lifecycle,
     instanceMode: backend.instanceMode,
+    ...(backend.serverOwnerScope ? { serverOwnerScope: backend.serverOwnerScope } : {}),
     targets: [...backend.targets],
     ...(backend.protocols?.length ? { protocols: [...backend.protocols] } : {}),
     actions,

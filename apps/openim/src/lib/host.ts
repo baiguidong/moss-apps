@@ -15,6 +15,7 @@ export type OpenIMDirectory = {
     openimUserID: string;
   }>;
   revision?: string;
+  nextCursor?: string;
 };
 
 export type OpenIMLocalFile = {
@@ -23,6 +24,8 @@ export type OpenIMLocalFile = {
   size: number;
   mediaUrl: string;
 };
+
+type OpenIMMaterializeResult = OpenIMLocalFile | { transferId: string; complete: false; size: number };
 
 export type OpenIMProfile = {
   userID: string;
@@ -34,6 +37,7 @@ export type OpenIMProfile = {
 };
 
 const DESKTOP_PROTOCOL = "moss.desktop/v1";
+const MATERIALIZE_CHUNK_BYTES = 384 * 1024;
 let instanceIdPromise: Promise<string> | null = null;
 
 function bytesToBase64(data: ArrayBuffer): string {
@@ -77,7 +81,10 @@ export const openIMHost = {
     expiresIn: number;
   }>("status.get"),
   createSession: () => invoke<OpenIMProfile>("session.ensure"),
-  listDirectory: () => invoke<OpenIMDirectory>("directory.list"),
+  listDirectory: (cursor?: string) => invoke<OpenIMDirectory>("directory.list", {
+    limit: 200,
+    ...(cursor ? { cursor } : {}),
+  }),
   prepareDirectConversation: (payload: { userID: string }) => invoke<{
     userID: string;
     name: string;
@@ -93,10 +100,22 @@ export const openIMHost = {
       multiple: payload.kind === "file" || payload.kind === "image",
     })
   ).files,
-  materializeFile: (payload: { fileName: string; data: ArrayBuffer }) => desktop<OpenIMLocalFile>(
-    "file.materialize",
-    { fileName: payload.fileName, dataBase64: bytesToBase64(payload.data) },
-  ),
+  materializeFile: async (payload: { fileName: string; data: ArrayBuffer }): Promise<OpenIMLocalFile> => {
+    const transferId = globalThis.crypto.randomUUID();
+    let result: OpenIMMaterializeResult | null = null;
+    for (let offset = 0; offset < payload.data.byteLength; offset += MATERIALIZE_CHUNK_BYTES) {
+      const end = Math.min(payload.data.byteLength, offset + MATERIALIZE_CHUNK_BYTES);
+      result = await desktop<OpenIMMaterializeResult>("file.materialize", {
+        fileName: payload.fileName,
+        dataBase64: bytesToBase64(payload.data.slice(offset, end)),
+        transferId,
+        offset,
+        complete: end === payload.data.byteLength,
+      });
+    }
+    if (!result || "complete" in result) throw new Error("File materialization did not complete.");
+    return result;
+  },
   createVideoThumbnail: (payload: { path: string }) => desktop<{ path: string; mediaUrl: string }>(
     "file.thumbnail",
     { path: payload.path, width: 640, height: 360 },

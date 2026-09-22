@@ -70,6 +70,7 @@ export function createOpenIMServerService(client: Pick<AppBackendClient, "accoun
   let context: AppBackendContext | null = null;
   let config: OpenIMServerConfig | null = null;
   let adminToken: { value: string; expiresAt: number } | null = null;
+  let unsubscribeDirectoryUserChanged: (() => void) | null = null;
   const pendingProvisioning = new Map<string, Promise<string>>();
 
   function requireContext(): AppBackendContext {
@@ -147,27 +148,6 @@ export function createOpenIMServerService(client: Pick<AppBackendClient, "accoun
     return result;
   }
 
-  async function allDirectoryUsers(): Promise<{
-    identity: AccountIdentity;
-    users: AccountDirectoryUser[];
-    departments: AccountHostResultMap["directory.list"]["departments"];
-    revision?: string;
-  }> {
-    const currentIdentity = await identity();
-    const users: AccountDirectoryUser[] = [];
-    let departments: AccountHostResultMap["directory.list"]["departments"] = [];
-    let cursor: string | undefined;
-    let revision: string | undefined;
-    do {
-      const page = await client.account.request("directory.list", { limit: 200, ...(cursor ? { cursor } : {}) });
-      users.push(...page.users);
-      if (!departments.length) departments = page.departments;
-      revision = page.revision || revision;
-      cursor = text(page.nextCursor) || undefined;
-    } while (cursor);
-    return { identity: currentIdentity, users, departments, revision };
-  }
-
   async function provision(user: AccountDirectoryUser, identityValue: AccountIdentity): Promise<string> {
     const current = requireConfig();
     const orgId = String(identityValue.organization!.id);
@@ -207,10 +187,43 @@ export function createOpenIMServerService(client: Pick<AppBackendClient, "accoun
   }
 
   async function findDirectoryUser(userId: string) {
-    const directory = await allDirectoryUsers();
+    const currentIdentity = await identity();
+    const directory = await client.account.request("directory.search", { query: userId, limit: 200 });
     const user = directory.users.find((entry) => entry.id === userId && entry.status === "active");
     if (!user) throw new Error("The selected Moss directory user is unavailable.");
-    return { ...directory, user };
+    return { identity: currentIdentity, user };
+  }
+
+  async function findDirectoryUsers(userIds: string[]): Promise<AccountDirectoryUser[]> {
+    const remaining = new Set(userIds);
+    const found = new Map<string, AccountDirectoryUser>();
+    let cursor: string | undefined;
+    do {
+      const page = await client.account.request("directory.list", { limit: 200, ...(cursor ? { cursor } : {}) });
+      for (const user of page.users) {
+        if (remaining.has(user.id) && user.status === "active") {
+          found.set(user.id, user);
+          remaining.delete(user.id);
+        }
+      }
+      cursor = text(page.nextCursor) || undefined;
+    } while (cursor && remaining.size);
+    return userIds.map((userId) => {
+      const user = found.get(userId);
+      if (!user) throw new Error(`Moss directory user is unavailable: ${userId}`);
+      return user;
+    });
+  }
+
+  async function revokeUser(userId: string): Promise<void> {
+    if (!config?.secret || !context?.owner?.orgId) return;
+    const userID = openIMUserId(config.namespace, context.owner.orgId, userId);
+    const results = await Promise.allSettled(Array.from({ length: 8 }, (_, index) => adminPost(
+      "/auth/force_logout",
+      { platformID: index + 1, userID },
+    )));
+    const failures = results.filter((result) => result.status === "rejected");
+    if (failures.length) throw new Error(`OpenIM session revocation failed (${failures.length}/8).`);
   }
 
   return {
@@ -218,6 +231,10 @@ export function createOpenIMServerService(client: Pick<AppBackendClient, "accoun
       context = nextContext;
       config = serverConfig(nextContext);
       adminToken = null;
+      unsubscribeDirectoryUserChanged?.();
+      unsubscribeDirectoryUserChanged = client.account.on("directory.user-changed", async ({ user }) => {
+        if (user.status === "disabled") await revokeUser(user.id);
+      });
       if (!config.apiUrl || !config.wsUrl || !config.secret) {
         client.status("degraded", { error: "OpenIM Server configuration is incomplete." });
       } else {
@@ -230,6 +247,8 @@ export function createOpenIMServerService(client: Pick<AppBackendClient, "accoun
       config = null;
       adminToken = null;
       pendingProvisioning.clear();
+      unsubscribeDirectoryUserChanged?.();
+      unsubscribeDirectoryUserChanged = null;
     },
 
     async health() {
@@ -267,16 +286,21 @@ export function createOpenIMServerService(client: Pick<AppBackendClient, "accoun
       };
     },
 
-    async listDirectory() {
+    async listDirectory(input: { cursor?: unknown; limit?: unknown } = {}) {
       const current = requireConfig();
-      const directory = await allDirectoryUsers();
-      const orgId = String(directory.identity.organization!.id);
+      const currentIdentity = await identity();
+      const page = await client.account.request("directory.list", {
+        limit: Math.min(200, Math.max(1, Number(input.limit) || 200)),
+        ...(text(input.cursor) ? { cursor: text(input.cursor) } : {}),
+      });
+      const orgId = String(currentIdentity.organization!.id);
       return {
-        departments: directory.departments,
-        users: directory.users
+        departments: page.departments,
+        users: page.users
           .filter((user) => user.status === "active")
           .map((user) => ({ ...user, status: "active", openimUserID: openIMUserId(current.namespace, orgId, user.id) })),
-        ...(directory.revision ? { revision: directory.revision } : {}),
+        ...(page.nextCursor ? { nextCursor: page.nextCursor } : {}),
+        ...(page.revision ? { revision: page.revision } : {}),
       };
     },
 
@@ -296,13 +320,7 @@ export function createOpenIMServerService(client: Pick<AppBackendClient, "accoun
         : [];
       if (userIds.length < 2) throw new Error("Select at least two members to create a group.");
       if (userIds.includes(currentIdentity.user!.id)) throw new Error("Do not select the current user as a group member.");
-      const directory = await allDirectoryUsers();
-      const byId = new Map(directory.users.filter((user) => user.status === "active").map((user) => [user.id, user]));
-      const users = userIds.map((userId) => {
-        const user = byId.get(userId);
-        if (!user) throw new Error(`Moss directory user is unavailable: ${userId}`);
-        return user;
-      });
+      const users = await findDirectoryUsers(userIds);
       return {
         groupID: `moss_${randomUUID().replaceAll("-", "")}`,
         memberUserIDs: await Promise.all(users.map((user) => provision(user, currentIdentity))),

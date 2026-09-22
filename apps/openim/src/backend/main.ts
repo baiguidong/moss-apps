@@ -56,10 +56,15 @@ client.registerAction("session.issue", async (input) => {
   return serverService.issueSession(input as { platformId?: unknown });
 });
 
-client.registerAction("directory.list", async () => {
-  if (context?.target.type === "server") return serverService.listDirectory();
+client.registerAction("directory.list", async (input) => {
+  if (context?.target.type === "server") return serverService.listDirectory(input as { cursor?: unknown; limit?: unknown });
   requireTarget("desktop");
-  return client.remote.request("action.invoke", { action: "directory.list", input: {}, timeoutMs: 30_000 });
+  return client.remote.request("action.invoke", {
+    action: "directory.list",
+    input: input as Record<string, unknown>,
+    timeoutMs: 30_000,
+    ownerScope: "org",
+  });
 });
 
 client.registerAction("conversation.direct.prepare", async (input) => {
@@ -69,6 +74,7 @@ client.registerAction("conversation.direct.prepare", async (input) => {
     action: "conversation.direct.prepare",
     input: input as Record<string, unknown>,
     timeoutMs: 30_000,
+    ownerScope: "org",
   });
 });
 
@@ -79,6 +85,7 @@ client.registerAction("conversation.group.prepare", async (input) => {
     action: "conversation.group.prepare",
     input: input as Record<string, unknown>,
     timeoutMs: 30_000,
+    ownerScope: "org",
   });
 });
 

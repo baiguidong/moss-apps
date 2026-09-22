@@ -1,6 +1,13 @@
 export type AppTarget = 'desktop' | 'server'
 export type AppBackendLifecycle = 'on-demand' | 'persistent'
 export type AppInstanceMode = 'single' | 'multiple'
+export type AppOwnerScope = 'host' | 'org' | 'user'
+export interface AppOwner {
+  scope: AppOwnerScope
+  orgId: string | null
+  userId: string | null
+  key: string
+}
 export type AppBackendProtocol = string
 
 export interface AgentSessionSummary {
@@ -23,7 +30,11 @@ export interface AgentAttachment {
 
 export type AccountPermission = 'account:identity:read' | 'account:directory:read'
 export type AccountHostMethod = 'identity.current' | 'directory.list' | 'directory.search'
-export type AccountBackendEvent = 'directory.changed'
+export type AccountBackendEvent = 'directory.changed' | 'directory.user-changed'
+export interface AccountBackendEventMap {
+  'directory.changed': { revision?: string }
+  'directory.user-changed': { user: AccountDirectoryUser }
+}
 
 export interface AccountDirectoryInput {
   departmentId?: string
@@ -74,9 +85,9 @@ export interface AppAccountApi {
     input?: AccountHostRequestMap[Method],
     options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal },
   ): Promise<AccountHostResultMap[Method]>
-  on(
-    name: AccountBackendEvent,
-    handler: (data: { revision?: string }, context: HostEventContext) => unknown | Promise<unknown>,
+  on<Event extends AccountBackendEvent>(
+    name: Event,
+    handler: (data: AccountBackendEventMap[Event], context: HostEventContext) => unknown | Promise<unknown>,
   ): () => void
 }
 
@@ -299,7 +310,7 @@ export interface DesktopFile {
 
 export interface DesktopHostRequestMap {
   'file.pick': { kind?: 'image' | 'video' | 'audio' | 'file'; multiple?: boolean }
-  'file.materialize': { fileName: string; dataBase64: string }
+  'file.materialize': { fileName: string; dataBase64: string; transferId?: string; offset?: number; complete?: boolean }
   'file.thumbnail': { path: string; width?: number; height?: number }
   'file.download': { url: string; fileName: string }
   'screen.capture': Record<string, never>
@@ -308,7 +319,7 @@ export interface DesktopHostRequestMap {
 
 export interface DesktopHostResultMap {
   'file.pick': { files: DesktopFile[] }
-  'file.materialize': DesktopFile
+  'file.materialize': DesktopFile | { transferId: string; complete: false; size: number }
   'file.thumbnail': { path: string; mediaUrl: string }
   'file.download': { canceled: boolean; filePath?: string }
   'screen.capture': DesktopFile
@@ -326,7 +337,7 @@ export interface AppDesktopApi {
 export type RemotePermission = 'remote:actions'
 export type RemoteHostMethod = 'action.invoke'
 export interface RemoteHostRequestMap {
-  'action.invoke': { action: string; input?: Record<string, unknown>; timeoutMs?: number }
+  'action.invoke': { action: string; input?: Record<string, unknown>; timeoutMs?: number; ownerScope?: 'user' | 'org' }
 }
 export interface RemoteHostResultMap { 'action.invoke': unknown }
 export interface AppRemoteApi {
@@ -382,6 +393,7 @@ export interface AppManifestV2 {
     apiVersion: 1
     lifecycle: AppBackendLifecycle
     instanceMode: AppInstanceMode
+    serverOwnerScope?: 'user' | 'org'
     targets: AppTarget[]
     protocols?: AppBackendProtocol[]
     actions: AppActionManifest[]
@@ -417,6 +429,7 @@ export interface AppBackendContext {
   dataDir: string
   runtimeDir: string
   target: { type: AppTarget; id: string }
+  owner: AppOwner | null
   protocols: AppBackendProtocol[]
   permissions: string[]
   grants: string[]
@@ -428,6 +441,7 @@ export interface AppBackendContext {
 }
 
 export interface AppActionContext extends AppBackendContext {
+  principal: AppOwner | null
   signal: AbortSignal
   requestId: string
   emit(name: string, data?: unknown): void

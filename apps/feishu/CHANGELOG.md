@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1 - 2026-09-22
+
+- 同步 Host API 2 的初始化协议：连接状态可以在 `service.ready` 前上报，初始化期间的 Binding 事件可以完成 ACK，不再循环等待至握手超时。
+- 同步新的 Action principal、Host 请求超时、Account 事件、Remote owner 和 Desktop 分块文件类型定义。
+
 ## 0.4.0 - 2026-09-22
 
 - 升级到 Host API 2，删除旧 `moss.channel/v1` 适配与兼容映射。

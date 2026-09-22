@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1 - 2026-09-22
+
+- Server Backend 改为组织级共享实例，OpenIM 管理密钥只由管理员配置一份；普通组织成员的 Action 仍使用本人 Moss 身份。
+- 修复初始化状态上报导致握手失败，并支持用户停用事件立即撤销全部 OpenIM 平台会话。
+- Desktop 在 Moss Server 登录信息变化时重启并登出旧 OpenIM 会话，避免跨账号复用 Token。
+- 通讯录按页传输，拖拽和粘贴文件使用有界分块写入，不再超过 1 MiB Backend IPC 限制。
+- Server 实例配置重新出现在 App 管理页，可编辑 API、WebSocket 地址和管理密钥。
+
 ## 0.2.0 - 2026-09-22
 
 - 升级到 Host API 2，删除 `moss.openim/v1` 和旧 Channel API 依赖。
