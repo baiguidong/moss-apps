@@ -185,31 +185,6 @@ export function createFeishuStateStore(dataDir: string, options: { now?: () => n
     return true
   }
 
-  function importLegacy(value: { pairedUsers?: unknown; pairing?: unknown } = {}): void {
-    const state = read()
-    let changed = false
-    for (const candidate of Array.isArray(value.pairedUsers) ? value.pairedUsers : []) {
-      const user = normalizeUser(candidate)
-      if (!user || state.pairedUsers.some((entry) => entry.userId === user.userId)) continue
-      state.pairedUsers.push(user)
-      changed = true
-    }
-    const pairing = value.pairing && typeof value.pairing === 'object' && !Array.isArray(value.pairing)
-      ? value.pairing as Record<string, unknown>
-      : {}
-    const code = text(pairing.code)
-    const expiresAt = Number(pairing.expiresAt) || 0
-    if (!state.pairing.codeHash && code && expiresAt > now()) {
-      state.pairing = {
-        codeHash: hashCode(code),
-        createdAt: Number(pairing.createdAt) || now(),
-        expiresAt,
-      }
-      changed = true
-    }
-    if (changed) write(state)
-  }
-
   return {
     listPairedUsers,
     isPaired,
@@ -217,6 +192,5 @@ export function createFeishuStateStore(dataDir: string, options: { now?: () => n
     issuePairingCode,
     tryPair,
     revoke,
-    importLegacy,
   }
 }

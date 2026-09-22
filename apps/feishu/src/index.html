@@ -292,7 +292,7 @@
       </details>
       <details>
         <summary>数据存储与安全</summary>
-        <div class="guide-content"><p>App ID、白名单和配对关系等配置由 Moss Host 持久化；App Secret 等敏感字段会写入 App 凭据库。配置页只会收到 <code>****</code> 掩码，飞书 Backend 启动时才会在隔离的实例上下文中取得明文。迁移期间，原“IM 接入”配置仍作为兼容数据源。</p></div>
+        <div class="guide-content"><p>App ID 和白名单由 Moss Host 持久化，配对关系保存在 App 实例数据目录；App Secret 等敏感字段会写入 App 凭据库。配置页只会收到 <code>****</code> 掩码，飞书 Backend 启动时才会在隔离的实例上下文中取得明文。</p></div>
       </details>
       </div>
     </section>
@@ -466,9 +466,7 @@
     }
 
     function configuredUsers() {
-      const paired = adapterStatus?.enabled !== false && Array.isArray(adapterStatus?.pairedUsers)
-        ? adapterStatus.pairedUsers
-        : Array.isArray(adapterConfig?.feishu?.pairedUsers) ? adapterConfig.feishu.pairedUsers : []
+      const paired = Array.isArray(adapterStatus?.pairedUsers) ? adapterStatus.pairedUsers : []
       const users = new Map(paired.map((user) => [String(user.userId || ''), user]))
       for (const userId of adapterConfig?.feishu?.allowedUsers || []) {
         const id = String(userId || '').trim()
@@ -478,7 +476,7 @@
     }
 
     async function agentRequest(method, input = {}) {
-      if (!hostBridge?.request) throw new Error('当前 Moss 版本不支持 Agent Channel 设置，请升级后重试。')
+      if (!hostBridge?.request) throw new Error('当前 Moss 版本不支持 Agent Host API，请升级后重试。')
       if (!agentInstanceId) {
         const instances = await window.mossApp.instances.list({ target: activeTarget })
         const instance = instances.find((entry) => entry?.id === 'moss.feishu--default') || instances[0]
@@ -583,41 +581,6 @@
       })
     }
 
-    function hasLegacyMemberPolicy(binding) {
-      const policy = binding?.binding?.policy || {}
-      return Boolean(policy.replyMode && policy.replyMode !== 'inherit')
-        || policy.agentId != null
-        || policy.permissionMode != null
-        || policy.resources != null
-        || policy.session != null
-        || policy.proactive != null
-    }
-
-    async function neutralizeLegacyMemberPolicies() {
-      for (const user of configuredUsers()) {
-        const externalMemberId = String(user.userId || '').trim()
-        if (!externalMemberId) continue
-        const current = await agentRequest('binding.get', {
-          externalConversationId: INSTANCE_BINDING_ID,
-          externalMemberId,
-        })
-        if (!hasLegacyMemberPolicy(current)) continue
-        await agentRequest('binding.update', {
-          externalConversationId: INSTANCE_BINDING_ID,
-          externalMemberId,
-          expectedRevision: current.binding.revision,
-          patch: {
-            replyMode: 'inherit',
-            agentId: null,
-            permissionMode: null,
-            resources: null,
-            session: null,
-            proactive: null,
-          },
-        })
-      }
-    }
-
     async function refreshAgentSettings() {
       if (agentBusy) return
       setAgentBusy(true)
@@ -627,7 +590,6 @@
         const [catalog, binding] = await Promise.all([
           agentRequest('catalog.list', { kinds: ['tools', 'skills', 'connectors'] }),
           agentRequest('binding.get', { externalConversationId: INSTANCE_BINDING_ID }),
-          neutralizeLegacyMemberPolicies(),
         ])
         if (disposed || requestVersion !== agentSettingsRequestVersion) return
         const normalizedBinding = await normalizeAutomaticPolicy(binding)
@@ -692,9 +654,7 @@
     }
 
     function renderPairing() {
-      const pairing = adapterStatus?.enabled !== false && adapterStatus?.pairing
-        ? adapterStatus.pairing
-        : adapterConfig?.pairing || {}
+      const pairing = adapterStatus?.pairing || {}
       const expiresAt = Number(pairing?.expiresAt) || 0
       const active = expiresAt > Date.now()
       $('pairCode').textContent = pairingCode && active ? pairingCode : '------'
@@ -808,7 +768,6 @@
       const allowedUsers = [...new Set($('allowedUsers').value.split(',').map((value) => value.trim()).filter(Boolean))]
       return {
         config: {
-          ...(activeInstance?.config || {}),
           appId,
           allowedUsers,
         },
@@ -877,13 +836,11 @@
       setMessage('')
       try {
         const feishu = adapterConfig?.feishu || {}
-        const pairedUsers = (Array.isArray(feishu.pairedUsers) ? feishu.pairedUsers : [])
-          .filter((user) => String(user?.userId || '') !== String(userId))
         const allowedUsers = (feishu.allowedUsers || [])
           .filter((entry) => String(entry || '') !== String(userId))
         await bridge.actions.invoke(activeInstance.id, 'pairing.revoke', { userId }, { target: activeTarget })
         activeInstance = await bridge.instances.update(activeInstance.id, {
-          config: { ...activeInstance.config, pairedUsers, allowedUsers },
+          config: { appId: String(feishu.appId || ''), allowedUsers },
         }, { target: activeTarget })
         statusRequestVersion += 1
         adapterConfig = { feishu: activeInstance.config || {} }

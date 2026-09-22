@@ -88,10 +88,10 @@ import {
   openIMSDK,
   type OpenIMProfile,
 } from "@/lib/openim-sdk";
+import { openIMHost, type OpenIMDirectory, type OpenIMLocalFile } from "@/lib/host";
 
 type ConnectionState = "connecting" | "connected" | "failed";
-type PickedOpenIMFile = Awaited<ReturnType<typeof window.agentDesktop.openIM.pickFiles>>[number];
-type OpenIMDirectory = Awaited<ReturnType<typeof window.agentDesktop.openIM.listDirectory>>;
+type PickedOpenIMFile = OpenIMLocalFile;
 type OpenIMDirectoryUser = OpenIMDirectory["users"][number];
 type OpenIMDirectoryDepartment = OpenIMDirectory["departments"][number];
 type OpenIMSidebarTab = "messages" | "directory";
@@ -472,7 +472,7 @@ export function OpenIMView() {
 
   const refreshDirectory = React.useCallback(async () => {
     const generation = accountGenerationRef.current;
-    const result = await window.agentDesktop.openIM.listDirectory();
+    const result = await openIMHost.listDirectory();
     if (generation !== accountGenerationRef.current) return { departments: [], users: [] };
     setDirectory(result);
     return result;
@@ -488,7 +488,7 @@ export function OpenIMView() {
     setConnection((current) => current === "connected" ? current : "connecting");
     setConnectionError("");
     try {
-      const session = await window.agentDesktop.openIM.createSession();
+      const session = await openIMHost.createSession();
       if (requestId !== bootstrapRequestRef.current) return;
       const nextUserID = String(session.userID || "");
       if (accountUserIDRef.current && accountUserIDRef.current !== nextUserID) {
@@ -539,7 +539,7 @@ export function OpenIMView() {
     );
     const timer = window.setTimeout(() => void bootstrap(), refreshDelay);
     return () => window.clearTimeout(timer);
-  }, [bootstrap, profile?.expiresIn, profile?.imToken]);
+  }, [bootstrap, profile?.expiresIn, profile?.userID]);
 
   React.useEffect(() => {
     if (!profile) return;
@@ -702,10 +702,9 @@ export function OpenIMView() {
       let info: SelfUserInfo;
       let sdkConnected = false;
       try {
-        const localConfig = await window.agentDesktop.openIM.getConfig();
-        const config = { ...localConfig, apiAddr: profile.apiAddr, wsAddr: profile.wsAddr };
-        if (!config.available) throw new Error(config.error || "OpenIM SDK 不可用");
-        const session = await ensureOpenIMSession(profile, config);
+        const localConfig = await openIMHost.getConfig();
+        if (!localConfig.available) throw new Error("OpenIM SDK 不可用");
+        const session = await ensureOpenIMSession(profile);
         info = session.selfInfo;
         sdkConnected = session.connected;
       } catch (error) {
@@ -755,10 +754,7 @@ export function OpenIMView() {
     };
   }, [
     bootstrap,
-    profile?.apiAddr,
-    profile?.imToken,
     profile?.userID,
-    profile?.wsAddr,
     refreshConversations,
     refreshDirectory,
     sessionRevision,
@@ -1029,7 +1025,7 @@ export function OpenIMView() {
         } else if (kind === "video") {
           const [duration, thumbnail] = await Promise.all([
             mediaDuration(file.mediaUrl, "video"),
-            window.agentDesktop.openIM.createVideoThumbnail({ path: file.path }),
+            openIMHost.createVideoThumbnail({ path: file.path }),
           ]);
           const extension = file.name.split(".").pop()?.toLowerCase() || "mp4";
           created = await openIMSDK.createVideoMessageFromFullPath({
@@ -1056,7 +1052,7 @@ export function OpenIMView() {
 
   const pickAttachments = async (kind: OpenIMAttachmentKind) => {
     if (!activeConversation || sending) return;
-    const files = await window.agentDesktop.openIM.pickFiles({ kind });
+    const files = await openIMHost.pickFiles({ kind });
     await sendAttachmentFiles(files.map((file) => ({ kind, file })));
   };
 
@@ -1077,7 +1073,7 @@ export function OpenIMView() {
     setCardPickerOpen(false);
     setSending(true);
     try {
-      const prepared = await window.agentDesktop.openIM.prepareDirectConversation({ userID: friend.id });
+      const prepared = await openIMHost.prepareDirectConversation({ userID: friend.id });
       const created = await openIMSDK.createCardMessage({
         userID: prepared.userID,
         nickname: friend.name,
@@ -1127,7 +1123,7 @@ export function OpenIMView() {
 
   const startCall = async (mediaType: "audio" | "video") => {
     if (!activeConversation || activeConversation.conversationType !== SessionType.Single || !selfInfo) return;
-    const config = await window.agentDesktop.openIM.getConfig();
+    const config = await openIMHost.getConfig();
     setRtcCall({
       invitation: {
         inviterUserID: selfInfo.userID,
@@ -1155,7 +1151,7 @@ export function OpenIMView() {
     setCreatingConversationUserID(user.id);
     setConnectionError("");
     try {
-      const prepared = await window.agentDesktop.openIM.prepareDirectConversation({ userID: user.id });
+      const prepared = await openIMHost.prepareDirectConversation({ userID: user.id });
       const result = await openIMSDK.getOneConversation({
         sourceID: prepared.userID,
         sessionType: SessionType.Single,
@@ -1177,7 +1173,7 @@ export function OpenIMView() {
     setCreatingGroup(true);
     setConnectionError("");
     try {
-      const prepared = await window.agentDesktop.openIM.prepareGroupConversation({
+      const prepared = await openIMHost.prepareGroupConversation({
         userIDs: selectedUsers.map((user) => user.id),
       });
       const created = await openIMSDK.createGroup({
@@ -1232,7 +1228,7 @@ export function OpenIMView() {
     try {
       const selected = directory.users.filter((user) => selectedInviteUserIDs.has(user.id));
       const prepared = await Promise.all(selected.map((user) => (
-        window.agentDesktop.openIM.prepareDirectConversation({ userID: user.id })
+        openIMHost.prepareDirectConversation({ userID: user.id })
       )));
       await openIMSDK.inviteUserToGroup({
         groupID: activeConversation.groupID,
@@ -1340,7 +1336,7 @@ export function OpenIMView() {
 
   const downloadMessage = async (url: string, fileName: string) => {
     try {
-      await window.agentDesktop.openIM.download({ url, fileName });
+      await openIMHost.download({ url, fileName });
     } catch (error) {
       setConnectionError(errorMessage(error));
     }

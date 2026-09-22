@@ -77,7 +77,6 @@ export type OpenIMPolicyTarget = {
 
 const EMPTY_CATALOG: AgentCatalog = { agents: [], tools: [], skills: [], connectors: [] };
 const MOSS_AGENT_PROTOCOL = "moss.agent/v1";
-const MOSS_CHANNEL_PROTOCOL = "moss.channel/v1";
 const RESOURCE_LABELS = {
   tools: ["工具", "决定 Agent 可以调用哪些内置或 App 工具"],
   skills: ["技能", "决定 Agent 可以加载哪些已安装技能"],
@@ -184,14 +183,6 @@ async function agentRequest<T>(
   input: Record<string, unknown>,
 ) {
   return window.mossApp.host.request<T>(instanceId, MOSS_AGENT_PROTOCOL, method, input);
-}
-
-async function channelRequest<T>(
-  instanceId: string,
-  method: string,
-  input: Record<string, unknown>,
-) {
-  return window.mossApp.host.request<T>(instanceId, MOSS_CHANNEL_PROTOCOL, method, input);
 }
 
 async function cancelConversationTurns(instanceId: string, conversationId: string) {
@@ -359,7 +350,7 @@ export function OpenIMAgentPolicyDialog({
           defaultConversationId,
         }),
         target.kind === "contact" && peerId
-          ? channelRequest<Record<string, any>>(instanceId, "conversation.current", {
+          ? agentRequest<Record<string, any>>(instanceId, "session.current", {
               externalUserId: peerId,
               externalConversationId: target.conversationId,
             }).catch(() => ({ session: null }))
@@ -435,7 +426,7 @@ export function OpenIMAgentPolicyDialog({
     setResettingSession(true);
     setError("");
     try {
-      const result = await channelRequest<Record<string, any>>(instanceId, "conversation.create", {
+      const result = await agentRequest<Record<string, any>>(instanceId, "session.create", {
         externalUserId: peerId,
         externalConversationId: target.conversationId,
         externalEventId: `context-reset:${crypto.randomUUID()}`,

@@ -50,16 +50,4 @@ describe('Feishu state store', () => {
     expect(store.revoke('ou_other')).toBe(true)
     expect(store.isPaired('ou_other')).toBe(false)
   })
-
-  it('imports legacy paired users and an active code once', () => {
-    const { root, store } = fixture()
-    store.importLegacy({
-      pairedUsers: [{ userId: 'ou_legacy', displayName: 'Legacy', pairedAt: 10 }],
-      pairing: { code: 'ABC234', createdAt: 900, expiresAt: 2_000 },
-    })
-    store.importLegacy({ pairedUsers: [{ userId: 'ou_legacy', displayName: 'Duplicate', pairedAt: 20 }] })
-    expect(store.listPairedUsers()).toEqual([{ userId: 'ou_legacy', displayName: 'Legacy', pairedAt: 10 }])
-    expect(store.tryPair('ABC234', { userId: 'ou_new' }).paired).toBe(true)
-    expect(JSON.parse(fs.readFileSync(path.join(root, 'feishu-state.json'), 'utf8')).pairing.codeHash).toBeNull()
-  })
 })

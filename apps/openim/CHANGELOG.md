@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 - 2026-09-22
+
+- 升级到 Host API 2，删除 `moss.openim/v1` 和旧 Channel API 依赖。
+- OpenIM Node SDK、Koffi 与各平台原生库迁入 App Backend，Core 不再提供原生桥。
+- Server Backend 通过通用 Account API 完成身份、目录、用户供应与 Token 签发；Desktop 通过 Remote API 调用同 App Server Action。
+- 文件、截图、下载和外链迁移到通用 Desktop API；自动回复、Session 与 Turn 统一使用 Agent API。
+- App 运行逻辑不再依赖 Moss webhook 和 OpenIM 专用系统设置；OpenIM Server 部署继续由 `moss/deploy/im` 维护。
+
 ## 0.1.5 - 2026-09-22
 
 - 自动回复防回环标识由 App 自己定义并通过通用消息扩展字段传递，Host 不再包含自动回复业务规则。
@@ -10,7 +18,7 @@
 
 ## 0.1.3 - 2026-09-22
 
-- 将 OpenIM 的账号级默认策略作用域留在 App 内，通过通用 Agent Channel 参数传给 Moss Core。
+- 将 OpenIM 的账号级默认策略作用域留在 App 内，通过通用 Agent 参数传给 Moss Core。
 - 外部消息沿用固定 Moss Session，并以普通用户消息写入会话；渠道安全规则只在 Session 系统提示中注入。
 - 修复“允许全部工具”被解析为空工具集的问题，避免自动回复只承诺处理却无法实际调用工具。
 

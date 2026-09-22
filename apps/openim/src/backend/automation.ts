@@ -1,21 +1,30 @@
-import {
-  MOSS_OPENIM_PROTOCOL,
-  type AppBackendClient,
-  type AppBackendContext,
-} from "@moss/app-sdk";
+import type { AppBackendClient, AppBackendContext } from "@moss/app-sdk";
 import { openIMDefaultConversationIdFor } from "../lib/conversation-identifiers";
+import type { OpenIMAutomationMessage, PublicOpenIMProfile } from "./openim-client";
 
 export const MAX_AUTOMATION_MESSAGE_AGE_MS = 5 * 60 * 1000;
 const SESSION_RETRY_MS = 30 * 1000;
 const MAX_DELIVERY_RETRY_MS = 5 * 60 * 1000;
-const AUTOMATION_MESSAGE_EXTENSION = "moss.openim/automation-v1";
 
 type Timer = ReturnType<typeof setTimeout>;
 
-type AutomationClient = Pick<
-  AppBackendClient,
-  "host" | "agent" | "onHostEvent" | "onAgentEvent" | "emit" | "log" | "status"
->;
+type AutomationClient = Pick<AppBackendClient, "agent" | "emit" | "log" | "status">;
+
+type OpenIMClient = {
+  ensureSession(): Promise<PublicOpenIMProfile>;
+  sendText(input: {
+    recipientId: string;
+    conversationId: string;
+    text: string;
+    idempotencyKey: string;
+    extension?: string;
+  }): Promise<Record<string, unknown>>;
+  markConversationRead(conversationId: string): Promise<Record<string, unknown>>;
+  normalizeMessages(event: string, data: unknown): OpenIMAutomationMessage[];
+  normalizeSessionEvent(event: string, data: unknown): { connected: boolean; userId: string; error?: string } | null;
+  onEvent(listener: (event: string, data: unknown) => void | Promise<void>): () => void;
+  automationExtension: string;
+};
 
 function record(value: unknown): Record<string, any> {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -24,7 +33,7 @@ function record(value: unknown): Record<string, any> {
 }
 
 function errorMessage(error: unknown) {
-  return (error instanceof Error ? error.message : String(error || "OpenIM 请求失败")).slice(0, 2_000);
+  return (error instanceof Error ? error.message : String(error || "OpenIM request failed")).slice(0, 2_000);
 }
 
 export function isFreshAutomationMessage(message: Record<string, any>, now = Date.now()) {
@@ -36,6 +45,7 @@ export function isFreshAutomationMessage(message: Record<string, any>, now = Dat
 
 export function createOpenIMAutomation(
   client: AutomationClient,
+  openIM: OpenIMClient,
   {
     now = () => Date.now(),
     setTimer = setTimeout,
@@ -49,6 +59,7 @@ export function createOpenIMAutomation(
   let context: AppBackendContext | null = null;
   let sessionRefreshTimer: Timer | null = null;
   let sessionEnsurePromise: Promise<void> | null = null;
+  let unsubscribeOpenIM: (() => void) | null = null;
   const deliveryRetryTimers = new Map<string, Timer>();
   const deliveryAttempts = new Map<string, number>();
   const deliveriesInFlight = new Map<string, Promise<Record<string, unknown>>>();
@@ -64,17 +75,13 @@ export function createOpenIMAutomation(
     if (sessionEnsurePromise) return sessionEnsurePromise;
     sessionEnsurePromise = (async () => {
       try {
-        const result = await client.host.request<{ connected: boolean; userId: string; expiresIn: number }>(
-          MOSS_OPENIM_PROTOCOL,
-          "session.ensure",
-          {},
-        );
-        client.status(result.connected ? "running" : "degraded", { userId: result.userId });
+        const result = await openIM.ensureSession();
+        client.status("running", { connected: true, userId: result.userID });
         const expiresIn = Number(result.expiresIn);
         const refreshAfter = Number.isFinite(expiresIn) && expiresIn > 0
-          ? Math.max(30_000, (expiresIn - 60) * 1000)
+          ? Math.max(30_000, (expiresIn - 60) * 1_000)
           : SESSION_RETRY_MS;
-        scheduleSessionRefresh(Math.min(refreshAfter, 12 * 60 * 60 * 1000));
+        scheduleSessionRefresh(Math.min(refreshAfter, 12 * 60 * 60 * 1_000));
       } catch (error) {
         const message = errorMessage(error);
         client.log("warn", "OpenIM session is not ready", { error: message });
@@ -133,24 +140,20 @@ export function createOpenIMAutomation(
         clearDeliveryRetry(turnId);
         return { handled: true, skipped: true };
       }
-      const text = String(data.text || turn.reviewedText || turn.resultText || "").trim();
-      if (!text || !turn.externalUserId || !turn.externalConversationId) {
+      const reply = String(data.text || turn.reviewedText || turn.resultText || "").trim();
+      if (!reply || !turn.externalUserId || !turn.externalConversationId) {
         await acknowledgeTurn(turn, true);
         clearDeliveryRetry(turnId);
         return { handled: true, skipped: true };
       }
       try {
-        const delivery = await client.host.request<Record<string, any>>(
-          MOSS_OPENIM_PROTOCOL,
-          "message.send",
-          {
-            recipientId: String(turn.externalUserId),
-            conversationId: String(turn.externalConversationId),
-            text,
-            idempotencyKey: turnId,
-            extension: AUTOMATION_MESSAGE_EXTENSION,
-          },
-        );
+        const delivery = await openIM.sendText({
+          recipientId: String(turn.externalUserId),
+          conversationId: String(turn.externalConversationId),
+          text: reply,
+          idempotencyKey: turnId,
+          extension: openIM.automationExtension,
+        });
         await acknowledgeTurn(turn, true, {
           externalMessageId: String(delivery.serverMessageId || delivery.clientMessageId || ""),
         });
@@ -184,68 +187,59 @@ export function createOpenIMAutomation(
     return operation;
   }
 
-  client.onHostEvent(MOSS_OPENIM_PROTOCOL, "session.changed", async (raw) => {
-    const data = record(raw);
-    client.emit("openim.session-changed", data);
-    if (data.connected === true) {
-      client.status("running", { userId: String(data.userId || "") });
-    } else {
-      client.status("degraded", { error: String(data.error || "OpenIM disconnected") });
-      scheduleSessionRefresh(10_000);
-    }
-    return { handled: true };
-  });
-
-  client.onHostEvent(MOSS_OPENIM_PROTOCOL, "message.received", async (raw) => {
-    const message = record(raw);
-    if (!context || !isFreshAutomationMessage(message, now())) {
-      return { handled: true, ignored: "stale" };
-    }
-    if (message.extension === AUTOMATION_MESSAGE_EXTENSION) {
+  async function handleMessage(message: OpenIMAutomationMessage) {
+    if (!context || !isFreshAutomationMessage(message, now())) return { handled: true, ignored: "stale" };
+    if (message.extension === openIM.automationExtension) {
       client.log("info", "Ignored an automated OpenIM message to prevent an AI reply loop", {
-        externalEventId: String(message.externalEventId || ""),
+        externalEventId: message.externalEventId,
       });
       return { handled: true, ignored: "automated" };
     }
     const result = await client.agent.request("turn.start", {
-      externalUserId: String(message.externalUserId || ""),
-      externalConversationId: String(message.externalConversationId || ""),
-      externalEventId: String(message.externalEventId || ""),
+      externalUserId: message.externalUserId,
+      externalConversationId: message.externalConversationId,
+      externalEventId: message.externalEventId,
       defaultConversationId: openIMDefaultConversationIdFor(message.externalConversationId) || undefined,
-      text: String(message.text || ""),
+      text: message.text,
       source: "human",
     });
-    if (result.routing !== "human") {
-      await client.host.request(
-        MOSS_OPENIM_PROTOCOL,
-        "conversation.mark-read",
-        { conversationId: String(message.externalConversationId || "") },
-      ).catch((error) => {
+    if ((result as Record<string, any>).routing !== "human") {
+      await openIM.markConversationRead(message.externalConversationId).catch((error) => {
         client.log("warn", "Unable to mark the Agent-handled OpenIM conversation as read", {
           error: errorMessage(error),
-          externalConversationId: String(message.externalConversationId || ""),
+          externalConversationId: message.externalConversationId,
         });
       });
     }
     client.emit("ai.turn-updated", {
-      turnId: result.turnId || null,
+      turnId: (result as Record<string, any>).turnId || null,
       conversationId: message.externalConversationId,
-      status: result.status || "received",
-      routing: result.routing || "human",
+      status: (result as Record<string, any>).status || "received",
+      routing: (result as Record<string, any>).routing || "human",
     });
-    return { handled: true, turnId: result.turnId || null, status: result.status || "received" };
-  });
+    return {
+      handled: true,
+      turnId: (result as Record<string, any>).turnId || null,
+      status: (result as Record<string, any>).status || "received",
+    };
+  }
 
-  client.onAgentEvent("turn.review_requested", async (data) => {
+  async function handleOpenIMEvent(event: string, data: unknown) {
+    const sessionEvent = openIM.normalizeSessionEvent(event, data);
+    if (sessionEvent && !sessionEvent.connected) scheduleSessionRefresh(10_000);
+    for (const message of openIM.normalizeMessages(event, data)) await handleMessage(message);
+  }
+
+  client.agent.on("turn.review_requested", async (data) => {
     client.emit("ai.review-requested", data);
     const turn = record((await client.agent.request("turn.get", { turnId: String(data.turnId || "") })).turn);
     if (turn.id) await acknowledgeTurn(turn, true);
     return { handled: true };
   });
 
-  client.onAgentEvent("turn.completed", (data) => deliverCompletedTurn(data));
+  client.agent.on("turn.completed", (data) => deliverCompletedTurn(data));
 
-  client.onAgentEvent("turn.failed", async (data) => {
+  client.agent.on("turn.failed", async (data) => {
     client.emit("ai.turn-updated", { ...data, status: "failed" });
     const turn = record((await client.agent.request("turn.get", { turnId: String(data.turnId || "") })).turn);
     if (turn.id) await acknowledgeTurn(turn, true);
@@ -255,10 +249,13 @@ export function createOpenIMAutomation(
   return {
     initialize(nextContext: AppBackendContext) {
       context = nextContext;
+      unsubscribeOpenIM = openIM.onEvent(handleOpenIMEvent);
       void ensureSession();
     },
     shutdown() {
       context = null;
+      unsubscribeOpenIM?.();
+      unsubscribeOpenIM = null;
       if (sessionRefreshTimer) clearTimer(sessionRefreshTimer);
       sessionRefreshTimer = null;
       for (const timer of deliveryRetryTimers.values()) clearTimer(timer);
@@ -266,6 +263,8 @@ export function createOpenIMAutomation(
       deliveryAttempts.clear();
     },
     ensureSession,
+    handleMessage,
+    handleOpenIMEvent,
     deliverCompletedTurn,
   };
 }

@@ -9,17 +9,6 @@ import {
   validateEnvelope,
 } from '../protocol/index.mjs'
 import {
-  MOSS_CHANNEL_PROTOCOL,
-  getChannelBackendEventPermission,
-  getChannelHostMethodPermission,
-  requireChannelPermission,
-  validateChannelBackendEvent,
-  validateChannelBackendEventData,
-  validateChannelHostMethod,
-  validateChannelHostInput,
-  validateChannelProtocol,
-} from '../channel/index.mjs'
-import {
   ACCOUNT_BACKEND_EVENT_PERMISSIONS,
   ACCOUNT_HOST_METHOD_PERMISSIONS,
   MOSS_ACCOUNT_PROTOCOL,
@@ -38,6 +27,18 @@ import {
   validateAgentHostMethod,
 } from '../agent/index.mjs'
 import {
+  DESKTOP_HOST_METHOD_PERMISSIONS,
+  MOSS_DESKTOP_PROTOCOL,
+  validateDesktopHostInput,
+  validateDesktopHostMethod,
+} from '../desktop/index.mjs'
+import {
+  MOSS_REMOTE_PROTOCOL,
+  REMOTE_HOST_METHOD_PERMISSIONS,
+  validateRemoteHostInput,
+  validateRemoteHostMethod,
+} from '../remote/index.mjs'
+import {
   requireHostPermission,
   requireHostProtocol,
   validateHostData,
@@ -45,22 +46,13 @@ import {
   validateHostProtocol,
 } from '../host/index.mjs'
 
-const DEFAULT_CHANNEL_TIMEOUT_MS = 30_000
-const MAX_CHANNEL_TIMEOUT_MS = 300_000
-const MAX_CHANNEL_REPLY_CACHE_ENTRIES = 128
+const DEFAULT_HOST_TIMEOUT_MS = 30_000
+const MAX_HOST_TIMEOUT_MS = 300_000
+const MAX_HOST_REPLY_CACHE_ENTRIES = 128
 
-function boundedTimeout(value, fallback = DEFAULT_CHANNEL_TIMEOUT_MS) {
+function boundedTimeout(value, fallback = DEFAULT_HOST_TIMEOUT_MS) {
   const parsed = Number(value ?? fallback)
-  return Math.max(100, Math.min(Number.isFinite(parsed) ? parsed : fallback, MAX_CHANNEL_TIMEOUT_MS))
-}
-
-function channelError(payload, fallbackMessage) {
-  const error = payload?.error || {}
-  return new AppServiceError(
-    error.code || APP_ERROR_CODES.channelUnavailable,
-    error.message || fallbackMessage,
-    error.details,
-  )
+  return Math.max(100, Math.min(Number.isFinite(parsed) ? parsed : fallback, MAX_HOST_TIMEOUT_MS))
 }
 
 function hostError(payload, fallbackMessage, fallbackCode = APP_ERROR_CODES.hostUnavailable) {
@@ -82,7 +74,7 @@ function stableJson(value) {
   return JSON.stringify(value) ?? 'null'
 }
 
-function channelFingerprint(...parts) {
+function hostFingerprint(...parts) {
   return createHash('sha256').update(stableJson(parts)).digest('hex')
 }
 
@@ -90,27 +82,23 @@ export class AppBackendClient {
   constructor(options = {}) {
     this.actions = new Map()
     this.controllers = new Map()
-    this.channelHandlers = new Map()
-    this.channelRequests = new Map()
-    this.channelEvents = new Map()
-    this.channelEventReplies = new Map()
+    this.hostHandlers = new Map()
+    this.hostRequests = new Map()
+    this.hostEvents = new Map()
+    this.hostEventReplies = new Map()
     this.context = null
-    this.channelClosed = true
+    this.hostClosed = true
     this.started = false
     this.onInitialize = options.onInitialize || null
     this.onShutdown = options.onShutdown || null
     this.onFatalError = options.onFatalError || null
-    this.channelRequestTimeoutMs = boundedTimeout(options.channelRequestTimeoutMs)
-    this.maxPendingChannelRequests = Math.max(1, Number(options.maxPendingChannelRequests) || 32)
-    this.maxActiveChannelEvents = Math.max(1, Number(options.maxActiveChannelEvents) || 32)
+    this.hostRequestTimeoutMs = boundedTimeout(options.hostRequestTimeoutMs)
+    this.maxPendingHostRequests = Math.max(1, Number(options.maxPendingHostRequests) || 32)
+    this.maxActiveHostEvents = Math.max(1, Number(options.maxActiveHostEvents) || 32)
     this.send = options.send || ((message) => process.send?.(message))
     this.onMessage = options.onMessage || ((handler) => process.on('message', handler))
     this.onDisconnect = options.onDisconnect || ((handler) => {
       if (typeof process.send === 'function') process.once('disconnect', handler)
-    })
-    this.channel = Object.freeze({
-      request: (method, input, requestOptions) => this.requestChannelHost(method, input, requestOptions),
-      on: (name, handler) => this.onChannelEvent(name, handler),
     })
     this.account = Object.freeze({
       request: (method, input, requestOptions) => this.requestAccountHost(method, input, requestOptions),
@@ -119,6 +107,12 @@ export class AppBackendClient {
     this.agent = Object.freeze({
       request: (method, input, requestOptions) => this.requestAgentHost(method, input, requestOptions),
       on: (name, handler) => this.onAgentEvent(name, handler),
+    })
+    this.desktop = Object.freeze({
+      request: (method, input, requestOptions) => this.requestDesktopHost(method, input, requestOptions),
+    })
+    this.remote = Object.freeze({
+      request: (method, input, requestOptions) => this.requestRemoteHost(method, input, requestOptions),
     })
     this.host = Object.freeze({
       request: (protocol, method, input, requestOptions) => this.requestHost(protocol, method, input, requestOptions),
@@ -130,15 +124,6 @@ export class AppBackendClient {
     if (!name || typeof handler !== 'function') throw new TypeError('registerAction requires a name and handler')
     this.actions.set(name, handler)
     return this
-  }
-
-  onChannelEvent(name, handler) {
-    const normalized = validateChannelBackendEvent(name)
-    return this.registerHostEvent(MOSS_CHANNEL_PROTOCOL, normalized, handler, {
-      permission: getChannelBackendEventPermission(normalized),
-      validateData: (data) => validateChannelBackendEventData(normalized, data),
-      channel: true,
-    })
   }
 
   onAccountEvent(name, handler) {
@@ -168,35 +153,12 @@ export class AppBackendClient {
   registerHostEvent(protocol, name, handler, options = {}) {
     if (typeof handler !== 'function') throw new TypeError('Host event handler must be a function')
     const key = hostHandlerKey(protocol, name)
-    if (this.channelHandlers.has(key)) {
-      throw new TypeError(`Host event handler is already registered: ${protocol} ${name}`)
-    }
+    if (this.hostHandlers.has(key)) throw new TypeError(`Host event handler is already registered: ${protocol} ${name}`)
     const entry = Object.freeze({ handler, ...options })
-    this.channelHandlers.set(key, entry)
+    this.hostHandlers.set(key, entry)
     return () => {
-      if (this.channelHandlers.get(key) === entry) this.channelHandlers.delete(key)
+      if (this.hostHandlers.get(key) === entry) this.hostHandlers.delete(key)
     }
-  }
-
-  async requestChannelHost(method, input = {}, options = {}) {
-    const normalizedMethod = validateChannelHostMethod(method)
-    if (this.context && !this.channelClosed) {
-      requireChannelPermission(this.context.permissions, getChannelHostMethodPermission(normalizedMethod))
-      requireChannelPermission(this.context.grants ?? this.context.permissions, getChannelHostMethodPermission(normalizedMethod))
-    }
-    return this.requestHostInternal(
-      MOSS_CHANNEL_PROTOCOL,
-      normalizedMethod,
-      validateChannelHostInput(normalizedMethod, input),
-      {
-        ...options,
-        transport: 'channel',
-        unavailableCode: APP_ERROR_CODES.channelUnavailable,
-        timeoutCode: APP_ERROR_CODES.channelTimeout,
-        protocolCode: APP_ERROR_CODES.channelProtocol,
-        label: 'Channel Host',
-      },
-    )
   }
 
   requestAccountHost(method, input = {}, options = {}) {
@@ -223,15 +185,39 @@ export class AppBackendClient {
     )
   }
 
+  requestDesktopHost(method, input = {}, options = {}) {
+    const normalizedMethod = validateDesktopHostMethod(method)
+    return this.requestTypedHost(
+      MOSS_DESKTOP_PROTOCOL,
+      normalizedMethod,
+      validateDesktopHostInput(normalizedMethod, input),
+      DESKTOP_HOST_METHOD_PERMISSIONS[normalizedMethod],
+      options,
+      'Desktop Host',
+    )
+  }
+
+  requestRemoteHost(method, input = {}, options = {}) {
+    const normalizedMethod = validateRemoteHostMethod(method)
+    return this.requestTypedHost(
+      MOSS_REMOTE_PROTOCOL,
+      normalizedMethod,
+      validateRemoteHostInput(normalizedMethod, input),
+      REMOTE_HOST_METHOD_PERMISSIONS[normalizedMethod],
+      options,
+      'Remote Host',
+    )
+  }
+
   requestTypedHost(protocol, method, input, permission, options, label) {
-    if (this.context && !this.channelClosed) {
+    if (this.context && !this.hostClosed) {
       requireHostPermission(this.context.permissions, permission)
       requireHostPermission(this.context.grants ?? this.context.permissions, permission, { source: 'grant' })
     }
     return this.requestHostInternal(protocol, method, input, { ...options, label })
   }
 
-  async requestHost(protocol, method, input = {}, options = {}) {
+  requestHost(protocol, method, input = {}, options = {}) {
     return this.requestHostInternal(
       validateHostProtocol(protocol),
       validateHostMember(method, 'Host method'),
@@ -242,99 +228,54 @@ export class AppBackendClient {
 
   async requestHostInternal(protocol, method, input, options = {}) {
     const label = options.label || 'Host protocol'
-    const unavailableCode = options.unavailableCode || APP_ERROR_CODES.hostUnavailable
-    const timeoutCode = options.timeoutCode || APP_ERROR_CODES.hostTimeout
-    const protocolCode = options.protocolCode || APP_ERROR_CODES.hostProtocol
-    const transport = options.transport === 'channel' ? 'channel' : 'host'
-    if (!this.context || this.channelClosed) {
-      return Promise.reject(new AppServiceError(unavailableCode, `${label} is not initialized`))
+    if (!this.context || this.hostClosed) {
+      throw new AppServiceError(APP_ERROR_CODES.hostUnavailable, `${label} is not initialized`)
     }
-    if (this.channelRequests.size >= this.maxPendingChannelRequests) {
-      return Promise.reject(new AppServiceError(unavailableCode, `${label} request limit reached`))
+    if (this.hostRequests.size >= this.maxPendingHostRequests) {
+      throw new AppServiceError(APP_ERROR_CODES.hostUnavailable, `${label} request limit reached`)
     }
-    try {
-      requireHostProtocol(this.context.protocols, protocol)
-    } catch (error) {
-      if (error?.code === APP_ERROR_CODES.hostUnavailable) {
-        throw new AppServiceError(unavailableCode, `App Backend was not initialized with protocol: ${protocol}`)
-      }
-      throw error
-    }
+    requireHostProtocol(this.context.protocols, protocol)
     const requestId = String(options.requestId || randomUUID())
-    if (!requestId || requestId.length > 128 || this.channelRequests.has(requestId)) {
-      return Promise.reject(new AppServiceError(APP_ERROR_CODES.invalidInput, `${label} request id is invalid or duplicated`))
+    if (!requestId || requestId.length > 128 || this.hostRequests.has(requestId)) {
+      throw new AppServiceError(APP_ERROR_CODES.invalidInput, `${label} request id is invalid or duplicated`)
     }
-    const timeoutMs = boundedTimeout(options.timeoutMs, this.channelRequestTimeoutMs)
+    const timeoutMs = boundedTimeout(options.timeoutMs, this.hostRequestTimeoutMs)
     let message
     try {
-      message = createEnvelope(`${transport}.request`, {
-        protocol,
-        method,
-        input,
-        ...this.identity(),
-      }, { id: requestId })
-      validateEnvelope(message, { allowedTypes: [`${transport}.request`] })
+      message = createEnvelope('host.request', { protocol, method, input, ...this.identity() }, { id: requestId })
+      validateEnvelope(message, { allowedTypes: ['host.request'] })
     } catch (error) {
-      return Promise.reject(new AppServiceError(
-        APP_ERROR_CODES.invalidInput,
-        `${label} request cannot be serialized: ${error.message}`,
-      ))
+      throw new AppServiceError(APP_ERROR_CODES.invalidInput, `${label} request cannot be serialized: ${error.message}`)
     }
     return new Promise((resolve, reject) => {
       const finish = (error, result) => {
-        const pending = this.channelRequests.get(requestId)
+        const pending = this.hostRequests.get(requestId)
         if (!pending) return
         clearTimeout(pending.timer)
         pending.signal?.removeEventListener('abort', pending.abortHandler)
-        this.channelRequests.delete(requestId)
+        this.hostRequests.delete(requestId)
         if (error) reject(error)
         else resolve(result)
       }
-      const timer = setTimeout(() => {
+      const cancel = (error) => {
         try {
-          this.send(createEnvelope(`${transport}.cancel`, {
-            protocol,
-            requestId,
-            ...this.identity(),
-          }))
+          this.send(createEnvelope('host.cancel', { protocol, requestId, ...this.identity() }))
         } catch {} finally {
-          finish(new AppServiceError(timeoutCode, `${label} request timed out after ${timeoutMs}ms`))
+          finish(error)
         }
-      }, timeoutMs)
+      }
+      const timer = setTimeout(() => cancel(
+        new AppServiceError(APP_ERROR_CODES.hostTimeout, `${label} request timed out after ${timeoutMs}ms`),
+      ), timeoutMs)
       timer.unref?.()
-      const abortHandler = () => {
-        try {
-          this.send(createEnvelope(`${transport}.cancel`, {
-            protocol,
-            requestId,
-            ...this.identity(),
-          }))
-        } catch {} finally {
-          finish(new AppServiceError(APP_ERROR_CODES.actionCanceled, 'Channel Host request canceled'))
-        }
-      }
-      this.channelRequests.set(requestId, {
-        resolve,
-        reject,
-        timer,
-        signal: options.signal,
-        abortHandler,
-        finish,
-        protocol,
-        transport,
-        unavailableCode,
-        protocolCode,
-        label,
-      })
-      if (options.signal?.aborted) {
-        abortHandler()
-        return
-      }
+      const abortHandler = () => cancel(new AppServiceError(APP_ERROR_CODES.actionCanceled, 'Host request canceled'))
+      this.hostRequests.set(requestId, { resolve, reject, timer, signal: options.signal, abortHandler, finish, protocol })
+      if (options.signal?.aborted) return abortHandler()
       options.signal?.addEventListener('abort', abortHandler, { once: true })
       try {
         this.send(message)
       } catch (error) {
-        finish(new AppServiceError(unavailableCode, `Cannot call ${label}: ${error.message}`))
+        finish(new AppServiceError(APP_ERROR_CODES.hostUnavailable, `Cannot call ${label}: ${error.message}`))
       }
     })
   }
@@ -352,37 +293,28 @@ export class AppBackendClient {
   }
 
   identity() {
-    return {
-      generation: this.context?.generation,
-      launchToken: this.context?.launchToken,
-    }
+    return { generation: this.context?.generation, launchToken: this.context?.launchToken }
   }
 
   hasCurrentIdentity(payload = {}) {
-    return Boolean(
-      this.context
+    return Boolean(this.context
       && payload.generation === this.context.generation
-      && payload.launchToken === this.context.launchToken
-    )
+      && payload.launchToken === this.context.launchToken)
   }
 
-  closeChannel(error = new AppServiceError(APP_ERROR_CODES.channelUnavailable, 'Channel Host disconnected')) {
-    this.channelClosed = true
-    for (const pending of [...this.channelRequests.values()]) pending.finish(error)
-    for (const active of this.channelEvents.values()) {
+  closeHost(error = new AppServiceError(APP_ERROR_CODES.hostUnavailable, 'Host disconnected')) {
+    this.hostClosed = true
+    for (const pending of [...this.hostRequests.values()]) pending.finish(error)
+    for (const active of this.hostEvents.values()) {
       active.canceled = true
       active.retryMessage = null
       active.controller.abort(error)
     }
-    this.channelEvents.clear()
-    this.channelEventReplies.clear()
+    this.hostEvents.clear()
+    this.hostEventReplies.clear()
   }
 
-  handleChannelResponse(message) {
-    return this.handleHostResponse(message, 'channel')
-  }
-
-  handleHostResponse(message, transport = 'host') {
+  handleHostResponse(message) {
     const payload = message.payload || {}
     let protocol
     try { protocol = validateHostProtocol(payload.protocol) } catch (error) {
@@ -390,47 +322,41 @@ export class AppBackendClient {
       return
     }
     const requestId = String(payload.requestId || message.id || '')
-    const pending = this.channelRequests.get(requestId)
+    const pending = this.hostRequests.get(requestId)
     if (!pending) return
-    if (pending.protocol !== protocol || pending.transport !== transport) {
+    if (pending.protocol !== protocol) {
       this.log('warn', `Rejected mismatched Host response: ${protocol}`)
       return
     }
     if (payload.ok === true) pending.finish(null, payload.result)
-    else pending.finish(transport === 'channel'
-      ? channelError(payload, 'Channel Host request failed')
-      : hostError(payload, 'Host protocol request failed', pending.unavailableCode))
+    else pending.finish(hostError(payload, 'Host protocol request failed'))
   }
 
-  async handleChannelEvent(message) {
-    return this.handleHostEvent(message, 'channel')
-  }
-
-  async handleHostEvent(message, transport = 'host') {
+  async handleHostEvent(message) {
     const payload = message.payload || {}
-    if (this.channelClosed) return
+    if (this.hostClosed) return
     let protocol
     try { protocol = validateHostProtocol(payload.protocol) } catch (error) {
-      this.sendHostEventResponse(message, transport, false, undefined, error, { cache: false })
+      this.sendHostEventResponse(message, false, undefined, error, { cache: false })
       return
     }
     const eventId = String(payload.eventId || message.id || '')
     const eventKey = hostHandlerKey(protocol, eventId)
-    const fingerprint = channelFingerprint(transport, payload.protocol, payload.name, payload.data)
-    const cached = this.channelEventReplies.get(eventKey)
+    const fingerprint = hostFingerprint(payload.protocol, payload.name, payload.data)
+    const cached = this.hostEventReplies.get(eventKey)
     if (cached) {
       if (cached.fingerprint === fingerprint) this.send(cached.response)
-      else this.sendHostEventResponse(message, transport, false, undefined, new AppServiceError(
-        transport === 'channel' ? APP_ERROR_CODES.channelProtocol : APP_ERROR_CODES.hostProtocol,
+      else this.sendHostEventResponse(message, false, undefined, new AppServiceError(
+        APP_ERROR_CODES.hostProtocol,
         `Host event id was reused with a different payload: ${eventId}`,
       ), { cache: false, fingerprint })
       return
     }
-    const existing = this.channelEvents.get(eventKey)
+    const existing = this.hostEvents.get(eventKey)
     if (existing) {
       if (existing.fingerprint !== fingerprint) {
-        this.sendHostEventResponse(message, transport, false, undefined, new AppServiceError(
-          transport === 'channel' ? APP_ERROR_CODES.channelProtocol : APP_ERROR_CODES.hostProtocol,
+        this.sendHostEventResponse(message, false, undefined, new AppServiceError(
+          APP_ERROR_CODES.hostProtocol,
           `Host event id was reused with a different payload: ${eventId}`,
         ), { cache: false, fingerprint })
       } else if (existing.canceled) {
@@ -441,125 +367,95 @@ export class AppBackendClient {
     let name
     let entry
     try {
-      if (transport === 'channel') {
-        validateChannelProtocol(protocol)
-        name = validateChannelBackendEvent(payload.name)
-      } else {
-        name = validateHostMember(payload.name, `${protocol} event`)
+      name = validateHostMember(payload.name, `${protocol} event`)
+      requireHostProtocol(this.context?.protocols, protocol)
+      entry = this.hostHandlers.get(hostHandlerKey(protocol, name))
+      if (entry?.permission) {
+        requireHostPermission(this.context.permissions, entry.permission)
+        requireHostPermission(this.context.grants ?? this.context.permissions, entry.permission, { source: 'grant' })
       }
-      try {
-        requireHostProtocol(this.context?.protocols, protocol)
-      } catch (error) {
-        if (transport === 'channel' && error?.code === APP_ERROR_CODES.hostUnavailable) {
-          throw new AppServiceError(
-            APP_ERROR_CODES.channelUnavailable,
-            `App Backend was not initialized with protocol: ${protocol}`,
-          )
-        }
-        throw error
-      }
-      entry = this.channelHandlers.get(hostHandlerKey(protocol, name))
-      if (entry?.permission) requireChannelPermission(this.context.permissions, entry.permission)
-      if (entry?.permission) requireChannelPermission(this.context.grants ?? this.context.permissions, entry.permission)
       if (entry?.validateData) entry.validateData(payload.data)
       else validateHostData(payload.data, `${protocol} ${name} data`)
     } catch (error) {
-      this.sendHostEventResponse(message, transport, false, undefined, error, { fingerprint })
+      this.sendHostEventResponse(message, false, undefined, error, { fingerprint })
       return
     }
     if (!entry) {
-      this.sendHostEventResponse(message, transport, false, undefined, new AppServiceError(
-        transport === 'channel' ? APP_ERROR_CODES.channelUnavailable : APP_ERROR_CODES.hostUnavailable,
+      this.sendHostEventResponse(message, false, undefined, new AppServiceError(
+        APP_ERROR_CODES.hostUnavailable,
         `No Host event handler is registered for ${protocol} ${name}`,
       ), { fingerprint })
       return
     }
-    if (this.channelEvents.size >= this.maxActiveChannelEvents) {
-      this.sendHostEventResponse(message, transport, false, undefined, new AppServiceError(
-        transport === 'channel' ? APP_ERROR_CODES.channelUnavailable : APP_ERROR_CODES.hostUnavailable,
+    if (this.hostEvents.size >= this.maxActiveHostEvents) {
+      this.sendHostEventResponse(message, false, undefined, new AppServiceError(
+        APP_ERROR_CODES.hostUnavailable,
         'Host event concurrency limit reached',
       ), { cache: false, fingerprint })
       return
     }
     const controller = new AbortController()
-    const active = {
-      controller,
-      fingerprint,
-      canceled: false,
-      responded: false,
-      retryMessage: null,
-      transport,
-    }
-    this.channelEvents.set(eventKey, active)
+    const active = { controller, fingerprint, canceled: false, responded: false, retryMessage: null }
+    this.hostEvents.set(eventKey, active)
     try {
       const result = await entry.handler(payload.data, {
         ...this.context,
         host: this.host,
-        channel: this.channel,
         signal: controller.signal,
         eventId,
         name,
         protocol,
       })
-      if (this.channelEvents.get(eventKey) === active) {
-        this.sendHostEventResponse(message, transport, true, result, undefined, { fingerprint })
+      if (this.hostEvents.get(eventKey) === active) {
+        this.sendHostEventResponse(message, true, result, undefined, { fingerprint })
         active.responded = true
       }
     } catch (error) {
-      if (this.channelEvents.get(eventKey) === active && !active.canceled) {
-        this.sendHostEventResponse(message, transport, false, undefined, error, { fingerprint })
+      if (this.hostEvents.get(eventKey) === active && !active.canceled) {
+        this.sendHostEventResponse(message, false, undefined, error, { fingerprint })
         active.responded = true
       }
     } finally {
-      if (this.channelEvents.get(eventKey) === active) {
-        this.channelEvents.delete(eventKey)
-        if (active.retryMessage && !active.responded && !this.channelClosed) {
-          queueMicrotask(() => {
-            void this.handleHostEvent(active.retryMessage, active.transport).catch((error) => this.handleFatalError(error))
-          })
+      if (this.hostEvents.get(eventKey) === active) {
+        this.hostEvents.delete(eventKey)
+        if (active.retryMessage && !active.responded && !this.hostClosed) {
+          queueMicrotask(() => void this.handleHostEvent(active.retryMessage).catch((error) => this.handleFatalError(error)))
         }
       }
     }
   }
 
-  sendChannelEventResponse(message, ok, result, error, options = {}) {
-    return this.sendHostEventResponse(message, 'channel', ok, result, error, options)
-  }
-
-  sendHostEventResponse(message, transport, ok, result, error, options = {}) {
+  sendHostEventResponse(message, ok, result, error, options = {}) {
     const protocol = String(message.payload?.protocol || '')
     const eventId = String(message.payload?.eventId || message.id || '')
     const eventKey = hostHandlerKey(protocol, eventId)
-    const fingerprint = options.fingerprint || channelFingerprint(
-      transport,
+    const fingerprint = options.fingerprint || hostFingerprint(
       message.payload?.protocol,
       message.payload?.name,
       message.payload?.data,
     )
-    const unavailableCode = transport === 'channel' ? APP_ERROR_CODES.channelUnavailable : APP_ERROR_CODES.hostUnavailable
-    const protocolCode = transport === 'channel' ? APP_ERROR_CODES.channelProtocol : APP_ERROR_CODES.hostProtocol
-    let response = createEnvelope(`${transport}.event.response`, {
+    let response = createEnvelope('host.event.response', {
       protocol,
       eventId,
       ok,
-      ...(ok ? { result } : { error: serializeError(error, unavailableCode) }),
+      ...(ok ? { result } : { error: serializeError(error, APP_ERROR_CODES.hostUnavailable) }),
       ...this.identity(),
     }, { id: eventId })
     try {
-      validateEnvelope(response, { allowedTypes: [`${transport}.event.response`] })
+      validateEnvelope(response, { allowedTypes: ['host.event.response'] })
     } catch (serializationError) {
-      response = createEnvelope(`${transport}.event.response`, {
+      response = createEnvelope('host.event.response', {
         protocol,
         eventId,
         ok: false,
-        error: serializeError(serializationError, protocolCode),
+        error: serializeError(serializationError, APP_ERROR_CODES.hostProtocol),
         ...this.identity(),
       }, { id: eventId })
     }
     if (options.cache !== false) {
-      this.channelEventReplies.set(eventKey, { fingerprint, response })
-      if (this.channelEventReplies.size > MAX_CHANNEL_REPLY_CACHE_ENTRIES) {
-        this.channelEventReplies.delete(this.channelEventReplies.keys().next().value)
+      this.hostEventReplies.set(eventKey, { fingerprint, response })
+      if (this.hostEventReplies.size > MAX_HOST_REPLY_CACHE_ENTRIES) {
+        this.hostEventReplies.delete(this.hostEventReplies.keys().next().value)
       }
     }
     this.send(response)
@@ -569,11 +465,9 @@ export class AppBackendClient {
     if (this.started) return this
     for (const [name, handler] of Object.entries(actions)) this.registerAction(name, handler)
     this.started = true
-    this.onMessage((raw) => {
-      void this.handleMessage(raw).catch((error) => this.handleFatalError(error))
-    })
+    this.onMessage((raw) => void this.handleMessage(raw).catch((error) => this.handleFatalError(error)))
     this.onDisconnect(() => {
-      this.closeChannel(new AppServiceError(APP_ERROR_CODES.hostUnavailable, 'Host disconnected'))
+      this.closeHost()
       setImmediate(() => process.exit(0))
     })
     this.send(createEnvelope('service.hello', {
@@ -590,9 +484,7 @@ export class AppBackendClient {
   handleFatalError(error) {
     try {
       this.send(createEnvelope('service.status', {
-        state: 'error',
-        details: serializeError(error),
-        ...this.identity(),
+        state: 'error', details: serializeError(error), ...this.identity(),
       }))
     } catch {}
     if (this.onFatalError) {
@@ -622,11 +514,12 @@ export class AppBackendClient {
       this.context = Object.freeze({
         ...payload,
         host: this.host,
-        channel: this.channel,
         account: this.account,
         agent: this.agent,
+        desktop: this.desktop,
+        remote: this.remote,
       })
-      this.channelClosed = false
+      this.hostClosed = false
       if (this.onInitialize) await this.onInitialize(this.context)
       this.send(createEnvelope('service.ready', { ...this.identity() }, { id: message.id }))
       return
@@ -637,47 +530,33 @@ export class AppBackendClient {
     }
     if (message.type === 'service.shutdown') {
       this.send(createEnvelope('service.status', { state: 'stopping', ...this.identity() }, { id: message.id }))
-      this.closeChannel(new AppServiceError(APP_ERROR_CODES.channelUnavailable, 'App Backend is shutting down'))
+      this.closeHost(new AppServiceError(APP_ERROR_CODES.hostUnavailable, 'App Backend is shutting down'))
       if (this.onShutdown) await this.onShutdown(this.context)
       setImmediate(() => process.exit(0))
       return
     }
-    if (message.type === 'channel.response' || message.type === 'host.response') {
-      if (!this.hasCurrentIdentity(payload)) {
-        this.log('warn', 'Rejected stale Host response')
-        return
-      }
-      this.handleHostResponse(message, message.type.startsWith('channel.') ? 'channel' : 'host')
+    if (message.type === 'host.response') {
+      if (!this.hasCurrentIdentity(payload)) return this.log('warn', 'Rejected stale Host response')
+      this.handleHostResponse(message)
       return
     }
-    if (message.type === 'channel.event.cancel' || message.type === 'host.event.cancel') {
-      if (!this.hasCurrentIdentity(payload)) {
-        this.log('warn', 'Rejected stale Host event cancellation')
-        return
-      }
+    if (message.type === 'host.event.cancel') {
+      if (!this.hasCurrentIdentity(payload)) return this.log('warn', 'Rejected stale Host event cancellation')
       let protocol
-      try {
-        protocol = message.type.startsWith('channel.')
-          ? validateChannelProtocol(payload.protocol)
-          : validateHostProtocol(payload.protocol)
-      } catch (error) {
+      try { protocol = validateHostProtocol(payload.protocol) } catch (error) {
         this.log('error', error.message)
         return
       }
-      const eventId = String(payload.eventId || '')
-      const active = this.channelEvents.get(hostHandlerKey(protocol, eventId))
+      const active = this.hostEvents.get(hostHandlerKey(protocol, String(payload.eventId || '')))
       if (active) {
         active.canceled = true
         active.controller.abort(new AppServiceError(APP_ERROR_CODES.actionCanceled, 'Host event canceled'))
       }
       return
     }
-    if (message.type === 'channel.event' || message.type === 'host.event') {
-      if (!this.hasCurrentIdentity(payload)) {
-        this.log('warn', 'Rejected stale Host event')
-        return
-      }
-      await this.handleHostEvent(message, message.type.startsWith('channel.') ? 'channel' : 'host')
+    if (message.type === 'host.event') {
+      if (!this.hasCurrentIdentity(payload)) return this.log('warn', 'Rejected stale Host event')
+      await this.handleHostEvent(message)
       return
     }
     if (message.type === 'action.cancel') {
@@ -685,7 +564,6 @@ export class AppBackendClient {
       return
     }
     if (message.type !== 'action.invoke') return
-
     const handler = this.actions.get(payload.name)
     if (!handler) {
       this.send(createEnvelope('action.error', {
@@ -701,9 +579,10 @@ export class AppBackendClient {
       const result = await handler(payload.input, {
         ...this.context,
         host: this.host,
-        channel: this.channel,
         account: this.account,
         agent: this.agent,
+        desktop: this.desktop,
+        remote: this.remote,
         signal: controller.signal,
         requestId: message.id,
         emit: (name, data) => this.emit(name, data),

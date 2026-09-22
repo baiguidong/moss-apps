@@ -80,9 +80,10 @@ apps/example/
 
 ## Moss 预装
 
-Moss 的发布 CI 不重新编译本仓库源码，也不使用市场里的浮动 `latest`。主仓库在
-`config/bundled-apps.lock.json` 中锁定 App 版本、Release 下载地址、SHA-256 和签名密钥，
-构建时下载并验证 ZIP，再把验证通过的内容放入桌面安装包。升级预装版本必须显式更新锁文件。
+Moss 的发布 CI 不重新编译本仓库源码，也不使用市场里的浮动 `latest`。主仓库的
+`config/bundled-apps.lock.json` 只锁定 App ID 和一个固定版本；构建时从本仓库发布的
+Marketplace 索引解析 Release 下载地址、SHA-256 和签名信息，验证 ZIP 后放入桌面安装包。
+升级预装版本必须显式更新锁文件。
 
 App ZIP 与 Moss 桌面安装包分开：Moss 仍分别构建 macOS arm64 和 Windows x64 安装包；
 当前飞书 App 是纯 JavaScript，同一个签名 ZIP 可同时用于这两个平台，支持范围由
@@ -97,4 +98,4 @@ App ZIP 与 Moss 桌面安装包分开：Moss 仍分别构建 macOS arm64 和 Wi
 
 ## SDK
 
-`packages/app-sdk` 是当前 Host API `1.3.0` 的发布快照，供本仓库 App 构建和测试。后续可迁移为正式发布的 `@moss/app-sdk` npm 包而不改变 App 代码。
+`packages/app-sdk` 是当前 Host API `2.0.0` 的发布快照，供本仓库 App 构建和测试。2.0 不提供旧 Channel 或平台专用协议兼容层；后续可迁移为正式发布的 `@moss/app-sdk` npm 包而不改变 App 代码。

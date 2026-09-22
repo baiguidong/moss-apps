@@ -27,6 +27,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { openIMMessageSummary } from "@/components/openim-message-content";
 import { openIMSDK } from "@/lib/openim-sdk";
+import { openIMHost } from "@/lib/host";
 import { cn } from "@/lib/utils";
 
 const EMOJIS = [
@@ -54,7 +55,7 @@ function attachmentKind(file: File): OpenIMAttachmentKind {
 
 async function materializeFile(file: File): Promise<OpenIMLocalAttachment> {
   const fileName = file.name || `openim-${Date.now()}`;
-  const materialized = await window.agentDesktop.openIM.materializeFile({
+  const materialized = await openIMHost.materializeFile({
     fileName,
     data: await file.arrayBuffer(),
   });
@@ -171,7 +172,7 @@ export function OpenIMComposer({
 
   const captureScreen = async () => {
     try {
-      const screenshot = await window.agentDesktop.openIM.captureScreen();
+      const screenshot = await openIMHost.captureScreen();
       onSendLocalAttachments([{
         ...screenshot,
         kind: "image",

@@ -2,12 +2,12 @@ import { describe, expect, it } from "bun:test";
 import { createOpenIMAutomation, MAX_AUTOMATION_MESSAGE_AGE_MS } from "./automation";
 
 function createFixture() {
-  const hostEvents = new Map<string, (data: any) => any>();
   const agentEvents = new Map<string, (data: any) => any>();
   const emitted: Array<{ name: string; data: any }> = [];
   const statuses: Array<{ state: string; details: any }> = [];
   const agentRequests: Array<{ method: string; input: any }> = [];
-  const hostRequests: Array<{ protocol: string; method: string; input: any }> = [];
+  const sent: any[] = [];
+  const markedRead: string[] = [];
   const timers: Array<{ callback: () => void; delay: number; cleared: boolean }> = [];
   let deliveryFailures = 0;
   const turn = {
@@ -19,14 +19,6 @@ function createFixture() {
     resultText: "AI reply",
   };
   const client = {
-    host: {
-      request: async (protocol: string, method: string, input: any) => {
-        hostRequests.push({ protocol, method, input });
-        if (method === "session.ensure") return { connected: true, userId: "self", expiresIn: 3600 };
-        if (method === "message.send" && deliveryFailures-- > 0) throw new Error("offline");
-        return { serverMessageId: "server-1" };
-      },
-    },
     agent: {
       request: async (method: string, input: any) => {
         agentRequests.push({ method, input });
@@ -35,35 +27,59 @@ function createFixture() {
         if (method === "turn.delivery.ack") return { acknowledged: input.ok };
         return {};
       },
+      on: (name: string, handler: (data: any) => any) => {
+        agentEvents.set(name, handler);
+        return () => agentEvents.delete(name);
+      },
     },
-    onHostEvent: (protocol: string, name: string, handler: (data: any) => any) => hostEvents.set(`${protocol}:${name}`, handler),
-    onAgentEvent: (name: string, handler: (data: any) => any) => agentEvents.set(name, handler),
     emit: (name: string, data: any) => emitted.push({ name, data }),
     log: () => {},
     status: (state: string, details: any) => statuses.push({ state, details }),
+  };
+  const openIM = {
+    automationExtension: "moss.openim/automation-v1",
+    ensureSession: async () => ({
+      userID: "self",
+      expiresIn: 3_600,
+      rtcEnabled: false,
+      capabilities: { createGroup: false },
+      user: { id: "user", name: "Self", email: null, orgId: "org" },
+    }),
+    sendText: async (input: any) => {
+      sent.push(input);
+      if (deliveryFailures-- > 0) throw new Error("offline");
+      return { serverMessageId: "server-1" };
+    },
+    markConversationRead: async (conversationId: string) => {
+      markedRead.push(conversationId);
+      return { read: true };
+    },
+    normalizeMessages: (event: string, data: any) => event === "message" ? [data] : [],
+    normalizeSessionEvent: (event: string, data: any) => event === "session" ? data : null,
+    onEvent: () => () => {},
   };
   const setTimer = ((callback: () => void, delay: number) => {
     const timer = { callback, delay, cleared: false, unref() {} };
     timers.push(timer);
     return timer;
   }) as unknown as typeof setTimeout;
-  const clearTimer = ((timer: any) => { timer.cleared = true }) as typeof clearTimeout;
-  const automation = createOpenIMAutomation(client as any, {
+  const clearTimer = ((timer: any) => { timer.cleared = true; }) as typeof clearTimeout;
+  const automation = createOpenIMAutomation(client as any, openIM as any, {
     now: () => 1_700_000_000_000,
     setTimer,
     clearTimer,
   });
   return {
     automation,
-    hostEvents,
     agentEvents,
     emitted,
     statuses,
     agentRequests,
-    hostRequests,
+    sent,
+    markedRead,
     timers,
     turn,
-    failDeliveries(count: number) { deliveryFailures = count },
+    failDeliveries(count: number) { deliveryFailures = count; },
   };
 }
 
@@ -72,20 +88,23 @@ describe("OpenIM automation backend", () => {
     const fixture = createFixture();
     fixture.automation.initialize({ instanceId: "default" } as any);
     await fixture.automation.ensureSession();
-    const receive = fixture.hostEvents.get("moss.openim/v1:message.received")!;
-    await expect(receive({
+    await expect(fixture.automation.handleMessage({
       externalUserId: "peer-1",
       externalConversationId: "openim-user:self/direct:peer-1",
       externalEventId: "message-old",
       text: "old",
       sentAt: 1_700_000_000_000 - MAX_AUTOMATION_MESSAGE_AGE_MS - 1,
+      contentType: 101,
+      sessionType: 1,
     })).resolves.toMatchObject({ ignored: "stale" });
-    await expect(receive({
+    await expect(fixture.automation.handleMessage({
       externalUserId: "peer-1",
       externalConversationId: "openim-user:self/direct:peer-1",
       externalEventId: "message-new",
       text: "hello",
       sentAt: 1_700_000_000_000,
+      contentType: 101,
+      sessionType: 1,
     })).resolves.toMatchObject({ turnId: "turn-1", status: "queued" });
     expect(fixture.agentRequests.filter((entry) => entry.method === "turn.start")).toEqual([{
       method: "turn.start",
@@ -98,25 +117,21 @@ describe("OpenIM automation backend", () => {
         source: "human",
       },
     }]);
-    expect(fixture.hostRequests.filter((entry) => entry.method === "conversation.mark-read")).toEqual([{
-      protocol: "moss.openim/v1",
-      method: "conversation.mark-read",
-      input: { conversationId: "openim-user:self/direct:peer-1" },
-    }]);
+    expect(fixture.markedRead).toEqual(["openim-user:self/direct:peer-1"]);
   });
 
   it("does not start an Agent turn for another Moss AI's automated reply", async () => {
     const fixture = createFixture();
     fixture.automation.initialize({ instanceId: "default" } as any);
     await fixture.automation.ensureSession();
-    const receive = fixture.hostEvents.get("moss.openim/v1:message.received")!;
-
-    await expect(receive({
+    await expect(fixture.automation.handleMessage({
       externalUserId: "peer-1",
       externalConversationId: "openim-user:self/direct:peer-1",
       externalEventId: "message-ai",
       text: "AI reply",
       sentAt: 1_700_000_000_000,
+      contentType: 101,
+      sessionType: 1,
       extension: "moss.openim/automation-v1",
     })).resolves.toEqual({ handled: true, ignored: "automated" });
     expect(fixture.agentRequests.filter((entry) => entry.method === "turn.start")).toHaveLength(0);
@@ -136,8 +151,8 @@ describe("OpenIM automation backend", () => {
     const retry = fixture.timers.find((timer) => timer.delay === 2_000 && !timer.cleared)!;
     retry.callback();
     await Bun.sleep(0);
-    expect(fixture.hostRequests.filter((entry) => entry.method === "message.send")).toHaveLength(2);
-    expect(fixture.hostRequests.filter((entry) => entry.method === "message.send")[0]?.input.extension).toBe("moss.openim/automation-v1");
+    expect(fixture.sent).toHaveLength(2);
+    expect(fixture.sent[0]?.extension).toBe("moss.openim/automation-v1");
     expect(fixture.agentRequests.filter((entry) => entry.method === "turn.delivery.ack").at(-1)?.input).toMatchObject({
       ok: true,
       externalMessageId: "server-1",
@@ -152,9 +167,7 @@ describe("OpenIM automation backend", () => {
     const fixture = createFixture();
     fixture.automation.initialize({ instanceId: "default" } as any);
     await fixture.automation.ensureSession();
-    const changed = fixture.hostEvents.get("moss.openim/v1:session.changed")!;
-    await changed({ connected: false, userId: "self", error: "offline" });
-    expect(fixture.statuses.at(-1)).toEqual({ state: "degraded", details: { error: "offline" } });
+    await fixture.automation.handleOpenIMEvent("session", { connected: false, userId: "self", error: "offline" });
     expect(fixture.timers.some((timer) => timer.delay === 10_000)).toBe(true);
   });
 
@@ -168,6 +181,6 @@ describe("OpenIM automation backend", () => {
       handled: true,
       skipped: true,
     });
-    expect(fixture.hostRequests.filter((entry) => entry.method === "message.send")).toHaveLength(0);
+    expect(fixture.sent).toHaveLength(0);
   });
 });

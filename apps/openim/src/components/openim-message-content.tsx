@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { MessageType, type CardElem, type MessageItem } from "@openim/wasm-client-sdk";
 import { Button } from "@/components/ui/button";
+import { openIMHost } from "@/lib/host";
 import { cn } from "@/lib/utils";
 
 export function formatBytes(value = 0) {
@@ -77,7 +78,7 @@ function LinkifiedText({ value }: { value: string }) {
           key={`${part}-${index}`}
           type="button"
           className="text-inherit underline underline-offset-2"
-          onClick={() => void window.agentDesktop.openIM.openExternal(part)}
+          onClick={() => void openIMHost.openExternal(part)}
         >
           {part}
         </button>
@@ -215,7 +216,7 @@ export function OpenIMMessageContent({
       const location = message.locationElem;
       const mapUrl = `https://www.openstreetmap.org/?mlat=${location?.latitude}&mlon=${location?.longitude}#map=16/${location?.latitude}/${location?.longitude}`;
       return (
-        <button type="button" className="block min-w-64 rounded-md border border-border bg-background p-3 text-left text-foreground hover:bg-muted/50" onClick={() => void window.agentDesktop.openIM.openExternal(mapUrl)}>
+        <button type="button" className="block min-w-64 rounded-md border border-border bg-background p-3 text-left text-foreground hover:bg-muted/50" onClick={() => void openIMHost.openExternal(mapUrl)}>
           <div className="flex items-center gap-2 text-sm font-medium"><MapPin className="h-4 w-4 text-primary" />{location?.description || "位置"}</div>
           <div className="mt-2 text-xs text-muted-foreground">{location?.latitude}, {location?.longitude}</div>
         </button>

@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "id": "moss.openim",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "displayName": "即时消息",
   "description": "通过 OpenIM 与组织成员沟通，并为每个联系人配置个人 AI 回复策略。",
   "icon": "assets/icon.svg",
-  "hostApi": "^1.3.0",
+  "hostApi": "^2.0.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -24,23 +24,38 @@
     "apiVersion": 1,
     "lifecycle": "persistent",
     "instanceMode": "single",
-    "targets": ["desktop"],
-    "protocols": ["moss.agent/v1", "moss.channel/v1", "moss.openim/v1"],
-    "actions": []
+    "targets": ["desktop", "server"],
+    "protocols": ["moss.account/v1", "moss.agent/v1", "moss.desktop/v1", "moss.remote/v1"],
+    "actions": [
+      { "name": "status.get" },
+      { "name": "session.ensure", "timeoutMs": 30000 },
+      { "name": "session.issue", "timeoutMs": 30000 },
+      { "name": "directory.list", "timeoutMs": 30000 },
+      { "name": "conversation.direct.prepare", "timeoutMs": 30000 },
+      { "name": "conversation.group.prepare", "timeoutMs": 30000 },
+      { "name": "sdk.call", "timeoutMs": 300000 },
+      { "name": "rtc.token" }
+    ],
+    "configuration": {
+      "schema": "schemas/config.json",
+      "secrets": "schemas/secrets.json"
+    }
   },
   "permissions": [
-    "openim:client",
-    "openim:messages",
-    "openim:files",
-    "openim:screen-capture",
-    "openim:media",
+    "account:identity:read",
+    "account:directory:read",
     "agent:catalog:read",
     "agent:bindings:read",
     "agent:bindings:write",
+    "agent:sessions:read",
+    "agent:sessions:write",
     "agent:turns:read",
     "agent:turns:write",
-    "channel:sessions:read",
-    "channel:sessions:write"
+    "desktop:files",
+    "desktop:screen-capture",
+    "desktop:external-links",
+    "desktop:media",
+    "remote:actions"
   ],
   "contributes": {
     "views": [
@@ -50,8 +65,7 @@
         "route": "#/messages",
         "location": "more",
         "icon": "chat",
-        "order": 190,
-        "permission": "openim:client"
+        "order": 190
       }
     ],
     "settings": [

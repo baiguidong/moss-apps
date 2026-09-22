@@ -1,6 +1,6 @@
 {
   "name": "@moss/openim-app",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,6 +13,7 @@
     "@livekit/components-styles": "1.1.6",
     "@moss/app-sdk": "file:../../packages/app-sdk",
     "@openim/electron-client-sdk": "3.8.3-patch.10",
+    "@openim/node-client-sdk": "1.1.0",
     "@openim/wasm-client-sdk": "3.8.3-patch.10",
     "@radix-ui/react-dropdown-menu": "2.1.16",
     "@radix-ui/react-slot": "1.2.4",

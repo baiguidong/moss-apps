@@ -13,8 +13,7 @@ describe("OpenIM appearance", () => {
     expect(appearanceThemeMode()).toBe("system");
   });
 
-  it("keeps legacy theme compatibility and validates CSS presets", () => {
-    expect(resolvedTheme({ theme: "light" }, true)).toBe("light");
+  it("validates CSS presets", () => {
     expect(appearanceCssThemeId({ cssThemeId: "grid-theme" })).toBe("grid-theme");
     expect(appearanceCssThemeId({ cssThemeId: "unknown" as never })).toBe("default");
   });

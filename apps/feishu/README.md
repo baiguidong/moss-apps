@@ -11,7 +11,7 @@
 - 不读取或上传图片、文件等消息资源；附件消息只返回“不支持”的文本提示。
 - 不提供人工接管、草稿审核、仅 @ 回复、成员级回复策略或 Agent 选择。
 
-Moss Core 仍保留通用 Agent Channel 能力，供 OpenIM 等需要完整策略的 App 使用。
+App 只通过通用 `moss.agent/v1` Host API 创建 Turn、接收结果并确认投递；飞书事件映射、配对、去重和回复发送都留在 App 内。
 
 ## 飞书开放平台配置
 
@@ -51,7 +51,7 @@ Moss Core 仍保留通用 Agent Channel 能力，供 OpenIM 等需要完整策�
 
 这些限制由 Moss Core 在 Session Runtime 和工具调用层执行。飞书手机端不显示授权卡片；本机运行时需要交互确认的操作在 Moss 客户端处理，Server 运行时则直接拒绝。
 
-App ID、白名单和配对关系保存在 App instance 配置中。App Secret、Encrypt Key 和 Verification Token 写入 Moss 加密凭据存储，配置页只会收到掩码。Agent system prompt、模型密钥和 Connector 凭据不会下发给飞书 App。
+App ID 和白名单保存在 App instance 配置中，配对关系保存在该实例的私有数据目录。App Secret、Encrypt Key 和 Verification Token 写入 Moss 加密凭据存储，配置页只会收到掩码。Agent system prompt、模型密钥和 Connector 凭据不会下发给飞书 App。
 
 ## 验收
 

@@ -70,7 +70,7 @@ describe('Feishu App UI contract', () => {
       expect(source).not.toContain(`id="${id}"`)
     }
     expect(configSchema.properties).not.toHaveProperty('streamingCard')
-    expect(configSchema.additionalProperties).toBe(true)
+    expect(configSchema.additionalProperties).toBe(false)
     for (const scope of ['im:message.p2p_msg:readonly', 'im:message:send_as_bot', 'im:message']) {
       expect(source).toContain(scope)
     }
@@ -79,17 +79,15 @@ describe('Feishu App UI contract', () => {
     expect(source).toContain("replyMode: 'ai_auto'")
     expect(source).toContain("session: { mode: 'fixed'")
     expect(source).toContain('normalizeAutomaticPolicy(binding)')
-    expect(source).toContain('neutralizeLegacyMemberPolicies()')
     expect(source).toContain("kinds: ['tools', 'skills', 'connectors']")
     expect(source).toContain('id="permissionMode"')
     expect(source).toContain('id="unrestrictedResources"')
     expect(manifest.permissions).toEqual([
-      'channel:connection',
-      'channel:messages',
-      'channel:deliveries',
       'agent:catalog:read',
       'agent:bindings:read',
       'agent:bindings:write',
+      'agent:turns:read',
+      'agent:turns:write',
     ])
     expect(backendSource).toContain("if (chatType !== 'p2p') return")
     expect(backendSource).toContain("hostBridge.on('turn.completed'")
@@ -111,15 +109,11 @@ describe('Feishu App UI contract', () => {
     }
   })
 
-  test('accepts and preserves configuration fields from older versions', () => {
-    const legacyConfig = {
-      appId: 'cli_example',
-      streamingCard: false,
-      allowedUsers: [],
-    }
+  test('rejects fields outside the current configuration contract', () => {
+    const invalidConfig = { appId: 'cli_example', streamingCard: false, allowedUsers: [] }
     const validate = compileJsonSchema(configSchema)
 
-    expect(validate(legacyConfig)).toBe(true)
-    expect(legacyConfig).toHaveProperty('streamingCard', false)
+    expect(validate(invalidConfig)).toBe(false)
+    expect(validate({ appId: 'cli_example', allowedUsers: [] })).toBe(true)
   })
 })

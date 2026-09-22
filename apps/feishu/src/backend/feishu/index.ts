@@ -9,7 +9,7 @@
 
 import * as Lark from '@larksuiteoapi/node-sdk'
 import { MessageDedup } from '../common/message-dedup.js'
-import { FeishuHostBridge } from '../common/app-channel-bridge.js'
+import { FeishuAgentBridge } from '../common/app-agent-bridge.js'
 import { enqueue } from '../common/chat-queue.js'
 import {
   loadConfigFromAppContext,
@@ -32,7 +32,7 @@ let transportConnected = false
 let transportError: string | null = null
 let transportUpdatedAt: number | null = null
 
-const hostBridge = new FeishuHostBridge({ onShutdown: () => shutdown(false, false) })
+const hostBridge = new FeishuAgentBridge({ onShutdown: () => shutdown(false, false) })
 const dedup = new MessageDedup()
 
 function initializeTransport(context: AppBackendConfigurationContext): void {
@@ -43,10 +43,6 @@ function initializeTransport(context: AppBackendConfigurationContext): void {
   if (!context.dataDir) throw new Error('Moss App data directory is unavailable.')
   target = context.target?.type === 'server' ? 'server' : 'desktop'
   stateStore = createFeishuStateStore(context.dataDir)
-  stateStore.importLegacy({
-    pairedUsers: config.feishu.pairedUsers,
-    pairing: (context.config as Record<string, unknown> | undefined)?.pairing,
-  })
 
   larkClient = new Lark.Client({
     appId: config.feishu.appId,
@@ -159,36 +155,36 @@ async function forwardMessage({
     return
   }
 
-  await hostBridge.request('chat.message.received', {
-    chatId,
-    openId,
-    eventId,
+  await hostBridge.requestAgent('turn.start', {
+    externalConversationId: chatId,
+    externalUserId: openId,
+    externalEventId: eventId,
     text,
   })
 }
 
 hostBridge.on('turn.completed', (payload: any) => {
-  const chatId = typeof payload?.chatId === 'string' ? payload.chatId : ''
+  const chatId = typeof payload?.externalConversationId === 'string' ? payload.externalConversationId : ''
   const turnId = typeof payload?.turnId === 'string' ? payload.turnId : ''
   const text = typeof payload?.text === 'string' ? payload.text : ''
   if (!chatId || !text) return
   enqueue(chatId, async () => {
     const delivered = await sendText(chatId, text, turnId || undefined)
     if (delivered && turnId) {
-      await hostBridge.request('turn.delivery.ack', { turnId, chatId })
+      await hostBridge.requestAgent('turn.delivery.ack', { turnId, externalConversationId: chatId, ok: true })
     }
   })
 })
 
 hostBridge.on('turn.failed', (payload: any) => {
-  const chatId = typeof payload?.chatId === 'string' ? payload.chatId : ''
+  const chatId = typeof payload?.externalConversationId === 'string' ? payload.externalConversationId : ''
   const turnId = typeof payload?.turnId === 'string' ? payload.turnId : ''
   if (!chatId) return
   enqueue(chatId, async () => {
     const message = typeof payload?.message === 'string' ? payload.message : 'Moss 会话处理失败。'
     const delivered = await sendText(chatId, `❌ ${message}`, turnId || undefined)
     if (delivered && turnId) {
-      await hostBridge.request('turn.delivery.ack', { turnId, chatId })
+      await hostBridge.requestAgent('turn.delivery.ack', { turnId, externalConversationId: chatId, ok: true })
     }
   })
 })
@@ -277,7 +273,7 @@ async function reportConnection(connected: boolean, error?: unknown, required = 
     return
   }
   try {
-    await hostBridge.request('adapter.connection', {
+    hostBridge.status(connected ? 'running' : 'degraded', {
       connected,
       ...(error ? { error: error instanceof Error ? error.message : String(error) } : {}),
     })

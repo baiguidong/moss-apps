@@ -3,15 +3,13 @@ import path from 'node:path'
 import Ajv2020 from 'ajv/dist/2020.js'
 import semver from 'semver'
 import { APP_ERROR_CODES, AppServiceError } from '../protocol/index.mjs'
-import { CHANNEL_PERMISSIONS, MOSS_CHANNEL_PROTOCOL } from '../channel/index.mjs'
 import manifestSchema from './app-manifest.schema.json' with { type: 'json' }
 
 export const APP_MANIFEST_SCHEMA = manifestSchema
-export const APP_HOST_API_VERSION = '1.3.0'
+export const APP_HOST_API_VERSION = '2.0.0'
 
 const ajv = new Ajv2020({ allErrors: true, strict: false })
 const validateManifestSchema = ajv.compile(APP_MANIFEST_SCHEMA)
-const channelPermissions = new Set(Object.values(CHANNEL_PERMISSIONS))
 
 export function ensureSafeRelativePath(value, fieldName = 'path') {
   const raw = String(value || '').trim()
@@ -237,20 +235,6 @@ export function validateAppManifest(rawManifest, options = {}) {
   }
   if (!semver.validRange(candidate.hostApi)) {
     throw new AppServiceError(APP_ERROR_CODES.invalidManifest, `Invalid hostApi range: ${candidate.hostApi}`)
-  }
-  if (candidate.backend?.protocols?.includes(MOSS_CHANNEL_PROTOCOL)) {
-    if (candidate.backend.lifecycle !== 'persistent') {
-      throw new AppServiceError(
-        APP_ERROR_CODES.invalidManifest,
-        `${MOSS_CHANNEL_PROTOCOL} requires a persistent Backend`,
-      )
-    }
-    if (!candidate.permissions.some((permission) => channelPermissions.has(permission))) {
-      throw new AppServiceError(
-        APP_ERROR_CODES.invalidManifest,
-        `${MOSS_CHANNEL_PROTOCOL} requires at least one channel permission`,
-      )
-    }
   }
   const hostApiVersion = options.hostApiVersion || APP_HOST_API_VERSION
   if (!semver.satisfies(hostApiVersion, candidate.hostApi)) {

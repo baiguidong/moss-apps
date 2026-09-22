@@ -11,9 +11,6 @@ export const HOST_MESSAGE_TYPES = Object.freeze([
   'host.response',
   'host.event',
   'host.event.cancel',
-  'channel.response',
-  'channel.event',
-  'channel.event.cancel',
   'service.ping',
   'service.shutdown',
 ])
@@ -27,9 +24,6 @@ export const BACKEND_MESSAGE_TYPES = Object.freeze([
   'host.request',
   'host.cancel',
   'host.event.response',
-  'channel.request',
-  'channel.cancel',
-  'channel.event.response',
   'event.emit',
   'service.pong',
   'log.write',
@@ -56,9 +50,6 @@ export const APP_ERROR_CODES = Object.freeze({
   hostUnavailable: 'APP_HOST_UNAVAILABLE',
   hostTimeout: 'APP_HOST_TIMEOUT',
   hostProtocol: 'APP_HOST_PROTOCOL_ERROR',
-  channelUnavailable: 'APP_CHANNEL_UNAVAILABLE',
-  channelTimeout: 'APP_CHANNEL_TIMEOUT',
-  channelProtocol: 'APP_CHANNEL_PROTOCOL_ERROR',
 })
 
 export class AppServiceError extends Error {

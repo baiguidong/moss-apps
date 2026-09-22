@@ -18,6 +18,7 @@ import { ConnectionState, LocalParticipant, Track } from "livekit-client";
 import { Camera, Loader2, Mic, PhoneOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { openIMSDK, type OpenIMProfile } from "@/lib/openim-sdk";
+import { openIMHost } from "@/lib/host";
 
 export enum OpenIMCallSignal {
   Invite = 200,
@@ -136,7 +137,7 @@ export function OpenIMRtcCall({ profile, selfUserID, call, onClose }: {
 
   const connect = React.useCallback(async () => {
     if (!profile.chatToken) throw new Error("通话登录信息缺失，请退出后重新登录");
-    const result = await window.agentDesktop.openIM.getRtcToken({
+    const result = await openIMHost.getRtcToken({
       chatToken: profile.chatToken,
       room: invitation.roomID,
       identity: selfUserID,

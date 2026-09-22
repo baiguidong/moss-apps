@@ -3,46 +3,7 @@ export type AppBackendLifecycle = 'on-demand' | 'persistent'
 export type AppInstanceMode = 'single' | 'multiple'
 export type AppBackendProtocol = string
 
-export type ChannelPermission =
-  | 'channel:connection'
-  | 'channel:pairing'
-  | 'channel:sessions:read'
-  | 'channel:sessions:write'
-  | 'channel:messages'
-  | 'channel:deliveries'
-  | 'channel:notifications'
-  | 'channel:decisions'
-
-export type ChannelHostMethod =
-  | 'connection.update'
-  | 'pairing.attempt'
-  | 'conversation.list'
-  | 'conversation.current'
-  | 'conversation.create'
-  | 'conversation.select'
-  | 'session.abort'
-  | 'message.receive'
-  | 'delivery.ack'
-  | 'decision.respond'
-
-export type ChannelBackendEvent =
-  | 'turn.accepted'
-  | 'turn.output'
-  | 'turn.review_requested'
-  | 'turn.completed'
-  | 'turn.failed'
-  | 'notification.deliver'
-  | 'decision.resolved'
-
-export interface ChannelExternalIdentity {
-  externalUserId: string
-  externalConversationId?: string
-  externalEventId?: string
-}
-
-export type ChannelIdempotentIdentity = ChannelExternalIdentity & { externalEventId: string }
-
-export interface ChannelSessionSummary {
+export interface AgentSessionSummary {
   id: string
   title: string
   preview?: string
@@ -52,84 +13,12 @@ export interface ChannelSessionSummary {
   originChannel?: string
 }
 
-export interface ChannelAttachment {
+export interface AgentAttachment {
   type: 'file' | 'image'
   name?: string
   mimeType?: string
   data?: string
   path?: string
-}
-
-export interface ChannelHostRequestMap {
-  'connection.update': { connected: boolean; error?: string | null; metadata?: Record<string, unknown> }
-  'pairing.attempt': Required<ChannelExternalIdentity> & { code: string; displayName?: string }
-  'conversation.list': ChannelExternalIdentity & { category?: string; page?: number; pageSize?: number; query?: string }
-  'conversation.current': ChannelExternalIdentity
-  'conversation.create': ChannelIdempotentIdentity & { title?: string }
-  'conversation.select': ChannelIdempotentIdentity & { sessionId: string }
-  'session.abort': ChannelIdempotentIdentity
-  'message.receive': Required<ChannelExternalIdentity> & { text?: string; attachments?: ChannelAttachment[]; mentioned?: boolean; source?: 'human' | 'agent' | 'system'; hop?: number }
-  'delivery.ack': {
-    deliveryId: string
-    kind?: 'turn' | 'notification'
-    ok: boolean
-    externalConversationId?: string
-    externalMessageId?: string
-    externalCardId?: string
-    error?: string
-  }
-  'decision.respond': Required<ChannelExternalIdentity> & { decisionId: string; actionToken: string; allowed: boolean }
-}
-
-export interface ChannelHostResultMap {
-  'connection.update': Record<string, unknown>
-  'pairing.attempt': {
-    paired: boolean
-    alreadyPaired?: boolean
-    duplicate?: boolean
-    conversationId?: string | null
-  }
-  'conversation.list': { sessions: ChannelSessionSummary[]; currentSession?: ChannelSessionSummary | null; [key: string]: unknown }
-  'conversation.current': { session?: ChannelSessionSummary | null; [key: string]: unknown }
-  'conversation.create': { session: ChannelSessionSummary; [key: string]: unknown }
-  'conversation.select': { session: ChannelSessionSummary; [key: string]: unknown }
-  'session.abort': { cancelled?: number; [key: string]: unknown }
-  'message.receive': { accepted?: boolean; duplicate?: boolean; turnId?: string | null; session?: ChannelSessionSummary; [key: string]: unknown }
-  'delivery.ack': Record<string, unknown>
-  'decision.respond': Record<string, unknown>
-}
-
-export interface ChannelBackendEventMap {
-  'turn.accepted': { turnId: string; externalConversationId: string; [key: string]: unknown }
-  'turn.output': { turnId: string; externalConversationId: string; [key: string]: unknown }
-  'turn.review_requested': { turnId: string; externalConversationId: string; text: string; [key: string]: unknown }
-  'turn.completed': { turnId: string; externalConversationId: string; [key: string]: unknown }
-  'turn.failed': { turnId: string; externalConversationId: string; [key: string]: unknown }
-  'notification.deliver': { deliveryId: string; externalConversationId: string; [key: string]: unknown }
-  'decision.resolved': { decisionId: string; [key: string]: unknown }
-}
-
-export interface ChannelEventContext extends AppBackendContext {
-  channel: AppChannelApi
-  signal: AbortSignal
-  eventId: string
-  name: ChannelBackendEvent
-  protocol: 'moss.channel/v1'
-}
-
-export type ChannelEventHandler<Data = Record<string, unknown>, Result = unknown> =
-  (data: Data, context: ChannelEventContext) => Result | Promise<Result>
-
-export interface AppChannelApi {
-  request<Method extends ChannelHostMethod>(
-    method: Method,
-    input: ChannelHostRequestMap[Method],
-    options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal },
-  ): Promise<ChannelHostResultMap[Method]>
-  on<Name extends ChannelBackendEvent, Result = unknown>(
-    name: Name,
-    handler: ChannelEventHandler<ChannelBackendEventMap[Name], Result>,
-  ): () => void
 }
 
 export type AccountPermission = 'account:identity:read' | 'account:directory:read'
@@ -185,24 +74,35 @@ export interface AppAccountApi {
     input?: AccountHostRequestMap[Method],
     options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal },
   ): Promise<AccountHostResultMap[Method]>
-  on(name: AccountBackendEvent, handler: (data: { revision?: string }, context: HostEventContext) => unknown | Promise<unknown>): () => void
+  on(
+    name: AccountBackendEvent,
+    handler: (data: { revision?: string }, context: HostEventContext) => unknown | Promise<unknown>,
+  ): () => void
 }
 
 export type AgentPermission =
   | 'agent:catalog:read'
   | 'agent:bindings:read'
   | 'agent:bindings:write'
+  | 'agent:sessions:read'
+  | 'agent:sessions:write'
   | 'agent:turns:read'
   | 'agent:turns:write'
+
 export type AgentReplyMode = 'human_only' | 'ai_auto' | 'ai_draft_review' | 'mention_only' | 'inherit'
 export type AgentSessionMode = 'fixed' | 'rotating' | 'new_each_turn'
-export type AgentChannelPermissionMode = 'default' | 'acceptEdits' | 'dontAsk'
+export type AgentPermissionMode = 'default' | 'acceptEdits' | 'dontAsk'
 export type AgentCatalogKind = 'agents' | 'tools' | 'skills' | 'connectors'
 export type AgentHostMethod =
   | 'catalog.list'
   | 'binding.get'
   | 'binding.update'
   | 'binding.reset'
+  | 'session.list'
+  | 'session.current'
+  | 'session.create'
+  | 'session.select'
+  | 'session.abort'
   | 'context.observe'
   | 'turn.start'
   | 'turn.list'
@@ -214,7 +114,6 @@ export type AgentHostMethod =
 export type AgentBackendEvent =
   | 'binding.changed'
   | 'turn.accepted'
-  | 'turn.output'
   | 'turn.review_requested'
   | 'turn.completed'
   | 'turn.failed'
@@ -229,7 +128,7 @@ export interface AgentBindingPolicy {
   inheritDefault?: boolean
   replyMode: AgentReplyMode
   agentId: string | null
-  permissionMode: AgentChannelPermissionMode
+  permissionMode: AgentPermissionMode
   resources: AgentBindingResources
   session: { mode: AgentSessionMode; rotateAfterTurns: number }
   proactive: { enabled: boolean; maxConsecutiveReplies: number; cooldownMs: number }
@@ -239,7 +138,7 @@ export interface AgentBindingPatch {
   inheritDefault?: boolean
   replyMode?: AgentReplyMode
   agentId?: string | null
-  permissionMode?: AgentChannelPermissionMode | null
+  permissionMode?: AgentPermissionMode | null
   resources?: Partial<AgentBindingResources> | null
   session?: Partial<AgentBindingPolicy['session']> | null
   proactive?: Partial<AgentBindingPolicy['proactive']> | null
@@ -282,6 +181,37 @@ export interface AgentHostRequestMap {
     defaultConversationId?: string
     expectedRevision?: number
   }
+  'session.list': {
+    externalUserId: string
+    externalConversationId?: string
+    externalEventId?: string
+    category?: string
+    page?: number
+    pageSize?: number
+    query?: string
+  }
+  'session.current': {
+    externalUserId: string
+    externalConversationId?: string
+    externalEventId?: string
+  }
+  'session.create': {
+    externalUserId: string
+    externalConversationId?: string
+    externalEventId: string
+    title?: string
+  }
+  'session.select': {
+    externalUserId: string
+    externalConversationId?: string
+    externalEventId: string
+    sessionId: string
+  }
+  'session.abort': {
+    externalUserId: string
+    externalConversationId?: string
+    externalEventId: string
+  }
   'context.observe': {
     externalUserId: string
     externalConversationId: string
@@ -294,7 +224,7 @@ export interface AgentHostRequestMap {
     externalEventId: string
     defaultConversationId?: string
     text?: string
-    attachments?: ChannelAttachment[]
+    attachments?: AgentAttachment[]
     mentioned?: boolean
     source?: 'human' | 'agent' | 'system'
     hop?: number
@@ -316,6 +246,19 @@ export interface AgentHostResultMap {
   'binding.get': { binding: AgentBindingRecord | null; effective: AgentEffectiveBinding }
   'binding.update': { binding: AgentBindingRecord; effective: AgentEffectiveBinding }
   'binding.reset': { reset: boolean; binding: null; effective: AgentEffectiveBinding }
+  'session.list': {
+    sessions: AgentSessionSummary[]
+    currentSession: AgentSessionSummary | null
+    page: number
+    pageSize: number
+    total: number
+    hasPrevious: boolean
+    hasNext: boolean
+  }
+  'session.current': { session: AgentSessionSummary | null }
+  'session.create': { session: AgentSessionSummary }
+  'session.select': { session: AgentSessionSummary }
+  'session.abort': { cancelled: number; session: AgentSessionSummary }
   'context.observe': { observed: boolean; duplicate: boolean }
   'turn.start': Record<string, unknown>
   'turn.list': { turns: Array<Record<string, unknown>> }
@@ -327,8 +270,71 @@ export interface AgentHostResultMap {
 }
 
 export interface AppAgentApi {
-  request<Method extends AgentHostMethod>(method: Method, input: AgentHostRequestMap[Method], options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<AgentHostResultMap[Method]>
-  on(name: AgentBackendEvent, handler: (data: Record<string, unknown>, context: HostEventContext) => unknown | Promise<unknown>): () => void
+  request<Method extends AgentHostMethod>(
+    method: Method,
+    input: AgentHostRequestMap[Method],
+    options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal },
+  ): Promise<AgentHostResultMap[Method]>
+  on(
+    name: AgentBackendEvent,
+    handler: (data: Record<string, unknown>, context: HostEventContext) => unknown | Promise<unknown>,
+  ): () => void
+}
+
+export type DesktopPermission = 'desktop:files' | 'desktop:screen-capture' | 'desktop:external-links' | 'desktop:media'
+export type DesktopHostMethod =
+  | 'file.pick'
+  | 'file.materialize'
+  | 'file.thumbnail'
+  | 'file.download'
+  | 'screen.capture'
+  | 'shell.open-external'
+
+export interface DesktopFile {
+  name: string
+  path: string
+  size: number
+  mediaUrl: string
+}
+
+export interface DesktopHostRequestMap {
+  'file.pick': { kind?: 'image' | 'video' | 'audio' | 'file'; multiple?: boolean }
+  'file.materialize': { fileName: string; dataBase64: string }
+  'file.thumbnail': { path: string; width?: number; height?: number }
+  'file.download': { url: string; fileName: string }
+  'screen.capture': Record<string, never>
+  'shell.open-external': { url: string }
+}
+
+export interface DesktopHostResultMap {
+  'file.pick': { files: DesktopFile[] }
+  'file.materialize': DesktopFile
+  'file.thumbnail': { path: string; mediaUrl: string }
+  'file.download': { canceled: boolean; filePath?: string }
+  'screen.capture': DesktopFile
+  'shell.open-external': { opened: true }
+}
+
+export interface AppDesktopApi {
+  request<Method extends DesktopHostMethod>(
+    method: Method,
+    input: DesktopHostRequestMap[Method],
+    options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal },
+  ): Promise<DesktopHostResultMap[Method]>
+}
+
+export type RemotePermission = 'remote:actions'
+export type RemoteHostMethod = 'action.invoke'
+export interface RemoteHostRequestMap {
+  'action.invoke': { action: string; input?: Record<string, unknown>; timeoutMs?: number }
+}
+export interface RemoteHostResultMap { 'action.invoke': unknown }
+export interface AppRemoteApi {
+  request<Output = unknown>(
+    method: 'action.invoke',
+    input: RemoteHostRequestMap['action.invoke'],
+    options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal },
+  ): Promise<Output>
 }
 
 export interface AppHostApi {
@@ -415,9 +421,10 @@ export interface AppBackendContext {
   permissions: string[]
   grants: string[]
   host: AppHostApi
-  channel: AppChannelApi
   account: AppAccountApi
   agent: AppAgentApi
+  desktop: AppDesktopApi
+  remote: AppRemoteApi
 }
 
 export interface AppActionContext extends AppBackendContext {
@@ -472,18 +479,19 @@ export class AppServiceError extends Error {
 export class AppBackendClient {
   constructor(options?: Record<string, unknown>)
   registerAction(name: string, handler: AppActionHandler): this
-  requestChannelHost<Method extends ChannelHostMethod>(method: Method, input: ChannelHostRequestMap[Method], options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<ChannelHostResultMap[Method]>
-  onChannelEvent<Name extends ChannelBackendEvent, Result = unknown>(name: Name, handler: ChannelEventHandler<ChannelBackendEventMap[Name], Result>): () => void
   requestAccountHost<Method extends AccountHostMethod>(method: Method, input?: AccountHostRequestMap[Method], options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<AccountHostResultMap[Method]>
   onAccountEvent(name: AccountBackendEvent, handler: (data: Record<string, unknown>, context: HostEventContext) => unknown | Promise<unknown>): () => void
   requestAgentHost<Method extends AgentHostMethod>(method: Method, input: AgentHostRequestMap[Method], options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<AgentHostResultMap[Method]>
   onAgentEvent(name: AgentBackendEvent, handler: (data: Record<string, unknown>, context: HostEventContext) => unknown | Promise<unknown>): () => void
+  requestDesktopHost<Method extends DesktopHostMethod>(method: Method, input: DesktopHostRequestMap[Method], options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<DesktopHostResultMap[Method]>
+  requestRemoteHost<Output = unknown>(method: 'action.invoke', input: RemoteHostRequestMap['action.invoke'], options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<Output>
   requestHost<Output = unknown>(protocol: AppBackendProtocol, method: string, input?: Record<string, unknown>, options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<Output>
   onHostEvent<Result = unknown>(protocol: AppBackendProtocol, name: string, handler: (data: Record<string, unknown>, context: HostEventContext) => Result | Promise<Result>): () => void
   readonly host: AppHostApi
-  readonly channel: AppChannelApi
   readonly account: AppAccountApi
   readonly agent: AppAgentApi
+  readonly desktop: AppDesktopApi
+  readonly remote: AppRemoteApi
   emit(name: string, data?: unknown): void
   log(level: string, message: string, details?: unknown): void
   status(state: string, details?: unknown): void
@@ -493,15 +501,10 @@ export class AppBackendClient {
 
 export const APP_SERVICE_PROTOCOL_VERSION: 1
 export const APP_BACKEND_API_VERSION: 1
-export const MOSS_CHANNEL_PROTOCOL: 'moss.channel/v1'
 export const MOSS_ACCOUNT_PROTOCOL: 'moss.account/v1'
 export const MOSS_AGENT_PROTOCOL: 'moss.agent/v1'
-export const MOSS_OPENIM_PROTOCOL: 'moss.openim/v1'
-export const CHANNEL_PERMISSIONS: Readonly<Record<string, ChannelPermission>>
-export const CHANNEL_HOST_METHOD_PERMISSIONS: Readonly<Record<ChannelHostMethod, ChannelPermission>>
-export const CHANNEL_BACKEND_EVENT_PERMISSIONS: Readonly<Record<ChannelBackendEvent, ChannelPermission>>
-export const CHANNEL_HOST_METHODS: readonly ChannelHostMethod[]
-export const CHANNEL_BACKEND_EVENTS: readonly ChannelBackendEvent[]
+export const MOSS_DESKTOP_PROTOCOL: 'moss.desktop/v1'
+export const MOSS_REMOTE_PROTOCOL: 'moss.remote/v1'
 export const ACCOUNT_PERMISSIONS: Readonly<Record<string, AccountPermission>>
 export const ACCOUNT_HOST_METHOD_PERMISSIONS: Readonly<Record<AccountHostMethod, AccountPermission>>
 export const ACCOUNT_BACKEND_EVENT_PERMISSIONS: Readonly<Record<AccountBackendEvent, AccountPermission>>
@@ -510,22 +513,18 @@ export const ACCOUNT_BACKEND_EVENTS: readonly AccountBackendEvent[]
 export const AGENT_PERMISSIONS: Readonly<Record<string, AgentPermission>>
 export const AGENT_REPLY_MODES: readonly AgentReplyMode[]
 export const AGENT_SESSION_MODES: readonly AgentSessionMode[]
-export const AGENT_CHANNEL_PERMISSION_MODES: readonly AgentChannelPermissionMode[]
+export const AGENT_PERMISSION_MODES: readonly AgentPermissionMode[]
 export const AGENT_CATALOG_KINDS: readonly AgentCatalogKind[]
 export const AGENT_HOST_METHOD_PERMISSIONS: Readonly<Record<AgentHostMethod, AgentPermission>>
 export const AGENT_BACKEND_EVENT_PERMISSIONS: Readonly<Record<AgentBackendEvent, AgentPermission>>
 export const AGENT_HOST_METHODS: readonly AgentHostMethod[]
 export const AGENT_BACKEND_EVENTS: readonly AgentBackendEvent[]
-export const OPENIM_PERMISSIONS: Readonly<Record<string, string>>
-export const OPENIM_HOST_METHOD_PERMISSIONS: Readonly<Record<string, string>>
-export const OPENIM_BACKEND_EVENT_PERMISSIONS: Readonly<Record<string, string>>
-export const OPENIM_HOST_METHODS: readonly string[]
-export const OPENIM_BACKEND_EVENTS: readonly string[]
-export function openIMConversationScope(userId: string): string
-export function openIMDefaultConversationId(userId: string): string
-export function openIMDirectConversationId(userId: string, peerUserId: string): string
-export function parseOpenIMDirectConversationId(value: unknown): { userId: string; peerUserId: string } | null
-export function openIMDefaultConversationIdFor(value: unknown): string | null
+export const DESKTOP_PERMISSIONS: Readonly<Record<string, DesktopPermission>>
+export const DESKTOP_HOST_METHOD_PERMISSIONS: Readonly<Record<DesktopHostMethod, DesktopPermission>>
+export const DESKTOP_HOST_METHODS: readonly DesktopHostMethod[]
+export const REMOTE_PERMISSIONS: Readonly<Record<string, RemotePermission>>
+export const REMOTE_HOST_METHOD_PERMISSIONS: Readonly<Record<RemoteHostMethod, RemotePermission>>
+export const REMOTE_HOST_METHODS: readonly RemoteHostMethod[]
 export const DEFAULT_MAX_MESSAGE_BYTES: number
 export const APP_HOST_API_VERSION: string
 export const APP_MANIFEST_SCHEMA: Record<string, unknown>
@@ -538,17 +537,6 @@ export function createEnvelope<T = unknown>(type: string, payload?: T, options?:
 export function validateEnvelope<T = unknown>(raw: unknown, options?: { allowedTypes?: string[]; maxBytes?: number }): AppServiceEnvelope<T>
 export function getEnvelopeByteLength(envelope: unknown): number
 export function serializeError(error: unknown, fallbackCode?: string): { code: string; message: string; details?: unknown }
-export function validateChannelHostMethod(value: unknown): ChannelHostMethod
-export function validateChannelBackendEvent(value: unknown): ChannelBackendEvent
-export function getChannelHostMethodPermission(method: ChannelHostMethod): ChannelPermission
-export function getChannelBackendEventPermission(name: ChannelBackendEvent): ChannelPermission
-export function validateChannelProtocol(value: unknown): 'moss.channel/v1'
-export function validateChannelData(value: unknown, label?: string): Record<string, unknown>
-export function validateChannelAttachments(value: unknown, method: string): void
-export function validateChannelMessageContent(input: Record<string, unknown>, method: string): void
-export function validateChannelHostInput(method: ChannelHostMethod, value: unknown): Record<string, unknown>
-export function validateChannelBackendEventData(name: ChannelBackendEvent, value: unknown): Record<string, unknown>
-export function requireChannelPermission(permissions: string[], requiredPermission: ChannelPermission): true
 export function validateAccountHostMethod(value: unknown): AccountHostMethod
 export function validateAccountBackendEvent(value: unknown): AccountBackendEvent
 export function validateAccountHostInput(method: AccountHostMethod, value: unknown): Record<string, unknown>
@@ -557,10 +545,12 @@ export function validateAgentHostMethod(value: unknown): AgentHostMethod
 export function validateAgentBackendEvent(value: unknown): AgentBackendEvent
 export function validateAgentHostInput(method: AgentHostMethod, value: unknown): Record<string, unknown>
 export function validateAgentBackendEventData(name: AgentBackendEvent, value: unknown): Record<string, unknown>
-export function validateOpenIMHostMethod(value: unknown): string
-export function validateOpenIMBackendEvent(value: unknown): string
-export function validateOpenIMHostInput(method: string, value: unknown): Record<string, unknown>
-export function validateOpenIMBackendEventData(name: string, value: unknown): Record<string, unknown>
+export function validateAgentAttachments(value: unknown, method: string): void
+export function validateAgentMessageContent(input: Record<string, unknown>, method: string): void
+export function validateDesktopHostMethod(value: unknown): DesktopHostMethod
+export function validateDesktopHostInput(method: DesktopHostMethod, value: unknown): Record<string, unknown>
+export function validateRemoteHostMethod(value: unknown): RemoteHostMethod
+export function validateRemoteHostInput(method: RemoteHostMethod, value: unknown): Record<string, unknown>
 export function validateHostProtocol(value: unknown): string
 export function validateHostMember(value: unknown, label?: string): string
 export function validateHostData(value: unknown, label?: string): Record<string, unknown>
