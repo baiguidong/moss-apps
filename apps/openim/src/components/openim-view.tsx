@@ -50,7 +50,7 @@ import {
 import {
   openIMDefaultConversationId,
   openIMDirectConversationId,
-} from "@moss/app-sdk/openim/identifiers";
+} from "@/lib/conversation-identifiers";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -108,6 +108,10 @@ function errorMessage(error: unknown) {
     return value.errDlt || value.errMsg || value.message || JSON.stringify(error);
   }
   return String(error || "OpenIM 请求失败");
+}
+
+function isTransientConnectionError(error: unknown) {
+  return /fetch failed|network|offline|econn|enotfound|etimedout|timeout|socket|网络|断网|超时|无法连接|连接失败|连接被拒绝/i.test(errorMessage(error));
 }
 
 function formatTime(timestamp?: number) {
@@ -279,7 +283,8 @@ export function OpenIMView() {
   const [profile, setProfile] = React.useState<OpenIMProfile | null>(null);
   const [selfInfo, setSelfInfo] = React.useState<SelfUserInfo | null>(null);
   const [connection, setConnection] = React.useState<ConnectionState>("connecting");
-  const [initializing, setInitializing] = React.useState(true);
+  const [sessionRevision, setSessionRevision] = React.useState(0);
+  const [bootstrapRetryVersion, setBootstrapRetryVersion] = React.useState(0);
   const [connectionError, setConnectionError] = React.useState("");
   const [conversations, setConversations] = React.useState<ConversationItem[]>([]);
   const [activeConversation, setActiveConversation] = React.useState<ConversationItem | null>(null);
@@ -341,9 +346,14 @@ export function OpenIMView() {
   const accountUserIDRef = React.useRef("");
   const accountGenerationRef = React.useRef(0);
   const bootstrapRequestRef = React.useRef(0);
+  const bootstrapInFlightRef = React.useRef(false);
+  const bootstrapQueuedRef = React.useRef(false);
+  const messagesConversationIDRef = React.useRef("");
+  const connectionRef = React.useRef<ConnectionState>(connection);
 
   activeConversationRef.current = activeConversation;
   selfUserIDRef.current = profile?.userID || selfInfo?.userID || "";
+  connectionRef.current = connection;
 
   const resetAccountState = React.useCallback(() => {
     accountGenerationRef.current += 1;
@@ -351,6 +361,7 @@ export function OpenIMView() {
     activeConversationRef.current = null;
     selfUserIDRef.current = "";
     loadingOlderRef.current = false;
+    messagesConversationIDRef.current = "";
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
     if (remoteTypingTimerRef.current) clearTimeout(remoteTypingTimerRef.current);
     typingTimerRef.current = null;
@@ -467,10 +478,14 @@ export function OpenIMView() {
     return result;
   }, []);
 
-  const bootstrap = React.useCallback(async () => {
+  const bootstrap = React.useCallback(async (queueIfBusy = false) => {
+    if (bootstrapInFlightRef.current) {
+      if (queueIfBusy) bootstrapQueuedRef.current = true;
+      return;
+    }
+    bootstrapInFlightRef.current = true;
     const requestId = ++bootstrapRequestRef.current;
-    setInitializing(true);
-    setConnection("connecting");
+    setConnection((current) => current === "connected" ? current : "connecting");
     setConnectionError("");
     try {
       const session = await window.agentDesktop.openIM.createSession();
@@ -482,22 +497,38 @@ export function OpenIMView() {
       accountUserIDRef.current = nextUserID;
       selfUserIDRef.current = nextUserID;
       setProfile(session);
+      if (connectionRef.current !== "connected") {
+        setSessionRevision((current) => current + 1);
+      }
     } catch (error) {
       if (requestId !== bootstrapRequestRef.current) return;
-      await logoutOpenIMSession().catch(() => {});
-      if (requestId !== bootstrapRequestRef.current) return;
-      resetAccountState();
-      accountUserIDRef.current = "";
-      setProfile(null);
+      if (!isTransientConnectionError(error)) {
+        await logoutOpenIMSession().catch(() => {});
+        if (requestId !== bootstrapRequestRef.current) return;
+        resetAccountState();
+        accountUserIDRef.current = "";
+        setProfile(null);
+      }
       setConnection("failed");
       setConnectionError(errorMessage(error));
-      setInitializing(false);
+    } finally {
+      bootstrapInFlightRef.current = false;
+      if (bootstrapQueuedRef.current) {
+        bootstrapQueuedRef.current = false;
+        setBootstrapRetryVersion((current) => current + 1);
+      }
     }
   }, [resetAccountState]);
 
   React.useEffect(() => {
     void bootstrap();
-  }, [bootstrap]);
+  }, [bootstrap, bootstrapRetryVersion]);
+
+  React.useEffect(() => {
+    if (connection !== "failed") return;
+    const timer = window.setTimeout(() => void bootstrap(), 10_000);
+    return () => window.clearTimeout(timer);
+  }, [bootstrap, connection]);
 
   React.useEffect(() => {
     if (!profile?.expiresIn) return;
@@ -535,11 +566,9 @@ export function OpenIMView() {
     };
     const handleSessionExpired = () => {
       if (!isCurrentAccount()) return;
-      resetAccountState();
-      accountUserIDRef.current = "";
-      setProfile(null);
+      setConnection("failed");
       setConnectionError("即时消息登录已失效，正在重新连接");
-      void logoutOpenIMSession().catch(() => {}).finally(() => bootstrap());
+      void logoutOpenIMSession().catch(() => {}).finally(() => bootstrap(true));
     };
     const handleConversationChanged = (event: WSEvent<ConversationItem[]>) => {
       if (!isCurrentAccount()) return;
@@ -668,25 +697,37 @@ export function OpenIMView() {
     void openIMSDK.on(CbEvents.OnSyncServerFinish, handleSyncFinished);
 
     void (async () => {
-      setInitializing(true);
-      setConnection("connecting");
+      setConnection((current) => current === "connected" ? current : "connecting");
       setConnectionError("");
+      let info: SelfUserInfo;
+      let sdkConnected = false;
       try {
         const localConfig = await window.agentDesktop.openIM.getConfig();
         const config = { ...localConfig, apiAddr: profile.apiAddr, wsAddr: profile.wsAddr };
         if (!config.available) throw new Error(config.error || "OpenIM SDK 不可用");
-        const info = await ensureOpenIMSession(profile, config);
-        if (!isCurrentAccount()) return;
-        setSelfInfo(info);
-        setConnection("connected");
-        await Promise.all([refreshConversations(), refreshDirectory()]);
+        const session = await ensureOpenIMSession(profile, config);
+        info = session.selfInfo;
+        sdkConnected = session.connected;
       } catch (error) {
         if (isCurrentAccount()) {
           setConnection("failed");
           setConnectionError(errorMessage(error));
         }
-      } finally {
-        if (isCurrentAccount()) setInitializing(false);
+        return;
+      }
+      if (!isCurrentAccount()) return;
+      setSelfInfo(info);
+      setConnection(sdkConnected ? "connected" : "connecting");
+      const [conversationResult, directoryResult] = await Promise.allSettled([
+        refreshConversations(),
+        refreshDirectory(),
+      ]);
+      if (!isCurrentAccount()) return;
+      if (conversationResult.status === "rejected") {
+        if (sdkConnected) setConnection("failed");
+        setConnectionError(errorMessage(conversationResult.reason));
+      } else if (directoryResult.status === "rejected") {
+        setConnectionError((current) => current || errorMessage(directoryResult.reason));
       }
     })();
 
@@ -712,22 +753,40 @@ export function OpenIMView() {
       void openIMSDK.off(CbEvents.OnGroupMemberInfoChanged, handleGroupChanged);
       void openIMSDK.off(CbEvents.OnSyncServerFinish, handleSyncFinished);
     };
-  }, [bootstrap, profile, refreshConversations, refreshDirectory, resetAccountState]);
+  }, [
+    bootstrap,
+    profile?.apiAddr,
+    profile?.imToken,
+    profile?.userID,
+    profile?.wsAddr,
+    refreshConversations,
+    refreshDirectory,
+    sessionRevision,
+  ]);
 
   React.useEffect(() => {
-    if (!activeConversation || connection !== "connected") {
+    const conversationID = activeConversation?.conversationID || "";
+    const conversationChanged = messagesConversationIDRef.current !== conversationID;
+    if (conversationChanged) {
+      messagesConversationIDRef.current = conversationID;
       setMessages([]);
       setHasMoreHistory(false);
+      setMessagesLoading(false);
+      setReplyTo(null);
+      setMultiSelect(false);
+      setSelectedMessageIDs(new Set());
+      setMessageQuery("");
+      setSearchResults(null);
+    }
+    if (!activeConversation) return;
+    if (connection !== "connected") {
+      historyRequestRef.current += 1;
+      setMessagesLoading(false);
       return;
     }
     const requestId = ++historyRequestRef.current;
-    setMessagesLoading(true);
+    setMessagesLoading(conversationChanged);
     setHasMoreHistory(false);
-    setReplyTo(null);
-    setMultiSelect(false);
-    setSelectedMessageIDs(new Set());
-    setMessageQuery("");
-    setSearchResults(null);
     void openIMSDK.getAdvancedHistoryMessageList({
       count: 100,
       startClientMsgID: "",
@@ -1331,23 +1390,6 @@ export function OpenIMView() {
     }
   };
 
-  if (!profile) {
-    return (
-      <div className="flex h-full min-h-0 items-center justify-center bg-background px-6">
-        <div className="w-full max-w-sm text-center">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary"><MessageSquareText className="h-5 w-5" /></div>
-            <div className="text-left"><h1 className="text-lg font-semibold text-foreground">即时消息</h1><div className="text-xs text-muted-foreground">使用 Moss Server 账号连接</div></div>
-          </div>
-          {initializing ? <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />正在连接</div> : null}
-          {!initializing && connectionError ? <div className="text-sm leading-6 text-destructive">{connectionError}</div> : null}
-          {!initializing ? <div className="mt-5 flex justify-center gap-2"><Button type="button" onClick={() => void bootstrap()}><RefreshCw className="h-4 w-4" />重新连接</Button>{appInstance?.enabled ? <Button type="button" variant="outline" onClick={openDefaultPolicy}><Bot className="h-4 w-4" />默认 AI 策略</Button> : appInstance ? <Button type="button" variant="outline" disabled={agentBackendBusy} onClick={() => void enableAgentBackend()}>{agentBackendBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}启用 AI 回复</Button> : null}</div> : null}
-        </div>
-        {policyTarget ? <OpenIMAgentPolicyDialog instanceId={appInstance?.enabled ? appInstance.id : null} target={policyTarget} onClose={() => setPolicyTarget(null)} /> : null}
-      </div>
-    );
-  }
-
   const filteredConversations = conversations.filter((item) => item.showName.toLowerCase().includes(query.trim().toLowerCase()));
   const departmentNames = new Map(directory.departments.map((department) => [department.id, department.name]));
   const normalizedQuery = query.trim().toLowerCase();
@@ -1364,12 +1406,19 @@ export function OpenIMView() {
   const selfGroupMember = groupMembers.find((member) => member.userID === selfInfo?.userID);
   const canManageGroup = Boolean(selfGroupMember && selfGroupMember.roleLevel >= GroupMemberRole.Admin);
   const groupMemberIDs = new Set(groupMembers.map((member) => member.userID));
+  const currentUserID = profile?.userID || selfInfo?.userID || "";
+  const currentDirectoryUserID = profile?.user.id || "";
+  const currentUserName = selfInfo?.nickname || profile?.user.name || "";
+  const statusLabel = connection === "connected"
+    ? connectionError ? "操作失败" : "已连接"
+    : connection === "connecting" ? "连接中" : "连接失败";
+  const statusIsError = connection === "failed" || Boolean(connectionError);
   const inviteCandidates = directory.users.filter((user) => (
-    user.id !== profile.user.id && !groupMemberIDs.has(user.openimUserID)
+    user.id !== currentDirectoryUserID && !groupMemberIDs.has(user.openimUserID)
   ));
 
   const renderDirectoryUser = (user: OpenIMDirectoryUser, depth: number) => {
-    const self = user.id === profile.user.id;
+    const self = Boolean(currentDirectoryUserID) && user.id === currentDirectoryUserID;
     const content = <>
       <Avatar name={user.name} size="sm" />
       <div className="min-w-0 flex-1">
@@ -1388,7 +1437,7 @@ export function OpenIMView() {
       <button
         key={`user-${user.id}`}
         type="button"
-        disabled={Boolean(creatingConversationUserID)}
+        disabled={connection !== "connected" || Boolean(creatingConversationUserID)}
         className="flex h-12 w-full items-center gap-3 pr-3 text-left hover:bg-muted/60 disabled:opacity-60"
         style={style}
         onClick={() => void openDirectoryConversation(user)}
@@ -1434,20 +1483,22 @@ export function OpenIMView() {
       <div className="flex h-11 shrink-0 items-center gap-3 border-b border-border/70 px-4">
         <MessageSquareText className="h-4 w-4 shrink-0 text-primary" />
         <div className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">即时消息</div>
-        {appInstance?.enabled ? <Button type="button" variant="ghost" size="sm" className="h-7 text-xs" onClick={openDefaultPolicy}><Bot className="h-3.5 w-3.5" />默认 AI 策略</Button> : appInstance ? <Button type="button" variant="outline" size="sm" className="h-7 text-xs" disabled={agentBackendBusy} onClick={() => void enableAgentBackend()}>{agentBackendBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Bot className="h-3.5 w-3.5" />}启用 AI 回复</Button> : null}
-        <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
-          {connection === "connecting" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <span className={cn("h-2 w-2 rounded-full", connection === "connected" ? "bg-emerald-500" : "bg-destructive")} />}
-          <span>{connection === "connected" ? "已连接" : connection === "connecting" ? "连接中" : "连接失败"}</span>
-        </div>
-        <span className="max-w-40 truncate text-xs text-muted-foreground">{selfInfo?.nickname || profile.user.name}</span>
-        <Button type="button" variant="ghost" size="icon-sm" onClick={() => void refreshConversations()} title="刷新会话"><RefreshCw className="h-4 w-4" /></Button>
+        {appInstance?.enabled ? <Button type="button" variant="ghost" size="sm" className="h-7 text-xs" disabled={!currentUserID} onClick={openDefaultPolicy}><Bot className="h-3.5 w-3.5" />默认 AI 策略</Button> : appInstance ? <Button type="button" variant="outline" size="sm" className="h-7 text-xs" disabled={agentBackendBusy} onClick={() => void enableAgentBackend()}>{agentBackendBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Bot className="h-3.5 w-3.5" />}启用 AI 回复</Button> : null}
+        <button
+          type="button"
+          className={cn("flex shrink-0 items-center gap-2 text-xs", statusIsError ? "text-destructive" : "text-muted-foreground")}
+          title={connectionError || (connection === "failed" ? "点击重新连接" : statusLabel)}
+          onClick={() => {
+            if (connection === "failed") void bootstrap(true);
+            else if (connectionError) setConnectionError("");
+          }}
+        >
+          {connection === "connecting" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <span className={cn("h-2 w-2 rounded-full", statusIsError ? "bg-destructive" : "bg-emerald-500")} />}
+          <span>{statusLabel}</span>
+        </button>
+        {currentUserName ? <span className="max-w-40 truncate text-xs text-muted-foreground">{currentUserName}</span> : null}
+        <Button type="button" variant="ghost" size="icon-sm" disabled={connection !== "connected"} onClick={() => void refreshConversations().catch((error) => setConnectionError(errorMessage(error)))} title="刷新会话"><RefreshCw className="h-4 w-4" /></Button>
       </div>
-
-      {connectionError ? (
-        <div className="flex shrink-0 items-center justify-between border-b border-destructive/20 bg-destructive/5 px-4 py-2 text-xs text-destructive">
-          <span className="truncate">{connectionError}</span><Button type="button" variant="ghost" size="icon-sm" onClick={() => setConnectionError("")}><X className="h-3.5 w-3.5" /></Button>
-        </div>
-      ) : null}
 
       <div className="flex min-h-0 flex-1">
         <aside className="flex w-[31%] min-w-[260px] max-w-[340px] shrink-0 flex-col border-r border-border/70">
@@ -1457,10 +1508,10 @@ export function OpenIMView() {
           </div>
           <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border/60 px-3">
             <div className="relative min-w-0 flex-1"><Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={sidebarTab === "messages" ? "搜索会话" : "搜索姓名、邮箱或部门"} className="h-8 pl-8" /></div>
-            {sidebarTab === "messages" ? <Button type="button" variant="ghost" size="icon-sm" onClick={() => { setSidebarTab("directory"); setQuery(""); }} title="发起会话"><MessageSquarePlus className="h-4 w-4" /></Button> : <>{profile.capabilities.createGroup ? <Button type="button" variant="ghost" size="icon-sm" onClick={() => setGroupCreateOpen(true)} title="创建群聊"><UsersRound className="h-4 w-4" /></Button> : null}<Button type="button" variant="ghost" size="icon-sm" onClick={() => void refreshDirectory()} title="刷新通讯录"><RefreshCw className="h-4 w-4" /></Button></>}
+            {sidebarTab === "messages" ? <Button type="button" variant="ghost" size="icon-sm" onClick={() => { setSidebarTab("directory"); setQuery(""); }} title="发起会话"><MessageSquarePlus className="h-4 w-4" /></Button> : <>{profile?.capabilities.createGroup ? <Button type="button" variant="ghost" size="icon-sm" onClick={() => setGroupCreateOpen(true)} title="创建群聊"><UsersRound className="h-4 w-4" /></Button> : null}<Button type="button" variant="ghost" size="icon-sm" disabled={connection !== "connected"} onClick={() => void refreshDirectory().catch((error) => setConnectionError(errorMessage(error)))} title="刷新通讯录"><RefreshCw className="h-4 w-4" /></Button></>}
           </div>
           {sidebarTab === "messages" ? <div className="min-h-0 flex-1 overflow-y-auto">
-            {initializing ? <div className="flex h-full items-center justify-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" />同步中</div> : filteredConversations.length ? filteredConversations.map((conversation) => {
+            {filteredConversations.length ? filteredConversations.map((conversation) => {
               const latest = latestMessage(conversation);
               const active = activeConversation?.conversationID === conversation.conversationID;
               return (
@@ -1477,7 +1528,7 @@ export function OpenIMView() {
             {filteredDirectoryDepartments.length || filteredRootUsers.length ? <>
               {filteredDirectoryDepartments.map((department) => renderDirectoryDepartment(department, 0))}
               {filteredRootUsers.map((user) => renderDirectoryUser(user, 0))}
-            </> : <div className="flex h-full flex-col items-center justify-center px-5 text-center text-sm text-muted-foreground"><UserRound className="mb-3 h-6 w-6" />未找到联系人</div>}
+            </> : <div className="flex h-full flex-col items-center justify-center px-5 text-center text-sm text-muted-foreground"><UserRound className="mb-3 h-6 w-6" />{query ? "未找到联系人" : "暂无联系人"}</div>}
           </div>}
         </aside>
 
@@ -1487,9 +1538,9 @@ export function OpenIMView() {
               <div className="flex h-12 shrink-0 items-center gap-3 border-b border-border/60 px-4">
                 <Avatar name={activeConversation.showName} url={activeConversation.faceURL} group={activeConversation.conversationType !== SessionType.Single} />
                 <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-foreground">{activeConversation.showName}</div><div className="truncate text-[11px] text-muted-foreground">{typingLabel || (activeConversation.conversationType === SessionType.Single ? activeConversation.userID : `${activeConversation.groupID} · ${groupMembers.length || ""}人`)}</div></div>
-                {activeConversation.conversationType === SessionType.Single && appInstance?.enabled ? <OpenIMAgentActivity instanceId={appInstance.id} conversationId={openIMDirectConversationId(profile.userID, activeConversation.userID)} /> : null}
-                {activeConversation.conversationType === SessionType.Single ? <Button type="button" variant="ghost" size="sm" className="h-8 text-xs" disabled={!appInstance?.enabled} title={appInstance?.enabled ? "联系人 AI 回复策略" : "请先启用 AI 回复"} onClick={() => setPolicyTarget({ conversationId: openIMDirectConversationId(profile.userID, activeConversation.userID), peerId: activeConversation.userID, title: activeConversation.showName || activeConversation.userID, kind: "contact" })}><Bot className="h-3.5 w-3.5" />AI 策略</Button> : null}
-                {profile.rtcEnabled && activeConversation.conversationType === SessionType.Single ? <><Button type="button" variant="ghost" size="icon-sm" title="语音通话" onClick={() => void startCall("audio")}><Phone className="h-4 w-4" /></Button><Button type="button" variant="ghost" size="icon-sm" title="视频通话" onClick={() => void startCall("video")}><Video className="h-4 w-4" /></Button></> : null}
+                {activeConversation.conversationType === SessionType.Single && appInstance?.enabled && currentUserID ? <OpenIMAgentActivity instanceId={appInstance.id} conversationId={openIMDirectConversationId(currentUserID, activeConversation.userID)} /> : null}
+                {activeConversation.conversationType === SessionType.Single ? <Button type="button" variant="ghost" size="sm" className="h-8 text-xs" disabled={!appInstance?.enabled || !currentUserID} title={appInstance?.enabled ? "联系人 AI 回复策略" : "请先启用 AI 回复"} onClick={() => currentUserID && setPolicyTarget({ conversationId: openIMDirectConversationId(currentUserID, activeConversation.userID), peerId: activeConversation.userID, title: activeConversation.showName || activeConversation.userID, kind: "contact" })}><Bot className="h-3.5 w-3.5" />AI 策略</Button> : null}
+                {profile?.rtcEnabled && activeConversation.conversationType === SessionType.Single ? <><Button type="button" variant="ghost" size="icon-sm" title="语音通话" onClick={() => void startCall("audio")}><Phone className="h-4 w-4" /></Button><Button type="button" variant="ghost" size="icon-sm" title="视频通话" onClick={() => void startCall("video")}><Video className="h-4 w-4" /></Button></> : null}
                 {messageSearchOpen ? <div className="relative w-56"><Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" /><Input autoFocus value={messageQuery} onChange={(event) => setMessageQuery(event.target.value)} placeholder="搜索聊天记录" className="h-8 pl-7 pr-7 text-xs" /><button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => { setMessageSearchOpen(false); setMessageQuery(""); }}><X className="h-3.5 w-3.5" /></button></div> : <Button type="button" variant="ghost" size="icon-sm" title="搜索聊天记录" onClick={() => setMessageSearchOpen(true)}><Search className="h-4 w-4" /></Button>}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild><Button type="button" variant="ghost" size="icon-sm" title="会话设置"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
@@ -1520,7 +1571,7 @@ export function OpenIMView() {
                             {uploadProgress[message.clientMsgID] !== undefined ? <div className="mt-1 h-1 overflow-hidden rounded-full bg-border/70"><div className="h-full bg-primary transition-[width]" style={{ width: `${uploadProgress[message.clientMsgID]}%` }} /></div> : null}
                             <div className={cn("mt-1 flex items-center gap-2 px-1 text-[10px] text-muted-foreground", mine && "justify-end")}><span>{formatTime(message.sendTime)}</span>{mine && activeConversation.conversationType === SessionType.Single && message.status === MessageStatus.Succeed ? <span>{message.isRead ? "已读" : "未读"}</span> : null}{message.status === MessageStatus.Failed ? <span className="text-destructive">发送失败</span> : null}</div>
                           </div>
-                          {mine ? <Avatar name={selfInfo?.nickname || profile.user.name} url={selfInfo?.faceURL} size="message" /> : null}
+                          {mine ? <Avatar name={currentUserName} url={selfInfo?.faceURL} size="message" /> : null}
                         </div>
                       );
                     })}
@@ -1528,13 +1579,13 @@ export function OpenIMView() {
                   </div>
                 ) : <div className="flex h-full items-center justify-center text-sm text-muted-foreground">{messageQuery ? "未找到消息" : "暂无消息"}</div>}
               </div>
-              {activeConversation.conversationType === SessionType.Single && appInstance?.enabled ? <OpenIMPendingReviews instanceId={appInstance.id} conversationId={openIMDirectConversationId(profile.userID, activeConversation.userID)} /> : null}
+              {activeConversation.conversationType === SessionType.Single && appInstance?.enabled && currentUserID ? <OpenIMPendingReviews instanceId={appInstance.id} conversationId={openIMDirectConversationId(currentUserID, activeConversation.userID)} /> : null}
               {multiSelect ? (
                 <div className="flex h-14 shrink-0 items-center justify-between border-t border-border bg-background px-4">
                   <div className="text-xs text-muted-foreground">已选择 {selectedMessageIDs.size} 条消息</div>
                   <div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => { setMultiSelect(false); setSelectedMessageIDs(new Set()); }}>取消</Button><Button variant="outline" size="sm" disabled={!selectedMessages.length} onClick={() => startForward(selectedMessages, "forward")}>逐条转发</Button><Button size="sm" disabled={!selectedMessages.length} onClick={() => startForward(selectedMessages, "merge")}>合并转发</Button></div>
                 </div>
-              ) : <OpenIMComposer key={`${profile.userID}:${activeConversation.conversationID}`} conversation={activeConversation} disabled={connection !== "connected" || sending} sending={sending} replyTo={replyTo} insertion={composerInsertion} onCancelReply={() => setReplyTo(null)} onSend={sendText} onTyping={notifyTyping} onPickAttachment={(kind) => void pickAttachments(kind)} onPickCard={() => setCardPickerOpen(true)} onPickLocation={() => setLocationOpen(true)} onPickMention={() => setMentionPickerOpen(true)} onSendLocalAttachments={(files) => void sendLocalAttachments(files)} onError={setConnectionError} />}
+              ) : <OpenIMComposer key={`${currentUserID || "offline"}:${activeConversation.conversationID}`} conversation={activeConversation} disabled={connection !== "connected" || sending} sending={sending} replyTo={replyTo} insertion={composerInsertion} onCancelReply={() => setReplyTo(null)} onSend={sendText} onTyping={notifyTyping} onPickAttachment={(kind) => void pickAttachments(kind)} onPickCard={() => setCardPickerOpen(true)} onPickLocation={() => setLocationOpen(true)} onPickMention={() => setMentionPickerOpen(true)} onSendLocalAttachments={(files) => void sendLocalAttachments(files)} onError={setConnectionError} />}
             </>
           ) : <div className="flex h-full flex-col items-center justify-center text-sm text-muted-foreground"><MessageSquareText className="mb-3 h-8 w-8" />选择一个会话</div>}
         </main>
@@ -1544,7 +1595,7 @@ export function OpenIMView() {
 
       {policyTarget ? <OpenIMAgentPolicyDialog instanceId={appInstance?.enabled ? appInstance.id : null} target={policyTarget} onClose={() => setPolicyTarget(null)} /> : null}
 
-      {groupCreateOpen ? <ModalShell title="创建群聊" onClose={() => setGroupCreateOpen(false)} width="max-w-lg"><form className="flex min-h-0 flex-1 flex-col" onSubmit={createDirectoryGroup}><div className="border-b border-border p-4"><label htmlFor="openim-group-name" className="mb-2 block text-xs font-medium text-muted-foreground">群聊名称</label><Input id="openim-group-name" autoFocus value={groupName} onChange={(event) => setGroupName(event.target.value)} placeholder="输入群聊名称" /></div><div className="min-h-0 flex-1 overflow-y-auto p-2">{directory.users.filter((user) => user.id !== profile.user.id).map((user) => { const selected = selectedGroupUserIDs.has(user.id); return <button key={user.id} type="button" className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-muted" onClick={() => setSelectedGroupUserIDs((current) => { const next = new Set(current); if (next.has(user.id)) next.delete(user.id); else next.add(user.id); return next; })}><span className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded border", selected ? "border-primary bg-primary text-primary-foreground" : "border-border")}>{selected ? <Check className="h-3.5 w-3.5" /> : null}</span><Avatar name={user.name} size="sm" /><span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{user.name}</span><span className="block truncate text-xs text-muted-foreground">{user.departmentId ? departmentNames.get(user.departmentId) || "未分配部门" : "未分配部门"}</span></span></button>; })}</div><div className="flex items-center justify-between border-t border-border px-4 py-3"><span className="text-xs text-muted-foreground">已选择 {selectedGroupUserIDs.size} 人</span><div className="flex gap-2"><Button type="button" variant="outline" onClick={() => setGroupCreateOpen(false)}>取消</Button><Button type="submit" disabled={creatingGroup || !groupName.trim() || selectedGroupUserIDs.size < 2}>{creatingGroup ? <Loader2 className="h-4 w-4 animate-spin" /> : null}创建</Button></div></div></form></ModalShell> : null}
+      {groupCreateOpen ? <ModalShell title="创建群聊" onClose={() => setGroupCreateOpen(false)} width="max-w-lg"><form className="flex min-h-0 flex-1 flex-col" onSubmit={createDirectoryGroup}><div className="border-b border-border p-4"><label htmlFor="openim-group-name" className="mb-2 block text-xs font-medium text-muted-foreground">群聊名称</label><Input id="openim-group-name" autoFocus value={groupName} onChange={(event) => setGroupName(event.target.value)} placeholder="输入群聊名称" /></div><div className="min-h-0 flex-1 overflow-y-auto p-2">{directory.users.filter((user) => user.id !== currentDirectoryUserID).map((user) => { const selected = selectedGroupUserIDs.has(user.id); return <button key={user.id} type="button" className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-muted" onClick={() => setSelectedGroupUserIDs((current) => { const next = new Set(current); if (next.has(user.id)) next.delete(user.id); else next.add(user.id); return next; })}><span className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded border", selected ? "border-primary bg-primary text-primary-foreground" : "border-border")}>{selected ? <Check className="h-3.5 w-3.5" /> : null}</span><Avatar name={user.name} size="sm" /><span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{user.name}</span><span className="block truncate text-xs text-muted-foreground">{user.departmentId ? departmentNames.get(user.departmentId) || "未分配部门" : "未分配部门"}</span></span></button>; })}</div><div className="flex items-center justify-between border-t border-border px-4 py-3"><span className="text-xs text-muted-foreground">已选择 {selectedGroupUserIDs.size} 人</span><div className="flex gap-2"><Button type="button" variant="outline" onClick={() => setGroupCreateOpen(false)}>取消</Button><Button type="submit" disabled={creatingGroup || !groupName.trim() || selectedGroupUserIDs.size < 2}>{creatingGroup ? <Loader2 className="h-4 w-4 animate-spin" /> : null}创建</Button></div></div></form></ModalShell> : null}
 
       {groupManageOpen && activeConversation?.conversationType !== SessionType.Single ? <ModalShell title="群聊成员" onClose={() => setGroupManageOpen(false)} width="max-w-xl"><div className="flex min-h-0 flex-1 flex-col">{canManageGroup ? <form className="flex items-center gap-2 border-b border-border p-3" onSubmit={updateGroupName}><Input value={groupNameDraft} onChange={(event) => setGroupNameDraft(event.target.value)} className="h-8" /><Button type="submit" size="sm" disabled={groupManaging || !groupNameDraft.trim()}>保存名称</Button></form> : null}<div className="min-h-0 flex-1 overflow-y-auto"><div className="px-4 pb-1 pt-3 text-xs font-medium text-muted-foreground">当前成员 · {groupMembers.length}</div>{groupMembers.map((member) => { const canRemove = canManageGroup && member.userID !== selfInfo?.userID && (selfGroupMember?.roleLevel === GroupMemberRole.Owner || member.roleLevel === GroupMemberRole.Normal); return <div key={member.userID} className="flex h-12 items-center gap-3 px-4 hover:bg-muted/50"><Avatar name={member.nickname} url={member.faceURL} size="sm" /><span className="min-w-0 flex-1 truncate text-sm">{member.nickname || member.userID}</span>{member.roleLevel === GroupMemberRole.Owner ? <span className="text-[11px] text-muted-foreground">群主</span> : member.roleLevel === GroupMemberRole.Admin ? <span className="text-[11px] text-muted-foreground">管理员</span> : null}{canRemove ? <Button type="button" variant="ghost" size="icon-sm" title="移出群聊" disabled={groupManaging} onClick={() => void removeGroupMember(member)}><X className="h-4 w-4" /></Button> : null}</div>; })}{canManageGroup && inviteCandidates.length ? <><div className="border-t border-border px-4 pb-1 pt-3 text-xs font-medium text-muted-foreground">添加成员</div>{inviteCandidates.map((user) => { const selected = selectedInviteUserIDs.has(user.id); return <button key={user.id} type="button" className="flex h-12 w-full items-center gap-3 px-4 text-left hover:bg-muted/50" onClick={() => setSelectedInviteUserIDs((current) => { const next = new Set(current); if (next.has(user.id)) next.delete(user.id); else next.add(user.id); return next; })}><span className={cn("flex h-5 w-5 items-center justify-center rounded border", selected ? "border-primary bg-primary text-primary-foreground" : "border-border")}>{selected ? <Check className="h-3.5 w-3.5" /> : null}</span><Avatar name={user.name} size="sm" /><span className="truncate text-sm">{user.name}</span></button>; })}</> : null}</div>{canManageGroup && inviteCandidates.length ? <div className="flex items-center justify-between border-t border-border px-4 py-3"><span className="text-xs text-muted-foreground">已选择 {selectedInviteUserIDs.size} 人</span><Button type="button" size="sm" disabled={groupManaging || !selectedInviteUserIDs.size} onClick={() => void inviteGroupMembers()}>{groupManaging ? <Loader2 className="h-4 w-4 animate-spin" /> : null}添加</Button></div> : null}</div></ModalShell> : null}
 
@@ -1562,7 +1613,7 @@ export function OpenIMView() {
         </div>
       ) : null}
 
-      {cardPickerOpen ? <ModalShell title="发送个人名片" onClose={() => setCardPickerOpen(false)}><div className="min-h-0 overflow-y-auto p-2">{directory.users.filter((user) => user.id !== profile.user.id).length ? directory.users.filter((user) => user.id !== profile.user.id).map((user) => <button key={user.id} type="button" className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-muted" onClick={() => void sendCard(user)}><Avatar name={user.name} size="sm" /><div className="min-w-0"><div className="truncate text-sm font-medium">{user.name}</div><div className="truncate text-xs text-muted-foreground">{user.departmentId ? departmentNames.get(user.departmentId) || "未分配部门" : "未分配部门"}</div></div></button>) : <div className="p-8 text-center text-sm text-muted-foreground">暂无联系人</div>}</div></ModalShell> : null}
+      {cardPickerOpen ? <ModalShell title="发送个人名片" onClose={() => setCardPickerOpen(false)}><div className="min-h-0 overflow-y-auto p-2">{directory.users.filter((user) => user.id !== currentDirectoryUserID).length ? directory.users.filter((user) => user.id !== currentDirectoryUserID).map((user) => <button key={user.id} type="button" className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-muted" onClick={() => void sendCard(user)}><Avatar name={user.name} size="sm" /><div className="min-w-0"><div className="truncate text-sm font-medium">{user.name}</div><div className="truncate text-xs text-muted-foreground">{user.departmentId ? departmentNames.get(user.departmentId) || "未分配部门" : "未分配部门"}</div></div></button>) : <div className="p-8 text-center text-sm text-muted-foreground">暂无联系人</div>}</div></ModalShell> : null}
 
       {mentionPickerOpen ? <ModalShell title="选择群成员" onClose={() => setMentionPickerOpen(false)}><div className="min-h-0 overflow-y-auto p-2">{groupMembers.filter((member) => member.userID !== selfInfo?.userID).map((member) => <button key={member.userID} type="button" className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-muted" onClick={() => { setMentionIDs((current) => current.includes(member.userID) ? current : [...current, member.userID]); setComposerInsertion({ key: Date.now(), text: `@${member.nickname}` }); setMentionPickerOpen(false); }}><Avatar name={member.nickname} url={member.faceURL} size="sm" /><div className="min-w-0"><div className="truncate text-sm font-medium">{member.nickname}</div><div className="truncate text-xs text-muted-foreground">{member.userID}</div></div></button>)}</div></ModalShell> : null}
 
@@ -1575,7 +1626,7 @@ export function OpenIMView() {
       {mergePreview?.mergeElem ? <ModalShell title={mergePreview.mergeElem.title || "聊天记录"} onClose={() => setMergePreview(null)} width="max-w-2xl"><div className="min-h-0 overflow-y-auto p-4"><div className="space-y-4">{mergePreview.mergeElem.multiMessage.map((message) => <div key={message.clientMsgID} className="flex gap-3"><Avatar name={message.senderNickname} url={message.senderFaceUrl} size="sm" /><div className="min-w-0 flex-1"><div className="mb-1 flex items-center justify-between gap-3"><span className="truncate text-xs font-medium">{message.senderNickname}</span><span className="text-[10px] text-muted-foreground">{formatTime(message.sendTime)}</span></div><OpenIMMessageContent message={message} mine={false} onOpenImage={setImagePreview} onOpenMerge={setMergePreview} onOpenCard={setCardPreview} onDownload={(url, name) => void downloadMessage(url, name)} /></div></div>)}</div></div></ModalShell> : null}
 
       {cardPreview ? <ModalShell title="个人名片" onClose={() => setCardPreview(null)}><div className="flex flex-col items-center p-6 text-center"><Avatar name={cardPreview.nickname} url={cardPreview.faceURL} /><div className="mt-3 text-base font-semibold">{cardPreview.nickname}</div><div className="mt-1 text-xs text-muted-foreground">{cardPreview.userID}</div><Button className="mt-5" onClick={() => void openCardConversation(cardPreview)}><ContactRound className="h-4 w-4" />发消息</Button></div></ModalShell> : null}
-      {rtcCall && selfInfo ? <OpenIMRtcCall profile={profile} selfUserID={selfInfo.userID} call={rtcCall} onClose={closeRtcCall} /> : null}
+      {rtcCall && selfInfo && profile ? <OpenIMRtcCall profile={profile} selfUserID={selfInfo.userID} call={rtcCall} onClose={closeRtcCall} /> : null}
     </div>
   );
 }

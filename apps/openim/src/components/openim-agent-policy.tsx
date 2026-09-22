@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { openIMDefaultConversationIdFor } from "@/lib/conversation-identifiers";
 
 type CatalogItem = {
   id: string;
@@ -339,6 +340,7 @@ export function OpenIMAgentPolicyDialog({
   const [followDefault, setFollowDefault] = React.useState(false);
   const [currentSession, setCurrentSession] = React.useState<Record<string, any> | null>(null);
   const [resettingSession, setResettingSession] = React.useState(false);
+  const defaultConversationId = openIMDefaultConversationIdFor(target.conversationId) || undefined;
 
   const load = React.useCallback(async () => {
     if (!instanceId) {
@@ -354,6 +356,7 @@ export function OpenIMAgentPolicyDialog({
         agentRequest<AgentHostResultMap["catalog.list"]>(instanceId, "catalog.list", {}),
         agentRequest<BindingResult>(instanceId, "binding.get", {
           externalConversationId: target.conversationId,
+          defaultConversationId,
         }),
         target.kind === "contact" && peerId
           ? channelRequest<Record<string, any>>(instanceId, "conversation.current", {
@@ -362,9 +365,13 @@ export function OpenIMAgentPolicyDialog({
             }).catch(() => ({ session: null }))
           : Promise.resolve({ session: null }),
       ]);
+      const nextDraft = normalizeDraft(bindingResult);
+      if (target.kind === "default" && !bindingResult.binding) {
+        nextDraft.sessionMode = "fixed";
+      }
       setCatalog(normalizeCatalog(catalogResult));
       setBinding(bindingResult.binding);
-      setDraft(normalizeDraft(bindingResult));
+      setDraft(nextDraft);
       setFollowDefault(target.kind === "contact" && !bindingResult.binding);
       setCurrentSession(record(sessionResult).session || null);
     } catch (nextError) {
@@ -372,7 +379,7 @@ export function OpenIMAgentPolicyDialog({
     } finally {
       setLoading(false);
     }
-  }, [instanceId, target.conversationId, target.kind]);
+  }, [defaultConversationId, instanceId, target.conversationId, target.kind]);
 
   React.useEffect(() => {
     void load();
@@ -394,11 +401,13 @@ export function OpenIMAgentPolicyDialog({
       if (target.kind === "contact" && followDefault) {
         await agentRequest(instanceId, "binding.reset", {
           externalConversationId: target.conversationId,
+          defaultConversationId,
           expectedRevision: binding?.revision || 0,
         });
       } else {
         await agentRequest(instanceId, "binding.update", {
           externalConversationId: target.conversationId,
+          defaultConversationId,
           expectedRevision: binding?.revision || 0,
           patch: draftPatch(draft, target.kind === "contact"),
         });

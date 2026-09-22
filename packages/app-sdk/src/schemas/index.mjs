@@ -7,7 +7,7 @@ import { CHANNEL_PERMISSIONS, MOSS_CHANNEL_PROTOCOL } from '../channel/index.mjs
 import manifestSchema from './app-manifest.schema.json' with { type: 'json' }
 
 export const APP_MANIFEST_SCHEMA = manifestSchema
-export const APP_HOST_API_VERSION = '1.2.0'
+export const APP_HOST_API_VERSION = '1.3.0'
 
 const ajv = new Ajv2020({ allErrors: true, strict: false })
 const validateManifestSchema = ajv.compile(APP_MANIFEST_SCHEMA)

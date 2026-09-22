@@ -22,6 +22,7 @@ export const OPENIM_PERMISSIONS = Object.freeze({
 export const OPENIM_HOST_METHOD_PERMISSIONS = Object.freeze({
   'session.ensure': OPENIM_PERMISSIONS.client,
   'message.send': OPENIM_PERMISSIONS.messages,
+  'conversation.mark-read': OPENIM_PERMISSIONS.messages,
 })
 
 export const OPENIM_BACKEND_EVENT_PERMISSIONS = Object.freeze({
@@ -84,8 +85,16 @@ export function validateOpenIMHostInput(method, value) {
     rejectUnknownFields(input, [], normalizedMethod)
     return {}
   }
+  if (normalizedMethod === 'conversation.mark-read') {
+    rejectUnknownFields(input, ['conversationId'], normalizedMethod)
+    const conversationId = text(input, 'conversationId', normalizedMethod)
+    if (!parseOpenIMDirectConversationId(conversationId)) {
+      fail('conversation.mark-read has an invalid conversationId')
+    }
+    return { conversationId }
+  }
   rejectUnknownFields(input, [
-    'recipientId', 'conversationId', 'text', 'idempotencyKey',
+    'recipientId', 'conversationId', 'text', 'idempotencyKey', 'extension',
   ], normalizedMethod)
   const recipientId = text(input, 'recipientId', normalizedMethod)
   const conversationId = text(input, 'conversationId', normalizedMethod)
@@ -98,6 +107,9 @@ export function validateOpenIMHostInput(method, value) {
     conversationId,
     text: text(input, 'text', normalizedMethod, { maxLength: 100_000 }),
     idempotencyKey: text(input, 'idempotencyKey', normalizedMethod, { maxLength: 256 }),
+    ...(input.extension === undefined
+      ? {}
+      : { extension: text(input, 'extension', normalizedMethod, { optional: true, maxLength: 1_024 }) }),
   }
 }
 
@@ -116,7 +128,7 @@ export function validateOpenIMBackendEventData(name, value) {
   }
   rejectUnknownFields(data, [
     'externalUserId', 'externalConversationId', 'externalEventId',
-    'text', 'sentAt', 'contentType', 'sessionType',
+    'text', 'sentAt', 'contentType', 'sessionType', 'extension',
   ], normalizedName)
   const sentAt = Number(data.sentAt)
   const contentType = Number(data.contentType)
@@ -132,5 +144,8 @@ export function validateOpenIMBackendEventData(name, value) {
     sentAt,
     contentType,
     sessionType,
+    ...(data.extension === undefined
+      ? {}
+      : { extension: text(data, 'extension', normalizedName, { optional: true, maxLength: 1_024 }) }),
   }
 }

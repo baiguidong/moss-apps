@@ -178,12 +178,14 @@ export function validateAgentHostInput(method, value) {
       }
       break
     case 'binding.get':
-      rejectUnknownFields(input, ['externalConversationId', 'externalMemberId'], normalizedMethod)
+      rejectUnknownFields(input, ['externalConversationId', 'externalMemberId', 'defaultConversationId'], normalizedMethod)
       validateBindingTarget(input, normalizedMethod)
+      requireText(input, 'defaultConversationId', normalizedMethod, { optional: true })
       break
     case 'binding.update':
-      rejectUnknownFields(input, ['externalConversationId', 'externalMemberId', 'expectedRevision', 'patch'], normalizedMethod)
+      rejectUnknownFields(input, ['externalConversationId', 'externalMemberId', 'defaultConversationId', 'expectedRevision', 'patch'], normalizedMethod)
       validateBindingTarget(input, normalizedMethod)
+      requireText(input, 'defaultConversationId', normalizedMethod, { optional: true })
       if (!Object.hasOwn(input, 'patch')) fail('binding.update requires a patch')
       validateBindingPatch(input.patch)
       if (input.expectedRevision !== undefined
@@ -193,9 +195,10 @@ export function validateAgentHostInput(method, value) {
       break
     case 'binding.reset':
       rejectUnknownFields(input, [
-        'externalConversationId', 'externalMemberId', 'expectedRevision',
+        'externalConversationId', 'externalMemberId', 'defaultConversationId', 'expectedRevision',
       ], normalizedMethod)
       validateBindingTarget(input, normalizedMethod)
+      requireText(input, 'defaultConversationId', normalizedMethod, { optional: true })
       if (input.expectedRevision !== undefined
         && (!Number.isInteger(input.expectedRevision) || input.expectedRevision < 0)) {
         fail('binding.reset expectedRevision must be a non-negative integer')
@@ -210,12 +213,13 @@ export function validateAgentHostInput(method, value) {
       break
     case 'turn.start':
       rejectUnknownFields(input, [
-        'externalUserId', 'externalConversationId', 'externalEventId',
+        'externalUserId', 'externalConversationId', 'externalEventId', 'defaultConversationId',
         'text', 'attachments', 'mentioned', 'source', 'hop',
       ], normalizedMethod)
       requireText(input, 'externalUserId', normalizedMethod)
       requireText(input, 'externalConversationId', normalizedMethod)
       requireText(input, 'externalEventId', normalizedMethod)
+      requireText(input, 'defaultConversationId', normalizedMethod, { optional: true })
       validateChannelMessageContent(input, normalizedMethod)
       if (input.mentioned !== undefined && typeof input.mentioned !== 'boolean') fail('turn.start mentioned must be a boolean')
       if (input.source !== undefined && !['human', 'agent', 'system'].includes(input.source)) fail('turn.start source must be human, agent, or system')

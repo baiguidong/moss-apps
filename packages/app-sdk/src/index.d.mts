@@ -268,16 +268,18 @@ export interface AgentEffectiveBinding extends AgentBindingPolicy {
 
 export interface AgentHostRequestMap {
   'catalog.list': { kinds?: AgentCatalogKind[] }
-  'binding.get': { externalConversationId: string; externalMemberId?: string }
+  'binding.get': { externalConversationId: string; externalMemberId?: string; defaultConversationId?: string }
   'binding.update': {
     externalConversationId: string
     externalMemberId?: string
+    defaultConversationId?: string
     expectedRevision?: number
     patch: AgentBindingPatch
   }
   'binding.reset': {
     externalConversationId: string
     externalMemberId?: string
+    defaultConversationId?: string
     expectedRevision?: number
   }
   'context.observe': {
@@ -290,6 +292,7 @@ export interface AgentHostRequestMap {
     externalUserId: string
     externalConversationId: string
     externalEventId: string
+    defaultConversationId?: string
     text?: string
     attachments?: ChannelAttachment[]
     mentioned?: boolean

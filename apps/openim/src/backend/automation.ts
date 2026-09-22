@@ -3,10 +3,12 @@ import {
   type AppBackendClient,
   type AppBackendContext,
 } from "@moss/app-sdk";
+import { openIMDefaultConversationIdFor } from "../lib/conversation-identifiers";
 
 export const MAX_AUTOMATION_MESSAGE_AGE_MS = 5 * 60 * 1000;
 const SESSION_RETRY_MS = 30 * 1000;
 const MAX_DELIVERY_RETRY_MS = 5 * 60 * 1000;
+const AUTOMATION_MESSAGE_EXTENSION = "moss.openim/automation-v1";
 
 type Timer = ReturnType<typeof setTimeout>;
 
@@ -146,6 +148,7 @@ export function createOpenIMAutomation(
             conversationId: String(turn.externalConversationId),
             text,
             idempotencyKey: turnId,
+            extension: AUTOMATION_MESSAGE_EXTENSION,
           },
         );
         await acknowledgeTurn(turn, true, {
@@ -198,13 +201,32 @@ export function createOpenIMAutomation(
     if (!context || !isFreshAutomationMessage(message, now())) {
       return { handled: true, ignored: "stale" };
     }
+    if (message.extension === AUTOMATION_MESSAGE_EXTENSION) {
+      client.log("info", "Ignored an automated OpenIM message to prevent an AI reply loop", {
+        externalEventId: String(message.externalEventId || ""),
+      });
+      return { handled: true, ignored: "automated" };
+    }
     const result = await client.agent.request("turn.start", {
       externalUserId: String(message.externalUserId || ""),
       externalConversationId: String(message.externalConversationId || ""),
       externalEventId: String(message.externalEventId || ""),
+      defaultConversationId: openIMDefaultConversationIdFor(message.externalConversationId) || undefined,
       text: String(message.text || ""),
       source: "human",
     });
+    if (result.routing !== "human") {
+      await client.host.request(
+        MOSS_OPENIM_PROTOCOL,
+        "conversation.mark-read",
+        { conversationId: String(message.externalConversationId || "") },
+      ).catch((error) => {
+        client.log("warn", "Unable to mark the Agent-handled OpenIM conversation as read", {
+          error: errorMessage(error),
+          externalConversationId: String(message.externalConversationId || ""),
+        });
+      });
+    }
     client.emit("ai.turn-updated", {
       turnId: result.turnId || null,
       conversationId: message.externalConversationId,

@@ -63,23 +63,31 @@ async function initializeSDK(config: OpenIMSDKConfig) {
 export async function ensureOpenIMSession(profile: OpenIMProfile, config: OpenIMSDKConfig) {
   await initializeSDK(config);
   const status = await openIMSDK.getLoginStatus();
-  if (status.data === LoginStatus.Logged) {
+  if (status.data === LoginStatus.Logged || status.data === LoginStatus.Logging) {
     const self = await openIMSDK.getSelfUserInfo();
     if (self.data.userID === profile.userID) {
       activeUserID = profile.userID;
-      return self.data;
+      return {
+        connected: status.data === LoginStatus.Logged,
+        selfInfo: self.data,
+      };
     }
     await openIMSDK.logout();
   }
   await openIMSDK.login({ userID: profile.userID, token: profile.imToken });
   activeUserID = profile.userID;
-  return (await openIMSDK.getSelfUserInfo()).data;
+  return {
+    connected: true,
+    selfInfo: (await openIMSDK.getSelfUserInfo()).data,
+  };
 }
 
 export async function logoutOpenIMSession() {
   try {
     const status = await openIMSDK.getLoginStatus();
-    if (status.data === LoginStatus.Logged || activeUserID) await openIMSDK.logout();
+    if (status.data === LoginStatus.Logged || status.data === LoginStatus.Logging || activeUserID) {
+      await openIMSDK.logout();
+    }
   } finally {
     activeUserID = "";
   }

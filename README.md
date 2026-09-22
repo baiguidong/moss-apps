@@ -97,4 +97,4 @@ App ZIP 与 Moss 桌面安装包分开：Moss 仍分别构建 macOS arm64 和 Wi
 
 ## SDK
 
-`packages/app-sdk` 是当前 Host API `1.2.0` 的发布快照，供本仓库 App 构建和测试。后续可迁移为正式发布的 `@moss/app-sdk` npm 包而不改变 App 代码。
+`packages/app-sdk` 是当前 Host API `1.3.0` 的发布快照，供本仓库 App 构建和测试。后续可迁移为正式发布的 `@moss/app-sdk` npm 包而不改变 App 代码。

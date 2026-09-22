@@ -93,10 +93,33 @@ describe("OpenIM automation backend", () => {
         externalUserId: "peer-1",
         externalConversationId: "openim-user:self/direct:peer-1",
         externalEventId: "message-new",
+        defaultConversationId: "openim-user:self/*",
         text: "hello",
         source: "human",
       },
     }]);
+    expect(fixture.hostRequests.filter((entry) => entry.method === "conversation.mark-read")).toEqual([{
+      protocol: "moss.openim/v1",
+      method: "conversation.mark-read",
+      input: { conversationId: "openim-user:self/direct:peer-1" },
+    }]);
+  });
+
+  it("does not start an Agent turn for another Moss AI's automated reply", async () => {
+    const fixture = createFixture();
+    fixture.automation.initialize({ instanceId: "default" } as any);
+    await fixture.automation.ensureSession();
+    const receive = fixture.hostEvents.get("moss.openim/v1:message.received")!;
+
+    await expect(receive({
+      externalUserId: "peer-1",
+      externalConversationId: "openim-user:self/direct:peer-1",
+      externalEventId: "message-ai",
+      text: "AI reply",
+      sentAt: 1_700_000_000_000,
+      extension: "moss.openim/automation-v1",
+    })).resolves.toEqual({ handled: true, ignored: "automated" });
+    expect(fixture.agentRequests.filter((entry) => entry.method === "turn.start")).toHaveLength(0);
   });
 
   it("retries failed reply delivery and acknowledges only a successful send", async () => {
@@ -114,6 +137,7 @@ describe("OpenIM automation backend", () => {
     retry.callback();
     await Bun.sleep(0);
     expect(fixture.hostRequests.filter((entry) => entry.method === "message.send")).toHaveLength(2);
+    expect(fixture.hostRequests.filter((entry) => entry.method === "message.send")[0]?.input.extension).toBe("moss.openim/automation-v1");
     expect(fixture.agentRequests.filter((entry) => entry.method === "turn.delivery.ack").at(-1)?.input).toMatchObject({
       ok: true,
       externalMessageId: "server-1",
