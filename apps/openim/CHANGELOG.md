@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2 - 2026-09-23
+
+- OpenIM App 恢复为仅 Desktop 运行，不再要求安装或启用同 App 的 Server Backend。
+- 用户供应、Token 签发、群聊准备、权限回调和停用处理由 Moss Server OpenIM integration 负责。
+- Desktop Backend 通过受控 Host 能力访问服务端管理接口，App 不接触 Moss 登录凭据或 OpenIM 管理密钥。
+
 ## 0.2.1 - 2026-09-22
 
 - Server Backend 改为组织级共享实例，OpenIM 管理密钥只由管理员配置一份；普通组织成员的 Action 仍使用本人 Moss 身份。

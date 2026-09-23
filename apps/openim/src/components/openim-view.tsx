@@ -480,7 +480,7 @@ export function OpenIMView() {
       result.users.push(...page.users);
       if (!result.departments.length) result.departments = page.departments;
       result.revision = page.revision || result.revision;
-      cursor = page.nextCursor;
+      cursor = page.nextCursor || undefined;
     } while (cursor);
     setDirectory(result);
     return result;

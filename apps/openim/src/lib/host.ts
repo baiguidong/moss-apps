@@ -15,7 +15,7 @@ export type OpenIMDirectory = {
     openimUserID: string;
   }>;
   revision?: string;
-  nextCursor?: string;
+  nextCursor?: string | null;
 };
 
 export type OpenIMLocalFile = {

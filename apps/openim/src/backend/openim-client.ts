@@ -195,7 +195,7 @@ export function normalizeOpenIMSessionEvent(event: string, value: unknown, curre
   return { connected: false, userId: currentUserId, error };
 }
 
-export function createOpenIMClientService(client: Pick<AppBackendClient, "remote" | "emit" | "log" | "status">) {
+export function createOpenIMClientService(client: Pick<AppBackendClient, "host" | "emit" | "log" | "status">) {
   let context: AppBackendContext | null = null;
   let sdk: OpenIMSDK | null = null;
   let sdkInitialized = false;
@@ -277,12 +277,12 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "remote
   }
 
   async function issueProfile(): Promise<RemoteProfile> {
-    return client.remote.request<RemoteProfile>("action.invoke", {
-      action: "session.issue",
-      input: { platformId: platformId() },
-      timeoutMs: 30_000,
-      ownerScope: "org",
-    }, { timeoutMs: 35_000 });
+    return client.host.request<RemoteProfile>(
+      "moss.openim/v1",
+      "session.issue",
+      { platformId: platformId() },
+      { timeoutMs: 35_000 },
+    );
   }
 
   async function ensureSession(): Promise<PublicOpenIMProfile> {

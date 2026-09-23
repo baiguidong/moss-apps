@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.openim",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "displayName": "即时消息",
   "description": "通过 OpenIM 与组织成员沟通，并为每个联系人配置个人 AI 回复策略。",
   "icon": "assets/icon.svg",
@@ -24,27 +24,20 @@
     "apiVersion": 1,
     "lifecycle": "persistent",
     "instanceMode": "single",
-    "serverOwnerScope": "org",
-    "targets": ["desktop", "server"],
-    "protocols": ["moss.account/v1", "moss.agent/v1", "moss.desktop/v1", "moss.remote/v1"],
+    "targets": ["desktop"],
+    "protocols": ["moss.agent/v1", "moss.desktop/v1", "moss.openim/v1"],
     "actions": [
       { "name": "status.get" },
       { "name": "session.ensure", "timeoutMs": 30000 },
-      { "name": "session.issue", "timeoutMs": 30000 },
       { "name": "directory.list", "timeoutMs": 30000 },
       { "name": "conversation.direct.prepare", "timeoutMs": 30000 },
       { "name": "conversation.group.prepare", "timeoutMs": 30000 },
       { "name": "sdk.call", "timeoutMs": 300000 },
       { "name": "rtc.token" }
-    ],
-    "configuration": {
-      "schema": "schemas/config.json",
-      "secrets": "schemas/secrets.json"
-    }
+    ]
   },
   "permissions": [
-    "account:identity:read",
-    "account:directory:read",
+    "openim:client",
     "agent:catalog:read",
     "agent:bindings:read",
     "agent:bindings:write",
@@ -55,8 +48,7 @@
     "desktop:files",
     "desktop:screen-capture",
     "desktop:external-links",
-    "desktop:media",
-    "remote:actions"
+    "desktop:media"
   ],
   "contributes": {
     "views": [
