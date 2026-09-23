@@ -86,6 +86,12 @@ apps/example/
 
 `marketplace.json` 只保存展示信息。版本、权限、Host API、下载地址和校验值由 CI 从 Manifest 与构建产物生成。
 
+### 导航入口
+
+已启用且有 UI 的 App 自动进入 Moss“更多”，每个 App 一个入口。停用后入口隐藏，纯后台 App 只在 Apps 中管理，无需手动加入侧栏。
+
+App 声明页面名称和路由，导航位置由 Moss 决定，不再声明 `contributes.views[].location`。Moss 使用已授权 view 中 `order` 最小的页面作为默认入口；未声明 view 时打开 `ui.entry`。其他页面由 App 内部导航，旧包的位置字段会被忽略。
+
 ### Backend 运行位置
 
 每个 App 最多运行一个由 Host 管理的 Backend 进程，Manifest 无需声明实例模式。配置、启停、重启和日志均围绕 App 管理。

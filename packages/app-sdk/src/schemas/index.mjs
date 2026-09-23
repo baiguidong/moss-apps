@@ -82,7 +82,6 @@ function normalizeContributes(contributes, manifest) {
     id: view.id,
     title: view.title.trim(),
     route: view.route || '#/',
-    location: view.location || 'hidden',
     icon: String(view.icon || '').trim(),
     order: Number(view.order) || 0,
     ...normalizeContributionPermission(view, requestedPermissions, `view ${view.id}`),
@@ -204,6 +203,12 @@ function normalizeBackend(backend) {
 
 export function validateAppManifest(rawManifest, options = {}) {
   const candidate = structuredClone(rawManifest)
+  // Navigation placement belongs to the Host; ignore the field in older packages.
+  if (Array.isArray(candidate?.contributes?.views)) {
+    for (const view of candidate.contributes.views) {
+      if (view && typeof view === 'object' && !Array.isArray(view)) delete view.location
+    }
+  }
   if (!validateManifestSchema(candidate)) {
     throw new AppServiceError(
       APP_ERROR_CODES.invalidManifest,

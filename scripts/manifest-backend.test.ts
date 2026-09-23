@@ -46,6 +46,16 @@ describe('App Backend manifest', () => {
     expect(result.backend).not.toHaveProperty('targets')
   })
 
+  it('discards legacy view placement while retaining routes and leaving source manifests intact', () => {
+    for (const location of ['more', 'sidebar', 'hidden']) {
+      const view = { id: 'home', title: 'Home', route: '#/home', location }
+      const result = validateAppManifest({ ...manifest(), ui: { entry: 'dist/ui/index.html' }, contributes: { views: [view] } })
+      expect(result.contributes?.views[0]).not.toHaveProperty('location')
+      expect(result.contributes?.views[0].route).toBe('#/home')
+      expect(view.location).toBe(location)
+    }
+  })
+
   it('rejects Server-only Backend properties and APIs', () => {
     expect(() => validateAppManifest(manifest({ serverOwnerScope: 'org' })))
       .toThrow(/additional properties/)
