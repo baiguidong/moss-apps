@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.4 - 2026-09-23
+
+- 适配 Moss 的单进程 App 运行约定，Manifest 不再声明实例模式。
+- 同步 App SDK，移除多实例创建和删除接口，保留已有配置与状态接口。
+
 ## 0.2.3 - 2026-09-23
 
 - 移除 Backend target 声明和运行时 target 分支，App 仅使用隐式 Desktop 运行环境。

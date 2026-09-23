@@ -11,7 +11,7 @@
     },
     "apps/feishu": {
       "name": "@moss/feishu-app",
-      "version": "0.4.3",
+      "version": "0.4.4",
       "dependencies": {
         "@larksuiteoapi/node-sdk": "^1.60.0",
         "@moss/app-sdk": "file:../../packages/app-sdk",
@@ -23,7 +23,7 @@
     },
     "apps/openim": {
       "name": "@moss/openim-app",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "dependencies": {
         "@livekit/components-react": "2.6.9",
         "@livekit/components-styles": "1.1.6",

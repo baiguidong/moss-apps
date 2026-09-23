@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.openim",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "displayName": "即时消息",
   "description": "通过 OpenIM 与组织成员沟通，并为每个联系人配置个人 AI 回复策略。",
   "icon": "assets/icon.svg",
@@ -23,7 +23,6 @@
     "runtime": "node",
     "apiVersion": 1,
     "lifecycle": "persistent",
-    "instanceMode": "single",
     "protocols": ["moss.agent/v1", "moss.desktop/v1", "moss.openim/v1"],
     "actions": [
       { "name": "status.get" },

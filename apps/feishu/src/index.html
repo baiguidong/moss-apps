@@ -229,7 +229,7 @@
           <label class="field"><span>Verification Token</span><input id="verificationToken" type="password" autocomplete="new-password" placeholder="长连接模式无需填写"></label>
           <label class="field full"><span>允许的用户 ID</span><input id="allowedUsers" autocomplete="off" placeholder="ou_xxx, ou_yyy（可选，逗号分隔）"><p class="hint">通常留空，再使用下方配对码绑定飞书账号。</p></label>
         </div></div>
-        <div class="settings-block"><div class="notice">飞书配置仅在此页面维护。保存后，Moss 会校验必填项并启动本机 Backend；Backend 实例页只负责运行控制和日志。</div></div>
+        <div class="settings-block"><div class="notice">飞书配置在此页面维护，保存后自动应用。可在 App 管理页启停、重启并查看日志。</div></div>
         <div class="actions"><button id="save" type="button">保存配置</button><span id="message" class="message" role="status" aria-live="polite"></span></div>
       </div>
     </section>
@@ -288,7 +288,7 @@
       </details>
       <details>
         <summary>数据存储与安全</summary>
-        <div class="guide-content"><p>App ID 和白名单由 Moss Host 持久化，配对关系保存在 App 实例数据目录；App Secret 等敏感字段会写入 App 凭据库。配置页只会收到 <code>****</code> 掩码，飞书 Backend 启动时才会在隔离的实例上下文中取得明文。</p></div>
+        <div class="guide-content"><p>App ID、白名单和配对关系会保存在本机。App Secret 等敏感字段存入 App 凭据库，配置页只显示 <code>****</code> 掩码。</p></div>
       </details>
       </div>
     </section>
@@ -475,7 +475,7 @@
         const instance = instances.find((entry) => entry?.id === 'moss.feishu--default') || instances[0]
         agentInstanceId = String(instance?.id || '')
       }
-      if (!agentInstanceId) throw new Error('飞书 Backend 实例尚未创建。')
+      if (!agentInstanceId) throw new Error('飞书后台服务尚未就绪。')
       return hostBridge.request(agentInstanceId, AGENT_PROTOCOL, method, input)
     }
 
@@ -728,7 +728,7 @@
       }
       const instances = await bridge.instances.list()
       activeInstance = instances.find((entry) => entry?.id === 'moss.feishu--default') || instances[0]
-      if (!activeInstance) throw new Error('飞书 Backend 实例尚未创建，请先在 App 管理页创建实例。')
+      if (!activeInstance) throw new Error('飞书后台服务尚未就绪，请重新启用飞书 App。')
       agentInstanceId = String(activeInstance.id || '')
       adapterConfig = { feishu: activeInstance.config || {} }
       hydrateForm(adapterConfig)

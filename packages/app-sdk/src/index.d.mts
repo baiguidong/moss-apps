@@ -1,5 +1,4 @@
 export type AppBackendLifecycle = 'on-demand' | 'persistent'
-export type AppInstanceMode = 'single' | 'multiple'
 export type AppOwnerScope = 'host' | 'org' | 'user'
 export interface AppOwner {
   scope: AppOwnerScope
@@ -391,7 +390,6 @@ export interface AppManifestV2 {
     runtime: 'node'
     apiVersion: 1
     lifecycle: AppBackendLifecycle
-    instanceMode: AppInstanceMode
     /** Host protocols used by the Desktop Backend. */
     protocols?: AppBackendProtocol[]
     actions: AppActionManifest[]
@@ -455,11 +453,9 @@ export interface AppUiApi {
   }
   instances: {
     list(): Promise<Array<Record<string, unknown>>>
-    create(input?: Record<string, unknown>): Promise<Record<string, unknown>>
     update(instanceId: string, patch?: Record<string, unknown>): Promise<Record<string, unknown>>
     setEnabled(instanceId: string, enabled: boolean): Promise<unknown>
     clearCredentials(instanceId: string): Promise<Record<string, unknown>>
-    remove(instanceId: string, options?: { deleteData?: boolean; deleteCredentials?: boolean }): Promise<{ ok: true }>
     getStatus(instanceId: string): Promise<Array<Record<string, unknown>>>
   }
   actions: {

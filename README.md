@@ -2,6 +2,16 @@
 
 Moss 官方 App 的独立源码与发布仓库。每个 App 位于 `apps/<name>`，独立维护版本、源码、配置 Schema、资源与测试。
 
+## App 创建手册
+
+创建或修改 App 前，请阅读 Moss 主仓库维护的说明。只检出本仓库时，也可以直接通过以下 GitHub 链接查看：
+
+- [App 创建规范](https://github.com/baiguidong/moss/blob/main/assistants/app-builder/assistant.md)：创建流程、UI 与主题规范、Backend 生命周期、Host API 使用及自检要求。
+- [App Runtime](https://github.com/baiguidong/moss/blob/main/ui/docs/app-runtime.md)：Manifest、安装包结构、配置与密钥、单进程运行约定。
+- [Host Capability API](https://github.com/baiguidong/moss/blob/main/ui/docs/app-host-capability-api.md)：Host 协议、权限声明与 Backend 调用方式。
+
+创建规范中的 `app_*` 工具用于 Moss 内置构建助手；在本仓库直接开发时，使用下文的本地开发和发布命令。
+
 ## 本地开发
 
 ```bash
@@ -77,6 +87,8 @@ apps/example/
 `marketplace.json` 只保存展示信息。版本、权限、Host API、下载地址和校验值由 CI 从 Manifest 与构建产物生成。
 
 ### Backend 运行位置
+
+每个 App 最多运行一个由 Host 管理的 Backend 进程，Manifest 无需声明实例模式。配置、启停、重启和日志均围绕 App 管理。
 
 本仓库的 App Backend 只随 Moss Desktop 运行，不支持部署到 Moss Server。运行位置是隐式约定，App 不声明 `targets`。带 Backend 的 App 直接声明所需 Host 协议：
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.feishu",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "displayName": "飞书",
   "description": "通过飞书私聊连接一个固定 Moss 会话并自动回复。",
   "icon": "assets/icon.svg",
@@ -23,7 +23,6 @@
     "runtime": "node",
     "apiVersion": 1,
     "lifecycle": "persistent",
-    "instanceMode": "single",
     "protocols": ["moss.agent/v1"],
     "actions": [
       { "name": "status.get" },

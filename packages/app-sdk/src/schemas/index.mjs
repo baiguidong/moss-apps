@@ -191,7 +191,6 @@ function normalizeBackend(backend) {
     runtime: 'node',
     apiVersion: 1,
     lifecycle: backend.lifecycle,
-    instanceMode: backend.instanceMode,
     ...(backend.protocols?.length ? { protocols: [...backend.protocols] } : {}),
     actions,
     ...(backend.configuration ? {

@@ -7,7 +7,6 @@ const backend = {
   runtime: 'node',
   apiVersion: 1,
   lifecycle: 'persistent',
-  instanceMode: 'single',
   actions: [],
 }
 
@@ -27,6 +26,12 @@ describe('App Backend manifest', () => {
   it('advertises Host API 2.1 while accepting Apps built for compatible 2.x hosts', () => {
     expect(APP_HOST_API_VERSION).toBe('2.1.0')
     expect(validateAppManifest(manifest()).hostApi).toBe('^2.0.0')
+  })
+
+  it('uses one Backend and accepts the legacy single declaration without retaining it', () => {
+    expect(validateAppManifest(manifest()).backend).not.toHaveProperty('instanceMode')
+    expect(validateAppManifest(manifest({ instanceMode: 'single' })).backend).not.toHaveProperty('instanceMode')
+    expect(() => validateAppManifest(manifest({ instanceMode: 'multiple' }))).toThrow(/instanceMode/)
   })
 
   it('uses an implicit Desktop runtime and rejects target declarations', () => {

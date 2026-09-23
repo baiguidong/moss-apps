@@ -159,13 +159,13 @@
     "backend": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["entry", "runtime", "apiVersion", "lifecycle", "instanceMode", "actions"],
+      "required": ["entry", "runtime", "apiVersion", "lifecycle", "actions"],
       "properties": {
         "entry": { "type": "string", "minLength": 1 },
         "runtime": { "const": "node" },
         "apiVersion": { "const": 1 },
         "lifecycle": { "enum": ["on-demand", "persistent"] },
-        "instanceMode": { "enum": ["single", "multiple"] },
+        "instanceMode": { "const": "single", "description": "Legacy field; each App has one Backend and new manifests omit this field." },
         "protocols": {
           "description": "Host protocols available to the Desktop Backend.",
           "type": "array",
