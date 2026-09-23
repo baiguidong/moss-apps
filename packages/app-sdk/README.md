@@ -1,6 +1,6 @@
 # Moss App SDK
 
-当前 SDK 对应 Host API `2.0.0`。
+当前 SDK 对应 Host API `2.1.0`。2.1 新增 Desktop-only 的 `moss.openim/v1` 管理协议，兼容要求 `^2.0.0` 的 App。
 
 ## Backend target 契约
 

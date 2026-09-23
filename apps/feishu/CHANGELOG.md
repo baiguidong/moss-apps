@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.2 - 2026-09-23
+
+- 按 Desktop 与 Server target 分别声明 Host 协议，并要求支持该 Manifest 契约的 Host API 2.1。
+
 ## 0.4.1 - 2026-09-22
 
 - 同步 Host API 2 的初始化协议：连接状态可以在 `service.ready` 前上报，初始化期间的 Binding 事件可以完成 ACK，不再循环等待至握手超时。

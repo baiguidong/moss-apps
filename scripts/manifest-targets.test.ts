@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { resolveBackendProtocols, validateAppManifest } from '../packages/app-sdk/src/index.mjs'
+import { APP_HOST_API_VERSION, resolveBackendProtocols, validateAppManifest } from '../packages/app-sdk/src/index.mjs'
 
 const backend = {
   entry: 'dist/backend/main.mjs',
@@ -23,6 +23,18 @@ function manifest(targets: Array<'desktop' | 'server'>, backendOverrides: Record
 }
 
 describe('Backend target declarations', () => {
+  it('advertises Host API 2.1 while accepting Apps built for compatible 2.x hosts', () => {
+    expect(APP_HOST_API_VERSION).toBe('2.1.0')
+    expect(validateAppManifest(manifest(['desktop'])).hostApi).toBe('^2.0.0')
+    expect(() => validateAppManifest(manifest(['desktop'], {
+      protocols: { desktop: ['moss.desktop/v1'] },
+    }))).toThrow(/Host API >=2.1.0/)
+    expect(validateAppManifest({
+      ...manifest(['desktop'], { protocols: { desktop: ['moss.desktop/v1'] } }),
+      hostApi: '^2.1.0',
+    }).hostApi).toBe('^2.1.0')
+  })
+
   it('accepts each explicit supported placement set', () => {
     expect(validateAppManifest(manifest(['desktop'])).backend?.targets).toEqual(['desktop'])
     expect(validateAppManifest(manifest(['server'])).backend?.targets).toEqual(['server'])
@@ -44,18 +56,22 @@ describe('Backend target declarations', () => {
   })
 
   it('declares and resolves protocols independently for each target', () => {
-    const result = validateAppManifest(manifest(['desktop', 'server'], {
-      protocols: {
-        desktop: ['moss.desktop/v1'],
-        server: ['moss.agent/v1'],
-      },
-    }))
+    const result = validateAppManifest({
+      ...manifest(['desktop', 'server'], {
+        protocols: {
+          desktop: ['moss.desktop/v1'],
+          server: ['moss.agent/v1'],
+        },
+      }),
+      hostApi: '^2.1.0',
+    })
     expect(resolveBackendProtocols(result.backend, 'desktop')).toEqual(['moss.desktop/v1'])
     expect(resolveBackendProtocols(result.backend, 'server')).toEqual(['moss.agent/v1'])
     expect(resolveBackendProtocols({ ...backend, targets: ['desktop', 'server'], protocols: ['moss.agent/v1'] }, 'server'))
       .toEqual(['moss.agent/v1'])
-    expect(() => validateAppManifest(manifest(['desktop'], {
-      protocols: { server: ['moss.agent/v1'] },
-    }))).toThrow(/protocols.server requires server/)
+    expect(() => validateAppManifest({
+      ...manifest(['desktop'], { protocols: { server: ['moss.agent/v1'] } }),
+      hostApi: '^2.1.0',
+    })).toThrow(/protocols.server requires server/)
   })
 })

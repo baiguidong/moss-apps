@@ -1,6 +1,6 @@
 {
   "name": "@moss/app-sdk",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "types": "./src/index.d.mts",
   "exports": {
@@ -9,6 +9,7 @@
     "./account": { "types": "./src/index.d.mts", "import": "./src/account/index.mjs" },
     "./agent": { "types": "./src/index.d.mts", "import": "./src/agent/index.mjs" },
     "./desktop": { "types": "./src/index.d.mts", "import": "./src/desktop/index.mjs" },
+    "./openim": { "types": "./src/index.d.mts", "import": "./src/openim/index.mjs" },
     "./remote": { "types": "./src/index.d.mts", "import": "./src/remote/index.mjs" },
     "./host": { "types": "./src/index.d.mts", "import": "./src/host/index.mjs" },
     "./client": { "types": "./src/index.d.mts", "import": "./src/client/index.mjs" },

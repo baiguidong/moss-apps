@@ -113,4 +113,4 @@ App ZIP 与 Moss 桌面安装包分开。纯 JavaScript App 可以用同一个�
 
 ## SDK
 
-`packages/app-sdk` 是当前 Host API `2.0.0` 的发布快照，供本仓库 App 构建和测试。2.0 不提供旧 Channel 或平台专用协议兼容层；后续可迁移为正式发布的 `@moss/app-sdk` npm 包而不改变 App 代码。
+`packages/app-sdk` 是当前 Host API `2.1.0` 的发布快照，供本仓库 App 构建和测试。2.x 不提供旧 Channel 兼容层；2.1 新增 Desktop-only 的 `moss.openim/v1`。后续可迁移为正式发布的 `@moss/app-sdk` npm 包而不改变 App 代码。
