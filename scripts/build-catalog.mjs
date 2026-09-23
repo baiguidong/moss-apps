@@ -3,6 +3,7 @@ import fsp from 'node:fs/promises'
 import path from 'node:path'
 import semver from 'semver'
 import { artifactsRoot, listApps, optionValue, readJson, repoRoot, writeJson } from './lib.mjs'
+import { fetchGitHubReleaseRecords } from './github-releases.mjs'
 
 const argv = process.argv.slice(2)
 const siteRoot = path.resolve(optionValue(argv, '--output') || path.join(repoRoot, 'site'))
@@ -22,30 +23,6 @@ async function findFiles(root, suffix) {
   }
   await visit(root)
   return output.sort()
-}
-
-async function fetchGitHubReleaseRecords(repository) {
-  const records = []
-  const headers = {
-    Accept: 'application/vnd.github+json',
-    'User-Agent': 'moss-apps-catalog-builder/1.0',
-    ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
-  }
-  for (let page = 1; ; page += 1) {
-    const response = await fetch(`https://api.github.com/repos/${repository}/releases?per_page=100&page=${page}`, { headers })
-    if (!response.ok) throw new Error(`Unable to list GitHub releases: HTTP ${response.status}`)
-    const releases = await response.json()
-    for (const release of releases) {
-      for (const asset of release.assets || []) {
-        if (!asset.name.endsWith('.release.json')) continue
-        const assetResponse = await fetch(asset.browser_download_url, { headers })
-        if (!assetResponse.ok) throw new Error(`Unable to download ${asset.name}: HTTP ${assetResponse.status}`)
-        records.push(await assetResponse.json())
-      }
-    }
-    if (releases.length < 100) break
-  }
-  return records
 }
 
 function validateRelease(record) {
