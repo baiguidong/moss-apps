@@ -98,3 +98,76 @@ export function validateDesktopHostInput(method, value) {
   }
   return input
 }
+
+function outputRecord(value, label) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label} must be an object`)
+  }
+  return value
+}
+
+function outputText(value, label, maxLength = 4096) {
+  if (typeof value !== 'string' || !value.trim() || value.length > maxLength) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label} is invalid`)
+  }
+}
+
+function rejectUnknownOutputFields(output, fields, label) {
+  const allowed = new Set(fields)
+  for (const field of Object.keys(output)) {
+    if (!allowed.has(field)) {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label} contains an unknown field: ${field}`)
+    }
+  }
+}
+
+function validateDesktopFile(value, label) {
+  const file = outputRecord(value, label)
+  rejectUnknownOutputFields(file, ['name', 'path', 'size', 'mediaUrl'], label)
+  outputText(file.name, `${label}.name`, 300)
+  outputText(file.path, `${label}.path`)
+  outputText(file.mediaUrl, `${label}.mediaUrl`, 16_384)
+  if (!Number.isSafeInteger(file.size) || file.size < 0 || file.size > 100 * 1024 * 1024) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label}.size is invalid`)
+  }
+}
+
+export function validateDesktopHostOutput(method, value) {
+  const normalizedMethod = validateDesktopHostMethod(method)
+  const output = outputRecord(value, `${normalizedMethod} output`)
+  if (normalizedMethod === 'file.pick') {
+    rejectUnknownOutputFields(output, ['files'], 'file.pick output')
+    if (!Array.isArray(output.files) || output.files.length > 10_000) {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'file.pick output files is invalid')
+    }
+    output.files.forEach((file, index) => validateDesktopFile(file, `file.pick output files[${index}]`))
+  } else if (normalizedMethod === 'file.materialize') {
+    if (output.complete === false) {
+      rejectUnknownOutputFields(output, ['transferId', 'complete', 'size'], 'file.materialize output')
+      outputText(output.transferId, 'file.materialize output transferId', 128)
+      if (!Number.isSafeInteger(output.size) || output.size < 0 || output.size > 100 * 1024 * 1024) {
+        throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'file.materialize output size is invalid')
+      }
+    } else {
+      validateDesktopFile(output, 'file.materialize output')
+    }
+  } else if (normalizedMethod === 'file.thumbnail') {
+    rejectUnknownOutputFields(output, ['path', 'mediaUrl'], 'file.thumbnail output')
+    outputText(output.path, 'file.thumbnail output path')
+    outputText(output.mediaUrl, 'file.thumbnail output mediaUrl', 16_384)
+  } else if (normalizedMethod === 'file.download') {
+    rejectUnknownOutputFields(output, ['canceled', 'filePath'], 'file.download output')
+    if (typeof output.canceled !== 'boolean') {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'file.download output canceled is invalid')
+    }
+    if (!output.canceled) outputText(output.filePath, 'file.download output filePath')
+  } else if (normalizedMethod === 'screen.capture') {
+    validateDesktopFile(output, 'screen.capture output')
+  } else {
+    rejectUnknownOutputFields(output, ['opened'], 'shell.open-external output')
+    if (output.opened !== true) {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'shell.open-external output opened is invalid')
+    }
+  }
+  return output
+}

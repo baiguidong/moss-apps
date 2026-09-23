@@ -194,7 +194,11 @@ function normalizeBackend(backend) {
     instanceMode: backend.instanceMode,
     ...(backend.serverOwnerScope ? { serverOwnerScope: backend.serverOwnerScope } : {}),
     targets: [...backend.targets],
-    ...(backend.protocols?.length ? { protocols: [...backend.protocols] } : {}),
+    ...(Array.isArray(backend.protocols) && backend.protocols.length
+      ? { protocols: [...backend.protocols] }
+      : backend.protocols && Object.keys(backend.protocols).length
+        ? { protocols: Object.fromEntries(Object.entries(backend.protocols).map(([target, protocols]) => [target, [...protocols]])) }
+        : {}),
     actions,
     ...(backend.configuration ? {
       configuration: {
@@ -208,15 +212,24 @@ function normalizeBackend(backend) {
 export function validateAppManifest(rawManifest, options = {}) {
   const candidate = structuredClone(rawManifest)
   if (
-    candidate?.ui
-    && candidate?.backend
+    candidate?.backend?.serverOwnerScope
     && Array.isArray(candidate.backend.targets)
-    && !candidate.backend.targets.includes('desktop')
+    && !candidate.backend.targets.includes('server')
   ) {
     throw new AppServiceError(
       APP_ERROR_CODES.invalidManifest,
-      'Apps with a UI must target desktop; Server-only Apps must omit ui',
+      'backend.serverOwnerScope requires server in backend.targets',
     )
+  }
+  if (candidate?.backend?.protocols && !Array.isArray(candidate.backend.protocols)) {
+    for (const target of Object.keys(candidate.backend.protocols)) {
+      if (!candidate.backend.targets?.includes(target)) {
+        throw new AppServiceError(
+          APP_ERROR_CODES.invalidManifest,
+          `backend.protocols.${target} requires ${target} in backend.targets`,
+        )
+      }
+    }
   }
   if (!validateManifestSchema(candidate)) {
     throw new AppServiceError(
@@ -259,6 +272,12 @@ export function validateAppManifest(rawManifest, options = {}) {
     ...(contributes ? { contributes } : {}),
     permissions: [...candidate.permissions],
   }
+}
+
+export function resolveBackendProtocols(backend, target) {
+  if (!backend?.protocols) return []
+  if (Array.isArray(backend.protocols)) return [...backend.protocols]
+  return Array.isArray(backend.protocols[target]) ? [...backend.protocols[target]] : []
 }
 
 export function loadJsonSchema(packageRoot, relativePath, fieldName = 'schema') {

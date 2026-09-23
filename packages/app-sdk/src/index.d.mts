@@ -1,3 +1,4 @@
+/** A supported Backend placement. Manifest targets must explicitly contain desktop, server, or both. */
 export type AppTarget = 'desktop' | 'server'
 export type AppBackendLifecycle = 'on-demand' | 'persistent'
 export type AppInstanceMode = 'single' | 'multiple'
@@ -9,6 +10,7 @@ export interface AppOwner {
   key: string
 }
 export type AppBackendProtocol = string
+export type AppTargetProtocols = Partial<Record<AppTarget, AppBackendProtocol[]>>
 
 export interface AgentSessionSummary {
   id: string
@@ -340,6 +342,7 @@ export interface RemoteHostRequestMap {
   'action.invoke': { action: string; input?: Record<string, unknown>; timeoutMs?: number; ownerScope?: 'user' | 'org' }
 }
 export interface RemoteHostResultMap { 'action.invoke': unknown }
+/** @deprecated Transitional compatibility only. New Apps must use one active Backend placement. */
 export interface AppRemoteApi {
   request<Output = unknown>(
     method: 'action.invoke',
@@ -393,9 +396,12 @@ export interface AppManifestV2 {
     apiVersion: 1
     lifecycle: AppBackendLifecycle
     instanceMode: AppInstanceMode
+    /** Owner scope used only while this instance is placed on Server. */
     serverOwnerScope?: 'user' | 'org'
+    /** Alternative placements for one Backend; an instance is active on only one target at a time. */
     targets: AppTarget[]
-    protocols?: AppBackendProtocol[]
+    /** Host protocols used at each target. The array form is transitional and applies to every target. */
+    protocols?: AppTargetProtocols | AppBackendProtocol[]
     actions: AppActionManifest[]
     configuration?: { schema?: string; secrets?: string }
   }
@@ -518,6 +524,7 @@ export const APP_BACKEND_API_VERSION: 1
 export const MOSS_ACCOUNT_PROTOCOL: 'moss.account/v1'
 export const MOSS_AGENT_PROTOCOL: 'moss.agent/v1'
 export const MOSS_DESKTOP_PROTOCOL: 'moss.desktop/v1'
+/** @deprecated Transitional compatibility only. New Apps must not split a Backend across targets. */
 export const MOSS_REMOTE_PROTOCOL: 'moss.remote/v1'
 export const ACCOUNT_PERMISSIONS: Readonly<Record<string, AccountPermission>>
 export const ACCOUNT_HOST_METHOD_PERMISSIONS: Readonly<Record<AccountHostMethod, AccountPermission>>
@@ -554,15 +561,18 @@ export function serializeError(error: unknown, fallbackCode?: string): { code: s
 export function validateAccountHostMethod(value: unknown): AccountHostMethod
 export function validateAccountBackendEvent(value: unknown): AccountBackendEvent
 export function validateAccountHostInput(method: AccountHostMethod, value: unknown): Record<string, unknown>
+export function validateAccountHostOutput(method: AccountHostMethod, value: unknown): Record<string, unknown>
 export function validateAccountBackendEventData(name: AccountBackendEvent, value: unknown): Record<string, unknown>
 export function validateAgentHostMethod(value: unknown): AgentHostMethod
 export function validateAgentBackendEvent(value: unknown): AgentBackendEvent
 export function validateAgentHostInput(method: AgentHostMethod, value: unknown): Record<string, unknown>
+export function validateAgentHostOutput(method: AgentHostMethod, value: unknown): Record<string, unknown>
 export function validateAgentBackendEventData(name: AgentBackendEvent, value: unknown): Record<string, unknown>
 export function validateAgentAttachments(value: unknown, method: string): void
 export function validateAgentMessageContent(input: Record<string, unknown>, method: string): void
 export function validateDesktopHostMethod(value: unknown): DesktopHostMethod
 export function validateDesktopHostInput(method: DesktopHostMethod, value: unknown): Record<string, unknown>
+export function validateDesktopHostOutput(method: DesktopHostMethod, value: unknown): Record<string, unknown>
 export function validateRemoteHostMethod(value: unknown): RemoteHostMethod
 export function validateRemoteHostInput(method: RemoteHostMethod, value: unknown): Record<string, unknown>
 export function validateHostProtocol(value: unknown): string
@@ -572,6 +582,7 @@ export function requireHostProtocol(protocols: string[], protocol: string): true
 export function requireHostPermission(permissions: string[], requiredPermission?: string | null, options?: { source?: 'declaration' | 'grant' }): true
 export function ensureSafeRelativePath(value: unknown, fieldName?: string): string
 export function validateAppManifest(rawManifest: unknown, options?: { hostApiVersion?: string }): AppManifestV2
+export function resolveBackendProtocols(backend: AppManifestV2['backend'], target: AppTarget): AppBackendProtocol[]
 export function loadJsonSchema(packageRoot: string, relativePath: string, fieldName?: string): Record<string, unknown>
 export function compileJsonSchema(schema: unknown): ((value: unknown) => boolean) & { errors?: unknown[] }
 

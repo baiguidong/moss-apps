@@ -419,6 +419,207 @@ export function validateAgentHostInput(method, value) {
   return input
 }
 
+function outputRecord(value, label) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label} must be an object`)
+  }
+  return value
+}
+
+function outputText(value, label, { nullable = false, maxLength = 100_000 } = {}) {
+  if (nullable && value === null) return
+  if (typeof value !== 'string' || !value.trim() || value.length > maxLength) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label} is invalid`)
+  }
+}
+
+function outputInteger(value, label, minimum = 0) {
+  if (!Number.isSafeInteger(value) || value < minimum) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label} is invalid`)
+  }
+}
+
+function rejectUnknownOutputFields(output, fields, label) {
+  const allowed = new Set(fields)
+  for (const field of Object.keys(output)) {
+    if (!allowed.has(field)) {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label} contains an unknown field: ${field}`)
+    }
+  }
+}
+
+function validateSessionSummary(value, label, { nullable = false } = {}) {
+  if (nullable && value === null) return
+  const session = outputRecord(value, label)
+  rejectUnknownOutputFields(session, [
+    'id', 'title', 'preview', 'updatedAt', 'busy', 'projectName', 'originChannel', 'messageCount',
+  ], label)
+  outputText(session.id, `${label}.id`)
+  outputText(session.title, `${label}.title`)
+  outputInteger(session.updatedAt, `${label}.updatedAt`)
+  if (typeof session.busy !== 'boolean') {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label}.busy is invalid`)
+  }
+}
+
+function validateBindingShape(value, label) {
+  const binding = outputRecord(value, label)
+  rejectUnknownOutputFields(binding, [
+    'id', 'appId', 'instanceId', 'externalConversationId', 'externalMemberId',
+    'policy', 'revision', 'createdAt', 'updatedAt',
+  ], label)
+}
+
+function validateEffectiveBindingShape(value, label) {
+  const effective = outputRecord(value, label)
+  rejectUnknownOutputFields(effective, [
+    'appId', 'instanceId', 'externalConversationId', 'externalMemberId', 'replyMode',
+    'agentId', 'permissionMode', 'resources', 'session', 'proactive', 'inheritDefault',
+    'revision', 'sourceRevisions', 'inherited', 'agentAvailable', 'unavailableResources',
+  ], label)
+}
+
+const AGENT_TURN_STATUSES = new Set([
+  'received', 'human', 'queued', 'running', 'awaiting_review',
+  'completed', 'rejected', 'failed', 'cancelled',
+])
+
+function validatePublicTurn(value, label, { nullable = false } = {}) {
+  if (nullable && value === null) return
+  const turn = outputRecord(value, label)
+  rejectUnknownOutputFields(turn, [
+    'id', 'externalConversationId', 'externalUserId', 'externalEventId', 'source', 'hop',
+    'sessionId', 'status', 'replyMode', 'input', 'resultText', 'reviewedText', 'error',
+    'deliveredAt', 'createdAt', 'updatedAt',
+  ], label)
+  for (const field of ['id', 'externalConversationId', 'externalUserId', 'externalEventId']) {
+    outputText(turn[field], `${label}.${field}`)
+  }
+  if (!AGENT_TURN_STATUSES.has(turn.status)) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label}.status is invalid`)
+  }
+  if (!AGENT_REPLY_MODES.includes(turn.replyMode)) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label}.replyMode is invalid`)
+  }
+  outputInteger(turn.hop, `${label}.hop`)
+  if (turn.sessionId !== null) outputText(turn.sessionId, `${label}.sessionId`)
+  outputRecord(turn.input, `${label}.input`)
+  if (turn.resultText !== undefined && typeof turn.resultText !== 'string') {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label}.resultText is invalid`)
+  }
+  if (turn.reviewedText !== undefined && typeof turn.reviewedText !== 'string') {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label}.reviewedText is invalid`)
+  }
+}
+
+function validateBindingResult(output, method, { reset = false } = {}) {
+  if (reset) {
+    if (typeof output.reset !== 'boolean' || output.binding !== null) {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${method} output reset state is invalid`)
+    }
+  } else if (output.binding !== null) {
+    validateBindingShape(output.binding, `${method} output binding`)
+  }
+  validateEffectiveBindingShape(output.effective, `${method} output effective`)
+}
+
+export function validateAgentHostOutput(method, value) {
+  const normalizedMethod = validateAgentHostMethod(method)
+  const output = outputRecord(value, `${normalizedMethod} output`)
+  if (normalizedMethod === 'catalog.list') {
+    rejectUnknownOutputFields(output, AGENT_CATALOG_KINDS, 'catalog.list output')
+    for (const kind of AGENT_CATALOG_KINDS) {
+      if (output[kind] !== undefined && (!Array.isArray(output[kind]) || output[kind].length > 10_000)) {
+        throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `catalog.list output ${kind} is invalid`)
+      }
+    }
+  } else if (normalizedMethod === 'binding.get' || normalizedMethod === 'binding.update') {
+    rejectUnknownOutputFields(output, ['binding', 'effective'], `${normalizedMethod} output`)
+    validateBindingResult(output, normalizedMethod)
+  } else if (normalizedMethod === 'binding.reset') {
+    rejectUnknownOutputFields(output, ['reset', 'binding', 'effective'], 'binding.reset output')
+    validateBindingResult(output, normalizedMethod, { reset: true })
+  } else if (normalizedMethod === 'session.list') {
+    rejectUnknownOutputFields(output, [
+      'sessions', 'currentSession', 'page', 'pageSize', 'total', 'hasPrevious', 'hasNext',
+    ], 'session.list output')
+    if (!Array.isArray(output.sessions) || output.sessions.length > 100) {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'session.list output sessions is invalid')
+    }
+    output.sessions.forEach((session, index) => validateSessionSummary(session, `session.list output sessions[${index}]`))
+    validateSessionSummary(output.currentSession, 'session.list output currentSession', { nullable: true })
+    for (const field of ['page', 'pageSize', 'total']) outputInteger(output[field], `session.list output ${field}`)
+    if (typeof output.hasPrevious !== 'boolean' || typeof output.hasNext !== 'boolean') {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'session.list output pagination is invalid')
+    }
+  } else if (normalizedMethod === 'session.current') {
+    rejectUnknownOutputFields(output, ['session'], 'session.current output')
+    validateSessionSummary(output.session, 'session.current output session', { nullable: true })
+  } else if (normalizedMethod === 'session.create' || normalizedMethod === 'session.select') {
+    rejectUnknownOutputFields(output, ['session'], `${normalizedMethod} output`)
+    validateSessionSummary(output.session, `${normalizedMethod} output session`)
+  } else if (normalizedMethod === 'session.abort') {
+    rejectUnknownOutputFields(output, ['cancelled', 'session'], 'session.abort output')
+    outputInteger(output.cancelled, 'session.abort output cancelled')
+    validateSessionSummary(output.session, 'session.abort output session')
+  } else if (normalizedMethod === 'context.observe') {
+    rejectUnknownOutputFields(output, ['observed', 'duplicate'], 'context.observe output')
+    if (typeof output.observed !== 'boolean' || typeof output.duplicate !== 'boolean') {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'context.observe output is invalid')
+    }
+  } else if (normalizedMethod === 'turn.start') {
+    rejectUnknownOutputFields(output, [
+      'accepted', 'routing', 'duplicate', 'turnId', 'status', 'sessionId',
+      'queued', 'session', 'reason',
+    ], 'turn.start output')
+    if (typeof output.accepted !== 'boolean' || typeof output.duplicate !== 'boolean') {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'turn.start output flags are invalid')
+    }
+    outputText(output.turnId, 'turn.start output turnId')
+    if (!AGENT_TURN_STATUSES.has(output.status)) {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'turn.start output status is invalid')
+    }
+    if (!['human', ...AGENT_REPLY_MODES].includes(output.routing)) {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'turn.start output routing is invalid')
+    }
+    if (output.sessionId !== null) outputText(output.sessionId, 'turn.start output sessionId')
+    if (output.queued !== undefined && typeof output.queued !== 'boolean') {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'turn.start output queued is invalid')
+    }
+    if (output.reason !== undefined) outputText(output.reason, 'turn.start output reason')
+    if (output.session !== undefined) validateSessionSummary(output.session, 'turn.start output session')
+  } else if (normalizedMethod === 'turn.list') {
+    rejectUnknownOutputFields(output, ['turns'], 'turn.list output')
+    if (!Array.isArray(output.turns) || output.turns.length > 200) {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'turn.list output turns is invalid')
+    }
+    output.turns.forEach((turn, index) => validatePublicTurn(turn, `turn.list output turns[${index}]`))
+  } else if (normalizedMethod === 'turn.get') {
+    rejectUnknownOutputFields(output, ['turn'], 'turn.get output')
+    validatePublicTurn(output.turn, 'turn.get output turn', { nullable: true })
+  } else if (['turn.abort', 'turn.reply', 'turn.review'].includes(normalizedMethod)) {
+    rejectUnknownOutputFields(
+      output,
+      normalizedMethod === 'turn.abort' ? ['turn', 'aborted'] : ['turn'],
+      `${normalizedMethod} output`,
+    )
+    validatePublicTurn(output.turn, `${normalizedMethod} output turn`)
+    if (normalizedMethod === 'turn.abort' && typeof output.aborted !== 'boolean') {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'turn.abort output aborted is invalid')
+    }
+  } else if (normalizedMethod === 'turn.delivery.ack') {
+    rejectUnknownOutputFields(output, ['acknowledged', 'turnId', 'status'], 'turn.delivery.ack output')
+    if (typeof output.acknowledged !== 'boolean') {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'turn.delivery.ack output acknowledged is invalid')
+    }
+    outputText(output.turnId, 'turn.delivery.ack output turnId')
+    if (!AGENT_TURN_STATUSES.has(output.status)) {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'turn.delivery.ack output status is invalid')
+    }
+  }
+  return output
+}
+
 export function validateAgentBackendEventData(name, value) {
   const normalizedName = validateAgentBackendEvent(name)
   const data = record(value, `${normalizedName} data`)

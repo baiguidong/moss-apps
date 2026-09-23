@@ -214,7 +214,7 @@ export class AppBackendClient {
   requestTypedHost(protocol, method, input, permission, options, label) {
     if (this.context && !this.hostClosed) {
       requireHostPermission(this.context.permissions, permission)
-      requireHostPermission(this.context.grants ?? this.context.permissions, permission, { source: 'grant' })
+      requireHostPermission(this.context.grants ?? [], permission, { source: 'grant' })
     }
     return this.requestHostInternal(protocol, method, input, { ...options, label })
   }
@@ -381,7 +381,7 @@ export class AppBackendClient {
       entry = this.hostHandlers.get(hostHandlerKey(protocol, name))
       if (entry?.permission) {
         requireHostPermission(this.context.permissions, entry.permission)
-        requireHostPermission(this.context.grants ?? this.context.permissions, entry.permission, { source: 'grant' })
+        requireHostPermission(this.context.grants ?? [], entry.permission, { source: 'grant' })
       }
       if (entry?.validateData) entry.validateData(payload.data)
       else validateHostData(payload.data, `${protocol} ${name} data`)

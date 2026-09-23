@@ -1,5 +1,6 @@
 import { APP_ERROR_CODES, AppServiceError } from '../protocol/index.mjs'
 
+// Transitional compatibility for existing Apps. New Backends use one active placement.
 export const MOSS_REMOTE_PROTOCOL = 'moss.remote/v1'
 
 export const REMOTE_PERMISSIONS = Object.freeze({

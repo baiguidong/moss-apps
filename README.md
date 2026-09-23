@@ -76,6 +76,22 @@ apps/example/
 
 `marketplace.json` 只保存展示信息。版本、权限、Host API、下载地址和校验值由 CI 从 Manifest 与构建产物生成。
 
+### Backend 运行位置
+
+每个带 Backend 的 App 都必须在 `app.moss.json` 中按实际能力显式声明 `backend.targets`：
+
+| 声明 | 含义 |
+| --- | --- |
+| `["desktop"]` | 只能随 Moss Desktop 运行；客户端退出或设备关机后 Backend 不再工作 |
+| `["server"]` | 只能部署到 Moss Server；可以由 Server 7×24 运行 |
+| `["desktop", "server"]` | 同一个 Backend 支持两种候选位置；每个 instance 同一时刻只在其中一处运行 |
+
+声明 `server` 是运行能力承诺，不是预留开关，而且不是所有 App 都需要支持。大多数 App 应保持 `["desktop"]`；只有声明 `server` 的 App 才能由 Moss Server 7×24 运行。Desktop 与 Server 模式可以采用不同逻辑并提供不同的适用功能，但各模式必须独立运行，不能依赖另一端的 Backend 同时在线。声明两种 target 不会创建两个协作进程；迁移到 Server 时先停止 Desktop deployment，再由 Server 接管同一个逻辑 instance。
+
+`backend.protocols` 按 target 声明，例如 `{"desktop": ["moss.desktop/v1"], "server": ["moss.agent/v1"]}`。只声明当前模式真正调用的协议，Desktop 专属协议不得放入 `server`。旧数组格式仅为现有 App 迁移保留，并视为所有 target 共用同一组协议；新 App 不应使用。
+
+UI 与 Backend 位置相互独立。App 可以只有 Desktop UI 而 Backend 只运行在 Server；UI 调用逻辑 instance，由 Moss Host 定位 active deployment，不应自行连接 Server。`moss.remote/v1` 是现有 App 的过渡兼容协议，新 App 不得用它把一个 Backend 拆成 Desktop/Server 两个协作角色。
+
 发布 ZIP 根目录直接包含 `app.moss.json`，不额外嵌套目录。源码、测试、`node_modules` 和私钥不会进入 ZIP。
 
 ## Moss 预装

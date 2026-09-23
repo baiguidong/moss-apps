@@ -25,7 +25,10 @@
     "lifecycle": "persistent",
     "instanceMode": "single",
     "targets": ["desktop", "server"],
-    "protocols": ["moss.agent/v1"],
+    "protocols": {
+      "desktop": ["moss.agent/v1"],
+      "server": ["moss.agent/v1"]
+    },
     "actions": [
       { "name": "status.get" },
       { "name": "pairing.issue" },

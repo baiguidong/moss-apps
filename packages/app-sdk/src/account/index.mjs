@@ -67,6 +67,61 @@ function rejectUnknownFields(input, fields, method) {
   }
 }
 
+function requireOutputString(value, label, { nullable = false, maxLength = 512 } = {}) {
+  if (nullable && value === null) return
+  if (typeof value !== 'string' || !value.trim() || value.length > maxLength) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label} is invalid`)
+  }
+}
+
+function validateStringList(value, label, maxItems = 512) {
+  if (value === undefined) return
+  if (!Array.isArray(value) || value.length > maxItems) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label} is invalid`)
+  }
+  for (const item of value) requireOutputString(item, label)
+}
+
+function rejectUnknownOutputFields(output, fields, label) {
+  const allowed = new Set(fields)
+  for (const field of Object.keys(output)) {
+    if (!allowed.has(field)) {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label} contains an unknown field: ${field}`)
+    }
+  }
+}
+
+function outputRecord(value, label) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label} must be an object`)
+  }
+  return value
+}
+
+function validateDirectoryUser(value, label) {
+  const user = outputRecord(value, label)
+  rejectUnknownOutputFields(user, ['id', 'name', 'email', 'departmentId', 'status'], label)
+  requireOutputString(user.id, `${label}.id`)
+  requireOutputString(user.name, `${label}.name`)
+  if (user.email !== undefined) requireOutputString(user.email, `${label}.email`, { nullable: true })
+  if (user.departmentId !== undefined) requireOutputString(user.departmentId, `${label}.departmentId`, { nullable: true })
+  if (user.status !== undefined && !['active', 'disabled'].includes(user.status)) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label}.status is invalid`)
+  }
+}
+
+function validateDirectoryDepartment(value, label) {
+  const department = outputRecord(value, label)
+  rejectUnknownOutputFields(department, ['id', 'name', 'parentId', 'userCount'], label)
+  requireOutputString(department.id, `${label}.id`)
+  requireOutputString(department.name, `${label}.name`)
+  if (department.parentId !== undefined) requireOutputString(department.parentId, `${label}.parentId`, { nullable: true })
+  if (department.userCount !== undefined
+    && (!Number.isInteger(department.userCount) || department.userCount < 0)) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${label}.userCount is invalid`)
+  }
+}
+
 export function validateAccountHostMethod(value) {
   return requireKnownName(value, ACCOUNT_HOST_METHOD_PERMISSIONS, 'Host method')
 }
@@ -102,6 +157,42 @@ export function validateAccountHostInput(method, value) {
     optionalLimit(input, normalizedMethod)
   }
   return input
+}
+
+export function validateAccountHostOutput(method, value) {
+  const normalizedMethod = validateAccountHostMethod(method)
+  const output = outputRecord(value, `${normalizedMethod} output`)
+  if (normalizedMethod === 'identity.current') {
+    rejectUnknownOutputFields(output, ['source', 'user', 'organization', 'scopes'], 'identity.current output')
+    if (!['local', 'server'].includes(output.source)) {
+      throw new AppServiceError(APP_ERROR_CODES.hostProtocol, 'identity.current output source is invalid')
+    }
+    if (output.user !== null) validateDirectoryUser(output.user, 'identity.current output user')
+    if (output.organization !== undefined && output.organization !== null) {
+      const organization = outputRecord(output.organization, 'identity.current output organization')
+      rejectUnknownOutputFields(organization, ['id', 'name'], 'identity.current output organization')
+      requireOutputString(organization.id, 'identity.current output organization.id')
+      requireOutputString(organization.name, 'identity.current output organization.name')
+    }
+    validateStringList(output.scopes, 'identity.current output scopes')
+    return output
+  }
+  rejectUnknownOutputFields(output, ['users', 'departments', 'nextCursor', 'revision'], `${normalizedMethod} output`)
+  if (!Array.isArray(output.users) || output.users.length > 200) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${normalizedMethod} output users is invalid`)
+  }
+  if (!Array.isArray(output.departments) || output.departments.length > 10_000) {
+    throw new AppServiceError(APP_ERROR_CODES.hostProtocol, `${normalizedMethod} output departments is invalid`)
+  }
+  output.users.forEach((user, index) => validateDirectoryUser(user, `${normalizedMethod} output users[${index}]`))
+  output.departments.forEach((department, index) => (
+    validateDirectoryDepartment(department, `${normalizedMethod} output departments[${index}]`)
+  ))
+  if (output.nextCursor !== undefined) {
+    requireOutputString(output.nextCursor, `${normalizedMethod} output nextCursor`, { nullable: true })
+  }
+  if (output.revision !== undefined) requireOutputString(output.revision, `${normalizedMethod} output revision`)
+  return output
 }
 
 export function validateAccountBackendEventData(name, value) {
