@@ -50,7 +50,6 @@ describe('Feishu App UI contract', () => {
       'encryptKey',
       'verificationToken',
       'allowedUsers',
-      'runLocation',
     ]) {
       expect(source.match(new RegExp(`id="${id}"`, 'g'))).toHaveLength(1)
     }
@@ -89,6 +88,10 @@ describe('Feishu App UI contract', () => {
       'agent:turns:read',
       'agent:turns:write',
     ])
+    expect(manifest.backend).not.toHaveProperty('targets')
+    expect(manifest.backend.protocols).toEqual(['moss.agent/v1'])
+    expect(source).not.toContain("'server'")
+    expect(backendSource).not.toContain("'server'")
     expect(backendSource).toContain("if (chatType !== 'p2p') return")
     expect(backendSource).toContain("hostBridge.on('turn.completed'")
     expect(backendSource).toContain("hostBridge.registerAction('pairing.issue'")

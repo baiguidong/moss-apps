@@ -8,7 +8,6 @@ let automation: ReturnType<typeof createOpenIMAutomation> | null = null;
 const client = new AppBackendClient({
   onInitialize: async (nextContext: AppBackendContext) => {
     context = nextContext;
-    if (nextContext.target.type !== "desktop") throw new Error("OpenIM App only supports Desktop.");
     desktopService.initialize(nextContext);
     automation = createOpenIMAutomation(client, desktopService);
     automation.initialize(nextContext);
@@ -29,38 +28,37 @@ const client = new AppBackendClient({
 
 const desktopService = createOpenIMClientService(client);
 
-function requireDesktop() {
+function requireContext() {
   if (!context) throw new Error("OpenIM App Backend is not initialized.");
-  if (context.target.type !== "desktop") throw new Error("This action requires the Desktop backend.");
 }
 
 client.registerAction("status.get", async () => {
-  requireDesktop();
+  requireContext();
   return desktopService.getStatus();
 });
 
 client.registerAction("session.ensure", async () => {
-  requireDesktop();
+  requireContext();
   return desktopService.ensureSession();
 });
 
 client.registerAction("directory.list", async (input) => {
-  requireDesktop();
+  requireContext();
   return client.host.request(MOSS_OPENIM_PROTOCOL, "directory.list", input as Record<string, unknown>);
 });
 
 client.registerAction("conversation.direct.prepare", async (input) => {
-  requireDesktop();
+  requireContext();
   return client.host.request(MOSS_OPENIM_PROTOCOL, "conversation.direct.prepare", input as Record<string, unknown>);
 });
 
 client.registerAction("conversation.group.prepare", async (input) => {
-  requireDesktop();
+  requireContext();
   return client.host.request(MOSS_OPENIM_PROTOCOL, "conversation.group.prepare", input as Record<string, unknown>);
 });
 
 client.registerAction("sdk.call", async (input) => {
-  requireDesktop();
+  requireContext();
   const value = input && typeof input === "object" && !Array.isArray(input)
     ? input as Record<string, unknown>
     : {};

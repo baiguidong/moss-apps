@@ -1,5 +1,3 @@
-/** A supported Backend placement. Manifest targets must explicitly contain desktop, server, or both. */
-export type AppTarget = 'desktop' | 'server'
 export type AppBackendLifecycle = 'on-demand' | 'persistent'
 export type AppInstanceMode = 'single' | 'multiple'
 export type AppOwnerScope = 'host' | 'org' | 'user'
@@ -10,7 +8,6 @@ export interface AppOwner {
   key: string
 }
 export type AppBackendProtocol = string
-export type AppTargetProtocols = Partial<Record<AppTarget, AppBackendProtocol[]>>
 
 export interface AgentSessionSummary {
   id: string
@@ -350,21 +347,6 @@ export interface OpenIMHostRequestMap {
   'conversation.group.prepare': { userIds: string[] }
 }
 
-export type RemotePermission = 'remote:actions'
-export type RemoteHostMethod = 'action.invoke'
-export interface RemoteHostRequestMap {
-  'action.invoke': { action: string; input?: Record<string, unknown>; timeoutMs?: number; ownerScope?: 'user' | 'org' }
-}
-export interface RemoteHostResultMap { 'action.invoke': unknown }
-/** @deprecated Transitional compatibility only. New Apps must use one active Backend placement. */
-export interface AppRemoteApi {
-  request<Output = unknown>(
-    method: 'action.invoke',
-    input: RemoteHostRequestMap['action.invoke'],
-    options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal },
-  ): Promise<Output>
-}
-
 export interface AppHostApi {
   request<Output = unknown>(
     protocol: AppBackendProtocol,
@@ -410,12 +392,8 @@ export interface AppManifestV2 {
     apiVersion: 1
     lifecycle: AppBackendLifecycle
     instanceMode: AppInstanceMode
-    /** Owner scope used only while this instance is placed on Server. */
-    serverOwnerScope?: 'user' | 'org'
-    /** Alternative placements for one Backend; an instance is active on only one target at a time. */
-    targets: AppTarget[]
-    /** Host protocols used at each target. The array form is transitional and applies to every target. */
-    protocols?: AppTargetProtocols | AppBackendProtocol[]
+    /** Host protocols used by the Desktop Backend. */
+    protocols?: AppBackendProtocol[]
     actions: AppActionManifest[]
     configuration?: { schema?: string; secrets?: string }
   }
@@ -448,7 +426,6 @@ export interface AppBackendContext {
   secrets: Record<string, string>
   dataDir: string
   runtimeDir: string
-  target: { type: AppTarget; id: string }
   owner: AppOwner | null
   protocols: AppBackendProtocol[]
   permissions: string[]
@@ -457,7 +434,6 @@ export interface AppBackendContext {
   account: AppAccountApi
   agent: AppAgentApi
   desktop: AppDesktopApi
-  remote: AppRemoteApi
 }
 
 export interface AppActionContext extends AppBackendContext {
@@ -518,14 +494,12 @@ export class AppBackendClient {
   requestAgentHost<Method extends AgentHostMethod>(method: Method, input: AgentHostRequestMap[Method], options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<AgentHostResultMap[Method]>
   onAgentEvent(name: AgentBackendEvent, handler: (data: Record<string, unknown>, context: HostEventContext) => unknown | Promise<unknown>): () => void
   requestDesktopHost<Method extends DesktopHostMethod>(method: Method, input: DesktopHostRequestMap[Method], options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<DesktopHostResultMap[Method]>
-  requestRemoteHost<Output = unknown>(method: 'action.invoke', input: RemoteHostRequestMap['action.invoke'], options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<Output>
   requestHost<Output = unknown>(protocol: AppBackendProtocol, method: string, input?: Record<string, unknown>, options?: { requestId?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<Output>
   onHostEvent<Result = unknown>(protocol: AppBackendProtocol, name: string, handler: (data: Record<string, unknown>, context: HostEventContext) => Result | Promise<Result>): () => void
   readonly host: AppHostApi
   readonly account: AppAccountApi
   readonly agent: AppAgentApi
   readonly desktop: AppDesktopApi
-  readonly remote: AppRemoteApi
   emit(name: string, data?: unknown): void
   log(level: string, message: string, details?: unknown): void
   status(state: string, details?: unknown): void
@@ -539,8 +513,6 @@ export const MOSS_ACCOUNT_PROTOCOL: 'moss.account/v1'
 export const MOSS_AGENT_PROTOCOL: 'moss.agent/v1'
 export const MOSS_DESKTOP_PROTOCOL: 'moss.desktop/v1'
 export const MOSS_OPENIM_PROTOCOL: 'moss.openim/v1'
-/** @deprecated Transitional compatibility only. New Apps must not split a Backend across targets. */
-export const MOSS_REMOTE_PROTOCOL: 'moss.remote/v1'
 export const ACCOUNT_PERMISSIONS: Readonly<Record<string, AccountPermission>>
 export const ACCOUNT_HOST_METHOD_PERMISSIONS: Readonly<Record<AccountHostMethod, AccountPermission>>
 export const ACCOUNT_BACKEND_EVENT_PERMISSIONS: Readonly<Record<AccountBackendEvent, AccountPermission>>
@@ -561,9 +533,6 @@ export const DESKTOP_HOST_METHODS: readonly DesktopHostMethod[]
 export const OPENIM_PERMISSIONS: Readonly<Record<string, OpenIMPermission>>
 export const OPENIM_HOST_METHOD_PERMISSIONS: Readonly<Record<OpenIMHostMethod, OpenIMPermission>>
 export const OPENIM_HOST_METHODS: readonly OpenIMHostMethod[]
-export const REMOTE_PERMISSIONS: Readonly<Record<string, RemotePermission>>
-export const REMOTE_HOST_METHOD_PERMISSIONS: Readonly<Record<RemoteHostMethod, RemotePermission>>
-export const REMOTE_HOST_METHODS: readonly RemoteHostMethod[]
 export const DEFAULT_MAX_MESSAGE_BYTES: number
 export const APP_HOST_API_VERSION: string
 export const APP_MANIFEST_SCHEMA: Record<string, unknown>
@@ -594,8 +563,6 @@ export function validateDesktopHostOutput(method: DesktopHostMethod, value: unkn
 export function validateOpenIMHostMethod(value: unknown): OpenIMHostMethod
 export function validateOpenIMHostInput(method: OpenIMHostMethod, value: unknown): Record<string, unknown>
 export function validateOpenIMHostOutput(method: OpenIMHostMethod, value: unknown): Record<string, unknown>
-export function validateRemoteHostMethod(value: unknown): RemoteHostMethod
-export function validateRemoteHostInput(method: RemoteHostMethod, value: unknown): Record<string, unknown>
 export function validateHostProtocol(value: unknown): string
 export function validateHostMember(value: unknown, label?: string): string
 export function validateHostData(value: unknown, label?: string): Record<string, unknown>
@@ -603,7 +570,6 @@ export function requireHostProtocol(protocols: string[], protocol: string): true
 export function requireHostPermission(permissions: string[], requiredPermission?: string | null, options?: { source?: 'declaration' | 'grant' }): true
 export function ensureSafeRelativePath(value: unknown, fieldName?: string): string
 export function validateAppManifest(rawManifest: unknown, options?: { hostApiVersion?: string }): AppManifestV2
-export function resolveBackendProtocols(backend: AppManifestV2['backend'], target: AppTarget): AppBackendProtocol[]
 export function loadJsonSchema(packageRoot: string, relativePath: string, fieldName?: string): Record<string, unknown>
 export function compileJsonSchema(schema: unknown): ((value: unknown) => boolean) & { errors?: unknown[] }
 

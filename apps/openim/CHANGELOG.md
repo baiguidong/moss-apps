@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.3 - 2026-09-23
+
+- 移除 Backend target 声明和运行时 target 分支，App 仅使用隐式 Desktop 运行环境。
+
 ## 0.2.2 - 2026-09-23
 
 - 要求 Host API 2.1，避免缺少 `moss.openim/v1` 的旧版 Moss 被误判为兼容。

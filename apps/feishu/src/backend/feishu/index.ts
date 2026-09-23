@@ -27,7 +27,6 @@ let config!: AdapterConfig
 let larkClient!: InstanceType<typeof Lark.Client>
 let wsClient: InstanceType<typeof Lark.WSClient> | null = null
 let stateStore!: ReturnType<typeof createFeishuStateStore>
-let target = 'desktop'
 let transportConnected = false
 let transportError: string | null = null
 let transportUpdatedAt: number | null = null
@@ -41,7 +40,6 @@ function initializeTransport(context: AppBackendConfigurationContext): void {
     throw new Error('Missing Feishu App ID or App Secret. Configure the moss.feishu App instance first.')
   }
   if (!context.dataDir) throw new Error('Moss App data directory is unavailable.')
-  target = context.target?.type === 'server' ? 'server' : 'desktop'
   stateStore = createFeishuStateStore(context.dataDir)
 
   larkClient = new Lark.Client({
@@ -78,7 +76,6 @@ async function ensureAgentPolicy(): Promise<void> {
 }
 
 hostBridge.registerAction('status.get', () => ({
-  target,
   transportConnected,
   transportError,
   transportUpdatedAt,
@@ -266,7 +263,6 @@ async function reportConnection(connected: boolean, error?: unknown, required = 
   hostBridge.status(connected ? 'connected' : 'disconnected', {
     connected,
     error: transportError,
-    target,
   })
   if (!hostBridge.available) {
     if (required) throw new Error('Moss host bridge disconnected during Feishu startup.')

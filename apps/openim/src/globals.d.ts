@@ -33,12 +33,11 @@ declare global {
           instanceId: string,
           name: string,
           input?: unknown,
-          options?: { requestId?: string; timeoutMs?: number; target?: "desktop" | "server" },
+          options?: { requestId?: string; timeoutMs?: number },
         ) => Promise<T>;
         cancel: (
           instanceId: string,
           requestId: string,
-          options?: { target?: "desktop" | "server" },
         ) => Promise<{ canceled: boolean }>;
       };
       instances: {

@@ -192,13 +192,7 @@ function normalizeBackend(backend) {
     apiVersion: 1,
     lifecycle: backend.lifecycle,
     instanceMode: backend.instanceMode,
-    ...(backend.serverOwnerScope ? { serverOwnerScope: backend.serverOwnerScope } : {}),
-    targets: [...backend.targets],
-    ...(Array.isArray(backend.protocols) && backend.protocols.length
-      ? { protocols: [...backend.protocols] }
-      : backend.protocols && Object.keys(backend.protocols).length
-        ? { protocols: Object.fromEntries(Object.entries(backend.protocols).map(([target, protocols]) => [target, [...protocols]])) }
-        : {}),
+    ...(backend.protocols?.length ? { protocols: [...backend.protocols] } : {}),
     actions,
     ...(backend.configuration ? {
       configuration: {
@@ -211,26 +205,6 @@ function normalizeBackend(backend) {
 
 export function validateAppManifest(rawManifest, options = {}) {
   const candidate = structuredClone(rawManifest)
-  if (
-    candidate?.backend?.serverOwnerScope
-    && Array.isArray(candidate.backend.targets)
-    && !candidate.backend.targets.includes('server')
-  ) {
-    throw new AppServiceError(
-      APP_ERROR_CODES.invalidManifest,
-      'backend.serverOwnerScope requires server in backend.targets',
-    )
-  }
-  if (candidate?.backend?.protocols && !Array.isArray(candidate.backend.protocols)) {
-    for (const target of Object.keys(candidate.backend.protocols)) {
-      if (!candidate.backend.targets?.includes(target)) {
-        throw new AppServiceError(
-          APP_ERROR_CODES.invalidManifest,
-          `backend.protocols.${target} requires ${target} in backend.targets`,
-        )
-      }
-    }
-  }
   if (!validateManifestSchema(candidate)) {
     throw new AppServiceError(
       APP_ERROR_CODES.invalidManifest,
@@ -249,16 +223,6 @@ export function validateAppManifest(rawManifest, options = {}) {
   }
   if (!semver.validRange(candidate.hostApi)) {
     throw new AppServiceError(APP_ERROR_CODES.invalidManifest, `Invalid hostApi range: ${candidate.hostApi}`)
-  }
-  if (
-    candidate.backend?.protocols
-    && !Array.isArray(candidate.backend.protocols)
-    && semver.intersects(candidate.hostApi, '<2.1.0')
-  ) {
-    throw new AppServiceError(
-      APP_ERROR_CODES.invalidManifest,
-      'Target-scoped backend.protocols requires Host API >=2.1.0',
-    )
   }
   const hostApiVersion = options.hostApiVersion || APP_HOST_API_VERSION
   if (!semver.satisfies(hostApiVersion, candidate.hostApi)) {
@@ -282,12 +246,6 @@ export function validateAppManifest(rawManifest, options = {}) {
     ...(contributes ? { contributes } : {}),
     permissions: [...candidate.permissions],
   }
-}
-
-export function resolveBackendProtocols(backend, target) {
-  if (!backend?.protocols) return []
-  if (Array.isArray(backend.protocols)) return [...backend.protocols]
-  return Array.isArray(backend.protocols[target]) ? [...backend.protocols[target]] : []
 }
 
 export function loadJsonSchema(packageRoot, relativePath, fieldName = 'schema') {

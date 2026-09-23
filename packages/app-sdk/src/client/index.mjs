@@ -34,12 +34,6 @@ import {
   validateDesktopHostMethod,
 } from '../desktop/index.mjs'
 import {
-  MOSS_REMOTE_PROTOCOL,
-  REMOTE_HOST_METHOD_PERMISSIONS,
-  validateRemoteHostInput,
-  validateRemoteHostMethod,
-} from '../remote/index.mjs'
-import {
   requireHostPermission,
   requireHostProtocol,
   validateHostData,
@@ -112,9 +106,6 @@ export class AppBackendClient {
     })
     this.desktop = Object.freeze({
       request: (method, input, requestOptions) => this.requestDesktopHost(method, input, requestOptions),
-    })
-    this.remote = Object.freeze({
-      request: (method, input, requestOptions) => this.requestRemoteHost(method, input, requestOptions),
     })
     this.host = Object.freeze({
       request: (protocol, method, input, requestOptions) => this.requestHost(protocol, method, input, requestOptions),
@@ -196,18 +187,6 @@ export class AppBackendClient {
       DESKTOP_HOST_METHOD_PERMISSIONS[normalizedMethod],
       options,
       'Desktop Host',
-    )
-  }
-
-  requestRemoteHost(method, input = {}, options = {}) {
-    const normalizedMethod = validateRemoteHostMethod(method)
-    return this.requestTypedHost(
-      MOSS_REMOTE_PROTOCOL,
-      normalizedMethod,
-      validateRemoteHostInput(normalizedMethod, input),
-      REMOTE_HOST_METHOD_PERMISSIONS[normalizedMethod],
-      options,
-      'Remote Host',
     )
   }
 
@@ -526,7 +505,6 @@ export class AppBackendClient {
         account: this.account,
         agent: this.agent,
         desktop: this.desktop,
-        remote: this.remote,
       })
       this.hostClosed = false
       if (this.onInitialize) await this.onInitialize(this.context)
@@ -592,7 +570,6 @@ export class AppBackendClient {
           account: this.account,
           agent: this.agent,
           desktop: this.desktop,
-          remote: this.remote,
           signal: controller.signal,
           requestId: message.id,
           emit: (name, data) => this.emit(name, data),

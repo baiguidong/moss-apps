@@ -14,7 +14,6 @@ export type AppBackendConfigurationContext = {
   config?: Record<string, unknown>
   secrets?: Record<string, unknown>
   dataDir?: string
-  target?: { type?: string; id?: string }
 }
 
 function stringList(value: unknown): string[] {

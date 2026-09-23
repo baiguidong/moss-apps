@@ -221,10 +221,6 @@
         <button id="refresh" class="secondary" type="button">刷新状态</button>
       </div>
       <div class="settings-group">
-        <div class="settings-row">
-          <div class="settings-row-copy"><h3>运行位置</h3><p>可在 Moss 的 App 管理页移动实例。</p></div>
-          <span id="runLocation" class="badge">本机</span>
-        </div>
         <div id="statusLine" class="status-line"><i class="dot"></i><span id="status">正在读取运行状态…</span></div>
         <div class="settings-block"><div class="grid">
           <label class="field"><span class="required">App ID</span><input id="appId" autocomplete="off" placeholder="cli_xxxxxxxx"></label>
@@ -233,7 +229,7 @@
           <label class="field"><span>Verification Token</span><input id="verificationToken" type="password" autocomplete="new-password" placeholder="长连接模式无需填写"></label>
           <label class="field full"><span>允许的用户 ID</span><input id="allowedUsers" autocomplete="off" placeholder="ou_xxx, ou_yyy（可选，逗号分隔）"><p class="hint">通常留空，再使用下方配对码绑定飞书账号。</p></label>
         </div></div>
-        <div class="settings-block"><div class="notice">飞书配置仅在此页面维护。保存后，Moss 会校验必填项并启动当前运行位置；Backend 实例页只负责运行控制和日志。</div></div>
+        <div class="settings-block"><div class="notice">飞书配置仅在此页面维护。保存后，Moss 会校验必填项并启动本机 Backend；Backend 实例页只负责运行控制和日志。</div></div>
         <div class="actions"><button id="save" type="button">保存配置</button><span id="message" class="message" role="status" aria-live="polite"></span></div>
       </div>
     </section>
@@ -253,7 +249,7 @@
         <div class="section-heading"><div><h2 id="agentPolicyTitle">执行权限</h2><p>飞书私聊始终由 AI 自动回复并复用该私聊的专用固定会话；这里只限制 Agent 可以使用的能力。</p></div><button id="refreshAgent" class="secondary" type="button">刷新</button></div>
         <div class="settings-group">
           <div class="settings-block"><div class="grid">
-            <label class="field full"><span>工具确认策略</span><select id="permissionMode"><option value="default">遵循 Moss 默认确认</option><option value="acceptEdits">自动允许文件编辑</option><option value="dontAsk">不弹窗，需要确认时拒绝</option></select><p class="hint">飞书不显示确认卡片；本机运行时请在 Moss 客户端处理，Server 运行时会拒绝需要确认的操作。</p></label>
+            <label class="field full"><span>工具确认策略</span><select id="permissionMode"><option value="default">遵循 Moss 默认确认</option><option value="acceptEdits">自动允许文件编辑</option><option value="dontAsk">不弹窗，需要确认时拒绝</option></select><p class="hint">飞书不显示确认卡片；需要交互确认时请在 Moss 客户端处理。</p></label>
           </div></div>
           <div class="settings-row">
             <div class="settings-row-copy"><h3>使用全部可用资源</h3><p>关闭后，仅允许下方明确勾选的工具、技能和连接器。</p></div>
@@ -309,8 +305,7 @@
     const BACKGROUNDS = new Set(['default', 'grid-theme', 'dot-theme', 'gradient-theme'])
     const systemColorScheme = matchMedia('(prefers-color-scheme: dark)')
     let adapterConfig = {}
-    let adapterStatus = { status: 'stopped', location: 'desktop', bridgeReady: false, transportConnected: false }
-    let activeTarget = 'desktop'
+    let adapterStatus = { status: 'stopped', bridgeReady: false, transportConnected: false }
     let activeInstance = null
     let pairingCode = null
     let busy = true
@@ -441,7 +436,6 @@
       $('verificationToken').value = ''
       $('verificationToken').placeholder = activeInstance?.secretRefs?.verificationToken?.configured ? '已配置' : '长连接模式无需填写'
       $('allowedUsers').value = Array.isArray(feishu.allowedUsers) ? feishu.allowedUsers.join(', ') : ''
-      $('runLocation').textContent = activeTarget === 'server' ? 'Moss Server' : '本机'
     }
 
     function selectMaskedSecret(event) {
@@ -449,11 +443,10 @@
     }
 
     function statusText(status) {
-      const location = status.location === 'server' ? 'Moss Server' : '本机'
-      if (status.transportConnected) return { text: `${location}飞书长连接已就绪`, kind: 'success' }
+      if (status.transportConnected) return { text: '本机飞书长连接已就绪', kind: 'success' }
       if (status.transportError) return { text: `飞书长连接失败：${status.transportError}`, kind: 'error' }
       if (status.status === 'error') return { text: `飞书 App 启动失败：${status.error || '未知错误'}`, kind: 'error' }
-      if (status.bridgeReady) return { text: `${location}桥接已连接，正在等待飞书长连接`, kind: 'warning' }
+      if (status.bridgeReady) return { text: '本机桥接已连接，正在等待飞书长连接', kind: 'warning' }
       if (status.status === 'running') return { text: '飞书 App 正在启动', kind: 'warning' }
       if (status.status === 'disabled') return { text: '飞书 App 未启用', kind: '' }
       return { text: '飞书 App 未启动', kind: '' }
@@ -478,12 +471,12 @@
     async function agentRequest(method, input = {}) {
       if (!hostBridge?.request) throw new Error('当前 Moss 版本不支持 Agent Host API，请升级后重试。')
       if (!agentInstanceId) {
-        const instances = await window.mossApp.instances.list({ target: activeTarget })
+        const instances = await window.mossApp.instances.list()
         const instance = instances.find((entry) => entry?.id === 'moss.feishu--default') || instances[0]
         agentInstanceId = String(instance?.id || '')
       }
       if (!agentInstanceId) throw new Error('飞书 Backend 实例尚未创建。')
-      return hostBridge.request(agentInstanceId, AGENT_PROTOCOL, method, input, { target: activeTarget })
+      return hostBridge.request(agentInstanceId, AGENT_PROTOCOL, method, input)
     }
 
     function renderResourceList(elementId, kind, items, selected, unrestricted) {
@@ -703,16 +696,15 @@
       if (!bridge) return
       const requestVersion = ++statusRequestVersion
       try {
-        const statuses = await bridge.instances.getStatus(activeInstance.id, { target: activeTarget })
+        const statuses = await bridge.instances.getStatus(activeInstance.id)
         const runtime = Array.isArray(statuses) ? statuses[0]?.runtime : null
         let details = {}
         if (runtime?.state === 'running') {
-          details = await bridge.actions.invoke(activeInstance.id, 'status.get', {}, { target: activeTarget }) || {}
+          details = await bridge.actions.invoke(activeInstance.id, 'status.get', {}) || {}
         }
         if (disposed || requestVersion !== statusRequestVersion) return
         adapterStatus = {
           status: runtime?.state || 'stopped',
-          location: activeTarget,
           bridgeReady: runtime?.state === 'running',
           transportConnected: details.transportConnected === true,
           transportError: details.transportError || runtime?.lastError || null,
@@ -730,26 +722,12 @@
       }
     }
 
-    async function loadTargetInstances(target) {
-      try {
-        return await bridge.instances.list({ target })
-      } catch {
-        return []
-      }
-    }
-
     async function load() {
       if (!bridge?.instances?.list || !bridge?.actions?.invoke) {
         throw new Error('当前 Moss 版本不支持飞书 App 配置，请升级后重试。')
       }
-      const [desktopInstances, serverInstances] = await Promise.all([
-        loadTargetInstances('desktop'),
-        loadTargetInstances('server'),
-      ])
-      const local = desktopInstances.find((entry) => entry?.id === 'moss.feishu--default') || desktopInstances[0]
-      const remote = serverInstances.find((entry) => entry?.id === 'moss.feishu--default') || serverInstances[0]
-      activeTarget = remote?.enabled && !local?.enabled ? 'server' : 'desktop'
-      activeInstance = activeTarget === 'server' ? remote : local
+      const instances = await bridge.instances.list()
+      activeInstance = instances.find((entry) => entry?.id === 'moss.feishu--default') || instances[0]
       if (!activeInstance) throw new Error('飞书 Backend 实例尚未创建，请先在 App 管理页创建实例。')
       agentInstanceId = String(activeInstance.id || '')
       adapterConfig = { feishu: activeInstance.config || {} }
@@ -787,17 +765,17 @@
       $('statusLine').className = 'status-line warning'
       try {
         const patch = collectFeishuConfig()
-        activeInstance = await bridge.instances.update(activeInstance.id, patch, { target: activeTarget })
+        activeInstance = await bridge.instances.update(activeInstance.id, patch)
         if (!activeInstance.enabled) {
-          await bridge.instances.setEnabled(activeInstance.id, true, { target: activeTarget })
-          const instances = await bridge.instances.list({ target: activeTarget })
+          await bridge.instances.setEnabled(activeInstance.id, true)
+          const instances = await bridge.instances.list()
           activeInstance = instances.find((entry) => entry?.id === agentInstanceId) || activeInstance
         }
         statusRequestVersion += 1
         adapterConfig = { feishu: activeInstance.config || {} }
         hydrateForm(adapterConfig)
         await refreshStatus()
-        setMessage('配置已保存，并已应用到当前运行位置。', 'ok')
+        setMessage('配置已保存，并已应用到本机 Backend。', 'ok')
       } catch (error) {
         setMessage(errorMessage(error), 'error')
         await refreshStatus()
@@ -815,7 +793,7 @@
       setBusy(true)
       setMessage('')
       try {
-        const result = await bridge.actions.invoke(activeInstance.id, 'pairing.issue', {}, { target: activeTarget })
+        const result = await bridge.actions.invoke(activeInstance.id, 'pairing.issue', {})
         pairingCode = result?.pairing?.code || null
         statusRequestVersion += 1
         adapterStatus = { ...adapterStatus, ...result, pairing: result?.pairing || {} }
@@ -838,10 +816,10 @@
         const feishu = adapterConfig?.feishu || {}
         const allowedUsers = (feishu.allowedUsers || [])
           .filter((entry) => String(entry || '') !== String(userId))
-        await bridge.actions.invoke(activeInstance.id, 'pairing.revoke', { userId }, { target: activeTarget })
+        await bridge.actions.invoke(activeInstance.id, 'pairing.revoke', { userId })
         activeInstance = await bridge.instances.update(activeInstance.id, {
           config: { appId: String(feishu.appId || ''), allowedUsers },
-        }, { target: activeTarget })
+        })
         statusRequestVersion += 1
         adapterConfig = { feishu: activeInstance.config || {} }
         await refreshStatus()

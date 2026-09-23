@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.3 - 2026-09-23
+
+- 移除 Moss Server 运行路径，飞书 Backend 现在仅随 Moss Desktop 运行。
+- 设置页不再查询或操作 Server App 实例。
+
 ## 0.4.2 - 2026-09-23
 
 - 按 Desktop 与 Server target 分别声明 Host 协议，并要求支持该 Manifest 契约的 Host API 2.1。

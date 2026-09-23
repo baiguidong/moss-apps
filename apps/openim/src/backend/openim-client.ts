@@ -207,13 +207,13 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "host" 
   const pendingSends = new Map<string, Promise<Record<string, unknown>>>();
   let sentMessagesPath = "";
 
-  function requireDesktopContext(): AppBackendContext {
-    if (!context || context.target.type !== "desktop") throw new Error("This OpenIM action requires the Desktop backend.");
+  function requireContext(): AppBackendContext {
+    if (!context) throw new Error("OpenIM App Backend is not initialized.");
     return context;
   }
 
   function ensureDirectories() {
-    const current = requireDesktopContext();
+    const current = requireContext();
     for (const directory of ["sdk", "logs", "platform-files"]) {
       fs.mkdirSync(path.join(current.dataDir, directory), { recursive: true, mode: 0o700 });
     }
@@ -263,7 +263,7 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "host" 
   }
 
   function ensureSdk(): OpenIMSDK {
-    requireDesktopContext();
+    requireContext();
     if (sdk) return sdk;
     const libraryPath = nativeLibraryPath();
     if (!fs.existsSync(libraryPath)) throw new Error(`OpenIM native library is missing for ${process.platform}-${process.arch}.`);
@@ -303,7 +303,7 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "host" 
         throw new Error("OpenIM Server returned an incomplete session profile.");
       }
       if (!sdkInitialized) {
-        const current = requireDesktopContext();
+        const current = requireContext();
         const initialized = await currentSdk.initSDK({
           platformID: platformId(),
           apiAddr: profile.apiAddr,
@@ -345,7 +345,7 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "host" 
   }
 
   function allowedFile(filePath: unknown): string {
-    const current = requireDesktopContext();
+    const current = requireContext();
     const root = fs.realpathSync(path.join(current.dataDir, "platform-files"));
     const resolved = fs.realpathSync(path.resolve(String(filePath || "")));
     const relative = path.relative(root, resolved);
@@ -459,7 +459,6 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "host" 
 
   return {
     initialize(nextContext: AppBackendContext) {
-      if (nextContext.target.type !== "desktop") throw new Error("OpenIM native client can only run on Desktop.");
       context = nextContext;
       ensureDirectories();
       sentMessagesPath = path.join(nextContext.dataDir, "sent-messages.json");

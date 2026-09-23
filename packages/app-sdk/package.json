@@ -10,7 +10,6 @@
     "./agent": { "types": "./src/index.d.mts", "import": "./src/agent/index.mjs" },
     "./desktop": { "types": "./src/index.d.mts", "import": "./src/desktop/index.mjs" },
     "./openim": { "types": "./src/index.d.mts", "import": "./src/openim/index.mjs" },
-    "./remote": { "types": "./src/index.d.mts", "import": "./src/remote/index.mjs" },
     "./host": { "types": "./src/index.d.mts", "import": "./src/host/index.mjs" },
     "./client": { "types": "./src/index.d.mts", "import": "./src/client/index.mjs" },
     "./schemas": { "types": "./src/index.d.mts", "import": "./src/schemas/index.mjs" },
