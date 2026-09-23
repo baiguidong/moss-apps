@@ -92,25 +92,24 @@ apps/example/
 
 UI 与 Backend 位置相互独立。App 可以只有 Desktop UI 而 Backend 只运行在 Server；UI 调用逻辑 instance，由 Moss Host 定位 active deployment，不应自行连接 Server。`moss.remote/v1` 是现有 App 的过渡兼容协议，新 App 不得用它把一个 Backend 拆成 Desktop/Server 两个协作角色。
 
-发布 ZIP 根目录直接包含 `app.moss.json`，不额外嵌套目录。源码、测试、`node_modules` 和私钥不会进入 ZIP。
+发布 ZIP 根目录直接包含 `app.moss.json`，不额外嵌套目录。源码、测试、开发依赖和私钥不会进入 ZIP。Backend 应优先编译为独立 JavaScript；无法内联的原生模块及其运行时依赖可以放在 `dist/backend/node_modules`，但不得复制完整开发依赖树。
 
-## Moss 预装
+## Moss 安装
 
-Moss 的发布 CI 不重新编译本仓库源码，也不使用市场里的浮动 `latest`。主仓库的
-`config/bundled-apps.lock.json` 只锁定 App ID 和一个固定版本；构建时从本仓库发布的
-Marketplace 索引解析 Release 下载地址、SHA-256 和签名信息，验证 ZIP 后放入桌面安装包。
-升级预装版本必须显式更新锁文件。
+Moss 的发布 CI 不下载、锁定或预装本仓库中的 App。App 由本仓库独立构建并发布到
+Marketplace；用户在 Moss 应用市场中选择版本，客户端下载对应的签名 ZIP 并完成校验后安装。
+Moss 自身升级不会安装、替换或升级 App。
 
-App ZIP 与 Moss 桌面安装包分开：Moss 仍分别构建 macOS arm64 和 Windows x64 安装包；
-当前飞书 App 是纯 JavaScript，同一个签名 ZIP 可同时用于这两个平台，支持范围由
-`apps/feishu/marketplace.json` 的 `platforms` 声明。以后包含原生依赖的 App 可以按平台发布独立产物。
+App ZIP 与 Moss 桌面安装包分开。纯 JavaScript App 可以用同一个签名 ZIP 支持多个平台；
+包含原生依赖的 App 也可以在一个 ZIP 中携带其声明支持的多套运行文件。应用市场根据
+`marketplace.json` 的 `platforms` 自动过滤不支持当前设备的版本，构建脚本不得把未声明平台的原生文件带入发布包。
 
 ## 版本规则
 
 - App 使用独立 SemVer。
 - 已发布的 `<app-id>@<version>` 不允许覆盖。
 - 修改 App 运行内容时必须提升 `app.moss.json` 版本。
-- Moss 预装版本由 Moss 主仓库的 `bundled-apps.lock.json` 固定，不跟随市场 `latest` 自动漂移。
+- Moss 不固定 App 版本；安装和升级版本由用户在应用市场中选择。
 
 ## SDK
 

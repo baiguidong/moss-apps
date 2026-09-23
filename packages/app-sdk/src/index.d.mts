@@ -336,6 +336,20 @@ export interface AppDesktopApi {
   ): Promise<DesktopHostResultMap[Method]>
 }
 
+export type OpenIMPermission = 'openim:client'
+export type OpenIMHostMethod =
+  | 'session.issue'
+  | 'directory.list'
+  | 'conversation.direct.prepare'
+  | 'conversation.group.prepare'
+
+export interface OpenIMHostRequestMap {
+  'session.issue': { platformId: number }
+  'directory.list': { cursor?: string; limit?: number }
+  'conversation.direct.prepare': { userId: string }
+  'conversation.group.prepare': { userIds: string[] }
+}
+
 export type RemotePermission = 'remote:actions'
 export type RemoteHostMethod = 'action.invoke'
 export interface RemoteHostRequestMap {
@@ -524,6 +538,7 @@ export const APP_BACKEND_API_VERSION: 1
 export const MOSS_ACCOUNT_PROTOCOL: 'moss.account/v1'
 export const MOSS_AGENT_PROTOCOL: 'moss.agent/v1'
 export const MOSS_DESKTOP_PROTOCOL: 'moss.desktop/v1'
+export const MOSS_OPENIM_PROTOCOL: 'moss.openim/v1'
 /** @deprecated Transitional compatibility only. New Apps must not split a Backend across targets. */
 export const MOSS_REMOTE_PROTOCOL: 'moss.remote/v1'
 export const ACCOUNT_PERMISSIONS: Readonly<Record<string, AccountPermission>>
@@ -543,6 +558,9 @@ export const AGENT_BACKEND_EVENTS: readonly AgentBackendEvent[]
 export const DESKTOP_PERMISSIONS: Readonly<Record<string, DesktopPermission>>
 export const DESKTOP_HOST_METHOD_PERMISSIONS: Readonly<Record<DesktopHostMethod, DesktopPermission>>
 export const DESKTOP_HOST_METHODS: readonly DesktopHostMethod[]
+export const OPENIM_PERMISSIONS: Readonly<Record<string, OpenIMPermission>>
+export const OPENIM_HOST_METHOD_PERMISSIONS: Readonly<Record<OpenIMHostMethod, OpenIMPermission>>
+export const OPENIM_HOST_METHODS: readonly OpenIMHostMethod[]
 export const REMOTE_PERMISSIONS: Readonly<Record<string, RemotePermission>>
 export const REMOTE_HOST_METHOD_PERMISSIONS: Readonly<Record<RemoteHostMethod, RemotePermission>>
 export const REMOTE_HOST_METHODS: readonly RemoteHostMethod[]
@@ -573,6 +591,9 @@ export function validateAgentMessageContent(input: Record<string, unknown>, meth
 export function validateDesktopHostMethod(value: unknown): DesktopHostMethod
 export function validateDesktopHostInput(method: DesktopHostMethod, value: unknown): Record<string, unknown>
 export function validateDesktopHostOutput(method: DesktopHostMethod, value: unknown): Record<string, unknown>
+export function validateOpenIMHostMethod(value: unknown): OpenIMHostMethod
+export function validateOpenIMHostInput(method: OpenIMHostMethod, value: unknown): Record<string, unknown>
+export function validateOpenIMHostOutput(method: OpenIMHostMethod, value: unknown): Record<string, unknown>
 export function validateRemoteHostMethod(value: unknown): RemoteHostMethod
 export function validateRemoteHostInput(method: RemoteHostMethod, value: unknown): Record<string, unknown>
 export function validateHostProtocol(value: unknown): string

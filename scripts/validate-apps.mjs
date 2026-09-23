@@ -10,6 +10,9 @@ for (const app of apps) {
   if (ids.has(app.manifest.id)) throw new Error(`Duplicate App id: ${app.manifest.id}`)
   ids.add(app.manifest.id)
   if (!app.manifest.publisher) throw new Error(`${app.manifest.id} must declare a publisher`)
+  if (Array.isArray(app.manifest.backend?.protocols)) {
+    throw new Error(`${app.manifest.id} must declare backend.protocols by target`)
+  }
   for (const relativePath of [app.manifest.icon, app.manifest.ui?.entry, app.manifest.backend?.entry]) {
     if (!relativePath) continue
     const absolutePath = path.join(app.root, relativePath)

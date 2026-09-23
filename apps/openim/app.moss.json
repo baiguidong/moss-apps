@@ -25,7 +25,9 @@
     "lifecycle": "persistent",
     "instanceMode": "single",
     "targets": ["desktop"],
-    "protocols": ["moss.agent/v1", "moss.desktop/v1", "moss.openim/v1"],
+    "protocols": {
+      "desktop": ["moss.agent/v1", "moss.desktop/v1", "moss.openim/v1"]
+    },
     "actions": [
       { "name": "status.get" },
       { "name": "session.ensure", "timeoutMs": 30000 },

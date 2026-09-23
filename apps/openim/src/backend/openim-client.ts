@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import OpenIMSDK from "@openim/node-client-sdk";
-import type { AppBackendClient, AppBackendContext } from "@moss/app-sdk";
+import { MOSS_OPENIM_PROTOCOL, type AppBackendClient, type AppBackendContext } from "@moss/app-sdk";
 import { openIMDirectConversationId, parseOpenIMDirectConversationId } from "../lib/conversation-identifiers";
 
 const AUTOMATION_MESSAGE_EXTENSION = "moss.openim/automation-v1";
@@ -278,7 +278,7 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "host" 
 
   async function issueProfile(): Promise<RemoteProfile> {
     return client.host.request<RemoteProfile>(
-      "moss.openim/v1",
+      MOSS_OPENIM_PROTOCOL,
       "session.issue",
       { platformId: platformId() },
       { timeoutMs: 35_000 },

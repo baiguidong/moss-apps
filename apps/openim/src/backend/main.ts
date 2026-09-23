@@ -1,8 +1,6 @@
-import { AppBackendClient, type AppBackendContext } from "@moss/app-sdk";
+import { AppBackendClient, MOSS_OPENIM_PROTOCOL, type AppBackendContext } from "@moss/app-sdk";
 import { createOpenIMAutomation } from "./automation";
 import { createOpenIMClientService } from "./openim-client";
-
-const OPENIM_PROTOCOL = "moss.openim/v1";
 
 let context: AppBackendContext | null = null;
 let automation: ReturnType<typeof createOpenIMAutomation> | null = null;
@@ -48,17 +46,17 @@ client.registerAction("session.ensure", async () => {
 
 client.registerAction("directory.list", async (input) => {
   requireDesktop();
-  return client.host.request(OPENIM_PROTOCOL, "directory.list", input as Record<string, unknown>);
+  return client.host.request(MOSS_OPENIM_PROTOCOL, "directory.list", input as Record<string, unknown>);
 });
 
 client.registerAction("conversation.direct.prepare", async (input) => {
   requireDesktop();
-  return client.host.request(OPENIM_PROTOCOL, "conversation.direct.prepare", input as Record<string, unknown>);
+  return client.host.request(MOSS_OPENIM_PROTOCOL, "conversation.direct.prepare", input as Record<string, unknown>);
 });
 
 client.registerAction("conversation.group.prepare", async (input) => {
   requireDesktop();
-  return client.host.request(OPENIM_PROTOCOL, "conversation.group.prepare", input as Record<string, unknown>);
+  return client.host.request(MOSS_OPENIM_PROTOCOL, "conversation.group.prepare", input as Record<string, unknown>);
 });
 
 client.registerAction("sdk.call", async (input) => {

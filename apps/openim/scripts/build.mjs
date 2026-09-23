@@ -7,6 +7,12 @@ import { fileURLToPath } from 'node:url'
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const backendFile = path.join(appRoot, 'dist', 'backend', 'main.mjs')
 const backendRoot = path.dirname(backendFile)
+const marketplace = JSON.parse(fs.readFileSync(path.join(appRoot, 'marketplace.json'), 'utf8'))
+const nativePlatforms = Object.freeze({
+  'darwin-arm64': { openim: 'mac_arm64', koffi: 'darwin_arm64' },
+  'darwin-x64': { openim: 'mac_x64', koffi: 'darwin_x64' },
+  'win32-x64': { openim: 'win_x64', koffi: 'win32_x64' },
+})
 fs.rmSync(backendRoot, { recursive: true, force: true })
 fs.mkdirSync(path.dirname(backendFile), { recursive: true })
 
@@ -40,5 +46,20 @@ fs.mkdirSync(packagedKoffiRoot, { recursive: true })
 for (const name of ['package.json', 'index.js', 'indirect.js']) {
   fs.copyFileSync(path.join(koffiRoot, name), path.join(packagedKoffiRoot, name))
 }
-fs.cpSync(path.join(koffiRoot, 'build', 'koffi'), path.join(packagedKoffiRoot, 'build', 'koffi'), { recursive: true })
-fs.cpSync(path.join(sdkRoot, 'assets'), path.join(backendRoot, 'native'), { recursive: true })
+for (const platform of marketplace.platforms || []) {
+  const directories = nativePlatforms[platform]
+  if (!directories) throw new Error(`OpenIM build does not define native assets for ${platform}`)
+  const openIMSource = path.join(sdkRoot, 'assets', directories.openim)
+  const openIMDestination = path.join(backendRoot, 'native', directories.openim)
+  fs.mkdirSync(openIMDestination, { recursive: true })
+  for (const name of fs.readdirSync(openIMSource)) {
+    if (name === '.gitkeep') continue
+    fs.copyFileSync(path.join(openIMSource, name), path.join(openIMDestination, name))
+  }
+  const koffiDestination = path.join(packagedKoffiRoot, 'build', 'koffi', directories.koffi)
+  fs.mkdirSync(koffiDestination, { recursive: true })
+  fs.copyFileSync(
+    path.join(koffiRoot, 'build', 'koffi', directories.koffi, 'koffi.node'),
+    path.join(koffiDestination, 'koffi.node'),
+  )
+}

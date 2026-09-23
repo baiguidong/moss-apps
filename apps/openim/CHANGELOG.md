@@ -5,6 +5,7 @@
 - OpenIM App 恢复为仅 Desktop 运行，不再要求安装或启用同 App 的 Server Backend。
 - 用户供应、Token 签发、群聊准备、权限回调和停用处理由 Moss Server OpenIM integration 负责。
 - Desktop Backend 通过受控 Host 能力访问服务端管理接口，App 不接触 Moss 登录凭据或 OpenIM 管理密钥。
+- Manifest 按 Desktop target 声明 Host 协议，并从 App SDK 使用正式的 OpenIM 协议常量与校验契约。
 
 ## 0.2.1 - 2026-09-22
 
