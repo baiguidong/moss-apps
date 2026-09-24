@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test'
-import * as appSdk from '../packages/app-sdk/src/index.mjs'
-import { APP_HOST_API_VERSION, validateAppManifest } from '../packages/app-sdk/src/index.mjs'
+import * as appSdk from '@moss/app-sdk'
+import { APP_HOST_API_VERSION, validateAppManifest } from '@moss/app-sdk'
+import { validateRepositoryAppManifest } from './lib.mjs'
 
 const backend = {
   entry: 'dist/backend/main.mjs',
@@ -23,9 +24,12 @@ function manifest(backendOverrides: Record<string, unknown> = {}) {
 }
 
 describe('App Backend manifest', () => {
-  it('advertises Host API 2.1 while accepting Apps built for compatible 2.x hosts', () => {
-    expect(APP_HOST_API_VERSION).toBe('2.1.0')
-    expect(validateAppManifest(manifest()).hostApi).toBe('^2.0.0')
+  it('advertises Host API 2.2 while accepting Apps built for compatible 2.x hosts', () => {
+    expect(APP_HOST_API_VERSION).toBe('2.2.0')
+    for (const hostApi of ['^2.0.0', '^2.1.0', '^2.2.0']) {
+      expect(validateAppManifest({ ...manifest(), hostApi }).hostApi).toBe(hostApi)
+    }
+    expect(() => validateAppManifest({ ...manifest(), hostApi: '^2.3.0' })).toThrow(/requires Host API/)
   })
 
   it('uses one Backend and accepts the legacy single declaration without retaining it', () => {
@@ -34,10 +38,20 @@ describe('App Backend manifest', () => {
     expect(() => validateAppManifest(manifest({ instanceMode: 'multiple' }))).toThrow(/instanceMode/)
   })
 
-  it('uses an implicit Desktop runtime and rejects target declarations', () => {
-    expect(validateAppManifest(manifest()).backend).not.toHaveProperty('targets')
-    expect(() => validateAppManifest(manifest({ targets: ['desktop'] }))).toThrow(/additional properties/)
-    expect(() => validateAppManifest(manifest({ targets: ['server'] }))).toThrow(/additional properties/)
+  it('normalizes legacy fields like Core without changing the source manifest', () => {
+    const source = manifest({ targets: ['desktop'], serverOwnerScope: 'org', futureField: true })
+    const result = validateAppManifest(source)
+    expect(result.backend).not.toHaveProperty('targets')
+    expect(result.backend).not.toHaveProperty('serverOwnerScope')
+    expect(result.backend).not.toHaveProperty('futureField')
+    expect(source.backend).toMatchObject({ targets: ['desktop'], serverOwnerScope: 'org', futureField: true })
+  })
+
+  it('rejects target declarations in repository Apps before SDK normalization', () => {
+    expect(validateRepositoryAppManifest(manifest()).backend).not.toHaveProperty('targets')
+    for (const targets of [['desktop'], ['server']]) {
+      expect(() => validateRepositoryAppManifest(manifest({ targets }))).toThrow(/backend.targets/)
+    }
   })
 
   it('allows a Desktop UI and Backend in the same App', () => {
@@ -57,16 +71,18 @@ describe('App Backend manifest', () => {
   })
 
   it('rejects Server-only Backend properties and APIs', () => {
-    expect(() => validateAppManifest(manifest({ serverOwnerScope: 'org' })))
-      .toThrow(/additional properties/)
+    expect(() => validateRepositoryAppManifest(manifest({ serverOwnerScope: 'org' })))
+      .toThrow(/backend.serverOwnerScope/)
+    expect(() => validateRepositoryAppManifest(manifest({ protocols: ['moss.remote/v1'] })))
+      .toThrow(/moss.remote\/v1/)
     expect(appSdk).not.toHaveProperty('MOSS_REMOTE_PROTOCOL')
     expect(appSdk.AppBackendClient.prototype).not.toHaveProperty('requestRemoteHost')
   })
 
   it('accepts only a flat protocol list', () => {
-    const result = validateAppManifest(manifest({ protocols: ['moss.desktop/v1'] }))
-    expect(result.backend?.protocols).toEqual(['moss.desktop/v1'])
-    expect(() => validateAppManifest(manifest({ protocols: { desktop: ['moss.agent/v1'] } })))
+    const result = validateAppManifest(manifest({ protocols: ['moss.platform/v1'] }))
+    expect(result.backend?.protocols).toEqual(['moss.platform/v1'])
+    expect(() => validateAppManifest(manifest({ protocols: { platform: ['moss.agent/v1'] } })))
       .toThrow(/backend\/protocols/)
   })
 

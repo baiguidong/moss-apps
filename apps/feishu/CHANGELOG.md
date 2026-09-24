@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.6 - 2026-09-24
+
+- Backend 直接引用 Moss Core 的 App SDK 2.2，沿用现有 `moss.agent/v1` 协议。
+
 ## 0.4.5 - 2026-09-23
 
 - 移除页面导航位置声明，由 Moss 在 App 启用后自动加入“更多”。

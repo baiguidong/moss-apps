@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.drive",
+  "summary": "个人云端文件，随时上传与下载。",
+  "description": "以简洁的文件列表管理个人云端空间，支持目录导航、新建目录、文件删除、多文件上传和下载。上传与下载各自独立展示进度、暂停和恢复记录，复用 Moss 的远程账号与云端存储。",
+  "categories": [
+    "效率",
+    "文件管理"
+  ],
+  "keywords": [
+    "网盘",
+    "文件",
+    "云端存储",
+    "上传",
+    "下载"
+  ],
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/drive",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

@@ -1,6 +1,6 @@
 {
   "name": "@moss/openim-app",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
   "dependencies": {
     "@livekit/components-react": "2.6.9",
     "@livekit/components-styles": "1.1.6",
-    "@moss/app-sdk": "file:../../packages/app-sdk",
+    "@moss/app-sdk": "workspace:*",
     "@openim/electron-client-sdk": "3.8.3-patch.10",
     "@openim/node-client-sdk": "1.1.0",
     "@openim/wasm-client-sdk": "3.8.3-patch.10",

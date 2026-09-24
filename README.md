@@ -2,6 +2,8 @@
 
 Moss 官方 App 的独立源码与发布仓库。每个 App 位于 `apps/<name>`，独立维护版本、源码、配置 Schema、资源与测试。
 
+当前应用：[网盘](apps/drive/README.md)、[飞书](apps/feishu/README.md)、[OpenIM](apps/openim/README.md)。
+
 ## App 创建手册
 
 创建或修改 App 前，请阅读 Moss 主仓库维护的说明。只检出本仓库时，也可以直接通过以下 GitHub 链接查看：
@@ -15,6 +17,7 @@ Moss 官方 App 的独立源码与发布仓库。每个 App 位于 `apps/<name>`
 ## 本地开发
 
 ```bash
+git submodule update --init --depth 1 vendor/moss-core
 bun install
 bun run validate
 bun run check
@@ -129,4 +132,12 @@ App ZIP 与 Moss 桌面安装包分开。纯 JavaScript App 可以用同一个�
 
 ## SDK
 
-`packages/app-sdk` 是当前 Host API `2.1.0` 的发布快照，供本仓库 App 构建和测试。2.x 不提供旧 Channel 兼容层；2.1 新增 Desktop-only 的 `moss.openim/v1`。后续可迁移为正式发布的 `@moss/app-sdk` npm 包而不改变 App 代码。
+SDK 源码只在 Moss Core 的 `packages/app-sdk` 维护。本仓库通过 Git 子模块 `vendor/moss-core` 固定引用 Core 提交，将其中的 SDK 纳入 Bun workspace；App 和构建脚本统一通过 `@moss/app-sdk` 包导入，不再保存 SDK 副本。
+
+当前引用的 SDK 为 `2.2.0`，包含 `moss.cloud-storage/v1`；通用文件、截图和外链使用 `moss.platform/v1`。接入方式见 [SDK 接入说明](docs/app-sdk.md)。SDK 会忽略 Manifest 的未知字段；本仓库的构建与发布校验仍会在规范化前拒绝 `backend.targets`、`backend.serverOwnerScope` 和 `moss.remote/v1` 声明。
+
+初次检出使用 `git clone --recurse-submodules`，已有检出按上方命令初始化子模块。CI、App 发布和市场索引工作流都会检出相同的固定提交。
+
+升级 SDK 时，在 Core 提交修改并推送到远端后更新 `vendor/moss-core` 指向的提交并运行 `bun install`，然后执行本仓库的校验、类型检查、测试和构建。提交子模块引用与锁文件即可，不复制或单独修改 SDK 源码。未推送的 Core 提交只能在持有该提交的本地仓库中验证，CI 无法检出。
+
+SDK 会编入 App Backend；构建内容变化时应同步提升相应 App 的版本。未来发布 npm 包后，可以改为包版本依赖，App 的 import 无需改变。

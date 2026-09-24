@@ -1,3 +1,5 @@
+import type { PlatformFile, PlatformHostMethod, PlatformHostRequestMap, PlatformHostResultMap } from "@moss/app-sdk";
+
 export type OpenIMDirectory = {
   departments: Array<{
     id: string;
@@ -18,14 +20,9 @@ export type OpenIMDirectory = {
   nextCursor?: string | null;
 };
 
-export type OpenIMLocalFile = {
-  name: string;
-  path: string;
-  size: number;
-  mediaUrl: string;
-};
+export type OpenIMLocalFile = PlatformFile;
 
-type OpenIMMaterializeResult = OpenIMLocalFile | { transferId: string; complete: false; size: number };
+type OpenIMMaterializeResult = PlatformHostResultMap["file.materialize"];
 
 export type OpenIMProfile = {
   userID: string;
@@ -36,7 +33,7 @@ export type OpenIMProfile = {
   user: { id: string; name: string; email: string | null; orgId: string };
 };
 
-const DESKTOP_PROTOCOL = "moss.desktop/v1";
+const PLATFORM_PROTOCOL = "moss.platform/v1";
 const MATERIALIZE_CHUNK_BYTES = 384 * 1024;
 let instanceIdPromise: Promise<string> | null = null;
 
@@ -68,8 +65,11 @@ async function invoke<T>(name: string, input: Record<string, unknown> = {}): Pro
   return window.mossApp.actions.invoke<T>(await resolveInstanceId(), name, input);
 }
 
-async function desktop<T>(method: string, input: Record<string, unknown> = {}): Promise<T> {
-  return window.mossApp.host.request<T>(await resolveInstanceId(), DESKTOP_PROTOCOL, method, input);
+async function platform<Method extends PlatformHostMethod>(
+  method: Method,
+  input: PlatformHostRequestMap[Method],
+): Promise<PlatformHostResultMap[Method]> {
+  return window.mossApp.host.request<PlatformHostResultMap[Method]>(await resolveInstanceId(), PLATFORM_PROTOCOL, method, input);
 }
 
 export const openIMHost = {
@@ -95,7 +95,7 @@ export const openIMHost = {
     memberUserIDs: string[];
   }>("conversation.group.prepare", { userIds: payload.userIDs }),
   pickFiles: async (payload: { kind: "image" | "video" | "audio" | "file" }) => (
-    await desktop<{ files: OpenIMLocalFile[] }>("file.pick", {
+    await platform("file.pick", {
       kind: payload.kind,
       multiple: payload.kind === "file" || payload.kind === "image",
     })
@@ -105,7 +105,7 @@ export const openIMHost = {
     let result: OpenIMMaterializeResult | null = null;
     for (let offset = 0; offset < payload.data.byteLength; offset += MATERIALIZE_CHUNK_BYTES) {
       const end = Math.min(payload.data.byteLength, offset + MATERIALIZE_CHUNK_BYTES);
-      result = await desktop<OpenIMMaterializeResult>("file.materialize", {
+      result = await platform("file.materialize", {
         fileName: payload.fileName,
         dataBase64: bytesToBase64(payload.data.slice(offset, end)),
         transferId,
@@ -116,16 +116,16 @@ export const openIMHost = {
     if (!result || "complete" in result) throw new Error("File materialization did not complete.");
     return result;
   },
-  createVideoThumbnail: (payload: { path: string }) => desktop<{ path: string; mediaUrl: string }>(
+  createVideoThumbnail: (payload: { path: string }) => platform(
     "file.thumbnail",
     { path: payload.path, width: 640, height: 360 },
   ),
-  captureScreen: () => desktop<OpenIMLocalFile>("screen.capture"),
-  download: (payload: { url: string; fileName: string }) => desktop<{ canceled: boolean; filePath?: string }>(
+  captureScreen: () => platform("screen.capture", {}),
+  download: (payload: { url: string; fileName: string }) => platform(
     "file.download",
     payload,
   ),
-  openExternal: (url: string) => desktop<{ opened: true }>("shell.open-external", { url }),
+  openExternal: (url: string) => platform("shell.open-external", { url }),
   getRtcToken: (payload: { chatToken: string; room: string; identity: string }) => invoke<{
     serverUrl: string;
     token: string;

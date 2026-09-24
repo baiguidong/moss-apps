@@ -6,7 +6,7 @@ Moss 的即时消息 App。OpenIM UI、Node SDK、原生库和平台事件由此
 
 联系人策略、Turn 和 Agent Session 映射按 owner、App 实例和联系人隔离，保存在 Moss Core 的通用 Agent 存储中；OpenIM SDK 数据、日志、媒体缓存和幂等投递记录保存在 `moss.openim` 的实例数据目录中。拖拽或粘贴的附件会先复制到 App 私有媒体缓存，原生 SDK 不能读取未经用户选择或缓存授权的任意路径。App 不读取 Moss 登录 Token、模型密钥或 Connector 凭据。
 
-Desktop Backend 通过受控的 `moss.openim/v1` Host 能力调用 Moss Server；Moss 登录 Token 和 OpenIM 管理密钥不会进入 App 进程。自动回复只使用 `moss.agent/v1`，文件、截图、下载和外链只使用 `moss.desktop/v1`。
+Desktop Backend 通过受控的 `moss.openim/v1` Host 能力调用 Moss Server；Moss 登录 Token 和 OpenIM 管理密钥不会进入 App 进程。自动回复只使用 `moss.agent/v1`，文件、截图、下载和外链只使用 `moss.platform/v1`。当前版本要求 Host API 2.2，并使用 `platform:*` 权限。
 
 管理员在 Moss Server 系统设置中配置 OpenIM API URL、WebSocket URL 和管理密钥。切换或退出 Moss Server 账号会重启 Desktop Backend 并登出旧 OpenIM 会话。
 

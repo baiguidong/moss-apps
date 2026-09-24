@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.6 - 2026-09-24
+
+- 直接引用 Moss Core 的 App SDK 2.2，文件、截图、下载和外链改用 `moss.platform/v1` 与 `platform:*` 权限。
+- 要求 Host API 2.2，避免安装到仍使用旧 Desktop 协议的宿主。
+
 ## 0.2.5 - 2026-09-23
 
 - 移除页面导航位置声明，由 Moss 在 App 启用后自动加入“更多”。

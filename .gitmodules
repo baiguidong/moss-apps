@@ -1,0 +1,4 @@
+[submodule "moss-core"]
+	path = vendor/moss-core
+	url = https://github.com/baiguidong/moss.git
+	shallow = true

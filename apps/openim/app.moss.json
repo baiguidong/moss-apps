@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "id": "moss.openim",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "displayName": "即时消息",
   "description": "通过 OpenIM 与组织成员沟通，并为每个联系人配置个人 AI 回复策略。",
   "icon": "assets/icon.svg",
-  "hostApi": "^2.1.0",
+  "hostApi": "^2.2.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -23,7 +23,7 @@
     "runtime": "node",
     "apiVersion": 1,
     "lifecycle": "persistent",
-    "protocols": ["moss.agent/v1", "moss.desktop/v1", "moss.openim/v1"],
+    "protocols": ["moss.agent/v1", "moss.platform/v1", "moss.openim/v1"],
     "actions": [
       { "name": "status.get" },
       { "name": "session.ensure", "timeoutMs": 30000 },
@@ -43,10 +43,10 @@
     "agent:sessions:write",
     "agent:turns:read",
     "agent:turns:write",
-    "desktop:files",
-    "desktop:screen-capture",
-    "desktop:external-links",
-    "desktop:media"
+    "platform:files",
+    "platform:screen-capture",
+    "platform:external-links",
+    "platform:media"
   ],
   "contributes": {
     "views": [

@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { validateAppManifest } from '../packages/app-sdk/src/index.mjs'
+import { validateAppManifest } from '@moss/app-sdk'
 
 export const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 export const appsRoot = path.join(repoRoot, 'apps')
@@ -11,6 +11,21 @@ export const artifactsRoot = path.join(repoRoot, 'artifacts')
 
 export function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'))
+}
+
+export function validateRepositoryAppManifest(rawManifest) {
+  const backend = rawManifest?.backend
+  if (backend && typeof backend === 'object') {
+    for (const field of ['targets', 'serverOwnerScope']) {
+      if (Object.hasOwn(backend, field)) {
+        throw new Error(`App ${rawManifest.id} must not declare backend.${field}; App Backends run only in Moss Desktop`)
+      }
+    }
+    if (Array.isArray(backend.protocols) && backend.protocols.includes('moss.remote/v1')) {
+      throw new Error(`App ${rawManifest.id} must not declare moss.remote/v1; App Backends run only in Moss Desktop`)
+    }
+  }
+  return validateAppManifest(rawManifest)
 }
 
 export async function writeJson(filePath, value) {
@@ -90,7 +105,7 @@ export function listApps() {
       const manifestPath = path.join(root, 'app.moss.json')
       const marketplacePath = path.join(root, 'marketplace.json')
       if (!fs.existsSync(manifestPath)) return null
-      const manifest = validateAppManifest(readJson(manifestPath))
+      const manifest = validateRepositoryAppManifest(readJson(manifestPath))
       if (!fs.existsSync(marketplacePath)) throw new Error(`Missing marketplace.json for ${manifest.id}`)
       const marketplace = validateMarketplaceMetadata(readJson(marketplacePath), manifest, marketplacePath)
       return { directoryName: entry.name, root, manifest, marketplace, manifestPath, marketplacePath }

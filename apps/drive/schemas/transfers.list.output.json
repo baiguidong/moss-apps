@@ -1,0 +1,153 @@
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "transfers": {
+              "type": "array",
+              "maxItems": 200,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "transferId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "direction": {
+                    "enum": [
+                      "upload",
+                      "download"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "fileId": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "state": {
+                    "enum": [
+                      "queued",
+                      "running",
+                      "paused",
+                      "cancelled",
+                      "completed"
+                    ]
+                  },
+                  "totalBytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "transferredBytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "createdAt": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "updatedAt": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "transferId",
+                  "direction",
+                  "name",
+                  "fileId",
+                  "state",
+                  "totalBytes",
+                  "transferredBytes",
+                  "error",
+                  "createdAt",
+                  "updatedAt"
+                ]
+              }
+            },
+            "nextCursor": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "transfers",
+            "nextCursor"
+          ]
+        }
+      },
+      "required": [
+        "ok",
+        "data"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ok": {
+          "const": false
+        },
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ]
+        }
+      },
+      "required": [
+        "ok",
+        "error"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.drive",
+  "version": "0.2.0",
+  "displayName": "网盘",
+  "description": "浏览个人云端文件，轻松上传与下载。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^2.2.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1120,
+      "height": 760,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "protocols": [
+      "moss.cloud-storage/v1"
+    ],
+    "actions": [
+      {
+        "name": "status.get",
+        "inputSchema": "schemas/status.get.input.json",
+        "outputSchema": "schemas/status.get.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "quota.get",
+        "inputSchema": "schemas/quota.get.input.json",
+        "outputSchema": "schemas/quota.get.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "files.list",
+        "inputSchema": "schemas/files.list.input.json",
+        "outputSchema": "schemas/files.list.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "local-files.pick",
+        "inputSchema": "schemas/local-files.pick.input.json",
+        "outputSchema": "schemas/local-files.pick.output.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "uploads.start",
+        "inputSchema": "schemas/uploads.start.input.json",
+        "outputSchema": "schemas/uploads.start.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "downloads.start",
+        "inputSchema": "schemas/downloads.start.input.json",
+        "outputSchema": "schemas/downloads.start.output.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "transfers.list",
+        "inputSchema": "schemas/transfers.list.input.json",
+        "outputSchema": "schemas/transfers.list.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "transfers.get",
+        "inputSchema": "schemas/transfers.get.input.json",
+        "outputSchema": "schemas/transfers.get.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "transfers.pause",
+        "inputSchema": "schemas/transfers.pause.input.json",
+        "outputSchema": "schemas/transfers.pause.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "transfers.resume",
+        "inputSchema": "schemas/transfers.resume.input.json",
+        "outputSchema": "schemas/transfers.resume.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "transfers.cancel",
+        "inputSchema": "schemas/transfers.cancel.input.json",
+        "outputSchema": "schemas/transfers.cancel.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "folders.create",
+        "inputSchema": "schemas/folders.create.input.json",
+        "outputSchema": "schemas/folders.create.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "files.delete",
+        "inputSchema": "schemas/files.delete.input.json",
+        "outputSchema": "schemas/files.delete.output.json",
+        "timeoutMs": 45000
+      }
+    ]
+  },
+  "permissions": [
+    "cloud-storage:read",
+    "cloud-storage:write",
+    "cloud-storage:delete"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "files",
+        "title": "网盘",
+        "route": "#/",
+        "icon": "folder",
+        "order": 210
+      }
+    ]
+  }
+}
