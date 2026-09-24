@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.7 - 2026-09-24
+
+- 接管 `SIGTERM` / `SIGINT`，修复 OpenIM 原生库在退出时触发 Node 信号循环、残留进程并占满 CPU 的问题。
+- 退出清理只执行一次；SDK 清理失败或超过 4 秒时退出，避免关闭流程无限等待。
+
 ## 0.2.6 - 2026-09-24
 
 - 直接引用 Moss Core 的 App SDK 2.2，文件、截图、下载和外链改用 `moss.platform/v1` 与 `platform:*` 权限。

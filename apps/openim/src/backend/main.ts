@@ -1,9 +1,18 @@
 import { AppBackendClient, MOSS_OPENIM_PROTOCOL, type AppBackendContext } from "@moss/app-sdk";
 import { createOpenIMAutomation } from "./automation";
 import { createOpenIMClientService } from "./openim-client";
+import { installOpenIMShutdownHandlers } from "./lifecycle";
 
 let context: AppBackendContext | null = null;
 let automation: ReturnType<typeof createOpenIMAutomation> | null = null;
+
+const shutdown = installOpenIMShutdownHandlers(async () => {
+  automation?.shutdown();
+  automation = null;
+  await desktopService.shutdown();
+  context = null;
+  console.log("[OpenIM] App Backend stopped");
+});
 
 const client = new AppBackendClient({
   onInitialize: async (nextContext: AppBackendContext) => {
@@ -13,13 +22,7 @@ const client = new AppBackendClient({
     automation.initialize(nextContext);
     console.log(`[OpenIM] App Backend ready for ${nextContext.instanceId}`);
   },
-  onShutdown: async () => {
-    automation?.shutdown();
-    automation = null;
-    await desktopService.shutdown();
-    context = null;
-    console.log("[OpenIM] App Backend stopped");
-  },
+  onShutdown: shutdown,
   onFatalError: (error: unknown) => {
     console.error("[OpenIM] Fatal App Backend error", error);
     process.exitCode = 1;
