@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "seconds",
+    "milliseconds",
+    "utc",
+    "date",
+    "timezone"
+  ],
+  "properties": {
+    "seconds": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "milliseconds": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "utc": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "date": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "timezone": {
+      "type": "string",
+      "maxLength": 100
+    }
+  }
+}

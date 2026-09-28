@@ -23,4 +23,10 @@ jobs:
       - run: bun run check
       - run: bun run test
       - run: bun run build
+      - name: Install browser for developer tools checks
+        working-directory: apps/devtools
+        run: bun x playwright install --with-deps chromium
+      - name: Verify developer tools UI
+        working-directory: apps/devtools
+        run: bun run test:browser
       - run: bun run package -- --skip-build

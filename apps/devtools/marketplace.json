@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.devtools",
+  "summary": "时间戳、Base64、AES、JSON，一处完成常用开发转换。",
+  "description": "简洁的本地开发工具，支持时间戳与日期双向转换、UTF-8 和 URL-safe Base64、AES-GCM/CBC 加解密，以及保留大整数精度的 JSON 格式化、压缩与校验。跟随 Moss 外观，也可由 Moss AI 调用。",
+  "categories": [
+    "开发工具",
+    "效率"
+  ],
+  "keywords": [
+    "时间戳",
+    "Base64",
+    "AES",
+    "JSON",
+    "格式化",
+    "本地工具"
+  ],
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/devtools",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT",
+  "featured": false
+}

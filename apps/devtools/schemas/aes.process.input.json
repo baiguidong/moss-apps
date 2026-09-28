@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "mode",
+    "input",
+    "key",
+    "keyEncoding",
+    "iv",
+    "ivEncoding",
+    "outputEncoding"
+  ],
+  "properties": {
+    "operation": {
+      "type": "string",
+      "enum": [
+        "encrypt",
+        "decrypt"
+      ]
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "GCM",
+        "CBC"
+      ]
+    },
+    "input": {
+      "type": "string",
+      "maxLength": 131072
+    },
+    "key": {
+      "type": "string",
+      "maxLength": 1024
+    },
+    "keyEncoding": {
+      "type": "string",
+      "enum": [
+        "hex",
+        "base64",
+        "utf8"
+      ]
+    },
+    "iv": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "ivEncoding": {
+      "type": "string",
+      "enum": [
+        "hex",
+        "base64"
+      ]
+    },
+    "outputEncoding": {
+      "type": "string",
+      "enum": [
+        "hex",
+        "base64"
+      ]
+    }
+  }
+}

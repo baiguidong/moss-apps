@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "input",
+    "indent"
+  ],
+  "properties": {
+    "operation": {
+      "type": "string",
+      "enum": [
+        "format",
+        "minify",
+        "validate"
+      ]
+    },
+    "input": {
+      "type": "string",
+      "maxLength": 131072
+    },
+    "indent": {
+      "type": "string",
+      "enum": [
+        "2",
+        "4",
+        "tab"
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "input",
+    "urlSafe"
+  ],
+  "properties": {
+    "operation": {
+      "type": "string",
+      "enum": [
+        "encode",
+        "decode"
+      ]
+    },
+    "input": {
+      "type": "string",
+      "maxLength": 131072
+    },
+    "urlSafe": {
+      "type": "boolean"
+    }
+  }
+}

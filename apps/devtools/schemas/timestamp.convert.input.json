@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "direction",
+    "input",
+    "unit",
+    "timezone"
+  ],
+  "properties": {
+    "direction": {
+      "type": "string",
+      "enum": [
+        "timestamp",
+        "date"
+      ]
+    },
+    "input": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "unit": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "seconds",
+        "milliseconds"
+      ]
+    },
+    "timezone": {
+      "type": "string",
+      "enum": [
+        "local",
+        "UTC",
+        "+08:00",
+        "+09:00",
+        "+01:00",
+        "-05:00",
+        "-08:00"
+      ]
+    }
+  }
+}

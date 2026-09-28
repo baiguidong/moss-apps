@@ -10,6 +10,26 @@
         "semver": "^7.7.4",
       },
     },
+    "apps/devtools": {
+      "name": "@moss/devtools-app",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moss/app-sdk": "workspace:*",
+        "jsonc-parser": "3.3.1",
+        "lucide-react": "0.564.0",
+        "react": "19.2.0",
+        "react-dom": "19.2.0",
+      },
+      "devDependencies": {
+        "@playwright/test": "1.58.2",
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "@vitejs/plugin-react": "5.0.4",
+        "bun-types": "latest",
+        "typescript": "5.9.3",
+        "vite": "7.1.10",
+      },
+    },
     "apps/drive": {
       "name": "@moss/drive-app",
       "version": "0.2.0",
@@ -214,6 +234,8 @@
     "@livekit/protocol": ["@livekit/protocol@1.24.0", "https://registry.npmmirror.com/@livekit/protocol/-/protocol-1.24.0.tgz", { "dependencies": { "@bufbuild/protobuf": "^1.10.0" } }, "sha512-9dCsqnkMn7lvbI4NGh18zhLDsrXyUcpS++TEFgEk5Xv1WM3R2kT3EzqgL1P/mr3jaabM6rJ8wZA/KJLuQNpF5w=="],
 
     "@moss/app-sdk": ["@moss/app-sdk@workspace:vendor/moss-core/packages/app-sdk"],
+
+    "@moss/devtools-app": ["@moss/devtools-app@workspace:apps/devtools"],
 
     "@moss/drive-app": ["@moss/drive-app@workspace:apps/drive"],
 
@@ -512,6 +534,8 @@
     "json-schema-traverse": ["json-schema-traverse@1.0.0", "https://registry.npmmirror.com/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
 
     "json5": ["json5@2.2.3", "https://registry.npmmirror.com/json5/-/json5-2.2.3.tgz", { "bin": { "json5": "lib/cli.js" } }, "sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg=="],
+
+    "jsonc-parser": ["jsonc-parser@3.3.1", "https://registry.npmmirror.com/jsonc-parser/-/jsonc-parser-3.3.1.tgz", {}, "sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ=="],
 
     "koffi": ["koffi@2.8.0", "https://registry.npmmirror.com/koffi/-/koffi-2.8.0.tgz", {}, "sha512-EXhiH9Ya4f+o4+24+uV4vFAMyPEskARVUaY8VHbIYWqkQVPTDyYJCBNfxp0Kxw6WdhaMwXeR8xIUyz8R2H8Rew=="],
 

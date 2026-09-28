@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "text",
+    "bytes",
+    "iv",
+    "ivEncoding",
+    "mode"
+  ],
+  "properties": {
+    "text": {
+      "type": "string",
+      "maxLength": 524288
+    },
+    "bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 524288
+    },
+    "iv": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "ivEncoding": {
+      "type": "string",
+      "enum": [
+        "hex",
+        "base64"
+      ]
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "GCM",
+        "CBC"
+      ]
+    }
+  }
+}

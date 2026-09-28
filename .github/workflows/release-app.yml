@@ -34,6 +34,12 @@ jobs:
       - run: node scripts/validate-apps.mjs --app "${{ steps.release.outputs.app_id }}"
       - run: node scripts/run-apps.mjs check --app "${{ steps.release.outputs.app_id }}"
       - run: node scripts/run-apps.mjs test --app "${{ steps.release.outputs.app_id }}"
+      - name: Verify developer tools UI
+        if: steps.release.outputs.app_id == 'moss.devtools'
+        working-directory: apps/devtools
+        run: |
+          bun x playwright install --with-deps chromium
+          bun run test:browser
       - name: Build signed App package
         env:
           MOSS_APP_SIGNING_PRIVATE_KEY: ${{ secrets.MOSS_APP_SIGNING_PRIVATE_KEY }}
