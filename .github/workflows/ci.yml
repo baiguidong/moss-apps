@@ -29,4 +29,7 @@ jobs:
       - name: Verify developer tools UI
         working-directory: apps/devtools
         run: bun run test:browser
+      - name: Verify HTTP client UI and local requests
+        working-directory: apps/http-client
+        run: bun run test:browser
       - run: bun run package -- --skip-build

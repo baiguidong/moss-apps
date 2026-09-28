@@ -1,6 +1,6 @@
 # 本地工具 App 选型与接入方案
 
-核对日期：2026-09-28。开发工具已实现为独立的 [moss.devtools](../apps/devtools/README.md)，验证范围见 [记录](devtools-app-verification.md)；其余 App 为源码调研与实施设计，尚未创建或完成实际转码测试。
+核对日期：2026-09-28。开发工具和 HTTP 调试已分别实现为独立的 [moss.devtools](../apps/devtools/README.md) 与 [moss.http-client](../apps/http-client/README.md)，验证范围见 [开发工具记录](devtools-app-verification.md) 和 [HTTP 记录](http-client-app-verification.md)；图片和音视频 App 仍为源码调研与实施设计，尚未创建或完成实际转码测试。
 
 目标是把不同开源项目中的实用能力接入 Moss Desktop，形成多个可以独立安装、升级和停用的本地 App。用户已选择按开发工具、图片工具、音视频工具等类别拆分。HTTP 调试单独成一个 App，便于独立维护请求集合、网络行为和凭据。
 

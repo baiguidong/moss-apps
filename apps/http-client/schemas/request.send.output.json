@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url",
+    "method",
+    "status",
+    "statusText",
+    "headers",
+    "body",
+    "bodyEncoding",
+    "bytes",
+    "truncated",
+    "durationMs",
+    "contentType",
+    "redirects",
+    "notice"
+  ],
+  "properties": {
+    "url": {
+      "type": "string"
+    },
+    "method": {
+      "type": "string"
+    },
+    "status": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 599
+    },
+    "statusText": {
+      "type": "string"
+    },
+    "headers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "value"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "body": {
+      "type": "string"
+    },
+    "bodyEncoding": {
+      "type": "string",
+      "enum": [
+        "text",
+        "base64"
+      ]
+    },
+    "bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1048576
+    },
+    "truncated": {
+      "type": "boolean"
+    },
+    "durationMs": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "contentType": {
+      "type": "string"
+    },
+    "redirects": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "url"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notice": {
+      "type": "string"
+    }
+  }
+}

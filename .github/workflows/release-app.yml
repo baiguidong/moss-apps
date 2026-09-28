@@ -40,6 +40,12 @@ jobs:
         run: |
           bun x playwright install --with-deps chromium
           bun run test:browser
+      - name: Verify HTTP client UI and local requests
+        if: steps.release.outputs.app_id == 'moss.http-client'
+        working-directory: apps/http-client
+        run: |
+          bun x playwright install --with-deps chromium
+          bun run test:browser
       - name: Build signed App package
         env:
           MOSS_APP_SIGNING_PRIVATE_KEY: ${{ secrets.MOSS_APP_SIGNING_PRIVATE_KEY }}

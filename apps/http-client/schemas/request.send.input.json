@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "method": {
+      "type": "string",
+      "enum": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "HEAD",
+        "OPTIONS"
+      ],
+      "default": "GET"
+    },
+    "url": {
+      "type": "string",
+      "maxLength": 16384,
+      "minLength": 1
+    },
+    "query": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "value",
+          "enabled"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 16384
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "headers": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "value",
+          "enabled"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 16384
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "bodyMode": {
+      "type": "string",
+      "enum": [
+        "none",
+        "json",
+        "text",
+        "form"
+      ],
+      "default": "none"
+    },
+    "body": {
+      "type": "string",
+      "maxLength": 1048576
+    },
+    "form": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "value",
+          "enabled"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 16384
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "username",
+        "password",
+        "token"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "none",
+            "basic",
+            "bearer"
+          ]
+        },
+        "username": {
+          "type": "string",
+          "maxLength": 16384
+        },
+        "password": {
+          "type": "string",
+          "maxLength": 16384
+        },
+        "token": {
+          "type": "string",
+          "maxLength": 16384
+        }
+      }
+    },
+    "timeoutMs": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 120000,
+      "default": 30000
+    },
+    "followRedirects": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.http-client",
+  "version": "0.1.0",
+  "displayName": "HTTP 调试",
+  "description": "编辑请求、查看响应，常用接口调试在本地完成。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^2.2.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1080,
+      "height": 740,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "on-demand",
+    "actions": [
+      {
+        "name": "request.send",
+        "inputSchema": "schemas/request.send.input.json",
+        "outputSchema": "schemas/request.send.output.json",
+        "timeoutMs": 135000
+      }
+    ]
+  },
+  "permissions": [],
+  "contributes": {
+    "views": [
+      {
+        "id": "requests",
+        "title": "HTTP 调试",
+        "route": "#/",
+        "icon": "globe",
+        "order": 230
+      }
+    ],
+    "tools": [
+      {
+        "id": "request.send",
+        "title": "发送 HTTP 请求",
+        "description": "从本机发送 HTTP(S) 请求，可访问本地和内网地址。支持参数、正文和鉴权；操作可能修改目标服务，须按用户意图执行。响应最多返回 1 MiB，不保存请求或响应。",
+        "action": "request.send",
+        "inputSchema": "schemas/request.send.input.json",
+        "outputSchema": "schemas/request.send.output.json",
+        "effect": "write"
+      }
+    ]
+  }
+}

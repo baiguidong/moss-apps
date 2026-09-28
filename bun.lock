@@ -61,6 +61,26 @@
         "typescript": "^5.9.3",
       },
     },
+    "apps/http-client": {
+      "name": "@moss/http-client-app",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moss/app-sdk": "workspace:*",
+        "jsonc-parser": "3.3.1",
+        "lucide-react": "0.564.0",
+        "react": "19.2.0",
+        "react-dom": "19.2.0",
+      },
+      "devDependencies": {
+        "@playwright/test": "1.58.2",
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "@vitejs/plugin-react": "5.0.4",
+        "bun-types": "latest",
+        "typescript": "5.9.3",
+        "vite": "7.1.10",
+      },
+    },
     "apps/openim": {
       "name": "@moss/openim-app",
       "version": "0.2.7",
@@ -240,6 +260,8 @@
     "@moss/drive-app": ["@moss/drive-app@workspace:apps/drive"],
 
     "@moss/feishu-app": ["@moss/feishu-app@workspace:apps/feishu"],
+
+    "@moss/http-client-app": ["@moss/http-client-app@workspace:apps/http-client"],
 
     "@moss/openim-app": ["@moss/openim-app@workspace:apps/openim"],
 
