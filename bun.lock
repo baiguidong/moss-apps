@@ -83,7 +83,7 @@
     },
     "apps/openim": {
       "name": "@moss/openim-app",
-      "version": "0.2.7",
+      "version": "0.2.8",
       "dependencies": {
         "@livekit/components-react": "2.6.9",
         "@livekit/components-styles": "1.1.6",

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.8 - 2026-09-29
+
+- 将 OpenIM 的 `10303: unread count has zero` 作为标记已读成功处理，避免页面与 AI 自动回复重复标记时产生 IPC 报错。
+- SDK 调用失败时保留操作名、原始错误码和错误原因，避免显示为 `[object Object]`。
+
 ## 0.2.7 - 2026-09-24
 
 - 接管 `SIGTERM` / `SIGINT`，修复 OpenIM 原生库在退出时触发 Node 信号循环、残留进程并占满 CPU 的问题。

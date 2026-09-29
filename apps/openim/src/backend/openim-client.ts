@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import OpenIMSDK from "@openim/node-client-sdk";
 import { MOSS_OPENIM_PROTOCOL, type AppBackendClient, type AppBackendContext } from "@moss/app-sdk";
 import { openIMDirectConversationId, parseOpenIMDirectConversationId } from "../lib/conversation-identifiers";
+import { markOpenIMConversationRead, normalizeOpenIMError } from "./sdk-errors";
 
 const AUTOMATION_MESSAGE_EXTENSION = "moss.openim/automation-v1";
 const SESSION_REFRESH_MIN_LEAD_MS = 10_000;
@@ -337,7 +338,7 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "host" 
     })().catch((error) => {
       clearSession();
       client.status("degraded", { error: errorMessage(error) });
-      throw error;
+      throw normalizeOpenIMError(error, "session.ensure");
     }).finally(() => {
       sessionPromise = null;
     });
@@ -391,13 +392,20 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "host" 
     if (!SDK_METHODS.has(method)) throw new Error(`OpenIM SDK method is not available to the App UI: ${method || "<empty>"}.`);
     const args = Array.isArray(argsValue) ? argsValue : [];
     if (method !== "getLoginStatus" && method !== "logout") await ensureSession();
-    if (method === "setConversation") return setConversation((args[0] || {}) as Record<string, unknown>);
-    const currentSdk = ensureSdk() as unknown as Record<string, (...values: any[]) => Promise<any>>;
-    const target = currentSdk[method];
-    if (typeof target !== "function") throw new Error(`OpenIM SDK method is unavailable: ${method}.`);
-    const result = await target.apply(currentSdk, safeArguments(method, args));
-    if (method === "logout") clearSession();
-    return result;
+    try {
+      if (method === "setConversation") return await setConversation((args[0] || {}) as Record<string, unknown>);
+      if (method === "markConversationMessageAsRead") {
+        return await markOpenIMConversationRead(ensureSdk(), ...(args as Parameters<OpenIMSDK["markConversationMessageAsRead"]>));
+      }
+      const currentSdk = ensureSdk() as unknown as Record<string, (...values: any[]) => Promise<any>>;
+      const target = currentSdk[method];
+      if (typeof target !== "function") throw new Error(`OpenIM SDK method is unavailable: ${method}.`);
+      const result = await target.apply(currentSdk, safeArguments(method, args));
+      if (method === "logout") clearSession();
+      return result;
+    } catch (error) {
+      throw normalizeOpenIMError(error, method);
+    }
   }
 
   async function sendText(input: {
@@ -453,7 +461,7 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "host" 
     const result = await currentSdk.getOneConversation({ sourceID: conversation.peerUserId, sessionType: DIRECT_SESSION_TYPE });
     const sdkConversationId = text(result.data?.conversationID);
     if (!sdkConversationId) throw new Error("OpenIM conversation is unavailable.");
-    await currentSdk.markConversationMessageAsRead(sdkConversationId);
+    await markOpenIMConversationRead(currentSdk, sdkConversationId);
     return { read: true, conversationId };
   }
 
