@@ -31,4 +31,6 @@ Core 工作区已有其他未提交修改，本轮仅修改分享所需文件。
 
 实现与验证已完成。Core 分支 `codex/drive-file-sharing` 已推送到远端，App 子模块固定到 `ead01ae8`，其他机器和 CI 可直接检出。Core 原有其他未提交修改保留。
 
-网盘本地包为 `artifacts/moss.drive/0.3.0/moss.drive-0.3.0.zip`（未附发布签名）。全仓库 App 校验、类型检查、单元测试和构建通过。具体测试及环境范围见 [验证记录](drive-app-verification.md)。
+网盘 [0.3.0 正式版](https://github.com/baiguidong/moss-apps/releases/tag/moss.drive-v0.3.0) 已由 CI 签名发布，应用市场目录已更新。CI 下载产物保存在 `artifacts/moss.drive/0.3.0/ci/`；上一级 ZIP 为发布前的本地未签名包。
+
+配套 Server 已从独立 Core 检出构建并部署，MySQL schema 升至 5，HTTPS 分享验收通过。Desktop 仍需单独升级到支持 Host API 2.3 的版本。全仓库 App 校验、类型检查、单元测试和构建通过；具体测试及环境范围见 [验证记录](drive-app-verification.md)。

@@ -1,5 +1,15 @@
 # 网盘 0.3.0 分享验证（2026-09-29）
 
+## 正式发布与 Server 部署
+
+- [发布 CI](https://github.com/baiguidong/moss-apps/actions/runs/36543186026) 与 [全仓库 CI](https://github.com/baiguidong/moss-apps/actions/runs/36543177898) 均通过；[0.3.0 Release](https://github.com/baiguidong/moss-apps/releases/tag/moss.drive-v0.3.0) 和应用市场目录已发布。
+- 从 Release 重新下载 ZIP，逐文件校验及 `release-1` 公钥签名验证通过。正式包 185983 字节，SHA-256 为 `62aa8cd9ffa5dc179cad37561bce7cf9ecbd8b144d864d27fe8ec75a7a8d61d8`；市场最新版本与产物校验值一致。
+- Core `ead01ae83318585e15cdb16185e0697561da02b5` 在独立目录构建 Linux AMD64 Server，部署版本 `0.0.1-share.20260929.ead01ae8`。更新前已备份数据库和配置；MySQL schema 从 4 升到 5，Nginx 增加 `/s/` 代理，服务健康检查通过。
+- 部署后验证现有管理员登录、管理页、S3、1 MiB + 101 字节上传下载 SHA-256、分享创建幂等、分享码校验、安全 Cookie、匿名直链、HEAD/Range、过期、撤销与列表状态；测试对象、分享与配额占用已清理。
+- MySQL、Silo 与 Nginx 容器保持运行。Server 重启后处理了失效数据库占用锁；原会话与记录保留，会话 runner 已自动恢复为 ready。Desktop 本次未发布，使用网盘 0.3.0 仍需要 Host API 2.3。
+
+## 发布前验证
+
 - Core Host API / SDK 升级到 2.3.0；新增分享创建、列表、撤销与独立分享权限。
 - App 单元测试 27 项、浏览器测试 11 项通过，覆盖分享创建、复制用信息、列表、取消、账号隔离与超时幂等重试。320px 窄窗口和浅/深色文件页面无横向溢出。
 - Core SQLite/MySQL 服务端回归各 67 项、Desktop 回归 882 项通过；Server/Desktop 类型检查、Server 构建与 Compose 部署校验通过。
