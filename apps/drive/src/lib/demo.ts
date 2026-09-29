@@ -1,4 +1,4 @@
-import type { CloudFile, CloudTransfer } from '@moss/app-sdk/cloud-storage'
+import type { CloudFile, CloudTransfer, CloudShare } from '@moss/app-sdk/cloud-storage'
 import type { CloudEvent, DriveApi, DriveMethod, Input, Output } from '../contracts'
 import { DriveError } from './errors'
 import { folderNameError } from './file-name'
@@ -22,6 +22,9 @@ export function createDemoApi(): DriveApi {
   add('spec', '需求文档.md', 'file', 'projects', '# 网盘需求\n\n简单、美观、易用。\n')
   add('drafts', '草稿', 'folder', 'projects')
   add('palette', '配色说明.txt', 'file', 'design', 'Moss：柔和背景、绿色主操作、清晰文字。\n')
+  const shares = new Map<string, CloudShare>()
+  const shareRequests = new Map<string, string>()
+  const shareInfo = (item: CloudShare): CloudShare => ({ ...item, state: item.state === 'revoked' ? 'revoked' : !files.some(file => file.id === item.fileId) ? 'unavailable' : item.expiresAt !== null && item.expiresAt <= Date.now() ? 'expired' : 'active' })
   const tasks = new Map<string, CloudTransfer>()
   const picked = new Map<string, File>()
   const finishes = new Map<string, () => void>()
@@ -50,6 +53,30 @@ export function createDemoApi(): DriveApi {
   async function request(method: DriveMethod, input: Record<string, any>): Promise<unknown> {
     if (disposed) throw new DriveError('APP_ACTION_CANCELED')
     if (method === 'status.get') return { state: 'ready', version: 1 }
+    if (method === 'shares.create') {
+      const existing = shareRequests.get(input.requestKey)
+      if (existing) return shareInfo(shares.get(existing)!)
+      const file = files.find(item => item.id === input.fileId && item.kind === 'file')
+      if (!file) throw new DriveError('FILE_NOT_FOUND')
+      if (input.expiresAt !== null && input.expiresAt <= Date.now()) throw new DriveError('INVALID_EXPIRY')
+      const id = crypto.randomUUID()
+      const share: CloudShare = { id, fileId: file.id, name: file.name, size: file.size, url: `https://demo.invalid/s/${id}`,
+        accessCode: input.accessCode === undefined ? String(100000 + crypto.getRandomValues(new Uint32Array(1))[0] % 900000) : input.accessCode,
+        expiresAt: input.expiresAt, createdAt: Date.now(), revokedAt: null, state: 'active' }
+      shares.set(id, share); shareRequests.set(input.requestKey, id)
+      return shareInfo(share)
+    }
+    if (method === 'shares.list') {
+      const all = [...shares.values()].filter(item => !input.fileId || item.fileId === input.fileId).sort((a, b) => b.createdAt - a.createdAt || b.id.localeCompare(a.id))
+      const offset = input.cursor ? all.findIndex(item => item.id === input.cursor) + 1 : 0, limit = input.limit ?? 100
+      return { shares: all.slice(offset, offset + limit).map(shareInfo), nextCursor: all.length > offset + limit ? all[offset + limit - 1].id : null }
+    }
+    if (method === 'shares.revoke') {
+      const item = shares.get(input.shareId)
+      if (!item) throw new DriveError('SHARE_NOT_FOUND')
+      item.state = 'revoked'; item.revokedAt ??= Date.now()
+      return shareInfo(item)
+    }
     if (method === 'quota.get') return { usedBytes: files.reduce((sum, file) => sum + file.size, 0), reservedBytes: 0, limitBytes: 10 * 1024 ** 3 }
     if (method === 'files.list') {
       const all = files.filter(file => file.parentId === (input.parentId ?? null))

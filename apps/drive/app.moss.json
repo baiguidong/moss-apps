@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "id": "moss.drive",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "displayName": "网盘",
-  "description": "浏览个人云端文件，轻松上传与下载。",
+  "description": "管理个人云端文件，上传、下载和分享。",
   "icon": "assets/icon.svg",
-  "hostApi": "^2.2.0",
+  "hostApi": "^2.3.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -104,13 +104,32 @@
         "inputSchema": "schemas/files.delete.input.json",
         "outputSchema": "schemas/files.delete.output.json",
         "timeoutMs": 45000
+      },
+      {
+        "name": "shares.create",
+        "inputSchema": "schemas/shares.create.input.json",
+        "outputSchema": "schemas/shares.create.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "shares.list",
+        "inputSchema": "schemas/shares.list.input.json",
+        "outputSchema": "schemas/shares.list.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "shares.revoke",
+        "inputSchema": "schemas/shares.revoke.input.json",
+        "outputSchema": "schemas/shares.revoke.output.json",
+        "timeoutMs": 45000
       }
     ]
   },
   "permissions": [
     "cloud-storage:read",
     "cloud-storage:write",
-    "cloud-storage:delete"
+    "cloud-storage:delete",
+    "cloud-storage:share"
   ],
   "contributes": {
     "views": [

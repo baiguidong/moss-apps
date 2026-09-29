@@ -45,7 +45,7 @@ async function backendHarness(protocols: string[], grants: string[] = []) {
   return { client, sent, send, reply }
 }
 
-describe('SDK 2.2 consumer contract', () => {
+describe('SDK 2.3 consumer contract', () => {
   it('loads the public entry points in the Node Backend runtime', () => {
     const output = execFileSync('node', [
       '--input-type=module', '-e', `
@@ -61,7 +61,7 @@ describe('SDK 2.2 consumer contract', () => {
       `,
     ], { cwd: new URL('..', import.meta.url), encoding: 'utf8' })
     expect(JSON.parse(output)).toEqual({
-      version: '2.2.0', cloud: MOSS_CLOUD_STORAGE_PROTOCOL,
+      version: '2.3.0', cloud: MOSS_CLOUD_STORAGE_PROTOCOL,
       platform: MOSS_PLATFORM_PROTOCOL, sameExports: true,
     })
   })
@@ -76,7 +76,7 @@ describe('SDK 2.2 consumer contract', () => {
       },
     }
     const manifest = validateAppManifest(source)
-    expect(manifest.hostApi).toBe(`^${APP_HOST_API_VERSION}`)
+    expect(manifest.hostApi).toBe(source.hostApi)
     const protocols = resolveBackendProtocols(manifest.backend)
     protocols.push(MOSS_PLATFORM_PROTOCOL)
     expect(manifest.backend?.protocols).toEqual([MOSS_CLOUD_STORAGE_PROTOCOL])

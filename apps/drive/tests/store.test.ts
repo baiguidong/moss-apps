@@ -226,3 +226,48 @@ test('a successful creation closes the dialog even if reloading the list fails',
   await f.store.submitDialog()
   expect(f.calls.filter(call => call.method === 'folders.create')).toHaveLength(1)
 })
+
+const share = (id = 's') => ({ id, fileId: 'f', name: 'report', size: 40, url: `https://files.test/s/${id}`, accessCode: '246810', createdAt: 1, expiresAt: null, revokedAt: null, state: 'active' as const })
+test('sharing retries use the same request key and settings; duplicate clicks are blocked', async () => {
+  const pending = deferred<any>(), f = await fixture({ 'shares.create': () => pending.promise }); await f.settle()
+  f.store.openShare(file('f'))
+  const creating = f.store.createShare()
+  await f.store.createShare()
+  expect(f.calls.filter(call => call.method === 'shares.create')).toHaveLength(1)
+  f.store.closeShare()
+  expect(f.store.getSnapshot().shareDialog?.pending).toBe(true)
+  pending.resolve(share()); await creating
+  expect(f.store.getSnapshot().shareDialog?.result?.url).toBe(share().url)
+  f.store.closeShare(); f.store.openShare(file('f'))
+  f.handlers['shares.create'] = () => { throw new DriveError('APP_HOST_TIMEOUT') }
+  await f.store.createShare(); await f.store.createShare()
+  const retries = f.calls.filter(call => call.method === 'shares.create').slice(1)
+  expect(retries[0].input).toEqual(retries[1].input)
+  expect(f.store.getSnapshot().shareDialog?.error).toContain('超时')
+})
+
+test('sharing lists and creation responses cannot cross accounts', async () => {
+  const creating = deferred<any>(), listing = deferred<any>()
+  const f = await fixture({ 'shares.create': () => creating.promise, 'shares.list': () => listing.promise }); await f.settle()
+  f.store.openShare(file('f'))
+  const createRequest = f.store.createShare(), listRequest = f.store.loadShares()
+  f.handlers['status.get'] = () => ({ state: 'unauthenticated' })
+  f.emit({ name: 'storage.status-changed', data: { state: 'unauthenticated' } })
+  creating.resolve(share()); listing.resolve({ shares: [share()], nextCursor: null })
+  await Promise.all([createRequest, listRequest])
+  expect(f.store.getSnapshot()).toMatchObject({ shareDialog: null, shares: [], shareCursor: null, revokeDialog: null })
+})
+
+test('revoke failure preserves share; success cannot be overwritten by a stale list', async () => {
+  const f = await fixture({ 'shares.list': () => ({ shares: [share()], nextCursor: null }), 'shares.revoke': () => { throw new DriveError('FORBIDDEN') } }); await f.settle()
+  await f.store.loadShares(); f.store.openRevoke(share()); await f.store.revokeShare()
+  expect(f.store.getSnapshot().revokeError).toBeTruthy()
+  expect(f.store.getSnapshot().shares[0].state).toBe('active')
+  const old = deferred<any>(); f.handlers['shares.list'] = () => old.promise
+  const listing = f.store.loadShares()
+  f.handlers['shares.revoke'] = () => ({ ...share(), state: 'revoked', revokedAt: 2 })
+  await f.store.revokeShare()
+  old.resolve({ shares: [share()], nextCursor: null }); await listing
+  expect(f.store.getSnapshot().shares[0].state).toBe('revoked')
+  expect(f.store.getSnapshot().revokeDialog).toBeNull()
+})

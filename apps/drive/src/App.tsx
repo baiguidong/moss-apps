@@ -1,7 +1,8 @@
 import { useEffect, useSyncExternalStore } from 'react'
-import { ArrowDownToLine, ArrowUpFromLine, FolderPlus, Trash2, ChevronRight, Cloud, CloudOff, FolderOpen, LoaderCircle, RefreshCw, X } from 'lucide-react'
+import { ArrowDownToLine, ArrowUpFromLine, FolderPlus, Share2, Trash2, ChevronRight, Cloud, CloudOff, FolderOpen, LoaderCircle, RefreshCw, X } from 'lucide-react'
 import { FileIcon } from './components/FileIcon'
 import { Transfers } from './components/Transfers'
+import { SharedFiles, ShareDialog, RevokeDialog } from './components/Sharing'
 import { FileDialog } from './components/FileDialog'
 import { bytes, date, fullDate } from './lib/format'
 import type { DriveState, DriveStore, DriveView } from './lib/store'
@@ -29,7 +30,7 @@ export function App({ store }: { store: DriveStore }) {
     return () => { window.removeEventListener('focus', focus); document.removeEventListener('visibilitychange', visible) }
   }, [store])
   const ready = state.cloud === 'ready'
-  const tabs = [{ id: 'files', label: '全部文件', icon: FolderOpen }, { id: 'upload', label: '上传', icon: ArrowUpFromLine }, { id: 'download', label: '下载', icon: ArrowDownToLine }] as const
+  const tabs = [{ id: 'files', label: '全部文件', icon: FolderOpen }, { id: 'upload', label: '上传', icon: ArrowUpFromLine }, { id: 'download', label: '下载', icon: ArrowDownToLine }, { id: 'shares', label: '已分享', icon: Share2 }] as const
   const runtimeDisabled = state.runtime.state === 'disabled'
   const [title, description] = runtimeDisabled ? ['网盘已停用', '请在 Moss 的应用管理中启用网盘。'] : cloudMessages[state.cloud] || cloudMessages.unavailable
   const upload = <button className="primary" disabled={!ready || state.picking} onClick={() => void store.upload()}>{state.picking ? <LoaderCircle size={16} className="spin" /> : <ArrowUpFromLine size={16} />}<span>{state.picking ? '正在选择' : '上传文件'}</span></button>
@@ -68,14 +69,14 @@ export function App({ store }: { store: DriveStore }) {
       </div>
       <section className="file-workspace" role="tabpanel" id={`view-${state.view}`} aria-labelledby={`tab-${state.view}`}>
         {!ready ? <div className="empty-state" role="status"><span className="empty-icon">{state.cloud === 'loading' ? <Cloud size={34} /> : <CloudOff size={34} />}</span><h2>{title}</h2><p>{description}</p>{state.cloud !== 'loading' && <button className="quiet bordered" disabled={state.refreshing} onClick={() => void store.refresh()}><RefreshCw size={15} />重新连接</button>}</div>
-          : state.view !== 'files' ? <Transfers key={state.view} state={state} store={store} direction={state.view} /> : <>
+          : state.view === 'shares' ? <SharedFiles state={state} store={store} /> : state.view !== 'files' ? <Transfers key={state.view} state={state} store={store} direction={state.view} /> : <>
             <div className="file-scroll" aria-busy={state.listLoading}>
               <table className="file-table"><thead><tr><th scope="col">名称</th><th scope="col" className="size-column">大小</th><th scope="col" className="date-column">修改时间</th><th scope="col" className="action-column"><span className="sr-only">操作</span></th></tr></thead>
                 <tbody>{state.files.map(file => <tr key={file.id} data-testid="file-row">
                   <td><div className="file-name"><FileIcon name={file.name} folder={file.kind === 'folder'} /><div className="file-description">{file.kind === 'folder' ? <button className="folder-link" title={file.name} onClick={() => void store.enter(file)}>{file.name}</button> : <span className="name-text" title={file.name}>{file.name}</span>}<span className="mobile-meta">{file.kind === 'folder' ? '文件夹' : bytes(file.size)}<span>·</span>{date(file.updatedAt)}</span></div></div></td>
                   <td className="size-column muted">{file.kind === 'folder' ? '—' : bytes(file.size)}</td>
                   <td className="date-column muted"><time dateTime={new Date(file.updatedAt).toISOString()} title={fullDate(file.updatedAt)}>{date(file.updatedAt)}</time></td>
-                  <td className="action-column">{file.kind === 'file' ? <div className="file-actions"><button className="download-button" aria-label={`下载 ${file.name}`} title="下载文件" disabled={state.downloads.includes(file.id)} onClick={() => void store.download(file)}>{state.downloads.includes(file.id) ? <LoaderCircle size={16} className="spin" /> : <ArrowDownToLine size={16} />}<span>下载</span></button><button className="icon-button delete-button" aria-label={`删除 ${file.name}`} title="删除文件" onClick={() => store.openDeleteFile(file)}><Trash2 size={15} /></button></div> : <ChevronRight className="folder-chevron" size={15} aria-hidden="true" />}</td>
+                  <td className="action-column">{file.kind === 'file' ? <div className="file-actions"><button className="quiet share-button" aria-label={`分享 ${file.name}`} title="分享文件" onClick={() => store.openShare(file)}><Share2 size={15} /><span>分享</span></button><button className="download-button" aria-label={`下载 ${file.name}`} title="下载文件" disabled={state.downloads.includes(file.id)} onClick={() => void store.download(file)}>{state.downloads.includes(file.id) ? <LoaderCircle size={16} className="spin" /> : <ArrowDownToLine size={16} />}<span>下载</span></button><button className="icon-button delete-button" aria-label={`删除 ${file.name}`} title="删除文件" onClick={() => store.openDeleteFile(file)}><Trash2 size={15} /></button></div> : <ChevronRight className="folder-chevron" size={15} aria-hidden="true" />}</td>
                 </tr>)}</tbody>
               </table>
               {state.listLoading && !state.files.length ? <div className="empty-state loading-state" role="status"><LoaderCircle className="spin" size={24} /><p>正在加载文件…</p></div> : !state.files.length && !state.listError && <div className="empty-state"><span className="empty-icon"><FolderOpen size={34} /></span><h2>还没有文件</h2><p>上传文件，留存值得保存的内容。</p><button className="quiet bordered" disabled={state.picking} onClick={() => void store.upload()}><ArrowUpFromLine size={15} />上传文件</button></div>}
@@ -84,13 +85,15 @@ export function App({ store }: { store: DriveStore }) {
             </div>
           </>}
         <footer className="workspace-footer">
-          <div className="footer-left"><span>{ready ? state.view === 'files' ? `已加载 ${state.files.length} 项` : `${state.tasks.filter(task => task.direction === state.view).length} 项记录` : '个人云端空间'}</span>
+          <div className="footer-left"><span>{ready ? state.view === 'files' ? `已加载 ${state.files.length} 项` : state.view === 'shares' ? `已加载 ${state.shares.length} 条分享` : `${state.tasks.filter(task => task.direction === state.view).length} 项记录` : '个人云端空间'}</span>
             <span className={`runtime-status ${['running', 'demo'].includes(state.runtime.state) && !state.runtime.error ? 'healthy' : ''}`} role="status"><i />{runtimeLabel(state)}</span></div>
           <div className="quota" title={state.quota ? `已用 ${bytes(state.quota.usedBytes)}，传输预留 ${bytes(state.quota.reservedBytes)}，总容量 ${bytes(state.quota.limitBytes)}` : undefined}>
             {state.quota ? <><span className="quota-meter" aria-hidden="true"><span style={{ width: `${Math.min(100, state.quota.limitBytes > 0 ? (state.quota.usedBytes + state.quota.reservedBytes) / state.quota.limitBytes * 100 : 0)}%` }} /></span><span>{bytes(state.quota.usedBytes)} / {bytes(state.quota.limitBytes)}</span></> : <span>{state.quotaError ? '容量暂不可用' : '—'}</span>}
           </div>
         </footer>
       </section>
+      {state.shareDialog && <ShareDialog dialog={state.shareDialog} store={store} />}
+      {state.revokeDialog && <RevokeDialog state={state} store={store} />}
       {state.dialog && <FileDialog dialog={state.dialog} store={store} />}
       {state.notice && <span className="sr-only" role="status" data-testid="transfer-announcement">{state.notice}</span>}
     </div>

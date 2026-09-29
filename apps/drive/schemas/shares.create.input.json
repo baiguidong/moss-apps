@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "fileId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "requestKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "expiresAt": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "accessCode": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9]{4,12}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "fileId",
+    "requestKey",
+    "expiresAt"
+  ]
+}

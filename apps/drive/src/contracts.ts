@@ -1,6 +1,7 @@
 import type { CloudStorageInputMap, CloudStorageOutputMap, CloudTransfer, CloudStorageState } from '@moss/app-sdk/cloud-storage'
 
 export const DRIVE_METHODS = [
+  'shares.create', 'shares.list', 'shares.revoke',
   'status.get', 'quota.get', 'files.list', 'folders.create', 'files.delete', 'local-files.pick', 'uploads.start',
   'downloads.start', 'transfers.list', 'transfers.get', 'transfers.pause',
   'transfers.resume', 'transfers.cancel',

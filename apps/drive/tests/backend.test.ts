@@ -85,3 +85,15 @@ test('directory creation and deletion validate inputs, responses and error codes
   expect((await f.invoke('files.delete', { fileId: 'file' })).payload.result.error.code).toBe('PERMISSION_DENIED')
   expect(manifest.permissions).toContain('cloud-storage:delete')
 })
+
+test('sharing action schema rejects malformed links and preserves share settings', async () => {
+  const share = { id: 's', fileId: 'f', name: 'report.pdf', size: 12, url: 'https://files.test/s/token', accessCode: '123456', createdAt: 1, expiresAt: null, revokedAt: null, state: 'active' }
+  const f = await fixture(() => share)
+  const settings = { fileId: 'f', requestKey: 'retry-key', expiresAt: null, accessCode: '123456' }
+  expect((await f.invoke('shares.create', settings)).payload.result).toEqual({ ok: true, data: share })
+  expect(f.messages.find(message => message.type === 'host.request')!.payload.input).toEqual(settings)
+  f.setResponse(() => ({ ...share, url: 'javascript:alert(1)' }))
+  expect((await f.invoke('shares.create', settings)).payload.result.ok).toBe(false)
+  f.setResponse(() => ({ shares: [share], nextCursor: null }))
+  expect((await f.invoke('shares.list')).payload.result.data.shares[0].accessCode).toBe('123456')
+})

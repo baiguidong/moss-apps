@@ -14,7 +14,14 @@ import schema10 from '../../schemas/transfers.cancel.output.json'
 import folderSchema from '../../schemas/folders.create.output.json'
 import deleteSchema from '../../schemas/files.delete.output.json'
 
+import shareCreate from '../../schemas/shares.create.output.json'
+import shareList from '../../schemas/shares.list.output.json'
+import shareRevoke from '../../schemas/shares.revoke.output.json'
+
 const validators = {
+  'shares.create': compileJsonSchema(shareCreate),
+  'shares.list': compileJsonSchema(shareList),
+  'shares.revoke': compileJsonSchema(shareRevoke),
   'status.get': compileJsonSchema(schema0),
   'quota.get': compileJsonSchema(schema1),
   'files.list': compileJsonSchema(schema2),

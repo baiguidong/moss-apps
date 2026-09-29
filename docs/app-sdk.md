@@ -1,6 +1,6 @@
 # Moss App SDK
 
-当前使用 Host API `2.2.0`。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用其 SDK workspace，仅维护接入说明和消费端回归测试。
+当前使用 Host API `2.3.0`。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用其 SDK workspace，仅维护接入说明和消费端回归测试。
 
 ## Backend 运行契约
 
@@ -84,3 +84,7 @@ UI 调用已声明的 `mossApp.actions.invoke(instanceId, action, input)`，订�
 `status.get` 用于检查云端可用状态。使用前需要开启 Moss 远程连接、登录启用了云端存储的 Server，并具有相应授权。同目录同名上传会返回冲突，下载不会覆盖已有文件。关闭页面可继续传输，退出 Moss 后暂停，重启后需要显式恢复。
 
 完整方法、状态和部署前提见 [Core 云端存储文档](https://github.com/baiguidong/moss/blob/main/docs/cloud-storage.md)。本仓库消费端回归随 `bun run test` 运行。
+
+## 2.3 分享接口
+
+新增 `CloudShare`、`shares.create/list/revoke` 与 `cloud-storage:share`。网盘要求 `hostApi: ^2.3.0`，接收页由 Server 的 `/s/:token` 提供；浏览器不依赖 Desktop Host。详见 [分享实施方案](drive-sharing-plan.md) 及 Core 云端存储文档。

@@ -24,12 +24,12 @@ function manifest(backendOverrides: Record<string, unknown> = {}) {
 }
 
 describe('App Backend manifest', () => {
-  it('advertises Host API 2.2 while accepting Apps built for compatible 2.x hosts', () => {
-    expect(APP_HOST_API_VERSION).toBe('2.2.0')
-    for (const hostApi of ['^2.0.0', '^2.1.0', '^2.2.0']) {
+  it('advertises Host API 2.3 while accepting Apps built for compatible 2.x hosts', () => {
+    expect(APP_HOST_API_VERSION).toBe('2.3.0')
+    for (const hostApi of ['^2.0.0', '^2.1.0', '^2.2.0', '^2.3.0']) {
       expect(validateAppManifest({ ...manifest(), hostApi }).hostApi).toBe(hostApi)
     }
-    expect(() => validateAppManifest({ ...manifest(), hostApi: '^2.3.0' })).toThrow(/requires Host API/)
+    expect(() => validateAppManifest({ ...manifest(), hostApi: '^2.4.0' })).toThrow(/requires Host API/)
   })
 
   it('uses one Backend and accepts the legacy single declaration without retaining it', () => {

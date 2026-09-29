@@ -136,7 +136,7 @@ App ZIP 与 Moss 桌面安装包分开。纯 JavaScript App 可以用同一个�
 
 SDK 源码只在 Moss Core 的 `packages/app-sdk` 维护。本仓库通过 Git 子模块 `vendor/moss-core` 固定引用 Core 提交，将其中的 SDK 纳入 Bun workspace；App 和构建脚本统一通过 `@moss/app-sdk` 包导入，不再保存 SDK 副本。
 
-当前引用的 SDK 为 `2.2.0`，包含 `moss.cloud-storage/v1`；通用文件、截图和外链使用 `moss.platform/v1`。接入方式见 [SDK 接入说明](docs/app-sdk.md)。SDK 会忽略 Manifest 的未知字段；本仓库的构建与发布校验仍会在规范化前拒绝 `backend.targets`、`backend.serverOwnerScope` 和 `moss.remote/v1` 声明。
+当前引用的 SDK 为 `2.3.0`，包含 `moss.cloud-storage/v1`；通用文件、截图和外链使用 `moss.platform/v1`。接入方式见 [SDK 接入说明](docs/app-sdk.md)。SDK 会忽略 Manifest 的未知字段；本仓库的构建与发布校验仍会在规范化前拒绝 `backend.targets`、`backend.serverOwnerScope` 和 `moss.remote/v1` 声明。
 
 初次检出使用 `git clone --recurse-submodules`，已有检出按上方命令初始化子模块。CI、App 发布和市场索引工作流都会检出相同的固定提交。
 

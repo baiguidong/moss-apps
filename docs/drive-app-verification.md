@@ -1,3 +1,16 @@
+# 网盘 0.3.0 分享验证（2026-09-29）
+
+- Core Host API / SDK 升级到 2.3.0；新增分享创建、列表、撤销与独立分享权限。
+- App 单元测试 27 项、浏览器测试 11 项通过，覆盖分享创建、复制用信息、列表、取消、账号隔离与超时幂等重试。320px 窄窗口和浅/深色文件页面无横向溢出。
+- Core SQLite/MySQL 服务端回归各 67 项、Desktop 回归 882 项通过；Server/Desktop 类型检查、Server 构建与 Compose 部署校验通过。
+- Chrome 通过真实 Server 的分享码页面下载文件；公开 HTTP 验证无登录下载、错误分享码、Range/HEAD、过期、撤销、文件删除/版本变化、所有者禁用、限流和下载中的撤销。
+- 真实 Silo 测试验证分享下载、备份恢复及 2 GiB + 101 字节上传/下载 SHA-256。Host 对真实 Server 完成分享创建、查询、撤销与公开链接访问。
+- 截图在 `artifacts/moss.drive/screenshots/0.3.0/`，包含 `shares.png`、`shares-narrow.png` 和 `public-share.png`。浏览器演示中的 `demo.invalid` 链接仅用于展示。
+
+本节记录发布前的本地验证。0.3.0 需要包含本次分享能力的 Moss Desktop（Host API 2.3）与 Server，并授予 `cloud-storage:share`；外部接收者需要可访问的 `server.publicUrl` 或当前连接地址。完整 Desktop 嵌入窗口的分享流程未在本轮重跑，沿用组件/Host/HTTP 分层回归。Core 原有其他未提交修改保持保留。
+
+---
+
 # 网盘验证记录
 
 ## 0.2.0 目录、文件删除与独立标签（2026-09-24）

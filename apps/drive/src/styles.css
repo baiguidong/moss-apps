@@ -267,3 +267,61 @@ button { white-space: nowrap; }
 .file-description { flex: 1; }
 .file-table .action-column { padding-left: 10px; padding-right: 14px; }
 @media (max-width: 360px) { .toolbar .actions button { font-size: 12px; } }
+
+/* File sharing uses the same table and dialog surfaces as file management. */
+.file-table .action-column { width: 192px; }
+.share-button { color: var(--muted-foreground); }
+.share-dialog { width: min(440px, calc(100vw - 32px)); }
+.name-field select { width: 100%; border: 1px solid var(--border); border-radius: 7px; padding: 9px 11px; font: inherit; font-size: 13px; color: var(--foreground); background: var(--background); }
+.share-code-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 20px; }
+.share-code-toggle input { accent-color: var(--primary); }
+.share-details { font-size: 12px; margin-top: 20px; }
+.share-details div { display: flex; justify-content: space-between; gap: 16px; margin: 10px 0; }
+.share-details dt { color: var(--muted-foreground); }
+.share-details dd { margin: 0; overflow-wrap: anywhere; }
+.share-copy-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.copy-control { position: relative; display: inline-flex; max-width: 100%; }
+.copy-status { position: absolute; right: 0; bottom: 100%; background: var(--popover); color: var(--foreground); box-shadow: 0 2px 10px #0002; border: 1px solid var(--border); padding: 5px 9px; border-radius: 6px; z-index: 2; width: max-content; max-width: 180px; font-size: 12px; }
+.shared-workspace { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+.shared-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; }
+.shared-toolbar h2 { font-size: 13px; font-weight: 550; margin: 0; }
+.share-table th:first-child { width: 26%; }
+.share-table .share-time { width: 16%; font-size: 11px; }
+.share-table .share-code-column { width: 9%; }
+.share-table th:nth-last-child(2) { width: 8%; }
+.share-table th:last-child { width: 180px; }
+.share-row-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.share-row-actions button { font-size: 12px; }
+.share-size { display: block; font-size: 11px; margin-top: 3px; }
+.share-mobile-details { display: none; }
+.share-status { font-size: 11px; color: var(--muted-foreground); }
+.share-status.active { color: var(--primary); }
+.share-table td { vertical-align: top; }
+.share-table .name-text { text-align: left; }
+@media (max-width: 900px) {
+  .share-table .share-time { display: none; }
+  .share-mobile-details { display: block; font-size: 11px; line-height: 1.8; color: var(--muted-foreground); overflow-wrap: anywhere; }
+  .share-table th:first-child { width: auto; }
+  .share-table th:last-child { width: 145px; }
+  .share-table th:nth-last-child(2) { width: 64px; }
+}
+@media (max-width: 600px) {
+  .file-table .action-column { width: 116px; }
+  .share-button span { display: none; }
+  .share-table .share-code-column { display: none; }
+  .share-table th:last-child { width: 120px; }
+  .share-table .file-icon { display: none; }
+  .share-table td, .share-table th { padding: 10px 6px; }
+  .share-row-actions button { padding: 5px; }
+  .share-row-actions svg { display: none; }
+  .share-table .file-name { gap: 0; }
+  .share-table .name-text { white-space: normal; overflow-wrap: anywhere; }
+  .workspace-tabs { gap: 0; }
+  .workspace-tabs button { padding: 7px 8px; }
+}
+@media (max-width: 360px) {
+  .workspace-tabs button { font-size: 12px; padding: 7px 6px; }
+  .workspace-tabs button svg { width: 13px; }
+  .share-table th:last-child { width: 102px; }
+  .share-table th:nth-last-child(2) { width: 48px; }
+}

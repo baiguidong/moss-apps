@@ -3,6 +3,13 @@ export class DriveError extends Error {
 }
 
 const messages: Record<string, string> = {
+  SHARING_UNSUPPORTED: '服务器暂不支持分享，请升级 Moss Server。',
+  UNKNOWN_METHOD: '当前 Moss 版本暂不支持分享，请升级后重试。',
+  SHARE_NOT_FOUND: '分享记录已不存在，请刷新列表。',
+  SHARE_URL_UNAVAILABLE: '服务器分享地址配置有误，请联系管理员。',
+  INVALID_EXPIRY: '请选择未来一年内的到期时间。',
+  IDEMPOTENCY_CONFLICT: '分享设置已变化，请关闭弹窗后重新创建。',
+
   NAME_CONFLICT: '此目录已有同名文件，请调整文件名后重新上传。',
   INVALID_NAME: '名称不能包含斜杠、控制字符，也不能使用“.”或“..”。',
   FOLDER_NOT_EMPTY: '目录内还有文件，请先清空目录。',

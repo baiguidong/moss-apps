@@ -1,13 +1,20 @@
-import type { CloudFile, CloudTransfer, CloudStorageState } from '@moss/app-sdk/cloud-storage'
+import type { CloudFile, CloudTransfer, CloudStorageState, CloudShare } from '@moss/app-sdk/cloud-storage'
 import type { CloudEvent, DriveApi, Output, RuntimeStatus } from '../contracts'
 import { errorCode, errorMessage, isCancelled } from './errors'
 import { folderNameError } from './file-name'
 
 export interface Crumb { id: string | null; name: string }
 export interface OperationError { id: string; name: string; message: string }
-export type DriveView = 'files' | 'upload' | 'download'
+export type DriveView = 'files' | 'upload' | 'download' | 'shares'
 export type FileDialogState = ({ kind: 'create-folder'; parent: Crumb; name: string } | { kind: 'delete-file'; file: CloudFile }) & { pending: boolean; error: string | null }
+export interface ShareDialogState {
+  file: Pick<CloudFile, 'id' | 'name'>; requestKey: string; preset: string; expiresAt: number | null
+  codeEnabled: boolean; code: string; pending: boolean; error: string | null; result: CloudShare | null
+}
 export interface DriveState {
+  shares: CloudShare[]; shareCursor: string | null; sharesLoading: boolean; sharesError: string | null
+  shareDialog: ShareDialogState | null; revokeDialog: CloudShare | null; revoking: boolean; revokeError: string | null
+
   path: Crumb[]; files: CloudFile[]; cursor: string | null; listLoading: boolean; listError: string | null
   tasks: CloudTransfer[]; tasksLoading: boolean; tasksError: string | null
   quota: Output<'quota.get'> | null; quotaError: boolean
@@ -28,6 +35,7 @@ export function mergeTransfer(current: CloudTransfer | undefined, incoming: Clou
   return incoming
 }
 const initial = (): DriveState => ({
+  shares: [], shareCursor: null, sharesLoading: false, sharesError: null, shareDialog: null, revokeDialog: null, revoking: false, revokeError: null,
   path: root(), files: [], cursor: null, listLoading: false, listError: null,
   tasks: [], tasksLoading: false, tasksError: null, quota: null, quotaError: false,
   cloud: 'loading', runtime: { state: 'starting' }, refreshing: false,
@@ -42,6 +50,7 @@ export class DriveStore {
   private alive = true
   private started = false
   private epoch = 0
+  private shareSequence = 0
   private listSequence = 0
   private refreshSequence = 0
   private taskSequence = 0
@@ -69,7 +78,7 @@ export class DriveStore {
   private clear(cloud: DriveState['cloud']) {
     clearTimeout(this.noticeTimer); this.noticeTransfers.clear()
     this.eventVersions.clear()
-    this.epoch++; this.listSequence++; this.taskSequence++; this.quotaSequence++; this.refreshSequence++
+    this.epoch++; this.shareSequence++; this.listSequence++; this.taskSequence++; this.quotaSequence++; this.refreshSequence++
     clearTimeout(this.completionTimer); this.completionTimer = undefined
     this.patch({ ...initial(), cloud, runtime: this.state.runtime, view: this.state.view })
   }
@@ -130,7 +139,7 @@ export class DriveStore {
       if (!valid()) return
       if (status.state !== 'ready') { this.clear(status.state); return }
       this.patch({ cloud: 'ready' })
-      await Promise.all([this.loadFiles(), this.loadQuota(), this.loadTasks()])
+      await Promise.all([this.loadFiles(), this.loadQuota(), this.loadTasks(), this.state.view === 'shares' ? this.loadShares() : undefined])
       if (!valid()) return
       // Starting an action may have started the backend; read its actual status again.
       const current = await this.api.runtime()
@@ -195,13 +204,86 @@ export class DriveStore {
     } catch (error) { if (valid()) this.handleReadError(error, { tasksError: errorMessage(error) }) }
     finally { if (valid()) this.patch({ tasksLoading: false }) }
   }
-  setView = (view: DriveView) => this.patch({ view })
+  setView = (view: DriveView) => {
+    this.patch({ view })
+    if (view === 'shares') void this.loadShares()
+  }
+  async loadShares(more = false) {
+    if (this.state.cloud !== 'ready' || (more && (!this.state.shareCursor || this.state.sharesLoading))) return
+    const seq = ++this.shareSequence, epoch = this.epoch
+    const valid = () => this.valid(epoch) && seq === this.shareSequence
+    const cursor = more ? this.state.shareCursor : null
+    this.patch({ sharesLoading: true, sharesError: null })
+    try {
+      const page = await this.api.request('shares.list', { limit: 100, ...(cursor ? { cursor } : {}) })
+      if (!valid()) return
+      const items = new Map((more ? this.state.shares : []).map(item => [item.id, item]))
+      page.shares.forEach(item => items.set(item.id, item))
+      if (cursor && cursor === page.nextCursor) throw new Error('Repeated share cursor')
+      this.patch({ shares: [...items.values()], shareCursor: page.nextCursor })
+    } catch (error) { if (valid()) this.handleReadError(error, { sharesError: errorMessage(error) }) }
+    finally { if (valid()) this.patch({ sharesLoading: false }) }
+  }
+  openShare = (file: CloudFile) => {
+    if (this.state.cloud !== 'ready' || this.state.dialog || this.state.shareDialog || this.state.revokeDialog || file.kind !== 'file') return
+    this.patch({ shareDialog: { file, requestKey: crypto.randomUUID(), preset: '7', expiresAt: Date.now() + 7 * 86400000,
+      codeEnabled: true, code: '', pending: false, error: null, result: null } })
+  }
+  viewShare = (share: CloudShare) => {
+    if (this.state.dialog || this.state.shareDialog || this.state.revokeDialog) return
+    this.patch({ shareDialog: { file: { id: share.fileId, name: share.name }, requestKey: '', preset: '', expiresAt: share.expiresAt,
+      codeEnabled: Boolean(share.accessCode), code: share.accessCode ?? '', pending: false, error: null, result: share } })
+  }
+  closeShare = () => { if (!this.state.shareDialog?.pending) this.patch({ shareDialog: null }) }
+  updateShare = (changes: Partial<Pick<ShareDialogState, 'preset' | 'expiresAt' | 'codeEnabled' | 'code'>>) => {
+    const dialog = this.state.shareDialog
+    if (dialog && !dialog.pending && !dialog.result) this.patch({ shareDialog: { ...dialog, ...changes, requestKey: crypto.randomUUID(), error: null } })
+  }
+  async createShare() {
+    const dialog = this.state.shareDialog, epoch = this.epoch
+    if (!dialog || dialog.pending || dialog.result || this.state.cloud !== 'ready') return
+    let error: string | null = null
+    if (dialog.expiresAt !== null && (!Number.isFinite(dialog.expiresAt) || dialog.expiresAt <= Date.now() || dialog.expiresAt > Date.now() + 366 * 86400000)) error = '请选择未来一年内的到期时间。'
+    if (dialog.codeEnabled && dialog.code && !/^[a-zA-Z0-9]{4,12}$/.test(dialog.code)) error = '分享码应为 4–12 位字母或数字。'
+    if (error) { this.patch({ shareDialog: { ...dialog, error } }); return }
+    const pending = { ...dialog, pending: true, error: null }
+    this.patch({ shareDialog: pending })
+    try {
+      const result = await this.api.request('shares.create', { fileId: dialog.file.id, requestKey: dialog.requestKey,
+        expiresAt: dialog.expiresAt, ...(!dialog.codeEnabled ? { accessCode: null } : dialog.code ? { accessCode: dialog.code } : {}) })
+      if (!this.valid(epoch) || this.state.shareDialog !== pending) return
+      this.patch({ shareDialog: { ...dialog, result }, shares: [result, ...this.state.shares.filter(item => item.id !== result.id)] })
+      this.shareSequence++ // Invalidate a listing captured before creation.
+      this.patch({ sharesLoading: false })
+    } catch (error) {
+      if (!this.valid(epoch)) return
+      if (this.state.shareDialog === pending) this.patch({ shareDialog: { ...dialog, error: errorMessage(error) } })
+      this.handleReadError(error, {})
+    }
+  }
+  openRevoke = (share: CloudShare) => {
+    if (this.state.cloud === 'ready' && !this.state.shareDialog && !this.state.dialog) this.patch({ revokeDialog: share, revokeError: null })
+  }
+  closeRevoke = () => { if (!this.state.revoking) this.patch({ revokeDialog: null, revokeError: null }) }
+  async revokeShare() {
+    const share = this.state.revokeDialog, epoch = this.epoch
+    if (!share || this.state.revoking || this.state.cloud !== 'ready') return
+    this.patch({ revoking: true, revokeError: null })
+    try {
+      const result = await this.api.request('shares.revoke', { shareId: share.id })
+      if (!this.valid(epoch)) return
+      this.shareSequence++
+      this.patch({ revokeDialog: null, sharesLoading: false, shares: this.state.shares.map(item => item.id === result.id ? result : item) })
+    } catch (error) {
+      if (this.valid(epoch)) this.handleReadError(error, { revokeError: errorMessage(error) })
+    } finally { if (this.valid(epoch)) this.patch({ revoking: false }) }
+  }
   openCreateFolder = () => {
-    if (this.state.cloud !== 'ready' || this.state.dialog) return
+    if (this.state.cloud !== 'ready' || this.state.dialog || this.state.shareDialog || this.state.revokeDialog) return
     this.patch({ dialog: { kind: 'create-folder', parent: this.state.path.at(-1)!, name: '', pending: false, error: null } })
   }
   openDeleteFile = (file: CloudFile) => {
-    if (this.state.cloud !== 'ready' || this.state.dialog || file.kind !== 'file' || !this.state.files.some(item => item.id === file.id)) return
+    if (this.state.cloud !== 'ready' || this.state.dialog || this.state.shareDialog || this.state.revokeDialog || file.kind !== 'file' || !this.state.files.some(item => item.id === file.id)) return
     this.patch({ dialog: { kind: 'delete-file', file, pending: false, error: null } })
   }
   closeDialog = () => { if (!this.state.dialog?.pending) this.patch({ dialog: null }) }
@@ -226,7 +308,7 @@ export class DriveStore {
       const sameDirectory = this.state.path.at(-1)!.id === parentId
       if (sameDirectory && dialog.kind === 'delete-file') this.patch({ files: this.state.files.filter(file => file.id !== dialog.file.id) })
       // A successful mutation is never retried because the subsequent refresh failed.
-      await Promise.all([sameDirectory ? this.loadFiles() : undefined, dialog.kind === 'delete-file' ? this.loadQuota() : undefined])
+      await Promise.all([sameDirectory ? this.loadFiles() : undefined, dialog.kind === 'delete-file' ? this.loadQuota() : undefined, dialog.kind === 'delete-file' && this.state.shares.length ? this.loadShares() : undefined])
     } catch (error) {
       if (!this.valid(epoch)) return
       if (this.state.dialog === pending) this.patch({ dialog: { ...dialog, error: dialog.kind === 'create-folder' && errorCode(error) === 'NAME_CONFLICT' ? '此目录已有同名文件或目录，请换一个名称。' : errorMessage(error) } })
