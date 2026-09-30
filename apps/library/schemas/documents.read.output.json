@@ -1,0 +1,55 @@
+{
+  "type": "object",
+  "required": [
+    "data"
+  ],
+  "properties": {
+    "data": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "revision",
+        "currentRevision",
+        "content",
+        "editable",
+        "chunks",
+        "nextOffset"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "chunks": {
+          "type": "array"
+        },
+        "nextOffset": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "truncated": {
+      "type": "boolean"
+    },
+    "nextOffset": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

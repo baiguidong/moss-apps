@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "required": [
+    "kind",
+    "path",
+    "name",
+    "resourceId",
+    "revision",
+    "uri"
+  ],
+  "properties": {
+    "kind": {
+      "const": "file"
+    },
+    "path": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "string"
+    },
+    "uri": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "exact-title",
+    "category": "title",
+    "query": "quarterly plan",
+    "expectedResourceIds": ["resource-title"]
+  },
+  {
+    "id": "chinese-business-term",
+    "category": "chinese",
+    "query": "中国建材采购",
+    "expectedResourceIds": ["resource-chinese"]
+  },
+  {
+    "id": "bounded-broad-fallback",
+    "category": "fallback",
+    "query": "alpha beta gamma",
+    "expectedResourceIds": ["resource-broad"]
+  },
+  {
+    "id": "expected-empty",
+    "category": "negative",
+    "query": "content that must not match",
+    "expectedResourceIds": []
+  }
+]

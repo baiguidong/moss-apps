@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "anyOf": [
+    {
+      "required": [
+        "opened"
+      ]
+    },
+    {
+      "required": [
+        "revealed"
+      ]
+    }
+  ],
+  "properties": {
+    "opened": {
+      "const": true
+    },
+    "revealed": {
+      "const": true
+    }
+  },
+  "additionalProperties": false
+}

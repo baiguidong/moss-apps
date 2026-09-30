@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.library",
+  "summary": "本地知识库：管理文档、全文检索、编写笔记，并供 AI 助手查询和写入。",
+  "description": "资料集、文件与目录导入、全文检索、笔记编辑、索引任务。数据保存在本地，查询默认覆盖全部资料集。",
+  "categories": [
+    "productivity"
+  ],
+  "keywords": [
+    "知识库",
+    "资料库",
+    "文档",
+    "检索",
+    "笔记"
+  ],
+  "platforms": [
+    "darwin-arm64",
+    "win32-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/library",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT"
+}

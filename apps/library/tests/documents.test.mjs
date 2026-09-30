@@ -1,0 +1,120 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import os from 'node:os'
+import { preparePython } from '../scripts/prepare-python.mjs'
+import { createLibraryService, parseLibraryDocumentWithPython } from '../src/backend/store.mjs'
+const parserPath = new URL('../src/backend/library_parser.py', import.meta.url).pathname
+async function fixture(t) {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-library-app-'))
+  const service = createLibraryService({ libraryRoot: path.join(directory, 'data'), parserPath })
+  t.after(async () => { service.close(); await service.waitForIdle(); await fs.rm(directory, { recursive: true, force: true }) })
+  return { directory, service, collection: service.listCollections()[0] }
+}
+test('CRUD preserves explicit titles, revisions and isolation between collections; default search is global', async t => {
+  const { service: s, collection: a } = await fixture(t)
+  const b = s.createCollection({ name: 'Second' })
+  const one = await s.createDocument({ collectionId: a.id, title: 'Explicit title', content: '# Different heading\n\n搜索鲸鱼 orchid first' })
+  const two = await s.createDocument({ collectionId: b.id, title: 'Second title', content: '搜索鲸鱼 orchid second' })
+  await s.waitForIdle()
+  assert.equal(s.search({ query: 'orchid' }).length, 2)
+  assert.equal(s.search({ query: '鲸鱼' }).length, 2)
+  assert.deepEqual(s.search({ query: 'orchid', collectionIds: [b.id] }).map(d => d.resourceId), [two.resource.id])
+  assert.equal(s.search({ query: 'orchid', collectionIds: [a.id, b.id] }).length, 2)
+  assert.equal(s.search({ query: 'orchid', collectionIds: [] }).length, 2)
+  assert.throws(() => s.search({ query: 'orchid', collectionIds: ['missing'] }), /不存在/)
+  assert.equal(s.listResources({ collectionIds: [b.id] }).length, 1)
+  const read = await s.readDocument({ resourceId: one.resource.id })
+  assert.equal(read.title, 'Explicit title')
+  assert.equal(read.editable, true)
+  assert.ok(!JSON.stringify(read).includes('Session'))
+  await s.updateDocument({ resourceId: read.id, revision: read.revision, title: 'Updated title', content: 'blueberry 中文新版' })
+  await s.waitForIdle()
+  assert.equal(s.search({ query: 'orchid' }).length, 1)
+  assert.equal(s.search({ query: 'blueberry' })[0].title, 'Updated title')
+  await assert.rejects(s.updateDocument({ resourceId: read.id, revision: read.revision, content: 'overwrite' }), /修改/)
+  const next = await s.readDocument({ resourceId: read.id })
+  const exported = await s.exportResource({ resourceId: read.id, revision: next.revision })
+  assert.equal(await fs.readFile(exported.path, 'utf8'), 'blueberry 中文新版')
+  await s.deleteDocument({ resourceId: read.id, revision: next.revision })
+  assert.equal(s.search({ query: 'blueberry' }).length, 0)
+  await s.deleteCollection({ id: b.id })
+  assert.equal(s.listResources({}).length, 0)
+})
+test('import copies directories, preserves hierarchy and equal-content files, is idempotent, never edits originals', async t => {
+  const { directory, service: s, collection } = await fixture(t)
+  const source = path.join(directory, 'originals'), sub = path.join(source, 'nested')
+  await fs.mkdir(sub, { recursive: true })
+  await fs.writeFile(path.join(source, 'one.md'), 'orchid identical')
+  await fs.writeFile(path.join(sub, 'two.md'), 'orchid identical')
+  await fs.writeFile(path.join(source, 'image.bin'), 'not supported')
+  let result = await s.importFiles({ collectionId: collection.id, paths: [source] })
+  assert.equal(result.written.length, 2); assert.deepEqual(result.failed, [])
+  await s.waitForIdle()
+  const docs = s.listResources({})
+  assert.equal(docs.length, 2)
+  assert.ok(docs.some(d => d.relativePath === 'nested/two.md'))
+  result = await s.importFiles({ collectionId: collection.id, paths: [source] })
+  assert.equal(result.written.every(w => !w.copied), true)
+  await s.waitForIdle()
+  assert.deepEqual(new Set(s.listResources({}).map(d => d.id)), new Set(docs.map(d => d.id)))
+  const d = docs[0]
+  await s.updateDocument({ resourceId: d.id, revision: d.revision, content: 'managed edit' })
+  await s.waitForIdle()
+  assert.equal(await fs.readFile(path.join(source, d.relativePath), 'utf8'), 'orchid identical')
+  await s.deleteDocument({ resourceId: d.id })
+  assert.equal(s.listResources({}).length, 1)
+  assert.equal(await fs.readFile(path.join(source, d.relativePath), 'utf8'), 'orchid identical')
+  assert.equal((await s.importFiles({ collectionId: collection.id, paths: ['relative.md'] })).failed.length, 1)
+  const link = path.join(directory, 'link.md'); await fs.symlink(path.join(source, 'one.md'), link)
+  assert.equal((await s.importFiles({ collectionId: collection.id, paths: [link] })).failed.length, 1)
+})
+test('bundled pypdf extracts actual PDF page text', async t => {
+  const { directory } = await fixture(t)
+  const pythonModules = path.join(directory, 'python')
+  await preparePython(pythonModules)
+  const stream = 'BT /F1 12 Tf 50 700 Td (Orchid PDF evidence) Tj ET'
+  const objects = [
+    '<< /Type /Catalog /Pages 2 0 R >>', '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>', `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,
+  ]
+  let pdf = '%PDF-1.4\n', offsets = [0]
+  objects.forEach((obj, i) => { offsets.push(Buffer.byteLength(pdf)); pdf += `${i + 1} 0 obj\n${obj}\nendobj\n` })
+  const xref = Buffer.byteLength(pdf)
+  pdf += `xref\n0 6\n0000000000 65535 f \n${offsets.slice(1).map(n => `${String(n).padStart(10, '0')} 00000 n \n`).join('')}trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`
+  const filePath = path.join(directory, 'example.pdf'); await fs.writeFile(filePath, pdf)
+  const parsed = await parseLibraryDocumentWithPython({ parserPath, filePath, pythonModulePaths: [pythonModules] })
+  assert.ok(parsed.blocks.some(b => b.text.includes('Orchid PDF evidence')))
+  assert.equal(parsed.blocks[0].page, 1)
+})
+test('title-only edits get a new revision and rebuild title search; deletion cleans exported copies', async t => {
+  const { service: s, collection } = await fixture(t)
+  const first = await s.createDocument({ collectionId: collection.id, title: 'Oldtitle', content: 'unchanged body' })
+  await s.waitForIdle()
+  const changed = await s.updateDocument({ resourceId: first.resource.id, revision: first.resource.revision, title: 'Newtitle', content: 'unchanged body' })
+  assert.notEqual(changed.resource.revision, first.resource.revision)
+  await s.waitForIdle()
+  assert.equal(s.search({ query: 'Newtitle' }).length, 1)
+  assert.equal(s.search({ query: 'Oldtitle' }).length, 1) // original filename remains discoverable
+  const exported = await s.exportResource({ resourceId: first.resource.id })
+  await s.deleteDocument({ resourceId: first.resource.id })
+  await assert.rejects(fs.stat(exported.path), { code: 'ENOENT' })
+})
+test('a parser failure preserves the prior indexed content and its citation revision', async t => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-library-failure-'))
+  const s = createLibraryService({ libraryRoot: directory, parserPath, parseDocument: async file => {
+    const text = await fs.readFile(file, 'utf8')
+    if (text.includes('FAIL')) throw new Error('fixture parse failure')
+    return { parser: 'fixture', blocks: [{ text }] }
+  } })
+  t.after(async () => { s.close(); await s.waitForIdle(); await fs.rm(directory, { recursive: true, force: true }) })
+  const first = await s.createDocument({ collectionId: s.listCollections()[0].id, title: 'Evidence', content: 'orchid original evidence' })
+  await s.waitForIdle()
+  await s.updateDocument({ resourceId: first.resource.id, revision: first.resource.revision, content: 'FAIL' })
+  await s.waitForIdle()
+  assert.equal(s.listResources({})[0].status, 'stale')
+  assert.equal(s.search({ query: 'orchid' })[0].revision, first.resource.revision)
+  await assert.rejects(s.exportResource({ resourceId: first.resource.id, revision: first.resource.revision }), /变化/)
+})
