@@ -1,6 +1,6 @@
 # Moss App SDK
 
-当前使用 Host API `2.3.0`。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用其 SDK workspace，仅维护接入说明和消费端回归测试。
+当前引用 SDK `2.3.0`。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用其 SDK workspace，仅维护接入说明和消费端回归测试。
 
 ## Backend 运行契约
 
@@ -88,3 +88,5 @@ UI 调用已声明的 `mossApp.actions.invoke(instanceId, action, input)`，订�
 ## 2.3 分享接口
 
 新增 `CloudShare`、`shares.create/list/revoke` 与 `cloud-storage:share`。网盘要求 `hostApi: ^2.3.0`，接收页由 Server 的 `/s/:token` 提供；浏览器不依赖 Desktop Host。详见 [分享实施方案](drive-sharing-plan.md) 及 Core 云端存储文档。
+
+Trace App 通过通用 `backend.host.request()` 使用 Host API `^2.5.0` 的 `moss.trace/v1` 协议。构建按 App 声明的最低 Host 版本校验；市场和安装时仍检查实际 Host 版本。参见 [Trace App](../apps/trace/README.md)。

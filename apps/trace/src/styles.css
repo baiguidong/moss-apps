@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@import "./theme.css";
+@custom-variant dark (&:where(.dark, .dark *));
+@theme inline {
+  --color-background: var(--background); --color-foreground: var(--foreground);
+  --color-card: var(--card); --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive); --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border); --color-input: var(--input); --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px); --radius-md: calc(var(--radius) - 2px); --radius-lg: var(--radius);
+}
+* { border-color: var(--border); }
+html, body, #root { height: 100%; margin: 0; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.trace-row-cv { content-visibility: auto; contain-intrinsic-size: auto 34px; }
+.trace-message-cv { content-visibility: auto; contain-intrinsic-size: auto 120px; }
+.trace-list-row-cv { content-visibility: auto; contain-intrinsic-size: auto 56px; }

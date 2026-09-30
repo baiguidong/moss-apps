@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

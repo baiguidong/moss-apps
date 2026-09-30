@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.trace",
+  "summary": "追踪本地模型调用，查看完整上下文与异常诊断。",
+  "description": "查看本地模型请求、响应、工具调用与诊断。启用应用即开始采集。",
+  "categories": [
+    "开发工具"
+  ],
+  "keywords": [
+    "Trace",
+    "模型",
+    "诊断",
+    "调试"
+  ],
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/trace",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}
