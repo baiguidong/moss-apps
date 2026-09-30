@@ -27,9 +27,17 @@ async function cleanup() { if (closed) return; closed = true; await runtime?.shu
   const appId = 'moss.library', info = await runtime.getActivePackage(appId)
   const instance = (await runtime.listInstances(appId))[0]
   const contributions = await runtime.listContributions({ appId, kinds: ['tools'], loadSchemas: true })
-  assert.equal(contributions.tools.length, 15)
+  assert.deepEqual(contributions.tools.map(t => t.id.split('/').at(-1)).sort(), ['delete', 'list', 'read', 'search', 'write'])
   const tool = action => contributions.tools.find(item => item.action === action).id
-  const invoke = (action, input = {}) => runtime.invokeToolContribution(tool(action), input)
+  const invoke = (action, input = {}) => {
+    if (['collections.create', 'collections.delete'].includes(action)) return runtime.invoke(appId, instance.id, action, input)
+    if (action === 'collections.list') return runtime.invokeToolContribution(tool('library.list'), { kind: 'collections', ...input })
+    if (action === 'sources.list') return runtime.invokeToolContribution(tool('library.list'), { kind: 'sources', ...input })
+    if (action === 'documents.list') return runtime.invokeToolContribution(tool('library.list'), { kind: 'resources', ...input })
+    const operation = { 'files.import': 'import', 'documents.create': 'create', 'documents.update': 'update' }[action]
+    return operation ? runtime.invokeToolContribution(tool('library.write'), { operation, ...input }) : runtime.invokeToolContribution(tool(action), input)
+  }
+  await assert.rejects(runtime.invokeToolContribution('moss.library/jobs-list', {}))
   const initial = (await invoke('collections.list')).data[0]
   const c = (await invoke('collections.create', { name: '验证资料' })).data
   const doc = (await invoke('documents.create', { collectionId: c.id, title: '工具写入', content: 'orchid alpha evidence' })).data.resource
@@ -53,6 +61,9 @@ async function cleanup() { if (closed) return; closed = true; await runtime?.shu
   assert.equal(changes.filter(result => result.status === 'rejected').length, 1)
   const current = (await invoke('documents.read', { resourceId: doc.id })).data
   await invoke('documents.delete', { resourceId: doc.id, revision: current.revision })
+  const imported = join(temporary, 'AI-import.md'); await writeFile(imported, 'cinnamon file tool')
+  assert.equal((await invoke('files.import', { collectionId: c.id, paths: [imported] })).data.writtenCount, 1)
+  assert.equal((await invoke('documents.list', { collectionId: c.id })).data.length, 1)
   await invoke('collections.delete', { id: c.id })
   await runtime.setAppEnabled(appId, false)
   assert.equal((await runtime.listContributions({ appId, kinds: ['tools'] })).tools.length, 0)

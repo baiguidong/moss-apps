@@ -6,11 +6,12 @@ import { fileURLToPath } from 'node:url'
 import { buildEmbeddedShell } from './build-embedded-shell.mjs'
 const appRoot = fileURLToPath(new URL('..', import.meta.url)), repo = resolve(appRoot, '../..')
 const core = process.env.MOSS_CORE_ROOT || resolve(repo, '../moss')
-const reportDir = join(repo, 'artifacts/moss.library/verification/0.1.0')
+const version = '0.1.1'
+const reportDir = join(repo, 'artifacts/moss.library/verification', version)
 await mkdir(reportDir, { recursive: true })
 const shell = await buildEmbeddedShell(core, join(reportDir, 'embedded-shell'))
 process.env.PW_CHROMIUM_ATTACH_TO_OTHER = '1'
-const desktop = await electron.launch({ executablePath: process.env.MOSS_TEST_ELECTRON || join(core, 'ui/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'), args: [join(appRoot, 'scripts/desktop-fixture.cjs')], env: { ...process.env, MOSS_CORE_ROOT: core, MOSS_TEST_NODE: process.env.MOSS_TEST_NODE || process.execPath, MOSS_LIBRARY_TEST_SHELL: shell, MOSS_LIBRARY_ARCHIVE: join(repo, 'artifacts/moss.library/0.1.0/moss.library-0.1.0.zip') }, timeout: 60000 })
+const desktop = await electron.launch({ executablePath: process.env.MOSS_TEST_ELECTRON || join(core, 'ui/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'), args: [join(appRoot, 'scripts/desktop-fixture.cjs')], env: { ...process.env, MOSS_CORE_ROOT: core, MOSS_TEST_NODE: process.env.MOSS_TEST_NODE || process.execPath, MOSS_LIBRARY_TEST_SHELL: shell, MOSS_LIBRARY_ARCHIVE: process.env.MOSS_LIBRARY_ARCHIVE || join(repo, `artifacts/moss.library/${version}/moss.library-${version}.zip`) }, timeout: 60000 })
 desktop.process().stderr.on('data', chunk => process.stderr.write(chunk))
 desktop.process().stdout.on('data', chunk => process.stdout.write(chunk))
 const errors = [], checks = []
@@ -23,7 +24,7 @@ try {
   temporary = await desktop.evaluate(() => globalThis.libraryFixture.temporary)
   const shot = async name => writeFile(join(reportDir, name), Buffer.from(await desktop.evaluate(() => globalThis.libraryFixture.screenshot()), 'base64'))
   await expect(page.getByText('开始积累你的知识', { exact: true })).toBeVisible()
-  checks.push('ZIP install, 15 tool contributions, global search, explicit collection filter, schema rejects projectId, resource resolution, persistent restart, concurrent revision protection, disable/enable')
+  checks.push('ZIP install, 5 CRUD tool contributions and no management tools, global search, explicit collection filter, schema rejects projectId, resource resolution, persistent restart, concurrent revision protection, disable/enable')
   await page.getByRole('button', { name: '新建资料集', exact: true }).click()
   let dialog = page.getByRole('dialog', { name: '新建资料集' })
   await dialog.getByRole('textbox', { name: '名称' }).fill('研究笔记')

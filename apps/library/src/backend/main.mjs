@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { createLibraryService } from './store.mjs'
 import { parseLibraryResourceUri } from './resource-uri.mjs'
 import { createActionLane, listResult } from './actions.mjs'
+import { resolveToolAction } from './tools.mjs'
 
 let ready = false
 let service, python
@@ -33,30 +34,34 @@ const methods = {
   'jobs.list': 'listJobs', 'jobs.cancel': 'cancelJob',
 }
 const mutations = new Set(['collections.create', 'collections.update', 'collections.delete', 'documents.create', 'documents.update', 'documents.delete', 'files.import', 'sources.refresh'])
-for (const [action, method] of Object.entries(methods)) {
-  backend.registerAction(action, async (input, context) => {
-    const run = async (signal = context.signal) => {
-      signal.throwIfAborted()
-      const data = await service[method](input, { signal })
-      if (action === 'files.import') {
-        const written = listResult(data.written.slice(0, 100), {}, 128 * 1024).data
-        const failed = listResult(data.failed.slice(0, 100), {}, 128 * 1024).data
-        const jobs = listResult(data.jobs, {}, 128 * 1024).data
-        return { data: { written, failed, jobs, writtenCount: data.written.length, failedCount: data.failed.length, jobsCount: data.jobs.length,
-          truncated: written.length < data.written.length || failed.length < data.failed.length || jobs.length < data.jobs.length } }
-      }
-      if (action === 'sources.list') return listResult(data.map(({ config, ...source }) => source), input)
-      if (Array.isArray(data)) {
-        const result = listResult(data, input)
-        if (action === 'documents.search' || action === 'jobs.list') delete result.nextOffset
-        return result
-      }
-      return { data }
+async function invokeAction(action, input, context) {
+  const method = methods[action]
+  const run = async (signal = context.signal) => {
+    signal.throwIfAborted()
+    const data = await service[method](input, { signal })
+    if (action === 'files.import') {
+      const written = listResult(data.written.slice(0, 100), {}, 128 * 1024).data
+      const failed = listResult(data.failed.slice(0, 100), {}, 128 * 1024).data
+      const jobs = listResult(data.jobs, {}, 128 * 1024).data
+      return { data: { written, failed, jobs, writtenCount: data.written.length, failedCount: data.failed.length, jobsCount: data.jobs.length,
+        truncated: written.length < data.written.length || failed.length < data.failed.length || jobs.length < data.jobs.length } }
     }
-    if (mutations.has(action) || action === 'documents.read') return lane.run(run, context.signal)
-    return run()
-  })
+    if (action === 'sources.list') return listResult(data.map(({ config, ...source }) => source), input)
+    if (Array.isArray(data)) {
+      const result = listResult(data, input)
+      if (action === 'documents.search' || action === 'jobs.list') delete result.nextOffset
+      return result
+    }
+    return { data }
+  }
+  if (mutations.has(action) || action === 'documents.read') return lane.run(run, context.signal)
+  return run()
 }
+for (const action of Object.keys(methods)) backend.registerAction(action, (input, context) => invokeAction(action, input, context))
+for (const name of ['library.list', 'library.write']) backend.registerAction(name, (input, context) => {
+  const action = resolveToolAction(name, input)
+  return invokeAction(action.name, action.input, context)
+})
 backend.registerAction('status.get', () => ({ data: { ...service.getOverview(), pythonAvailable: python.available } }))
 backend.registerAction('local.pick', (input, context) => context.host.request('moss.local-files/v1', 'pick', input, { signal: context.signal, timeoutMs: 300000 }))
 backend.registerAction('documents.open', async (input, context) => {

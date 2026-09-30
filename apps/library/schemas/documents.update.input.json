@@ -8,7 +8,8 @@
     },
     "revision": {
       "type": "string",
-      "maxLength": 100
+      "maxLength": 100,
+      "minLength": 1
     },
     "title": {
       "type": "string",

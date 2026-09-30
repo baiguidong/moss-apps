@@ -143,3 +143,5 @@ SDK 源码只在 Moss Core 的 `packages/app-sdk` 维护。本仓库通过 Git �
 升级 SDK 时，在 Core 提交修改并推送到远端后更新 `vendor/moss-core` 指向的提交并运行 `bun install`，然后执行本仓库的校验、类型检查、测试和构建。提交子模块引用与锁文件即可，不复制或单独修改 SDK 源码。未推送的 Core 提交只能在持有该提交的本地仓库中验证，CI 无法检出。
 
 SDK 会编入 App Backend；构建内容变化时应同步提升相应 App 的版本。未来发布 npm 包后，可以改为包版本依赖，App 的 import 无需改变。
+
+应用市场支持通过 `build-catalog.mjs --mirror-apps moss.library` 在目录同域托管指定 App 的签名 ZIP。构建目录时会验证原始 release 的大小与 SHA-256，只改分发地址，签名包和不可变 GitHub Release 保持原样。发布及手动目录部署使用同一配置；目前为知识库启用，以减少 GitHub 下载链路超时。
