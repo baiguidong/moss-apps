@@ -16,6 +16,7 @@ import {
   sha256Hex,
   sha256Integrity,
   signaturePayload,
+  validateRepositoryAppToolSchemas,
   writeJson,
 } from './lib.mjs'
 
@@ -43,6 +44,7 @@ async function createChecksums(packageRoot) {
 }
 
 async function verifyPackageDirectory(packageRoot, manifest, expectedSignature) {
+  validateRepositoryAppToolSchemas(packageRoot, manifest)
   const declared = readJson(path.join(packageRoot, 'checksums.json'))
   const actual = await createChecksums(packageRoot)
   if (JSON.stringify(declared) !== JSON.stringify(actual)) throw new Error('Generated package checksums are inconsistent')

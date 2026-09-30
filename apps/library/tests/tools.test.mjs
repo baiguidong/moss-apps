@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { compileJsonSchema } from '@moss/app-sdk'
+import { compileJsonSchema, validateAppToolInputSchema } from '@moss/app-sdk'
 import { resolveToolAction } from '../src/backend/tools.mjs'
 const root = new URL('../', import.meta.url)
 const manifest = JSON.parse(readFileSync(new URL('app.moss.json', root)))
@@ -10,6 +10,10 @@ test('AI exposes exactly five CRUD tools with appropriate read/write/destructive
   assert.deepEqual(manifest.contributes.tools.map(t => [t.id, t.effect]), [['list','read'],['search','read'],['read','read'],['write','write'],['delete','destructive']])
   assert.ok(manifest.backend.actions.some(a => a.name === 'jobs.cancel'))
   assert.equal(manifest.contributes.tools.some(t => t.action === 'jobs.cancel'), false)
+  for (const tool of manifest.contributes.tools) {
+    const declared = JSON.parse(readFileSync(new URL(tool.inputSchema, root)))
+    assert.equal(validateAppToolInputSchema(declared, `tool ${tool.id}`), declared)
+  }
 })
 test('list routing preserves explicit filters and standard pagination', () => {
   assert.deepEqual(resolveToolAction('library.list', {}), { name: 'collections.list', input: {} })
@@ -18,8 +22,17 @@ test('list routing preserves explicit filters and standard pagination', () => {
   const valid = schema('library.list.input')
   assert.equal(valid({}), true)
   assert.equal(valid({ kind: 'resources', collectionId: 'c' }), true)
-  assert.equal(valid({ collectionId: 'c' }), false)
+  assert.deepEqual(resolveToolAction('library.list', { kind: 'resources' }), { name: 'documents.list', input: {} })
+  assert.deepEqual(resolveToolAction('library.list', { kind: 'sources' }), { name: 'sources.list', input: {} })
+  assert.equal(valid({ collectionId: 'c' }), true)
+  for (const input of [{ collectionId: 'c' }, { kind: 'collections', collectionId: 'c' }]) {
+    assert.equal(valid(input), true)
+    assert.throws(() => resolveToolAction('library.list', input), /列出资料集时不得传入 collectionId/)
+  }
   assert.equal(valid({ kind: 'resources', projectId: 'p' }), false)
+  for (const input of [{ kind: 'invalid' }, { limit: 101 }, { offset: -1 }, { kind: 'resources', collectionId: '' }]) {
+    assert.equal(valid(input), false)
+  }
 })
 test('write accepts explicit file paths only; delete requires a nonempty revision', () => {
   const valid = schema('library.write.input')

@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict'
 import { _electron as electron, expect } from '@playwright/test'
-import { mkdir, rm, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { resolve, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildEmbeddedShell } from './build-embedded-shell.mjs'
 const appRoot = fileURLToPath(new URL('..', import.meta.url)), repo = resolve(appRoot, '../..')
 const core = process.env.MOSS_CORE_ROOT || resolve(repo, '../moss')
-const version = '0.1.2'
+const { version } = JSON.parse(await readFile(join(appRoot, 'app.moss.json'), 'utf8'))
 const reportDir = join(repo, 'artifacts/moss.library/verification', version)
 await mkdir(reportDir, { recursive: true })
 const shell = await buildEmbeddedShell(core, join(reportDir, 'embedded-shell'))

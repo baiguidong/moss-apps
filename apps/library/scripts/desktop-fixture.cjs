@@ -38,6 +38,10 @@ async function cleanup() { if (closed) return; closed = true; await runtime?.shu
   }
   await assert.rejects(runtime.invokeToolContribution('moss.library/jobs-list', {}))
   const initial = (await invoke('collections.list')).data[0]
+  assert.ok((await runtime.invokeToolContribution(tool('library.list'), {})).data.length > 0)
+  for (const input of [{ collectionId: initial.id }, { kind: 'collections', collectionId: initial.id }]) {
+    await assert.rejects(runtime.invokeToolContribution(tool('library.list'), input), /列出资料集时不得传入 collectionId/)
+  }
   const c = (await invoke('collections.create', { name: '验证资料' })).data
   const prepared = join(temporary, '工具写入.md')
   await writeFile(prepared, 'orchid alpha evidence')

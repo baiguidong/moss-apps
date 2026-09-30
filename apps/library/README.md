@@ -45,7 +45,7 @@ Action 与 Tool 的完整输入契约在 `schemas/`，公共 Action 返回 `{ da
 
 AI 仅注册 5 个工具：
 
-- `list`：列出资料集、来源或文档；`kind` 为 `collections`（默认）、`sources` 或 `resources`。
+- `list`：列出资料集、来源或文档；`kind` 为 `collections`（默认）、`sources` 或 `resources`。`collectionId` 仅用于筛选来源或文档；列出资料集时不得传入，由 Backend 在执行前校验。参数 schema 描述字段类型、范围和枚举，直接作为模型工具输入定义。
 - `search`：全文搜索，默认全库；可指定 `collectionIds`。
 - `read`：根据 `resourceId` 读取正文和版本。
 - `write`：仅传 `collectionId` 和 `paths`（1–500 个普通文件绝对路径）。Agent 先整理、生成或修改文件，再逐文件导入；可一次列出多个文件。不接受目录、符号链接、原始正文或 create/update 操作。相同资料集内重复导入同一路径会更新原文档副本，内容未变则跳过复制。
