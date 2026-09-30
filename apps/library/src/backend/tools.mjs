@@ -8,10 +8,7 @@ export function resolveToolAction(name, input = {}) {
     return { name: action, input: { ...page, ...(collectionId ? kind === 'resources' ? { collectionIds: [collectionId] } : { collectionId } : {}) } }
   }
   if (name === 'library.write') {
-    const { operation, ...payload } = input
-    const action = { import: 'files.import', create: 'documents.create', update: 'documents.update' }[operation]
-    if (!action) throw new Error('请选择 import、create 或 update 写入操作。')
-    return { name: action, input: payload }
+    return { name: 'files.import', input, options: { filesOnly: true } }
   }
   throw new Error('不支持的知识库工具。')
 }

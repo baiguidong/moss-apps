@@ -5,6 +5,7 @@ import path from 'node:path'
 import os from 'node:os'
 import { preparePython } from '../scripts/prepare-python.mjs'
 import { createLibraryService, parseLibraryDocumentWithPython } from '../src/backend/store.mjs'
+import { resolveToolAction } from '../src/backend/tools.mjs'
 const parserPath = new URL('../src/backend/library_parser.py', import.meta.url).pathname
 async function fixture(t) {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-library-app-'))
@@ -69,6 +70,60 @@ test('import copies directories, preserves hierarchy and equal-content files, is
   assert.equal((await s.importFiles({ collectionId: collection.id, paths: ['relative.md'] })).failed.length, 1)
   const link = path.join(directory, 'link.md'); await fs.symlink(path.join(source, 'one.md'), link)
   assert.equal((await s.importFiles({ collectionId: collection.id, paths: [link] })).failed.length, 1)
+})
+test('AI file writes reject directories without side effects and import only explicitly selected files', async t => {
+  const { directory, service: s, collection } = await fixture(t)
+  const source = path.join(directory, 'originals')
+  await fs.mkdir(source)
+  const first = path.join(source, 'one.md'), second = path.join(source, 'two.md')
+  await fs.writeFile(first, 'orchid first')
+  await fs.writeFile(second, 'orchid second')
+  const write = paths => {
+    const action = resolveToolAction('library.write', { collectionId: collection.id, paths })
+    return s.importFiles(action.input, action.options)
+  }
+  const rejected = await write([source])
+  assert.deepEqual(rejected.written, [])
+  assert.deepEqual(rejected.jobs, [])
+  assert.match(rejected.failed[0].error, /只接受普通文件/)
+  assert.equal(s.listSources({}).length, 0)
+  assert.equal(s.listResources({}).length, 0)
+  const result = await write([source, first, first])
+  await s.waitForIdle()
+  assert.equal(result.failed.length, 1)
+  assert.equal(result.written.length, 1)
+  assert.equal(s.listResources({}).length, 1)
+  assert.equal((await s.readDocument({ resourceId: s.listResources({})[0].id })).content, 'orchid first')
+  const link = path.join(directory, 'link.md')
+  await fs.symlink(first, link)
+  assert.equal((await write([link])).failed.length, 1)
+  assert.equal((await write(['relative.md'])).failed.length, 1)
+})
+test('AI reimport updates the same resource, skips unchanged files and rejects stale deletion', async t => {
+  const { directory, service: s, collection } = await fixture(t)
+  const file = path.join(directory, 'prepared.md')
+  const action = resolveToolAction('library.write', { collectionId: collection.id, paths: [file] })
+  const write = () => s.importFiles(action.input, action.options)
+  await fs.writeFile(file, 'orchid original')
+  await write(); await s.waitForIdle()
+  const original = s.listResources({})[0]
+  assert.equal((await write()).written[0].copied, false)
+  await s.waitForIdle()
+  assert.equal(s.listResources({})[0].revision, original.revision)
+  await fs.writeFile(file, 'blueberry replacement')
+  assert.equal((await write()).written[0].copied, true)
+  await s.waitForIdle()
+  const current = await s.readDocument({ resourceId: original.id })
+  assert.notEqual(current.revision, original.revision)
+  assert.equal(current.content, 'blueberry replacement')
+  assert.equal(s.listResources({}).length, 1)
+  assert.equal(s.search({ query: 'orchid' }).length, 0)
+  assert.equal(s.search({ query: 'blueberry' })[0].resourceId, original.id)
+  await assert.rejects(s.deleteDocument({ resourceId: original.id, revision: original.revision }), /版本已变化/)
+  assert.equal(s.listResources({}).length, 1)
+  await s.deleteDocument({ resourceId: original.id, revision: current.revision })
+  assert.equal(s.listResources({}).length, 0)
+  assert.equal(await fs.readFile(file, 'utf8'), 'blueberry replacement')
 })
 test('bundled pypdf extracts actual PDF page text', async t => {
   const { directory } = await fixture(t)

@@ -576,6 +576,7 @@ async function listLocalFiles(rootPath, options = {}) {
       unsupportedReason: '',
     }];
   }
+  if (options.filesOnly) throw new Error('写入工具只接受普通文件，请先展开目录并选择要导入的文件。');
   if (!rootStat.isDirectory()) throw new Error('Library source is not a file or directory.');
 
   const files = [];
@@ -1000,11 +1001,11 @@ export function createLibraryService(options) {
     return refreshSource({ sourceId: source.id, coalesced: true });
   }
 
-  async function importFiles(input = {}, { signal } = {}) {
+  async function importFiles(input = {}, { signal, filesOnly = false } = {}) {
     ensureOpen();
     const collectionId = text(input.collectionId);
     requireCollection(collectionId);
-    if (!Array.isArray(input.paths) || !input.paths.length || input.paths.length > 500) throw new Error('请选择 1 至 500 个文件或目录。');
+    if (!Array.isArray(input.paths) || !input.paths.length || input.paths.length > 500) throw new Error(filesOnly ? '请选择 1 至 500 个文件。' : '请选择 1 至 500 个文件或目录。');
     const written = [], failed = [], jobs = [];
     for (const supplied of new Set(input.paths)) {
       signal?.throwIfAborted();
@@ -1015,7 +1016,7 @@ export function createLibraryService(options) {
         if ((await fsp.lstat(sourcePath)).isSymbolicLink()) throw new Error('不能导入符号链接。');
         if (isPathInside(libraryRoot, canonical)) throw new Error('请选择知识库之外的原始文件。');
         const stat = await fsp.stat(canonical);
-        const files = await listLocalFiles(canonical, { maxDepth: 100, maxFiles: 10_000, recursive: true, excludedRoots: [libraryRoot], signal });
+        const files = await listLocalFiles(canonical, { maxDepth: 100, maxFiles: 10_000, recursive: true, excludedRoots: [libraryRoot], signal, filesOnly });
         if (!files.length) throw new Error('没有找到支持的文档，或文件超过 50 MB。');
         const sourceKey = createHash('sha256').update(`${collectionId}:${canonical}`).digest('hex').slice(0, 32);
         const managedRoot = path.join(libraryRoot, 'managed', sourceKey);
