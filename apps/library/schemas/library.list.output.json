@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "truncated": {
+      "type": "boolean"
+    },
+    "nextOffset": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "data"
+  ],
+  "additionalProperties": false
+}

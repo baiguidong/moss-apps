@@ -4,12 +4,14 @@ import path from 'node:path'
 import semver from 'semver'
 import { artifactsRoot, listApps, optionValue, readJson, repoRoot, writeJson } from './lib.mjs'
 import { fetchGitHubReleaseRecords } from './github-releases.mjs'
+import { mirrorCatalogArtifact } from './catalog-artifacts.mjs'
 
 const argv = process.argv.slice(2)
 const siteRoot = path.resolve(optionValue(argv, '--output') || path.join(repoRoot, 'site'))
 const catalogBaseUrl = String(process.env.MOSS_APP_MARKET_BASE_URL || 'https://baiguidong.github.io/moss-apps').replace(/\/+$/, '')
 const githubRepository = optionValue(argv, '--github-repository') || ''
 const explicitRelease = optionValue(argv, '--release')
+const mirrorApps = new Set(String(optionValue(argv, '--mirror-apps') || '').split(',').filter(Boolean))
 
 async function findFiles(root, suffix) {
   if (!fs.existsSync(root)) return []
@@ -60,7 +62,12 @@ await fsp.mkdir(path.join(siteRoot, 'v1', 'assets'), { recursive: true })
 const sourceApps = new Map(listApps().map((app) => [app.manifest.id, app]))
 const summaries = []
 for (const [appId, entry] of [...byApp.entries()].sort(([left], [right]) => left.localeCompare(right))) {
-  const versions = [...entry.versions.values()].sort((left, right) => semver.rcompare(left.version, right.version))
+  let versions = [...entry.versions.values()].sort((left, right) => semver.rcompare(left.version, right.version))
+  if (mirrorApps.has(appId)) {
+    const mirrored = []
+    for (const version of versions) mirrored.push(await mirrorCatalogArtifact(appId, version, { siteRoot, artifactsRoot, catalogBaseUrl }))
+    versions = mirrored
+  }
   const latest = versions[0]
   const sourceApp = sourceApps.get(appId)
   let iconUrl = ''

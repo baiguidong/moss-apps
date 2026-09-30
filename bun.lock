@@ -83,7 +83,7 @@
     },
     "apps/library": {
       "name": "@moss/library-app",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "lucide-react": "0.564.0",

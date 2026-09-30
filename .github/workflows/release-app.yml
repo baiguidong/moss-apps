@@ -72,7 +72,7 @@ jobs:
       - name: Build marketplace catalog
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: node scripts/build-catalog.mjs --github-repository "$GITHUB_REPOSITORY" --release "artifacts/${{ steps.release.outputs.app_id }}/${{ steps.release.outputs.version }}/${{ steps.release.outputs.app_id }}-${{ steps.release.outputs.version }}.release.json"
+        run: node scripts/build-catalog.mjs --github-repository "$GITHUB_REPOSITORY" --mirror-apps moss.library --release "artifacts/${{ steps.release.outputs.app_id }}/${{ steps.release.outputs.version }}/${{ steps.release.outputs.app_id }}-${{ steps.release.outputs.version }}.release.json"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -1,0 +1,147 @@
+{
+  "type": "object",
+  "properties": {
+    "operation": {
+      "type": "string",
+      "enum": [
+        "import",
+        "create",
+        "update"
+      ],
+      "description": "import 复制本地文件或目录；create 新建文档；update 更新已有文档。"
+    },
+    "collectionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "paths": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      },
+      "description": "本机文件或目录的绝对路径，不支持相对路径。"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 180
+    },
+    "content": {
+      "type": "string",
+      "maxLength": 524288
+    },
+    "resourceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "revision": {
+      "type": "string",
+      "maxLength": 100,
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "operation"
+  ],
+  "oneOf": [
+    {
+      "properties": {
+        "operation": {
+          "const": "import"
+        }
+      },
+      "required": [
+        "collectionId",
+        "paths"
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "title"
+            ]
+          },
+          {
+            "required": [
+              "content"
+            ]
+          },
+          {
+            "required": [
+              "resourceId"
+            ]
+          },
+          {
+            "required": [
+              "revision"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "create"
+        }
+      },
+      "required": [
+        "collectionId",
+        "title",
+        "content"
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "paths"
+            ]
+          },
+          {
+            "required": [
+              "resourceId"
+            ]
+          },
+          {
+            "required": [
+              "revision"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "update"
+        }
+      },
+      "required": [
+        "resourceId",
+        "revision",
+        "content"
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "collectionId"
+            ]
+          },
+          {
+            "required": [
+              "paths"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
