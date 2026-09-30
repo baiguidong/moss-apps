@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.devtools",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "displayName": "开发工具",
   "description": "时间戳、Base64、AES 与 JSON，常用转换在本地完成。",
   "icon": "assets/icon.svg",
@@ -59,44 +59,6 @@
         "route": "#/timestamp",
         "icon": "braces",
         "order": 220
-      }
-    ],
-    "tools": [
-      {
-        "id": "timestamp.convert",
-        "title": "时间戳转换",
-        "description": "在秒/毫秒 Unix 时间戳与指定时区日期之间转换；保留毫秒。日期输入格式 YYYY-MM-DD HH:mm:ss.SSS。",
-        "action": "timestamp.convert",
-        "inputSchema": "schemas/timestamp.convert.input.json",
-        "outputSchema": "schemas/timestamp.convert.output.json",
-        "effect": "read"
-      },
-      {
-        "id": "base64.convert",
-        "title": "Base64 编解码",
-        "description": "UTF-8 文本与标准或 URL-safe Base64 之间转换，严格校验编码。",
-        "action": "base64.convert",
-        "inputSchema": "schemas/base64.convert.input.json",
-        "outputSchema": "schemas/base64.convert.output.json",
-        "effect": "read"
-      },
-      {
-        "id": "json.process",
-        "title": "JSON 格式化与校验",
-        "description": "格式化、压缩或校验标准 JSON，保留大整数、数字原文与键顺序。",
-        "action": "json.process",
-        "inputSchema": "schemas/json.process.input.json",
-        "outputSchema": "schemas/json.process.output.json",
-        "effect": "read"
-      },
-      {
-        "id": "aes.process",
-        "title": "AES 加解密",
-        "description": "使用原始 16/24/32 字节密钥进行 AES-GCM 或 AES-CBC 加解密。加密时空 IV 自动生成；GCM 密文尾部包含 16 字节认证标签，CBC 使用 PKCS#7 填充。",
-        "action": "aes.process",
-        "inputSchema": "schemas/aes.process.input.json",
-        "outputSchema": "schemas/aes.process.output.json",
-        "effect": "read"
       }
     ]
   }

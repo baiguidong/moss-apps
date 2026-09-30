@@ -9,10 +9,15 @@ import { prepareRequest, sendRequest } from '../src/core/request'
 import { emptyRequest, METHODS, RESPONSE_LIMIT } from '../src/contracts'
 import { formatJson } from '../src/core/json'
 import { readTemplates, templateRequest } from '../src/lib/templates'
+import manifest from '../app.moss.json'
 let server: Awaited<ReturnType<typeof createTestServer>>, other: typeof server
 beforeAll(async () => { server = await createTestServer(); other = await createTestServer() })
 afterAll(async () => { await server.close(); await other.close() })
 const pair = (name: string, value: string, enabled = true) => ({ name, value, enabled })
+test('the App exposes its UI action without registering an Agent tool', () => {
+  assert.deepEqual((manifest.contributes as { tools?: unknown[] }).tools || [], [])
+  assert.deepEqual(manifest.backend.actions.map((action: { name: string }) => action.name), ['request.send'])
+})
 test('methods, duplicate query parameters, Unicode, enabled headers and error status bodies', async () => {
   for (const method of METHODS) {
     const result = await sendRequest({ url: `${server.url}/status?first=1`, method, query: [pair('q', '你好 & +'), pair('q', 'two'), pair('skip', 'no', false)], headers: [pair('X-Example', 'yes'), pair('X-Disabled', 'no', false)] })

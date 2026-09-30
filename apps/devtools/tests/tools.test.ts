@@ -101,11 +101,12 @@ describe('AES native Crypto', () => {
     await expect(aes({ ...aesInput, operation: 'decrypt', input: result.text.slice(0, -2) + (result.text.endsWith('ff') ? '00' : 'ff') })).rejects.toThrow('解密失败')
   })
 })
-test('published contracts validate results, reject extra fields and expose only declared tools', async () => {
+test('published contracts keep UI actions without registering Agent tools', async () => {
   const manifest = validateAppManifest(JSON.parse(readFileSync(new URL('../app.moss.json', import.meta.url), 'utf8')))
   const samples = { 'timestamp.convert': time, 'base64.convert': { operation: 'encode', input: 'hello', urlSafe: false }, 'json.process': { operation: 'format', input: '{"x":1}', indent: '2' }, 'aes.process': aesInput }
   expect(manifest.permissions).toEqual([])
-  expect(manifest.contributes!.tools).toHaveLength(4)
+  expect(manifest.contributes?.tools || []).toEqual([])
+  expect(manifest.backend!.actions).toHaveLength(4)
   for (const action of manifest.backend!.actions) {
     const inputSchema = JSON.parse(readFileSync(new URL('../' + action.inputSchema, import.meta.url), 'utf8'))
     const outputSchema = JSON.parse(readFileSync(new URL('../' + action.outputSchema, import.meta.url), 'utf8'))

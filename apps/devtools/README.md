@@ -13,7 +13,7 @@ Moss 的本地开发工具 App，提供时间戳、Base64、AES 与 JSON 四个�
 
 ## Moss 接入
 
-需要 Host API `^2.2.0`。一个按需启动的 Node Backend 为 UI 和四个 `contributes.tools` 共用实现：`timestamp.convert`、`base64.convert`、`aes.process`、`json.process`。操作只返回转换结果，不写文件，不申请平台权限。AI 调用会遵循 Moss 的会话与工具记录规则；App 自身不记录输入，因此不要把页面内的本地处理等同于 AI 会话内容不出设备。
+需要 Host API `^2.2.0`。按需启动的 Node Backend 提供四个页面操作：`timestamp.convert`、`base64.convert`、`aes.process`、`json.process`。这些操作仅由 App 界面调用，不向 Moss AI 助手注册工具。操作只返回转换结果，不写文件，不申请平台权限，App 自身不记录输入。
 
 Moss 中始终调用 Backend，连接失败会显示错误。普通浏览器中使用相同核心实现本地运行，不使用伪造结果；只有完整桌面验证才能确认宿主调用链。纯 JavaScript 包无原生依赖，市场声明 macOS、Windows、Linux 的 x64/arm64；桌面集成实测平台需见验证记录。
 
@@ -34,6 +34,6 @@ MOSS_CORE_ROOT=/path/to/moss bun run --cwd apps/devtools test:desktop
 
 浏览器测试使用本机 Google Chrome，CI 使用 Playwright Chromium。桌面测试需要完整 Core checkout 及其 Electron/UI 依赖，安装 ZIP 到临时目录，使用真实 Core EmbeddedAppView、preload 和 App Runtime；不操作用户的 Moss 配置或已有 App。
 
-ZIP 输出到 `artifacts/moss.devtools/0.1.0/`。浏览器截图和桌面验证报告位于 `artifacts/moss.devtools/`。推送 `moss.devtools-v0.1.0` 标签后，现有 Release App CI 校验、测试、构建、签名并更新应用市场。
+ZIP 输出到 `artifacts/moss.devtools/0.1.1/`。浏览器截图和桌面验证报告位于 `artifacts/moss.devtools/`。推送 `moss.devtools-v0.1.1` 标签后，现有 Release App CI 校验、测试、构建、签名并更新应用市场。
 
 开源来源见 [说明](assets/licenses/README.md)，安装包包含第三方许可证。完整检查范围见仓库中的 [验证记录](../../docs/devtools-app-verification.md)。

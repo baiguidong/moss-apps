@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import assert from 'node:assert/strict'
 import { fork } from 'node:child_process'
 import { mkdtemp, copyFile, rm, readdir } from 'node:fs/promises'
@@ -5,11 +6,12 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createEnvelope } from '@moss/app-sdk'
+const appVersion = JSON.parse(readFileSync(new URL('../app.moss.json', import.meta.url), 'utf8')).version
 const directory = await mkdtemp(join(tmpdir(), 'moss-devtools-bundle-'))
 const entry = join(directory, 'main.mjs')
 await copyFile(fileURLToPath(new URL('../dist/backend/main.mjs', import.meta.url)), entry)
 const identity = { generation: 1, launchToken: 'isolated-bundle-verification' }
-const child = fork(entry, [], { cwd: directory, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], env: { PATH: process.env.PATH, MOSS_APP_ID: 'moss.devtools', MOSS_APP_VERSION: '0.1.0', MOSS_APP_INSTANCE_ID: 'default', MOSS_APP_GENERATION: '1', MOSS_APP_LAUNCH_TOKEN: identity.launchToken } })
+const child = fork(entry, [], { cwd: directory, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], env: { PATH: process.env.PATH, MOSS_APP_ID: 'moss.devtools', MOSS_APP_VERSION: appVersion, MOSS_APP_INSTANCE_ID: 'default', MOSS_APP_GENERATION: '1', MOSS_APP_LAUNCH_TOKEN: identity.launchToken } })
 const logs = []
 child.stdout.on('data', data => logs.push(data.toString())); child.stderr.on('data', data => logs.push(data.toString()))
 function receive(type, id) {
@@ -31,7 +33,7 @@ async function invoke(name, input, failure = false) {
 try {
   await receive('service.hello')
   const ready = receive('service.ready')
-  child.send(createEnvelope('service.init', { ...identity, appId: 'moss.devtools', version: '0.1.0', instanceId: 'default', config: {}, secrets: {}, dataDir: directory, runtimeDir: directory, permissions: [], grants: [], protocols: [] }))
+  child.send(createEnvelope('service.init', { ...identity, appId: 'moss.devtools', version: appVersion, instanceId: 'default', config: {}, secrets: {}, dataDir: directory, runtimeDir: directory, permissions: [], grants: [], protocols: [] }))
   await ready
   assert.equal((await invoke('timestamp.convert', { direction: 'timestamp', input: '1704067200123', unit: 'auto', timezone: 'UTC' })).utc, '2024-01-01T00:00:00.123Z')
   assert.equal((await invoke('base64.convert', { operation: 'encode', input: '你好 👋', urlSafe: false })).text, Buffer.from('你好 👋').toString('base64'))

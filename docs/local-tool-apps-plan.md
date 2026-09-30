@@ -44,7 +44,7 @@ CryptoJS 的 README 已明确停止维护。新的 AES 模块优先使用原生 
 - 每个 App 有一个 Desktop 本地 Node Backend，可使用 `on-demand` 或 `persistent` 生命周期。
 - UI 通过 `mossApp.actions.invoke()` 调用 Backend，操作通过 `backend.actions` 声明输入/输出 Schema。
 - Backend 获得当前 App 的 `dataDir` / `runtimeDir`；文件选择等公开能力使用 `moss.platform/v1`。
-- `contributes.tools` 可以把同一套 Backend action 提供给 Moss AI。已检查 Core 中的贡献注册与调用链路；当前是 Desktop 能力，`remote-direct` 会话不支持这条调用路径。
+- `contributes.tools` 只用于明确需要 AI 调用的能力，安装和管理时必须向用户展示。开发工具与 HTTP 调试 App 仅提供页面操作，不注册 AI 工具。
 - 已有 [OpenIM 构建脚本](../apps/openim/scripts/build.mjs) 可参考分平台原生运行文件的裁剪和打包。
 
 接入关系：
@@ -52,8 +52,6 @@ CryptoJS 的 README 已明确停止维护。新的 AES 模块优先使用原生 
 ```mermaid
 flowchart LR
     UI[各 App 的本地界面] --> Actions[已声明的 Backend actions]
-    AI[Moss Desktop AI] --> Tools[contributes.tools]
-    Tools --> Actions
     Actions --> Engine[开源处理模块或本地引擎]
     Actions --> Platform[Moss 文件选择与导出能力]
     Engine --> Result[结果文本或 App 私有文件]
@@ -61,12 +59,12 @@ flowchart LR
 
 开发工具和 HTTP 的短任务可使用 `on-demand`。图片批处理和音视频任务队列初期使用 `persistent`，任务操作返回 ID，页面通过查询与事件获取进度。当前按需 Backend 根据待处理调用判断空闲；返回任务 ID 后继续转码会有被空闲回收的风险，不能直接套用短任务生命周期。
 
-AI 与界面复用相同实现，例如：
+各 App 使用 Backend action 实现界面操作。开发工具与 HTTP 调试不注册 AI 工具；其他 App 只有明确需要 AI 调用时才声明：
 
 | 操作 | 建议 action | AI 工具效果 |
 | --- | --- | --- |
-| 格式化 JSON / 转换时间戳 | `json.format` / `timestamp.convert` | 纯文本转换可声明 `read` |
-| 执行 HTTP 请求 | `request.send` | 初期统一声明 `write`，不根据方法名推断没有副作用 |
+| 格式化 JSON / 转换时间戳 | `json.format` / `timestamp.convert` | 不注册 AI 工具 |
+| 执行 HTTP 请求 | `request.send` | 不注册 AI 工具 |
 | 图片转换 | `image.convert` | 创建产物，声明 `write` |
 | 创建转码任务 | `media.start` | 创建产物，声明 `write` |
 | 查看任务进度 | `jobs.get` / `jobs.list` | 声明 `read` |
@@ -104,7 +102,7 @@ AI 与界面复用相同实现，例如：
 
 ## 实施顺序与验收
 
-1. **开发工具 App**：先实现时间戳、Base64、JSON、AES，完成本地 UI、共享 Backend action 和 AI 工具注册；验证 Unicode、无效输入、大整数格式化、时区/毫秒，以及标准 AES 测试向量。
+1. **开发工具 App**：先实现时间戳、Base64、JSON、AES，完成本地 UI 和 Backend action，不注册 AI 工具；验证 Unicode、无效输入、大整数格式化、时区/毫秒，以及标准 AES 测试向量。
 2. **HTTP 调试 App**：验证本地测试服务的各类方法、请求体、鉴权、重定向、超时/取消和大响应。请求在 Node 执行，普通 HTTP 调试无需依赖浏览器 CORS 代理。响应正文按容量限制或分页读取，凭据不进入请求历史明文。
 3. **公共文件能力 + 图片工具 App**：补齐保存路径，验证透明度、EXIF 方向、动画输入的处理策略、格式支持、批量部分失败与输出质量；HEIC/RAW 等按选定引擎构建能力另行加入。
 4. **音视频工具 App**：完成 FFmpeg 跨平台运行包、长任务与大文件路径，验证视频/音轨转换、超过 100 MiB 的文件、取消、磁盘不足、宿主退出、产物可播放性。可选格式和编码器从实际二进制能力生成，不把容器后缀等同于编码器可用。
