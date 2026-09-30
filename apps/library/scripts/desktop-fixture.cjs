@@ -30,17 +30,30 @@ async function cleanup() { if (closed) return; closed = true; await runtime?.shu
   assert.deepEqual(contributions.tools.map(t => t.id.split('/').at(-1)).sort(), ['delete', 'list', 'read', 'search', 'write'])
   const tool = action => contributions.tools.find(item => item.action === action).id
   const invoke = (action, input = {}) => {
-    if (['collections.create', 'collections.delete'].includes(action)) return runtime.invoke(appId, instance.id, action, input)
+    if (['collections.create', 'collections.delete', 'documents.create', 'documents.update'].includes(action)) return runtime.invoke(appId, instance.id, action, input)
     if (action === 'collections.list') return runtime.invokeToolContribution(tool('library.list'), { kind: 'collections', ...input })
     if (action === 'sources.list') return runtime.invokeToolContribution(tool('library.list'), { kind: 'sources', ...input })
     if (action === 'documents.list') return runtime.invokeToolContribution(tool('library.list'), { kind: 'resources', ...input })
-    const operation = { 'files.import': 'import', 'documents.create': 'create', 'documents.update': 'update' }[action]
-    return operation ? runtime.invokeToolContribution(tool('library.write'), { operation, ...input }) : runtime.invokeToolContribution(tool(action), input)
+    return runtime.invokeToolContribution(tool(action === 'files.import' ? 'library.write' : action), input)
   }
   await assert.rejects(runtime.invokeToolContribution('moss.library/jobs-list', {}))
   const initial = (await invoke('collections.list')).data[0]
   const c = (await invoke('collections.create', { name: '验证资料' })).data
-  const doc = (await invoke('documents.create', { collectionId: c.id, title: '工具写入', content: 'orchid alpha evidence' })).data.resource
+  const prepared = join(temporary, '工具写入.md')
+  await writeFile(prepared, 'orchid alpha evidence')
+  assert.equal((await invoke('files.import', { collectionId: c.id, paths: [prepared] })).data.writtenCount, 1)
+  const doc = (await invoke('documents.list', { collectionId: c.id })).data[0]
+  assert.equal(contributions.tools.find(t => t.id === 'moss.library/delete').effect, 'destructive')
+  for (const input of [
+    { operation: 'create', collectionId: c.id, title: 'raw', content: 'raw content' },
+    { operation: 'update', resourceId: doc.id, revision: doc.revision, content: 'raw content' },
+    { collectionId: c.id, paths: [temporary], filesOnly: false },
+  ]) await assert.rejects(runtime.invokeToolContribution(tool('library.write'), input))
+  const directoryWrite = (await invoke('files.import', { collectionId: c.id, paths: [temporary] })).data
+  assert.equal(directoryWrite.writtenCount, 0)
+  assert.equal(directoryWrite.failedCount, 1)
+  assert.match(directoryWrite.failed[0].error, /只接受普通文件/)
+  assert.equal((await invoke('documents.list', { collectionId: c.id })).data.length, 1)
   for (let i = 0; i < 100; i++) {
     if ((await invoke('documents.search', { query: 'orchid' })).data.length) break
     await new Promise(resolve => setTimeout(resolve, 50))
@@ -53,14 +66,23 @@ async function cleanup() { if (closed) return; closed = true; await runtime?.shu
   await assert.rejects(invoke('documents.search', { query: 'orchid', projectId: 'unwanted' }))
   await runtime.restartInstance(appId, instance.id)
   assert.equal((await invoke('documents.read', { resourceId: doc.id })).data.title, '工具写入')
+  assert.equal((await invoke('files.import', { collectionId: c.id, paths: [prepared] })).data.written[0].copied, false)
+  await writeFile(prepared, 'blueberry prepared update')
+  assert.equal((await invoke('files.import', { collectionId: c.id, paths: [prepared] })).data.written[0].copied, true)
+  const reimported = (await invoke('documents.read', { resourceId: doc.id })).data
+  assert.equal(reimported.content, 'blueberry prepared update')
+  assert.notEqual(reimported.revision, doc.revision)
+  await assert.rejects(invoke('documents.delete', { resourceId: doc.id, revision: doc.revision }), /版本已变化/)
+  for (const revision of [undefined, '']) await assert.rejects(invoke('documents.delete', { resourceId: doc.id, revision }))
   const changes = await Promise.allSettled([
-    invoke('documents.update', { resourceId: doc.id, revision: doc.revision, content: 'first update' }),
-    invoke('documents.update', { resourceId: doc.id, revision: doc.revision, content: 'concurrent update' }),
+    invoke('documents.update', { resourceId: doc.id, revision: reimported.revision, content: 'first update' }),
+    invoke('documents.update', { resourceId: doc.id, revision: reimported.revision, content: 'concurrent update' }),
   ])
   assert.equal(changes.filter(result => result.status === 'fulfilled').length, 1)
   assert.equal(changes.filter(result => result.status === 'rejected').length, 1)
   const current = (await invoke('documents.read', { resourceId: doc.id })).data
   await invoke('documents.delete', { resourceId: doc.id, revision: current.revision })
+  assert.equal(await readFile(prepared, 'utf8'), 'blueberry prepared update')
   const imported = join(temporary, 'AI-import.md'); await writeFile(imported, 'cinnamon file tool')
   assert.equal((await invoke('files.import', { collectionId: c.id, paths: [imported] })).data.writtenCount, 1)
   assert.equal((await invoke('documents.list', { collectionId: c.id })).data.length, 1)

@@ -34,11 +34,11 @@ const methods = {
   'jobs.list': 'listJobs', 'jobs.cancel': 'cancelJob',
 }
 const mutations = new Set(['collections.create', 'collections.update', 'collections.delete', 'documents.create', 'documents.update', 'documents.delete', 'files.import', 'sources.refresh'])
-async function invokeAction(action, input, context) {
+async function invokeAction(action, input, context, options = {}) {
   const method = methods[action]
   const run = async (signal = context.signal) => {
     signal.throwIfAborted()
-    const data = await service[method](input, { signal })
+    const data = await service[method](input, { ...options, signal })
     if (action === 'files.import') {
       const written = listResult(data.written.slice(0, 100), {}, 128 * 1024).data
       const failed = listResult(data.failed.slice(0, 100), {}, 128 * 1024).data
@@ -60,7 +60,7 @@ async function invokeAction(action, input, context) {
 for (const action of Object.keys(methods)) backend.registerAction(action, (input, context) => invokeAction(action, input, context))
 for (const name of ['library.list', 'library.write']) backend.registerAction(name, (input, context) => {
   const action = resolveToolAction(name, input)
-  return invokeAction(action.name, action.input, context)
+  return invokeAction(action.name, action.input, context, action.options)
 })
 backend.registerAction('status.get', () => ({ data: { ...service.getOverview(), pythonAvailable: python.available } }))
 backend.registerAction('local.pick', (input, context) => context.host.request('moss.local-files/v1', 'pick', input, { signal: context.signal, timeoutMs: 300000 }))

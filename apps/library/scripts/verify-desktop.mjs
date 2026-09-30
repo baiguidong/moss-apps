@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { buildEmbeddedShell } from './build-embedded-shell.mjs'
 const appRoot = fileURLToPath(new URL('..', import.meta.url)), repo = resolve(appRoot, '../..')
 const core = process.env.MOSS_CORE_ROOT || resolve(repo, '../moss')
-const version = '0.1.1'
+const version = '0.1.2'
 const reportDir = join(repo, 'artifacts/moss.library/verification', version)
 await mkdir(reportDir, { recursive: true })
 const shell = await buildEmbeddedShell(core, join(reportDir, 'embedded-shell'))
@@ -24,7 +24,7 @@ try {
   temporary = await desktop.evaluate(() => globalThis.libraryFixture.temporary)
   const shot = async name => writeFile(join(reportDir, name), Buffer.from(await desktop.evaluate(() => globalThis.libraryFixture.screenshot()), 'base64'))
   await expect(page.getByText('开始积累你的知识', { exact: true })).toBeVisible()
-  checks.push('ZIP install, 5 CRUD tool contributions and no management tools, global search, explicit collection filter, schema rejects projectId, resource resolution, persistent restart, concurrent revision protection, disable/enable')
+  checks.push('ZIP install, 5 CRUD tool contributions and no management tools, global search, explicit collection filter, schema rejects projectId, resource resolution, file-only AI writes, directory and raw-content rejection, repeat-file updates, stale deletion rejection, persistent restart, concurrent UI revision protection, disable/enable')
   await page.getByRole('button', { name: '新建资料集', exact: true }).click()
   let dialog = page.getByRole('dialog', { name: '新建资料集' })
   await dialog.getByRole('textbox', { name: '名称' }).fill('研究笔记')

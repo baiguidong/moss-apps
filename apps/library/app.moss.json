@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.library",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "displayName": "知识库",
   "description": "导入文档、管理资料集、全文检索和编辑本地知识。",
   "icon": "assets/icon.svg",
@@ -201,7 +201,7 @@
       {
         "id": "write",
         "title": "写入知识库",
-        "description": "导入文件/目录、新建文档或更新正文。新建和导入指定 collectionId；更新指定 resourceId 和 revision。索引异步执行。",
+        "description": "将已准备好的本地文件复制到指定资料集并异步索引。传 collectionId 和文件绝对 paths；目录需由 Agent 先展开、整理并选择文件。同一资料集内重复导入同一路径更新副本；不修改原文件。",
         "action": "library.write",
         "effect": "write",
         "inputSchema": "schemas/library.write.input.json",
@@ -210,7 +210,7 @@
       {
         "id": "delete",
         "title": "删除知识库文档",
-        "description": "删除文档副本与索引，不修改原始文件。使用读取返回的 currentRevision（或 revision）防止误删已更新文档。",
+        "description": "删除文档副本与索引，不修改原始文件；此破坏性操作默认由 Host 请求 ask 确认。使用读取返回的 currentRevision（或 revision）防止误删已更新文档。",
         "action": "documents.delete",
         "effect": "destructive",
         "inputSchema": "schemas/documents.delete.input.json",

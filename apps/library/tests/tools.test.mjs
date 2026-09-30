@@ -21,20 +21,21 @@ test('list routing preserves explicit filters and standard pagination', () => {
   assert.equal(valid({ collectionId: 'c' }), false)
   assert.equal(valid({ kind: 'resources', projectId: 'p' }), false)
 })
-test('write accepts only complete, unambiguous create/update/import requests', () => {
+test('write accepts explicit file paths only; delete requires a nonempty revision', () => {
   const valid = schema('library.write.input')
-  const cases = [
-    [{ operation: 'import', collectionId: 'c', paths: ['/tmp/a.md'] }, 'files.import'],
-    [{ operation: 'create', collectionId: 'c', title: 'A', content: '' }, 'documents.create'],
-    [{ operation: 'update', resourceId: 'r', revision: 'v', content: 'new' }, 'documents.update'],
-  ]
-  for (const [input, expected] of cases) { assert.equal(valid(input), true, JSON.stringify(valid.errors)); assert.equal(resolveToolAction('library.write', input).name, expected) }
+  const input = { collectionId: 'c', paths: ['/tmp/a.md', '/tmp/b.md'] }
+  assert.equal(valid(input), true, JSON.stringify(valid.errors))
+  assert.deepEqual(resolveToolAction('library.write', input), { name: 'files.import', input, options: { filesOnly: true } })
   for (const input of [
-    { operation: 'delete', resourceId: 'r', revision: 'v' },
-    { operation: 'update', resourceId: 'r', content: 'new' },
-    { operation: 'update', resourceId: 'r', revision: '', content: 'new' },
-    { operation: 'create', collectionId: 'c', title: 'A', content: 'x', paths: ['/tmp/a.md'] },
-    { operation: 'import', collectionId: 'c', paths: [] },
+    { operation: 'import', collectionId: 'c', paths: ['/tmp/a.md'] },
+    { operation: 'create', collectionId: 'c', title: 'A', content: 'x' },
+    { operation: 'update', resourceId: 'r', revision: 'v', content: 'new' },
+    { collectionId: 'c', paths: ['/tmp/a.md'], content: 'raw content' },
+    { collectionId: 'c', paths: ['/tmp/a.md'], filesOnly: false },
+    { collectionId: 'c', paths: [] },
+    { paths: ['/tmp/a.md'] },
   ]) assert.equal(valid(input), false, JSON.stringify(input))
+  assert.equal(schema('documents.delete.input')({ resourceId: 'r' }), false)
   assert.equal(schema('documents.delete.input')({ resourceId: 'r', revision: '' }), false)
+  assert.equal(schema('documents.delete.input')({ resourceId: 'r', revision: 'v' }), true)
 })

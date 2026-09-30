@@ -1,125 +1,50 @@
 {
-  "oneOf": [
-    {
+  "type": "object",
+  "required": [
+    "data"
+  ],
+  "properties": {
+    "data": {
       "type": "object",
       "required": [
-        "data"
+        "written",
+        "failed",
+        "jobs",
+        "writtenCount",
+        "failedCount",
+        "truncated"
       ],
       "properties": {
-        "data": {
-          "type": "object",
-          "required": [
-            "written",
-            "failed",
-            "jobs",
-            "writtenCount",
-            "failedCount",
-            "truncated"
-          ],
-          "properties": {
-            "written": {
-              "type": "array"
-            },
-            "failed": {
-              "type": "array"
-            },
-            "jobs": {
-              "type": "array"
-            },
-            "writtenCount": {
-              "type": "integer"
-            },
-            "failedCount": {
-              "type": "integer"
-            },
-            "truncated": {
-              "type": "boolean"
-            }
-          },
-          "additionalProperties": true
+        "written": {
+          "type": "array"
+        },
+        "failed": {
+          "type": "array"
+        },
+        "jobs": {
+          "type": "array"
+        },
+        "writtenCount": {
+          "type": "integer"
+        },
+        "failedCount": {
+          "type": "integer"
         },
         "truncated": {
           "type": "boolean"
-        },
-        "nextOffset": {
-          "type": [
-            "integer",
-            "null"
-          ]
         }
       },
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    {
-      "type": "object",
-      "required": [
-        "data"
-      ],
-      "properties": {
-        "data": {
-          "type": "object",
-          "required": [
-            "resource",
-            "job"
-          ],
-          "properties": {
-            "resource": {
-              "type": "object",
-              "required": [
-                "id",
-                "title",
-                "revision"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
-                },
-                "revision": {
-                  "type": "string"
-                }
-              },
-              "additionalProperties": true
-            },
-            "job": {
-              "type": "object",
-              "required": [
-                "id",
-                "status",
-                "progress"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "string"
-                },
-                "progress": {
-                  "type": "object",
-                  "required": [],
-                  "properties": {},
-                  "additionalProperties": true
-                }
-              },
-              "additionalProperties": true
-            }
-          },
-          "additionalProperties": true
-        },
-        "truncated": {
-          "type": "boolean"
-        },
-        "nextOffset": {
-          "type": [
-            "integer",
-            "null"
-          ]
-        }
-      },
-      "additionalProperties": false
+    "truncated": {
+      "type": "boolean"
+    },
+    "nextOffset": {
+      "type": [
+        "integer",
+        "null"
+      ]
     }
-  ]
+  },
+  "additionalProperties": false
 }
