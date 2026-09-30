@@ -1,0 +1,71 @@
+{
+  "type": "object",
+  "required": [
+    "data"
+  ],
+  "properties": {
+    "data": {
+      "type": "object",
+      "required": [
+        "resource",
+        "job"
+      ],
+      "properties": {
+        "resource": {
+          "type": "object",
+          "required": [
+            "id",
+            "title",
+            "revision"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "job": {
+          "type": "object",
+          "required": [
+            "id",
+            "status",
+            "progress"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "progress": {
+              "type": "object",
+              "required": [],
+              "properties": {},
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "truncated": {
+      "type": "boolean"
+    },
+    "nextOffset": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

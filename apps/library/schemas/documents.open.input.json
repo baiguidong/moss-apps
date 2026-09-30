@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "properties": {
+    "resourceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "revision": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "reveal": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "resourceId"
+  ]
+}

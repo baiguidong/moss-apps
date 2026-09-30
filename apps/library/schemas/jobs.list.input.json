@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "sourceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "required": [
+    "data"
+  ],
+  "properties": {
+    "data": {
+      "type": "object",
+      "required": [
+        "written",
+        "failed",
+        "jobs",
+        "writtenCount",
+        "failedCount",
+        "truncated"
+      ],
+      "properties": {
+        "written": {
+          "type": "array"
+        },
+        "failed": {
+          "type": "array"
+        },
+        "jobs": {
+          "type": "array"
+        },
+        "writtenCount": {
+          "type": "integer"
+        },
+        "failedCount": {
+          "type": "integer"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "truncated": {
+      "type": "boolean"
+    },
+    "nextOffset": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

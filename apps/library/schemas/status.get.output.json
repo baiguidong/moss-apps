@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "required": [
+    "data"
+  ],
+  "properties": {
+    "data": {
+      "type": "object",
+      "required": [
+        "pythonAvailable",
+        "stats"
+      ],
+      "properties": {
+        "pythonAvailable": {
+          "type": "boolean"
+        },
+        "stats": {
+          "type": "object",
+          "required": [],
+          "properties": {},
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "truncated": {
+      "type": "boolean"
+    },
+    "nextOffset": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

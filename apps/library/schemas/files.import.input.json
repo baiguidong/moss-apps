@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "collectionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "paths": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      },
+      "description": "本机文件或目录的绝对路径，不支持相对路径。"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "collectionId",
+    "paths"
+  ]
+}

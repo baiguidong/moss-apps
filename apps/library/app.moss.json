@@ -1,0 +1,308 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.library",
+  "version": "0.1.0",
+  "displayName": "知识库",
+  "description": "导入文档、管理资料集、全文检索和编辑本地知识。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^2.3.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1160,
+      "height": 780,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "protocols": [
+      "moss.local-files/v1",
+      "moss.runtimes/v1"
+    ],
+    "actions": [
+      {
+        "name": "collections.list",
+        "inputSchema": "schemas/collections.list.input.json",
+        "outputSchema": "schemas/collections.list.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "collections.create",
+        "inputSchema": "schemas/collections.create.input.json",
+        "outputSchema": "schemas/collections.create.output.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "collections.update",
+        "inputSchema": "schemas/collections.update.input.json",
+        "outputSchema": "schemas/collections.update.output.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "collections.delete",
+        "inputSchema": "schemas/collections.delete.input.json",
+        "outputSchema": "schemas/collections.delete.output.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.list",
+        "inputSchema": "schemas/documents.list.input.json",
+        "outputSchema": "schemas/documents.list.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "documents.search",
+        "inputSchema": "schemas/documents.search.input.json",
+        "outputSchema": "schemas/documents.search.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "documents.read",
+        "inputSchema": "schemas/documents.read.input.json",
+        "outputSchema": "schemas/documents.read.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "documents.create",
+        "inputSchema": "schemas/documents.create.input.json",
+        "outputSchema": "schemas/documents.create.output.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.update",
+        "inputSchema": "schemas/documents.update.input.json",
+        "outputSchema": "schemas/documents.update.output.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.delete",
+        "inputSchema": "schemas/documents.delete.input.json",
+        "outputSchema": "schemas/documents.delete.output.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "files.import",
+        "inputSchema": "schemas/files.import.input.json",
+        "outputSchema": "schemas/files.import.output.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "sources.list",
+        "inputSchema": "schemas/sources.list.input.json",
+        "outputSchema": "schemas/sources.list.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "sources.refresh",
+        "inputSchema": "schemas/sources.refresh.input.json",
+        "outputSchema": "schemas/sources.refresh.output.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "jobs.list",
+        "inputSchema": "schemas/jobs.list.input.json",
+        "outputSchema": "schemas/jobs.list.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "jobs.cancel",
+        "inputSchema": "schemas/jobs.cancel.input.json",
+        "outputSchema": "schemas/jobs.cancel.output.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "status.get",
+        "inputSchema": "schemas/status.get.input.json",
+        "outputSchema": "schemas/status.get.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "local.pick",
+        "inputSchema": "schemas/local.pick.input.json",
+        "outputSchema": "schemas/local.pick.output.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.open",
+        "inputSchema": "schemas/documents.open.input.json",
+        "outputSchema": "schemas/documents.open.output.json",
+        "timeoutMs": 45000
+      },
+      {
+        "name": "resource.resolve",
+        "inputSchema": "schemas/resource.resolve.input.json",
+        "outputSchema": "schemas/resource.resolve.output.json",
+        "timeoutMs": 45000
+      }
+    ]
+  },
+  "permissions": [
+    "local-files:pick",
+    "local-files:open"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "library",
+        "title": "知识库",
+        "route": "#/",
+        "icon": "book-open",
+        "order": 220
+      }
+    ],
+    "tools": [
+      {
+        "id": "collections-list",
+        "title": "列出资料集",
+        "description": "列出本地知识库的全部资料集。",
+        "action": "collections.list",
+        "effect": "read",
+        "inputSchema": "schemas/collections.list.input.json",
+        "outputSchema": "schemas/collections.list.output.json"
+      },
+      {
+        "id": "collections-create",
+        "title": "新建资料集",
+        "description": "创建独立于项目与会话的资料集。",
+        "action": "collections.create",
+        "effect": "write",
+        "inputSchema": "schemas/collections.create.input.json",
+        "outputSchema": "schemas/collections.create.output.json"
+      },
+      {
+        "id": "collections-update",
+        "title": "修改资料集",
+        "description": "修改资料集名称和说明。",
+        "action": "collections.update",
+        "effect": "write",
+        "inputSchema": "schemas/collections.update.input.json",
+        "outputSchema": "schemas/collections.update.output.json"
+      },
+      {
+        "id": "collections-delete",
+        "title": "删除资料集",
+        "description": "删除资料集及其中托管的文档副本和索引。",
+        "action": "collections.delete",
+        "effect": "destructive",
+        "inputSchema": "schemas/collections.delete.input.json",
+        "outputSchema": "schemas/collections.delete.output.json"
+      },
+      {
+        "id": "documents-list",
+        "title": "列出文档",
+        "description": "分页列出全部或显式指定资料集中的文档。",
+        "action": "documents.list",
+        "effect": "read",
+        "inputSchema": "schemas/documents.list.input.json",
+        "outputSchema": "schemas/documents.list.output.json"
+      },
+      {
+        "id": "documents-search",
+        "title": "搜索知识库",
+        "description": "本地全文搜索；默认搜索全部资料集。返回片段、来源和可读取的 resourceId。不需要项目或会话参数。",
+        "action": "documents.search",
+        "effect": "read",
+        "inputSchema": "schemas/documents.search.input.json",
+        "outputSchema": "schemas/documents.search.output.json"
+      },
+      {
+        "id": "documents-read",
+        "title": "读取文档",
+        "description": "读取文档正文及引用位置；长文档使用 nextOffset 继续读取。",
+        "action": "documents.read",
+        "effect": "read",
+        "inputSchema": "schemas/documents.read.input.json",
+        "outputSchema": "schemas/documents.read.output.json"
+      },
+      {
+        "id": "documents-create",
+        "title": "写入文档",
+        "description": "在指定资料集中创建 Markdown 文档，异步索引。",
+        "action": "documents.create",
+        "effect": "write",
+        "inputSchema": "schemas/documents.create.input.json",
+        "outputSchema": "schemas/documents.create.output.json"
+      },
+      {
+        "id": "documents-update",
+        "title": "更新文档",
+        "description": "更新可编辑文档；使用读取时的 revision 防止覆盖并发修改。",
+        "action": "documents.update",
+        "effect": "write",
+        "inputSchema": "schemas/documents.update.input.json",
+        "outputSchema": "schemas/documents.update.output.json"
+      },
+      {
+        "id": "documents-delete",
+        "title": "删除文档",
+        "description": "删除知识库中的托管副本和索引。",
+        "action": "documents.delete",
+        "effect": "destructive",
+        "inputSchema": "schemas/documents.delete.input.json",
+        "outputSchema": "schemas/documents.delete.output.json"
+      },
+      {
+        "id": "files-import",
+        "title": "导入文件",
+        "description": "复制本地文件或目录到资料集，保留目录层级并异步解析。支持 PDF、Office、Markdown 和文本，每文件最多 50 MB。返回导入失败原因及索引任务。",
+        "action": "files.import",
+        "effect": "write",
+        "inputSchema": "schemas/files.import.input.json",
+        "outputSchema": "schemas/files.import.output.json"
+      },
+      {
+        "id": "sources-list",
+        "title": "列出导入来源",
+        "description": "查看文档导入来源及索引状态。",
+        "action": "sources.list",
+        "effect": "read",
+        "inputSchema": "schemas/sources.list.input.json",
+        "outputSchema": "schemas/sources.list.output.json"
+      },
+      {
+        "id": "sources-refresh",
+        "title": "重建来源索引",
+        "description": "重新解析已托管文档；不会重新读取原始文件。",
+        "action": "sources.refresh",
+        "effect": "write",
+        "inputSchema": "schemas/sources.refresh.input.json",
+        "outputSchema": "schemas/sources.refresh.output.json"
+      },
+      {
+        "id": "jobs-list",
+        "title": "查看索引任务",
+        "description": "查看异步索引进度及失败原因。",
+        "action": "jobs.list",
+        "effect": "read",
+        "inputSchema": "schemas/jobs.list.input.json",
+        "outputSchema": "schemas/jobs.list.output.json"
+      },
+      {
+        "id": "jobs-cancel",
+        "title": "取消索引任务",
+        "description": "取消指定索引任务。",
+        "action": "jobs.cancel",
+        "effect": "write",
+        "inputSchema": "schemas/jobs.cancel.input.json",
+        "outputSchema": "schemas/jobs.cancel.output.json"
+      }
+    ],
+    "resourceProviders": [
+      {
+        "id": "documents",
+        "schemes": [
+          "moss-knowledge"
+        ],
+        "resolveAction": "resource.resolve"
+      }
+    ]
+  }
+}
