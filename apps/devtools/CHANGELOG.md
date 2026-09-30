@@ -1,5 +1,9 @@
 # 更新记录
 
+## 0.1.1
+
+- 移除四项 AI 工具注册，时间戳、Base64、AES 和 JSON 功能仅通过 App 页面使用。
+
 ## 0.1.0
 
 - 新增独立开发工具 App：时间戳双向转换、UTF-8 / URL-safe Base64、AES-GCM/CBC、JSON 格式化与校验。

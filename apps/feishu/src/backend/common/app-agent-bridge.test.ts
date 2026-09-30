@@ -6,7 +6,7 @@ import { createEnvelope, validateAgentHostInput } from '@moss/app-sdk'
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 describe('Feishu App Host bridge', () => {
-  it('does not report the App Backend ready until the transport is connected', async () => {
+  it('reports local readiness independently of the transport connection', async () => {
     const sent: any[] = []
     let receive: ((message: any) => void) | undefined
     const bridge = new FeishuAgentBridge({
@@ -33,6 +33,10 @@ describe('Feishu App Host bridge', () => {
     bridge.ready()
     await tick()
     expect(sent.at(-1)).toMatchObject({ type: 'service.ready', id: 'init-1' })
+    bridge.status('degraded', { connected: false, error: 'Network is offline' })
+    receive?.(createEnvelope('service.ping', { generation: 1, launchToken: 'launch-1' }, { id: 'ping-offline' }))
+    await tick()
+    expect(sent.at(-1)).toMatchObject({ type: 'service.pong', id: 'ping-offline' })
     bridge.destroy()
   })
 

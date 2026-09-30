@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 // Test-only bridge to the compiled Node Backend; no request implementation is mocked.
 import { fork } from 'node:child_process'
 import { createServer } from 'node:http'
@@ -7,16 +8,17 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createEnvelope } from '@moss/app-sdk'
 import { createTestServer } from '../tests/fixtures.mjs'
+const appVersion = JSON.parse(readFileSync(new URL('../app.moss.json', import.meta.url), 'utf8')).version
 const directory = await mkdtemp(join(tmpdir(), 'moss-http-browser-'))
 const fixture = await createTestServer(), pending = new Map()
 const identity = { generation: 1, launchToken: 'browser-integration' }
-const backend = fork(fileURLToPath(new URL('../dist/backend/main.mjs', import.meta.url)), [], { cwd: directory, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], env: { PATH: process.env.PATH, MOSS_APP_ID: 'moss.http-client', MOSS_APP_VERSION: '0.1.0', MOSS_APP_INSTANCE_ID: 'default', MOSS_APP_GENERATION: '1', MOSS_APP_LAUNCH_TOKEN: identity.launchToken } })
+const backend = fork(fileURLToPath(new URL('../dist/backend/main.mjs', import.meta.url)), [], { cwd: directory, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], env: { PATH: process.env.PATH, MOSS_APP_ID: 'moss.http-client', MOSS_APP_VERSION: appVersion, MOSS_APP_INSTANCE_ID: 'default', MOSS_APP_GENERATION: '1', MOSS_APP_LAUNCH_TOKEN: identity.launchToken } })
 backend.stdout.pipe(process.stdout); backend.stderr.pipe(process.stderr)
 await new Promise((resolve, reject) => {
   backend.once('error', reject)
   backend.once('exit', code => reject(new Error(`Backend exit ${code}`)))
   backend.on('message', message => {
-    if (message.type === 'service.hello') backend.send(createEnvelope('service.init', { ...identity, appId: 'moss.http-client', version: '0.1.0', instanceId: 'default', config: {}, secrets: {}, dataDir: directory, runtimeDir: directory, permissions: [], grants: [], protocols: [] }))
+    if (message.type === 'service.hello') backend.send(createEnvelope('service.init', { ...identity, appId: 'moss.http-client', version: appVersion, instanceId: 'default', config: {}, secrets: {}, dataDir: directory, runtimeDir: directory, permissions: [], grants: [], protocols: [] }))
     if (message.type === 'service.ready') resolve()
     if (message.type === 'action.result' || message.type === 'action.error') {
       const callback = pending.get(message.id)

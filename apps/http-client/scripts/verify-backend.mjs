@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import assert from 'node:assert/strict'
 import { fork } from 'node:child_process'
 import { mkdtemp, copyFile, rm, readdir } from 'node:fs/promises'
@@ -7,11 +8,12 @@ import { fileURLToPath } from 'node:url'
 import { createEnvelope } from '@moss/app-sdk'
 import { createTestServer } from '../tests/fixtures.mjs'
 const server = await createTestServer()
+const appVersion = JSON.parse(readFileSync(new URL('../app.moss.json', import.meta.url), 'utf8')).version
 const directory = await mkdtemp(join(tmpdir(), 'moss-http-bundle-'))
 const entry = join(directory, 'main.mjs')
 await copyFile(fileURLToPath(new URL('../dist/backend/main.mjs', import.meta.url)), entry)
 const identity = { generation: 1, launchToken: 'isolated-bundle-verification' }
-const child = fork(entry, [], { cwd: directory, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], env: { PATH: process.env.PATH, MOSS_APP_ID: 'moss.http-client', MOSS_APP_VERSION: '0.1.0', MOSS_APP_INSTANCE_ID: 'default', MOSS_APP_GENERATION: '1', MOSS_APP_LAUNCH_TOKEN: identity.launchToken } })
+const child = fork(entry, [], { cwd: directory, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], env: { PATH: process.env.PATH, MOSS_APP_ID: 'moss.http-client', MOSS_APP_VERSION: appVersion, MOSS_APP_INSTANCE_ID: 'default', MOSS_APP_GENERATION: '1', MOSS_APP_LAUNCH_TOKEN: identity.launchToken } })
 const logs = []
 child.stdout.on('data', data => logs.push(data.toString())); child.stderr.on('data', data => logs.push(data.toString()))
 function receive(type, id) {
@@ -33,7 +35,7 @@ async function invoke(name, input, failure = false) {
 try {
   await receive('service.hello')
   const ready = receive('service.ready')
-  child.send(createEnvelope('service.init', { ...identity, appId: 'moss.http-client', version: '0.1.0', instanceId: 'default', config: {}, secrets: {}, dataDir: directory, runtimeDir: directory, permissions: [], grants: [], protocols: [] }))
+  child.send(createEnvelope('service.init', { ...identity, appId: 'moss.http-client', version: appVersion, instanceId: 'default', config: {}, secrets: {}, dataDir: directory, runtimeDir: directory, permissions: [], grants: [], protocols: [] }))
   await ready
   const result = await invoke('request.send', { url: `${server.url}/echo`, method: 'POST', bodyMode: 'json', body: '{"id":9007199254740993}', auth: { type: 'bearer', username: '', password: '', token: 'isolated-test-token' } })
   assert.equal(result.status, 200)

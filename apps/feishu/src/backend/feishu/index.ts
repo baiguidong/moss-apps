@@ -26,6 +26,8 @@ const MAX_REPLY_CHARS = 4_000
 let config!: AdapterConfig
 let larkClient!: InstanceType<typeof Lark.Client>
 let wsClient: InstanceType<typeof Lark.WSClient> | null = null
+let connectionRetry: ReturnType<typeof setTimeout> | null = null
+let stopping = false
 let stateStore!: ReturnType<typeof createFeishuStateStore>
 let transportConnected = false
 let transportError: string | null = null
@@ -256,7 +258,7 @@ async function handleMessage(data: any): Promise<void> {
   })
 }
 
-async function reportConnection(connected: boolean, error?: unknown, required = false): Promise<void> {
+async function reportConnection(connected: boolean, error?: unknown): Promise<void> {
   transportConnected = connected
   transportError = error ? (error instanceof Error ? error.message : String(error)) : null
   transportUpdatedAt = Date.now()
@@ -264,10 +266,7 @@ async function reportConnection(connected: boolean, error?: unknown, required = 
     connected,
     error: transportError,
   })
-  if (!hostBridge.available) {
-    if (required) throw new Error('Moss host bridge disconnected during Feishu startup.')
-    return
-  }
+  if (!hostBridge.available) return
   try {
     hostBridge.status(connected ? 'running' : 'degraded', {
       connected,
@@ -275,7 +274,6 @@ async function reportConnection(connected: boolean, error?: unknown, required = 
     })
   } catch (reportError) {
     console.error('[Feishu] Unable to report connection state:', reportError)
-    if (required) throw reportError
   }
 }
 
@@ -286,7 +284,6 @@ async function start(): Promise<void> {
   if (!hostBridge.available) throw new Error('Feishu App must be started by a Moss host process.')
   const context = await hostBridge.hello()
   initializeTransport(context)
-  await ensureAgentPolicy()
   console.log(`[Feishu] App ID: ${config.feishu.appId}`)
   console.log('[Feishu] Moss host bridge ready')
 
@@ -310,16 +307,30 @@ async function start(): Promise<void> {
     appSecret: config.feishu.appSecret,
     domain: Lark.Domain.Feishu,
     loggerLevel: Lark.LoggerLevel.info,
+    autoReconnect: true,
     onReady: connection.onReady,
     onError: connection.onError,
     onReconnecting: connection.onReconnecting,
     onReconnected: connection.onReconnected,
   })
 
-  await wsClient.start({ eventDispatcher: dispatcher })
-  await connection.initialReady
+  // Actions and local IPC are ready even when the computer has no network.
   hostBridge.ready()
-  console.log('[Feishu] Bot is running! (WebSocket connected)')
+  console.log('[Feishu] Backend is ready; connecting to Feishu in the background')
+  const connect = async (): Promise<void> => {
+    if (stopping) return
+    try {
+      await ensureAgentPolicy()
+      if (stopping) return
+      await wsClient!.start({ eventDispatcher: dispatcher })
+    } catch (error) {
+      if (stopping) return
+      connection.onError(error)
+      connectionRetry = setTimeout(() => { connectionRetry = null; void connect() }, 30_000)
+      connectionRetry.unref?.()
+    }
+  }
+  void connect()
 }
 
 start().catch((error) => {
@@ -329,6 +340,9 @@ start().catch((error) => {
 })
 
 function shutdown(exitProcess = true, destroyHostBridge = true): void {
+  stopping = true
+  if (connectionRetry) clearTimeout(connectionRetry)
+  connectionRetry = null
   console.log('[Feishu] Shutting down...')
   wsClient?.close({ force: true })
   if (destroyHostBridge) hostBridge.destroy()
