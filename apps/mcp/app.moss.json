@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.mcp",
+  "version": "0.1.0",
+  "displayName": "MCP",
+  "description": "管理 MCP 服务连接，让常用工具融入对话。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^2.4.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1120,
+      "height": 780,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "protocols": [
+      "moss.mcp/v1"
+    ],
+    "actions": [
+      {
+        "name": "servers.list",
+        "inputSchema": "schemas/servers.list.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "servers.save",
+        "inputSchema": "schemas/servers.save.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "servers.remove",
+        "inputSchema": "schemas/servers.remove.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "servers.set-enabled",
+        "inputSchema": "schemas/servers.set-enabled.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "servers.inspect",
+        "inputSchema": "schemas/servers.inspect.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "auth.start",
+        "inputSchema": "schemas/auth.start.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "auth.clear",
+        "inputSchema": "schemas/auth.clear.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      }
+    ],
+    "configuration": {
+      "secrets": "schemas/secrets.json"
+    }
+  },
+  "permissions": [
+    "mcp:read",
+    "mcp:manage",
+    "mcp:connect",
+    "mcp:auth"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "connections",
+        "title": "MCP",
+        "route": "#/",
+        "icon": "plug",
+        "order": 220
+      }
+    ],
+    "settings": [
+      {
+        "id": "manage",
+        "title": "管理 MCP 连接",
+        "viewId": "connections"
+      }
+    ]
+  }
+}

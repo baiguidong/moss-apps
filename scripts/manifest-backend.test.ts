@@ -24,9 +24,12 @@ function manifest(backendOverrides: Record<string, unknown> = {}) {
 }
 
 describe('App Backend manifest', () => {
-  it('builds against declared Host target while installation validates the actual Host', () => {
-    const source = { ...manifest({ protocols: ['moss.trace/v1'] }), hostApi: '^2.5.0' }
-    expect(validateRepositoryAppManifest(source).hostApi).toBe('^2.5.0')
+  it.each([
+    ['moss.mcp/v1', '^2.4.0'],
+    ['moss.trace/v1', '^2.5.0'],
+  ])('builds %s against its declared Host target while installation validates the actual Host', (protocol, hostApi) => {
+    const source = { ...manifest({ protocols: [protocol] }), hostApi }
+    expect(validateRepositoryAppManifest(source).hostApi).toBe(hostApi)
     expect(() => validateAppManifest(source, { hostApiVersion: '2.3.0' })).toThrow(/requires Host API/)
     expect(() => validateRepositoryAppManifest({ ...source, hostApi: 'invalid' })).toThrow()
   })

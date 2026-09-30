@@ -2,6 +2,8 @@
 
 当前引用 SDK `2.3.0`。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用其 SDK workspace，仅维护接入说明和消费端回归测试。
 
+App 可通过通用 `backend.host.request()` 使用较新 Desktop 提供的协议。MCP App 要求 Host API `^2.4.0` 的 `moss.mcp/v1`，仍可使用当前 SDK 的传输实现。仓库构建校验采用 Manifest 声明的最低 Host 版本；市场和安装阶段继续按实际运行的 Host 版本判断兼容性。无需为仅使用通用 transport 的协议复制 SDK 或更新子模块。详见 [MCP App](../apps/mcp/README.md)。
+
 ## Backend 运行契约
 
 App Backend 只支持 Moss Desktop，运行位置无需在 Manifest 中声明。`protocols` 直接使用协议名称数组；只有客户端运行时 Backend 才可用。

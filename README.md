@@ -2,7 +2,7 @@
 
 Moss 官方 App 的独立源码与发布仓库。每个 App 位于 `apps/<name>`，独立维护版本、源码、配置 Schema、资源与测试。
 
-当前应用：[开发工具](apps/devtools/README.md)、[HTTP 调试](apps/http-client/README.md)、[网盘](apps/drive/README.md)、[知识库](apps/library/README.md)、[飞书](apps/feishu/README.md)、[OpenIM](apps/openim/README.md)、[Trace](apps/trace/README.md)。
+当前应用：[开发工具](apps/devtools/README.md)、[HTTP 调试](apps/http-client/README.md)、[网盘](apps/drive/README.md)、[知识库](apps/library/README.md)、[飞书](apps/feishu/README.md)、[OpenIM](apps/openim/README.md)、[MCP](apps/mcp/README.md)、[Trace](apps/trace/README.md)。
 
 规划中的本地工具扩展见 [本地工具 App 选型与接入方案](docs/local-tool-apps-plan.md)，覆盖开发工具、HTTP 调试、图片和音视频处理。
 

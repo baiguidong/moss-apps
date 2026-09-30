@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.mcp",
+  "summary": "连接和管理 MCP 服务，在对话中使用你的工具。",
+  "description": "集中管理本地进程、HTTP 与 SSE 服务，支持连接检查、工具查看、浏览器授权和加密凭据。自动迁移原有桌面 MCP 配置。",
+  "categories": [
+    "效率",
+    "开发工具"
+  ],
+  "keywords": [
+    "MCP",
+    "工具",
+    "集成",
+    "连接",
+    "自动化"
+  ],
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/mcp",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}
