@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { validateAppManifest } from '@moss/app-sdk'
+import { loadJsonSchema, validateAppManifest, validateAppToolInputSchema } from '@moss/app-sdk'
 
 export const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 export const appsRoot = path.join(repoRoot, 'apps')
@@ -26,6 +26,13 @@ export function validateRepositoryAppManifest(rawManifest) {
     }
   }
   return validateAppManifest(rawManifest)
+}
+
+export function validateRepositoryAppToolSchemas(packageRoot, manifest) {
+  for (const tool of manifest.contributes?.tools || []) {
+    const label = `App ${manifest.id} tool ${tool.id} inputSchema (${tool.inputSchema})`
+    validateAppToolInputSchema(loadJsonSchema(packageRoot, tool.inputSchema, label), label)
+  }
 }
 
 export async function writeJson(filePath, value) {
@@ -106,6 +113,7 @@ export function listApps() {
       const marketplacePath = path.join(root, 'marketplace.json')
       if (!fs.existsSync(manifestPath)) return null
       const manifest = validateRepositoryAppManifest(readJson(manifestPath))
+      validateRepositoryAppToolSchemas(root, manifest)
       if (!fs.existsSync(marketplacePath)) throw new Error(`Missing marketplace.json for ${manifest.id}`)
       const marketplace = validateMarketplaceMetadata(readJson(marketplacePath), manifest, marketplacePath)
       return { directoryName: entry.name, root, manifest, marketplace, manifestPath, marketplacePath }

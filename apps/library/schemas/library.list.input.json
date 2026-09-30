@@ -3,6 +3,7 @@
   "properties": {
     "collectionId": {
       "type": "string",
+      "description": "仅在 kind 为 sources 或 resources 时用于筛选资料集；列出资料集（kind=collections 或省略 kind）时不得传入。",
       "minLength": 1,
       "maxLength": 100
     },
@@ -17,6 +18,7 @@
     },
     "kind": {
       "type": "string",
+      "description": "列表类型，默认 collections；collections 列出资料集，sources 列出来源，resources 列出文档。",
       "enum": [
         "collections",
         "sources",
@@ -25,34 +27,5 @@
       "default": "collections"
     }
   },
-  "additionalProperties": false,
-  "allOf": [
-    {
-      "if": {
-        "anyOf": [
-          {
-            "not": {
-              "required": [
-                "kind"
-              ]
-            }
-          },
-          {
-            "properties": {
-              "kind": {
-                "const": "collections"
-              }
-            }
-          }
-        ]
-      },
-      "then": {
-        "not": {
-          "required": [
-            "collectionId"
-          ]
-        }
-      }
-    }
-  ]
+  "additionalProperties": false
 }
