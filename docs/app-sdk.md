@@ -1,6 +1,6 @@
 # Moss App SDK
 
-当前引用 SDK `2.3.0`。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用其 SDK workspace，仅维护接入说明和消费端回归测试。
+当前引用 SDK `2.6.0`。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用其 SDK workspace，仅维护接入说明和消费端回归测试。
 
 App 可通过通用 `backend.host.request()` 使用较新 Desktop 提供的协议。MCP App 要求 Host API `^2.4.0` 的 `moss.mcp/v1`，仍可使用当前 SDK 的传输实现。仓库构建校验采用 Manifest 声明的最低 Host 版本；市场和安装阶段继续按实际运行的 Host 版本判断兼容性。无需为仅使用通用 transport 的协议复制 SDK 或更新子模块。详见 [MCP App](../apps/mcp/README.md)。
 
@@ -92,3 +92,5 @@ UI 调用已声明的 `mossApp.actions.invoke(instanceId, action, input)`，订�
 新增 `CloudShare`、`shares.create/list/revoke` 与 `cloud-storage:share`。网盘要求 `hostApi: ^2.3.0`，接收页由 Server 的 `/s/:token` 提供；浏览器不依赖 Desktop Host。详见 [分享实施方案](drive-sharing-plan.md) 及 Core 云端存储文档。
 
 Trace App 通过通用 `backend.host.request()` 使用 Host API `^2.5.0` 的 `moss.trace/v1` 协议。构建按 App 声明的最低 Host 版本校验；市场和安装时仍检查实际 Host 版本。参见 [Trace App](../apps/trace/README.md)。
+
+审计中心使用 Host API `^2.6.0` 的 `moss.audit/v1` 协议。App 自己维护规则引擎、SQLite 和扫描；Host 只导出脱敏会话、迁移旧库、保留撤销事件、定位会话和投递通知。固定的 Core 提交也用于最终签名 ZIP 的集成验证，避免依赖开发者的相邻工作区。参见 [审计中心](../apps/audit/README.md)。

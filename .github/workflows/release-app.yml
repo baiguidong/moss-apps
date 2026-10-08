@@ -61,12 +61,21 @@ jobs:
         run: |
           bun x playwright install --with-deps chromium
           bun run test:browser
+      - name: Verify Audit UI and local database
+        if: steps.release.outputs.app_id == 'moss.audit'
+        working-directory: apps/audit
+        run: |
+          bun x playwright install --with-deps chromium
+          bun run test:browser
       - name: Build signed App package
         env:
           MOSS_APP_SIGNING_PRIVATE_KEY: ${{ secrets.MOSS_APP_SIGNING_PRIVATE_KEY }}
           MOSS_APP_SIGNING_KEY_ID: release-1
           MOSS_APP_PUBLISHED_AT: ${{ github.event.head_commit.timestamp }}
         run: node scripts/package-app.mjs --app "${{ steps.release.outputs.app_id }}" --require-signature
+      - name: Verify signed Audit package with the pinned Core Host
+        if: steps.release.outputs.app_id == 'moss.audit'
+        run: node apps/audit/scripts/verify-package.mjs --require-signature
       - name: Publish immutable release assets
         env:
           GH_TOKEN: ${{ github.token }}

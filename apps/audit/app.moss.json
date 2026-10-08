@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.audit",
+  "version": "0.1.1",
+  "displayName": "审计中心",
+  "description": "审计本地会话与工具调用，管理风险规则、发现项和操作历史。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^2.6.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1200,
+      "height": 800,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "protocols": [
+      "moss.audit/v1"
+    ],
+    "actions": [
+      {
+        "name": "dashboard.get",
+        "inputSchema": "schemas/empty.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "event.get",
+        "inputSchema": "schemas/id.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "audit.run",
+        "inputSchema": "schemas/run.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "rule.update",
+        "inputSchema": "schemas/rule.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "finding.update",
+        "inputSchema": "schemas/finding.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "findings.update",
+        "inputSchema": "schemas/findings.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "session.open",
+        "inputSchema": "schemas/session.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "status.get",
+        "inputSchema": "schemas/empty.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "result.read",
+        "inputSchema": "schemas/read.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "result.release",
+        "inputSchema": "schemas/id.json",
+        "timeoutMs": 120000
+      }
+    ]
+  },
+  "permissions": [
+    "audit:read",
+    "audit:navigate",
+    "audit:notify"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "audit",
+        "title": "审计中心",
+        "route": "#/",
+        "order": 250
+      }
+    ]
+  }
+}

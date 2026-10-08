@@ -41,4 +41,9 @@ jobs:
       - name: Verify MCP connection management UI
         working-directory: apps/mcp
         run: bun run test:browser
+      - name: Verify Audit UI and local database
+        working-directory: apps/audit
+        run: bun run test:browser
       - run: bun run package -- --skip-build
+      - name: Verify Audit package with the pinned Core Host
+        run: node apps/audit/scripts/verify-package.mjs

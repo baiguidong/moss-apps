@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "sessionIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "minItems": 1,
+      "maxItems": 5000
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

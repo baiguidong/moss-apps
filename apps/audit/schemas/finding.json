@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "status": {
+      "enum": [
+        "open",
+        "acknowledged",
+        "resolved",
+        "false_positive"
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "status"
+  ],
+  "additionalProperties": false
+}
