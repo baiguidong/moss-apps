@@ -7,8 +7,8 @@ import { Resources } from './resources'
 import { resolveDefinition, resolveChildren } from './validation'
 import { Worker } from 'node:worker_threads'
 import { AsyncResource } from 'node:async_hooks'
-const TASKS = 'moss.tasks/v1',
-  EXEC = 'moss.agent-execution/v1'
+import { createTasksClient, createExecutionClient, type AppHostApi } from '@moss/app-sdk'
+import { ExecutionWatcher, DEFAULT_EXECUTION_REFRESH_MS as HOST_REFRESH_MS } from '@moss/app-sdk/execution'
 const terminal = new Set(['completed', 'failed', 'cancelled', 'interrupted'])
 export class RunManager {
   runs: Record<string, any> = {}
@@ -18,17 +18,33 @@ export class RunManager {
       worker: Worker
       timer: ReturnType<typeof setInterval>
       executions: Map<string, string>
+      controller: AbortController
     }
   >()
   resources: Resources
   starting = new Map<string, Promise<any>>()
   detached = new AsyncResource('workflow-background')
   completionTimer: ReturnType<typeof setInterval>
+  private tasks: ReturnType<typeof createTasksClient>
+  private executions: ReturnType<typeof createExecutionClient>
+  private executionEvents: ExecutionWatcher
+  private unsubscribeTasks: () => void
   constructor(
     private directory: string,
-    private host: any,
+    host: AppHostApi,
     private emit: (event: any) => void,
   ) {
+    this.tasks = createTasksClient(host)
+    this.executions = createExecutionClient(host)
+    this.executionEvents = new ExecutionWatcher(this.executions)
+    this.unsubscribeTasks = this.tasks.on('task.changed', ({ task }) => {
+      if (!terminal.has(task.status)) return
+      for (const run of Object.values(this.runs)) {
+        if (run.status === 'running' && run.taskId === task.id && run.attempt === task.attempt) {
+          void this.cancel(run.id, task.error || 'Moss 已停止任务').catch(() => {})
+        }
+      }
+    })
     fs.mkdirSync(directory, { recursive: true })
     this.resources = new Resources(path.join(directory, 'resources'))
     for (const name of fs
@@ -113,7 +129,7 @@ export class RunManager {
       this.runs[id] = run
       this.save(run) // Persist intent before the host can accept it.
     }
-    const task = await this.host.request(TASKS, 'task.create', run.taskInput)
+    const task = await this.tasks.request('task.create', run.taskInput)
     Object.assign(run, {taskId:task.id, scopeRef:task.scopeRef, sessionId:task.sessionId, workspace:task.workspace,
       status:task.status === 'running' ? 'running' : 'interrupted'})
     this.save(run)
@@ -131,23 +147,27 @@ export class RunManager {
       resourceLimits: { maxOldGenerationSizeMb: 128 },
     })
     const executions = new Map<string, string>()
+    const controller = new AbortController()
     let polling = false
-    const timer = setInterval(async () => {
-      if (polling) return
+    const isCurrent = () => this.active.get(run.id)?.controller === controller && run.status === 'running'
+    const refreshTask = async () => {
+      if (polling || !isCurrent()) return
       polling = true
       try {
-        const task = await this.host.request(TASKS, 'task.get', {
+        const task = await this.tasks.request('task.get', {
           taskId: run.taskId,
-        })
-        if (terminal.has(task.status))
+        }, { signal: controller.signal })
+        if (isCurrent() && terminal.has(task.status) && task.attempt === run.attempt)
           await this.cancel(run.id, task.error || 'Moss 已停止任务')
       } catch (error) {
-        await this.cancel(run.id, String(error))
+        if (isCurrent()) await this.cancel(run.id, String(error))
       } finally {
         polling = false
       }
-    }, 1000)
-    this.active.set(run.id, { worker, timer, executions })
+    }
+    const timer = setInterval(() => { void refreshTask() }, HOST_REFRESH_MS)
+    this.active.set(run.id, { worker, timer, executions, controller })
+    void refreshTask()
     worker.on('message', (message) => {
       if (message.type === 'event') {
         const event = { ...message.event, ...(message.event.output !== undefined ? { output: this.resources.bound(message.event.output, 2048) } : {}), ...(message.event.input !== undefined ? { input: this.resources.bound(message.event.input, 2048) } : {}), error: message.event.error?.slice(0,2000) };
@@ -182,8 +202,8 @@ export class RunManager {
       if (message.type === 'agent-cancel') {
         const id = executions.get(message.id)
         if (id)
-          void this.host
-            .request(EXEC, 'execution.cancel', { executionId: id })
+          void this.executions
+            .request('execution.cancel', { executionId: id })
             .catch(() => {})
       }
       if (message.type === 'outcome')
@@ -206,24 +226,20 @@ export class RunManager {
     })
   }
   async agent(run: any, message: any, executions: Map<string, string>) {
+    const signal = this.active.get(run.id)?.controller.signal
+    if (!signal || signal.aborted || run.status !== 'running') throw new Error('工作流已停止')
     const input = message.input
-    const execution = await this.host.request(EXEC, 'execution.start', {
+    const execution = await this.executions.request('execution.start', {
       scopeRef: run.scopeRef,
       idempotencyKey: input.idempotencyKey,
       contextKey: input.contextKey,
       prompt: input.prompt,
       outputSchema: input.opts?.schema ?? {},
       ...(input.opts?.agentType ? { agentType: input.opts.agentType } : {}),
-    })
+    }, { signal })
     executions.set(message.id, execution.id)
     try {
-      let state = execution
-      while (!terminal.has(state.status)) {
-        if (run.status !== 'running') throw new Error('工作流已停止')
-        await new Promise((resolve) => setTimeout(resolve, 400))
-        state = await this.host.request(EXEC, 'execution.get', {
-          executionId: execution.id,
-        })
+      const state = await this.executionEvents.wait(execution, signal, state => {
         this.active
           .get(run.id)
           ?.worker.postMessage({
@@ -235,16 +251,17 @@ export class RunManager {
               toolCalls: state.toolCalls,
             },
           })
-      }
+      })
       if (state.status !== 'completed')
         throw new Error(state.error || state.status)
+      if (!state.resultRef) throw new Error('Moss 未返回执行结果引用')
       let text = '',
         offset = 0
       while (true) {
-        const chunk = await this.host.request(EXEC, 'execution.result.read', {
+        const chunk = await this.executions.request('execution.result.read', {
           resultRef: state.resultRef,
           offset,
-        })
+        }, { signal })
         text += chunk.text
         if (chunk.nextOffset === null) break
         offset = chunk.nextOffset
@@ -264,17 +281,18 @@ export class RunManager {
     const active = this.active.get(run.id)
     clearInterval(active?.timer)
     this.active.delete(run.id)
+    active?.controller.abort(new Error('工作流已结束'))
     Object.assign(run, outcome, { endedAt: Date.now() })
     this.save(run)
     this.emit({ runId: run.id, status: run.status })
     await this.completeTask(run)
   }
   async completeTask(run: any) {
-    const task = await this.host.request(TASKS, 'task.get', {
+    const task = await this.tasks.request('task.get', {
       taskId: run.taskId,
     })
     if (!terminal.has(task.status))
-      await this.host.request(TASKS, 'task.finish', {
+      await this.tasks.request('task.finish', {
         taskId: run.taskId,
         revision: task.revision,
         status: run.status === 'completed' ? 'completed' : 'failed',
@@ -297,9 +315,10 @@ export class RunManager {
     const active = this.active.get(runId)
     this.active.delete(runId)
     clearInterval(active?.timer)
+    active?.controller.abort(new Error(reason))
     await active?.worker.terminate()
-    await this.host
-      .request(TASKS, 'task.cancel', { taskId: run.taskId, reason })
+    await this.tasks
+      .request('task.cancel', { taskId: run.taskId, reason })
       .catch(() => {})
     this.emit({ runId, status: run.status })
     return this.summary(run)
@@ -309,10 +328,10 @@ export class RunManager {
     if (!['interrupted', 'failed', 'cancelled', 'blocked'].includes(run.status))
       throw new Error('当前状态不能恢复')
     if (this.active.size >= 4) throw new Error('运行数量已达上限')
-    const task = await this.host.request(TASKS, 'task.get', {
+    const task = await this.tasks.request('task.get', {
       taskId: run.taskId,
     })
-    const next = await this.host.request(TASKS, 'task.resume', {
+    const next = await this.tasks.request('task.resume', {
       taskId: run.taskId,
       revision: task.revision,
     })
@@ -329,9 +348,12 @@ export class RunManager {
     return this.summary(run)
   }
   async close() {
+    this.unsubscribeTasks()
+    this.executionEvents.close()
     clearInterval(this.completionTimer)
     await Promise.all(
-      [...this.active.keys()].map((id) => this.cancel(id, 'App 已停止')),
+      [...this.active.keys()].map((id) => this.cancel(id, 'Execution watcher closed')),
     )
+    this.detached.emitDestroy()
   }
 }

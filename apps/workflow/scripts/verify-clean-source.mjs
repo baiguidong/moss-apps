@@ -17,7 +17,7 @@ try {
  // Source is isolated. Core's unchanged, installed dependency tree is reused.
  fs.symlinkSync(path.resolve(repo,'../moss/node_modules'),path.join(core,'node_modules'),'dir')
  fs.symlinkSync(path.resolve(repo,'../moss/ui/node_modules'),path.join(core,'ui/node_modules'),'dir')
- fs.cpSync(path.join(core,'packages/app-sdk'),path.join(apps,'vendor/moss-core/packages/app-sdk'),{recursive:true})
+ for(const name of ['app-sdk','host-contracts'])fs.cpSync(path.join(core,'packages',name),path.join(apps,'vendor/moss-core/packages',name),{recursive:true})
  run('bun',['install','--ignore-scripts'],apps)
  run('bun',['run','build'],path.join(apps,'apps/workflow'))
  run('node',['scripts/package-app.mjs','--app','workflow','--skip-build'],apps)

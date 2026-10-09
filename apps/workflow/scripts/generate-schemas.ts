@@ -31,7 +31,7 @@ for(const [name,operations] of Object.entries(groups)) {
   const branches=Object.entries(operations).map(([operation,action])=>{const schema=read(action);return {...schema,properties:{...schema.properties,operation:{const:operation,type:'string'}},required:['operation',...(schema.required??[])]}})
   write(name,{type:'object',definitions,properties:{...Object.assign({},...branches.map(b=>b.properties)),operation:{type:'string',enum:Object.keys(operations)}},required:['operation'],additionalProperties:false,description:branches.map(b=>`${b.properties.operation.const}: required ${b.required.join(', ')}`).join('; ')})
 }
-const manifest = JSON.parse(fs.readFileSync('app.moss.json','utf8'));manifest.hostApi='^2.8.0'
+const manifest = JSON.parse(fs.readFileSync('app.moss.json','utf8'));manifest.hostApi='^3.0.0'
 manifest.backend.actions = manifest.backend.actions.filter((a:any)=>!['templates.list','history.list','history.get','commands.list'].includes(a.name))
 manifest.contributes.resourceProviders=[{id:'workflows',title:'工作流',schemes:['moss-workflow'],resolveAction:'composer.resolve',listAction:'composer.list'}]
 write('composer.list',{type:'object',properties:{query:{type:'string',maxLength:512},offset:{type:'integer',minimum:0},limit:{type:'integer',minimum:1,maximum:20}},additionalProperties:false})

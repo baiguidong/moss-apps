@@ -29,3 +29,5 @@ if (result.error) {
 if (result.status !== 0) process.exit(result.status ?? 1)
 
 fs.copyFileSync(path.join(appRoot, 'src', 'index.html'), uiFile)
+
+fs.copyFileSync(fileURLToPath(import.meta.resolve('@moss/app-sdk/ui')), path.join(path.dirname(uiFile), 'app-client.mjs'))

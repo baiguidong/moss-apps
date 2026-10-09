@@ -1,3 +1,4 @@
+import { createAppClient } from '@moss/app-sdk/ui'
 import type { AppUiApi } from '@moss/app-sdk'
 import type { ActionResult, CloudEvent, DriveApi, DriveMethod, Input, Output, RuntimeStatus } from '../contracts'
 import { actionTimeout } from '../contracts'
@@ -6,32 +7,24 @@ import { DriveError } from './errors'
 declare global { interface Window { mossApp?: AppUiApi } }
 
 export function createHostApi(bridge: AppUiApi): DriveApi {
-  let instance: Promise<string> | undefined
+  const client = createAppClient(bridge)
   let disposed = false
-  const pending = new Map<string, string>()
-  const resolveInstance = () => instance ??= bridge.instances.list().then(instances => {
-    const item = instances[0]
-    if (!item?.id) throw new DriveError('HOST_UNAVAILABLE')
-    return String(item.id)
-  }).catch(error => { instance = undefined; throw error })
   return {
     demo: false,
     async request<M extends DriveMethod>(method: M, input: Input<M>): Promise<Output<M>> {
-      const id = await resolveInstance()
       if (disposed) throw new DriveError('APP_ACTION_CANCELED')
       const requestId = crypto.randomUUID()
-      pending.set(requestId, id)
-      try {
-        const response = await bridge.actions.invoke<ActionResult<Output<M>>>(id, method, input, { requestId, timeoutMs: actionTimeout(method) })
+      {
+        const response = await client.actions.invoke<ActionResult<Output<M>>>(method, input, { requestId, timeoutMs: actionTimeout(method) })
         if (!response?.ok) throw new DriveError(response?.error?.code || 'REQUEST_FAILED', response?.error?.message)
         return response.data
-      } finally { pending.delete(requestId) }
+      }
     },
     async runtime(): Promise<RuntimeStatus> {
       const installation = await bridge.app.getInstallationState()
       const record = installation?.installation as { enabled?: boolean } | undefined
       if (!record?.enabled) return { state: 'disabled' }
-      const status = await bridge.instances.getStatus(await resolveInstance())
+      const status = await bridge.app.getStatus()
       return { state: String(status?.state || 'stopped'), error: typeof status?.lastError === 'string' ? status.lastError : undefined }
     },
     onCloud: callback => bridge.events.on('cloud.event', event => {
@@ -44,8 +37,7 @@ export function createHostApi(bridge: AppUiApi): DriveApi {
     }),
     dispose() {
       disposed = true
-      for (const [requestId, id] of pending) void bridge.actions.cancel(id, requestId).catch(() => {})
-      pending.clear()
+      client.dispose()
     },
   }
 }

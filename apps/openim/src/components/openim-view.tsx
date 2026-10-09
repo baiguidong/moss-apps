@@ -1,3 +1,4 @@
+import { createAppClient } from '@moss/app-sdk/ui';
 "use client";
 
 import * as React from "react";
@@ -286,6 +287,9 @@ export function OpenIMView() {
   const [sessionRevision, setSessionRevision] = React.useState(0);
   const [bootstrapRetryVersion, setBootstrapRetryVersion] = React.useState(0);
   const [connectionError, setConnectionError] = React.useState("");
+  const downloads = React.useRef(new Set<AbortController>());
+  const [downloadCount, setDownloadCount] = React.useState(0);
+  React.useEffect(() => () => { for (const controller of downloads.current) controller.abort(); downloads.current.clear(); }, []);
   const [conversations, setConversations] = React.useState<ConversationItem[]>([]);
   const [activeConversation, setActiveConversation] = React.useState<ConversationItem | null>(null);
   const [messages, setMessages] = React.useState<MessageItem[]>([]);
@@ -418,7 +422,7 @@ export function OpenIMView() {
 
   const refreshAppInstance = React.useCallback(async () => {
     const instances = await window.mossApp.instances.list();
-    const instance = instances[0];
+    const instance = instances[0] as { id: string; enabled?: boolean } | undefined;
     setAppInstance(instance ? { id: instance.id, enabled: instance.enabled === true } : null);
     return instance;
   }, []);
@@ -914,19 +918,17 @@ export function OpenIMView() {
   const cancelPendingAgentReplies = React.useCallback(async (target: ConversationItem) => {
     if (!appInstance?.enabled || !profile?.userID || target.conversationType !== SessionType.Single) return;
     const externalConversationId = openIMDirectConversationId(profile.userID, target.userID);
-    const result = await window.mossApp.host.request<{
+    const result = await createAppClient(window.mossApp).host.request<{
       turns?: Array<{ id?: string; status?: string; deliveredAt?: number | null }>;
     }>(
-      appInstance.id,
       "moss.agent/v1",
       "turn.list",
       { externalConversationId, statuses: ["queued", "running", "awaiting_review", "completed"], limit: 100 },
     );
     await Promise.allSettled((result.turns || []).map((turn) => {
       if (!turn.id || (turn.status === "completed" && turn.deliveredAt)) return Promise.resolve();
-      return window.mossApp.host.request(
-        appInstance.id,
-        "moss.agent/v1",
+      return createAppClient(window.mossApp).host.request(
+          "moss.agent/v1",
         turn.status === "awaiting_review" ? "turn.review" : "turn.abort",
         turn.status === "awaiting_review"
           ? { turnId: turn.id, action: "reject" }
@@ -961,9 +963,8 @@ export function OpenIMView() {
         const observedText = openIMMessageSummary(sent.data).trim();
         const externalMessageId = String(sent.data.serverMsgID || sent.data.clientMsgID || "");
         if (observedText && externalMessageId) {
-          await window.mossApp.host.request(
-            appInstance.id,
-            "moss.agent/v1",
+          await createAppClient(window.mossApp).host.request(
+                  "moss.agent/v1",
             "context.observe",
             {
               externalUserId: target.userID,
@@ -1343,10 +1344,16 @@ export function OpenIMView() {
   };
 
   const downloadMessage = async (url: string, fileName: string) => {
+    const controller = new AbortController();
+    downloads.current.add(controller);
+    setDownloadCount(downloads.current.size);
     try {
-      await openIMHost.download({ url, fileName });
+      await openIMHost.download({ url, fileName }, controller.signal);
     } catch (error) {
-      setConnectionError(errorMessage(error));
+      if (!controller.signal.aborted) setConnectionError(errorMessage(error));
+    } finally {
+      downloads.current.delete(controller);
+      setDownloadCount(downloads.current.size);
     }
   };
 
@@ -1487,6 +1494,7 @@ export function OpenIMView() {
       <div className="flex h-11 shrink-0 items-center gap-3 border-b border-border/70 px-4">
         <MessageSquareText className="h-4 w-4 shrink-0 text-primary" />
         <div className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">即时消息</div>
+        {downloadCount > 0 ? <Button variant="ghost" size="sm" onClick={() => { for (const controller of downloads.current) controller.abort(); }}>取消下载（{downloadCount}）</Button> : null}
         {appInstance?.enabled ? <Button type="button" variant="ghost" size="sm" className="h-7 text-xs" disabled={!currentUserID} onClick={openDefaultPolicy}><Bot className="h-3.5 w-3.5" />默认 AI 策略</Button> : appInstance ? <Button type="button" variant="outline" size="sm" className="h-7 text-xs" disabled={agentBackendBusy} onClick={() => void enableAgentBackend()}>{agentBackendBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Bot className="h-3.5 w-3.5" />}启用 AI 回复</Button> : null}
         <button
           type="button"

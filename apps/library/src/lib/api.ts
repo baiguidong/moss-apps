@@ -1,3 +1,4 @@
+import { createAppClient } from '@moss/app-sdk/ui'
 import type { AppUiApi } from '@moss/app-sdk'
 declare global { interface Window { mossApp?: AppUiApi } }
 export interface Collection { id: string; name: string; description: string; resourceCount: number }
@@ -6,16 +7,11 @@ export interface Job { id: string; sourceId: string; status: string; error: stri
 export interface Source { id: string; name: string; status: string; error: string }
 export interface Api { demo: boolean; request<T = unknown>(name: string, input?: Record<string, unknown>): Promise<T>; subscribe(fn: () => void): () => void }
 export function createHostApi(bridge: AppUiApi): Api {
-  let instance: Promise<string> | undefined
-  const id = () => instance ??= bridge.instances.list().then(items => {
-    if (!items[0]) throw new Error('知识库尚未启用，请在应用管理中启用。')
-    return String(items[0].id)
-  }).catch(e => { instance = undefined; throw e })
+  const client = createAppClient(bridge)
   return {
     demo: false,
     async request<T>(name: string, input: Record<string, unknown> = {}) {
-      const instanceId = await id()
-      const invoke = (args: Record<string, unknown>) => bridge.actions.invoke(instanceId, name, args, { timeoutMs: 300000 }) as Promise<{ data?: T; nextOffset?: number | null }>
+      const invoke = (args: Record<string, unknown>) => client.actions.invoke(name, args, { timeoutMs: 300000 }) as Promise<{ data?: T; nextOffset?: number | null }>
       const result = await invoke(input)
       if ((name === 'collections.list' || name === 'sources.list') && input.offset === undefined && input.limit === undefined && Array.isArray(result.data)) {
         const items = [...result.data]

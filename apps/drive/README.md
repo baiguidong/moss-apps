@@ -4,7 +4,7 @@ Moss 的个人云端文件空间。支持文件与目录列表、新建目录、
 
 ## 使用
 
-需要支持 Host API 2.3 的 Moss Desktop，以及已开启云端存储的 Moss Server。在 Moss 设置中连接服务器并登录，然后安装 `moss.drive-0.3.0.zip`。应用申请 `cloud-storage:read`、`cloud-storage:write`、`cloud-storage:delete` 和新增的 `cloud-storage:share`；安装或升级时需授予分享权限。Server 账号也需要分享权限，已有登录令牌可能需要重新登录。
+需要支持 Host API 3.0.0 的 Moss Desktop，以及已开启云端存储的 Moss Server。在 Moss 设置中连接服务器并登录，然后安装 `moss.drive-0.3.1.zip`。应用申请 `cloud-storage:read`、`cloud-storage:write`、`cloud-storage:delete` 和新增的 `cloud-storage:share`；安装或升级时需授予分享权限。Server 账号也需要分享权限，已有登录令牌可能需要重新登录。
 
 - “全部文件”中点击文件夹进入，通过面包屑返回。切换标签和“更新列表”保留当前目录。
 - “新建目录”创建到当前路径，支持根目录和子目录；空名称、非法字符、名称过长及同名冲突会提示修改。

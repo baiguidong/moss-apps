@@ -1,8 +1,23 @@
 # Moss App SDK
 
-当前引用 SDK `2.8.0`。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用其 SDK workspace，仅维护接入说明和消费端回归测试。
+当前引用 SDK / Runtime `3.0.0`，全部 App 声明 `hostApi: "^3.0.0"`。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用 SDK 和 host-contracts workspace，仅维护接入说明和消费端回归测试。
 
-App 可通过通用 `backend.host.request()` 使用较新 Desktop 提供的协议。MCP App 要求 Host API `^2.4.0` 的 `moss.mcp/v1`，仍可使用当前 SDK 的传输实现。仓库构建校验采用 Manifest 声明的最低 Host 版本；市场和安装阶段继续按实际运行的 Host 版本判断兼容性。无需为仅使用通用 transport 的协议复制 SDK 或更新子模块。详见 [MCP App](../apps/mcp/README.md)。
+App 可通过通用 `backend.host.request()` 使用 Desktop 提供的协议。Tasks/Execution 和 MCP 优先使用 `@moss/app-sdk/execution`、`@moss/app-sdk/mcp` 的 typed client，其类型和校验器来自同一份 host-contracts。仓库构建校验采用 Manifest 声明的最低 Host 版本；市场和安装阶段继续按实际运行的 Host 版本判断兼容性。详见 [MCP App](../apps/mcp/README.md)。
+
+## 3.0 UI 调用与公共辅助函数
+
+```ts
+import { createAppClient } from '@moss/app-sdk/ui'
+const app = createAppClient(window.mossApp)
+const controller = new AbortController()
+await app.actions.invoke('files.list', {}, { signal: controller.signal })
+// 页面或组件销毁时取消这个 client 的未完成调用。
+app.dispose()
+```
+
+普通调用不再传 `instanceId`；Main 绑定当前 App，SDK 负责取消和结构化错误还原。原始 `window.mossApp` 是返回结果信封的隔离桥，业务代码应使用 SDK client。实例配置管理仍可使用 `instances` API，当前运行状态使用 `app.app.getStatus()`。
+
+`ExecutionWatcher` 复用执行事件订阅，提供初始查询、序号过滤、5 秒兜底和清理；Workflow 已采用。旧 UI 调用签名与 `validateExecutionInput` 已删除，统一使用 `validateExecutionHostInput`。
 
 ## Backend 运行契约
 
@@ -12,7 +27,7 @@ App 可以通过 Host API 使用 Moss Server 提供的能力，但 App Backend �
 
 这里的声明限制由仓库校验器在 SDK 规范化之前执行；SDK 与 Core 一致，会忽略未知 Manifest 字段且不修改调用方的原始对象。
 
-## 2.2 接口变化
+## 2.2 引入的领域接口（沿用至今）
 
 - 新增 `@moss/app-sdk/cloud-storage`：公共云端文件、目录、配额及传输任务。
 - 通用客户端能力改用 `@moss/app-sdk/platform`、`moss.platform/v1`、`platform:*` 权限，以及 `client.platform` / `context.platform`。旧 `desktop` 导出和方法已移除，已有 App 需要同步修改调用与 Manifest。
@@ -20,7 +35,7 @@ App 可以通过 Host API 使用 Moss Server 提供的能力，但 App Backend �
 - `instances.getStatus()` 类型修正为单个状态对象或 `null`。
 - 导出 `resolveBackendProtocols()`，`compileJsonSchema()` 支持可选的 `removeAdditional` 参数。
 
-校验器支持 `^2.0.0`、`^2.1.0` 和 `^2.2.0` 的版本范围。依赖云端存储或本次迁移后的 Platform 协议时，App 应声明 `hostApi: "^2.2.0"`，避免安装到本仓库先前使用的旧宿主。
+上述协议名称继续沿用，当前构建统一声明 Host API `^3.0.0`。
 
 ## 云端存储接入
 
@@ -32,7 +47,7 @@ App 可以通过 Host API 使用 Moss Server 提供的能力，但 App Backend �
   "id": "example.drive",
   "version": "0.1.0",
   "displayName": "网盘",
-  "hostApi": "^2.2.0",
+  "hostApi": "^3.0.0",
   "backend": {
     "entry": "dist/backend/main.mjs",
     "runtime": "node",
@@ -79,7 +94,7 @@ backend.start({
 })
 ```
 
-UI 调用已声明的 `mossApp.actions.invoke(instanceId, action, input)`，订阅 `mossApp.events.on('cloud.event', callback)` 显示进度，并在重新打开页面时查询任务恢复显示。实际 App 还需按创建规范补齐 UI、publisher、marketplace 信息、输入/输出 Schema 与状态处理。
+UI 通过绑定 client 调用已声明的 `app.actions.invoke(action, input)`，订阅 `app.events.on('cloud.event', callback)` 显示进度，并在重新打开页面时查询任务恢复显示。实际 App 还需按创建规范补齐 UI、publisher、marketplace 信息、输入/输出 Schema 与状态处理。
 
 上传、下载的返回值是任务 ID，不代表文件已经传完。任务通过 `transfers.get/list` 和 `transfers.progress/changed` 事件查询；暂停、恢复、取消使用 `transfers.pause/resume/cancel`。上传失败会进入 `paused` 并返回 `error`，不能只根据状态名判断是否出错。
 
@@ -89,15 +104,15 @@ UI 调用已声明的 `mossApp.actions.invoke(instanceId, action, input)`，订�
 
 ## 2.3 分享接口
 
-新增 `CloudShare`、`shares.create/list/revoke` 与 `cloud-storage:share`。网盘要求 `hostApi: ^2.3.0`，接收页由 Server 的 `/s/:token` 提供；浏览器不依赖 Desktop Host。详见 [分享实施方案](drive-sharing-plan.md) 及 Core 云端存储文档。
+2.3 引入 `CloudShare`、`shares.create/list/revoke` 与 `cloud-storage:share`。当前网盘要求 `hostApi: ^3.0.0`，接收页由 Server 的 `/s/:token` 提供；浏览器不依赖 Desktop Host。详见 [分享实施方案](drive-sharing-plan.md) 及 Core 云端存储文档。
 
-Trace App 通过通用 `backend.host.request()` 使用 Host API `^2.5.0` 的 `moss.trace/v1` 协议。构建按 App 声明的最低 Host 版本校验；市场和安装时仍检查实际 Host 版本。参见 [Trace App](../apps/trace/README.md)。
+Trace App 使用 2.5 引入的 `moss.trace/v1` 协议，当前要求 Host API `^3.0.0`。构建按 App 声明的最低 Host 版本校验；市场和安装时仍检查实际 Host 版本。参见 [Trace App](../apps/trace/README.md)。
 
-审计中心使用 Host API `^2.6.0` 的 `moss.audit/v1` 协议。App 自己维护规则引擎、SQLite 和扫描；Host 只导出脱敏会话、迁移旧库、保留撤销事件、定位会话和投递通知。固定的 Core 提交也用于最终签名 ZIP 的集成验证，避免依赖开发者的相邻工作区。参见 [审计中心](../apps/audit/README.md)。
+审计中心使用 2.6 引入的 `moss.audit/v1` 协议，当前要求 Host API `^3.0.0`。App 自己维护规则引擎、SQLite 和扫描；Host 负责脱敏会话、撤销事件、定位会话和投递通知。固定的 Core 提交也用于安装包集成验证。参见 [审计中心](../apps/audit/README.md)。
 
 
 ## 2.8 Workflow App 与会话资源
 
 Workflow 使用通用 `moss.agent-execution/v1` 执行接口与 `moss.tasks/v1`、App 任务、`resourceProviders.listAction` 和 `composer.prepare`。Core 不包含 Workflow 引擎；定义、画布和调度位于 `apps/workflow`。
 
-Workflow 固定使用 `vendor/moss-core` 中 Core 提交 `570209f8a0175216e94502d8737e0d93183d91a8` 的 SDK/Runtime 2.8。执行 `git submodule update --init --recursive` 后即可安装和构建，无需额外 SDK 补丁。
+Workflow 使用 `vendor/moss-core` 固定提交中的 SDK/Runtime 3.0 和 host-contracts。执行 `git submodule update --init --recursive` 后即可安装和构建，无需额外 SDK 补丁。

@@ -28,8 +28,8 @@ function App() {
     void window.mossApp.app.getInfo().then((info: { appearance?: MossAppearance }) => {
       if (!disposed) updateAppearance(info?.appearance);
     }).catch(() => updateAppearance(null));
-    const unsubscribe = window.mossApp.events.on("appearance", (appearance: MossAppearance) => {
-      if (!disposed) updateAppearance(appearance);
+    const unsubscribe = window.mossApp.events.on("appearance", (appearance: unknown) => {
+      if (!disposed) updateAppearance(appearance as MossAppearance);
     });
     const handleSystemThemeChange = () => {
       if (!disposed && appearanceThemeMode(currentAppearance) === "system") {

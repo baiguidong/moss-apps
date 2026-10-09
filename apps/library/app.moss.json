@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "id": "moss.library",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "displayName": "知识库",
   "description": "导入文档、管理资料集、全文检索和编辑本地知识。",
   "icon": "assets/icon.svg",
-  "hostApi": "^2.3.0",
+  "hostApi": "^3.0.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"

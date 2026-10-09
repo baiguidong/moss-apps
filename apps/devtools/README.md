@@ -13,7 +13,7 @@ Moss 的本地开发工具 App，提供时间戳、Base64、AES 与 JSON 四个�
 
 ## Moss 接入
 
-需要 Host API `^2.2.0`。按需启动的 Node Backend 提供四个页面操作：`timestamp.convert`、`base64.convert`、`aes.process`、`json.process`。这些操作仅由 App 界面调用，不向 Moss AI 助手注册工具。操作只返回转换结果，不写文件，不申请平台权限，App 自身不记录输入。
+需要 Host API `^3.0.0`。按需启动的 Node Backend 提供四个页面操作：`timestamp.convert`、`base64.convert`、`aes.process`、`json.process`。这些操作仅由 App 界面调用，不向 Moss AI 助手注册工具。操作只返回转换结果，不写文件，不申请平台权限，App 自身不记录输入。
 
 Moss 中始终调用 Backend，连接失败会显示错误。普通浏览器中使用相同核心实现本地运行，不使用伪造结果；只有完整桌面验证才能确认宿主调用链。纯 JavaScript 包无原生依赖，市场声明 macOS、Windows、Linux 的 x64/arm64；桌面集成实测平台需见验证记录。
 

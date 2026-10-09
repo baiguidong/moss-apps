@@ -1,3 +1,4 @@
+import { createAppClient } from '@moss/app-sdk/ui';
 import type { PlatformFile, PlatformHostMethod, PlatformHostRequestMap, PlatformHostResultMap } from "@moss/app-sdk";
 
 export type OpenIMDirectory = {
@@ -35,7 +36,6 @@ export type OpenIMProfile = {
 
 const PLATFORM_PROTOCOL = "moss.platform/v1";
 const MATERIALIZE_CHUNK_BYTES = 384 * 1024;
-let instanceIdPromise: Promise<string> | null = null;
 
 function bytesToBase64(data: ArrayBuffer): string {
   const bytes = new Uint8Array(data);
@@ -47,29 +47,16 @@ function bytesToBase64(data: ArrayBuffer): string {
   return btoa(binary);
 }
 
-async function resolveInstanceId(): Promise<string> {
-  if (!instanceIdPromise) {
-    instanceIdPromise = window.mossApp.instances.list().then((instances) => {
-      const instance = instances.find((item) => item.enabled === true) || instances[0];
-      if (!instance?.id) throw new Error("OpenIM App instance is unavailable.");
-      return String(instance.id);
-    }).catch((error) => {
-      instanceIdPromise = null;
-      throw error;
-    });
-  }
-  return instanceIdPromise;
-}
-
 async function invoke<T>(name: string, input: Record<string, unknown> = {}): Promise<T> {
-  return window.mossApp.actions.invoke<T>(await resolveInstanceId(), name, input);
+  return createAppClient(window.mossApp).actions.invoke<T>(name, input);
 }
 
 async function platform<Method extends PlatformHostMethod>(
   method: Method,
   input: PlatformHostRequestMap[Method],
+  signal?: AbortSignal,
 ): Promise<PlatformHostResultMap[Method]> {
-  return window.mossApp.host.request<PlatformHostResultMap[Method]>(await resolveInstanceId(), PLATFORM_PROTOCOL, method, input);
+  return createAppClient(window.mossApp).host.request<PlatformHostResultMap[Method]>(PLATFORM_PROTOCOL, method, input, { signal, timeoutMs: 300000 });
 }
 
 export const openIMHost = {
@@ -121,9 +108,10 @@ export const openIMHost = {
     { path: payload.path, width: 640, height: 360 },
   ),
   captureScreen: () => platform("screen.capture", {}),
-  download: (payload: { url: string; fileName: string }) => platform(
+  download: (payload: { url: string; fileName: string }, signal?: AbortSignal) => platform(
     "file.download",
     payload,
+    signal,
   ),
   openExternal: (url: string) => platform("shell.open-external", { url }),
   getRtcToken: (payload: { chatToken: string; room: string; identity: string }) => invoke<{
@@ -134,8 +122,4 @@ export const openIMHost = {
 
 export function invokeOpenIMSdk(method: string, ...args: unknown[]) {
   return invoke<any>("sdk.call", { method, args });
-}
-
-export function resetOpenIMHostInstance() {
-  instanceIdPromise = null;
 }

@@ -20,7 +20,7 @@ async function fixture(respond?: (method: string, input: any) => unknown, initia
       const server = servers.find(server => server.name === input.name)
       if (server) server.enabled = input.enabled
     }
-    return structuredClone({ servers })
+    return structuredClone({ servers: servers.map(server => ({ credentialsMissing: false, check: null, ...server })) })
   }
   const messages: AppServiceEnvelope<any>[] = []
   const backend = createMcpBackend({ send: (message: AppServiceEnvelope<any>) => {
@@ -106,7 +106,7 @@ test('failed setup keeps existing services usable and retries on a later list', 
 
 test('a concurrent same-name save is adopted without overwriting it', async () => {
   let hasConcurrent = false
-  const existing = { name: PLAYWRIGHT_CDP, enabled: false, updatedAt: 5, config: { type: 'stdio', command: 'custom' } }
+  const existing = { credentialsMissing: false, check: null, name: PLAYWRIGHT_CDP, enabled: false, updatedAt: 5, config: { type: 'stdio', command: 'custom' } }
   const f = await fixture(method => {
     if (method === 'servers.save') { hasConcurrent = true; throw new Error('已有同名服务') }
     if (hasConcurrent && method === 'servers.list') return { servers: [existing] }

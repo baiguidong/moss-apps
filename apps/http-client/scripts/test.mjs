@@ -9,9 +9,14 @@ try {
     if (generated.error) throw generated.error
     if (generated.status !== 0) throw new Error(`Cannot generate isolated test certificates: ${generated.stderr}`)
   }
-  const entry = join(directory, 'request.test.mjs')
-  for (const [command, args] of [['bun', ['build', 'tests/request.test.ts', '--target=node', `--outfile=${entry}`]], [process.execPath, ['--test', entry]]]) {
-    const result = spawnSync(command, args, { stdio: 'inherit', env: { ...process.env, MOSS_HTTP_TEST_CERTS: directory, NODE_EXTRA_CA_CERTS: join(directory, 'trusted.crt') } })
+  const requestTests = join(directory, 'request.test.mjs'), hostTests = join(directory, 'host.test.mjs'), backend = join(directory, 'backend.mjs')
+  for (const [command, args] of [
+    ['bun', ['build', 'tests/request.test.ts', '--target=node', `--outfile=${requestTests}`]],
+    ['bun', ['build', 'tests/host.test.ts', '--target=node', `--outfile=${hostTests}`]],
+    ['bun', ['build', 'src/backend/main.ts', '--target=node', `--outfile=${backend}`]],
+    [process.execPath, ['--test', requestTests, hostTests]],
+  ]) {
+    const result = spawnSync(command, args, { stdio: 'inherit', env: { ...process.env, MOSS_HTTP_TEST_CERTS: directory, MOSS_HTTP_TEST_BACKEND: backend, NODE_EXTRA_CA_CERTS: join(directory, 'trusted.crt') } })
     if (result.error) throw result.error
     if (result.status !== 0) process.exitCode = result.status || 1
     if (process.exitCode) break

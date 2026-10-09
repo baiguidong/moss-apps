@@ -2,7 +2,7 @@
 
 独立的 Moss MCP 管理 App。内置 Playwright CDP 浏览器服务，使用紧凑工具栏与分栏工作区。左侧搜索和筛选服务，右侧查看工具、连接信息和授权状态。支持本地进程（stdio）、Streamable HTTP、SSE，提供连接检查、工具目录、服务启停及浏览器 OAuth 授权。
 
-需要提供 `moss.mcp/v1` 的 Moss Desktop（Host API 2.4.0 或更新的兼容版本）。App 通过现有 SDK 的通用 Host transport 调用该协议，无需复制 SDK 或 MCP 客户端。安装时授予 MCP 读取、管理、连接及授权权限。
+需要提供 `moss.mcp/v1` 的 Moss Desktop（Host API ^3.0.0）。App 通过现有 SDK 的通用 Host transport 调用该协议，无需复制 SDK 或 MCP 客户端。安装时授予 MCP 读取、管理、连接及授权权限。
 
 ## 内置 Playwright CDP
 

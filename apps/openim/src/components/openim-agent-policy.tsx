@@ -1,3 +1,4 @@
+import { createAppClient } from '@moss/app-sdk/ui';
 "use client";
 
 import * as React from "react";
@@ -178,15 +179,14 @@ function draftPatch(draft: PolicyDraft, customContact: boolean): AgentBindingPat
 }
 
 async function agentRequest<T>(
-  instanceId: string,
   method: string,
   input: Record<string, unknown>,
 ) {
-  return window.mossApp.host.request<T>(instanceId, MOSS_AGENT_PROTOCOL, method, input);
+  return createAppClient(window.mossApp).host.request<T>(MOSS_AGENT_PROTOCOL, method, input);
 }
 
-async function cancelConversationTurns(instanceId: string, conversationId: string) {
-  const result = await agentRequest<AgentHostResultMap["turn.list"]>(instanceId, "turn.list", {
+async function cancelConversationTurns(conversationId: string) {
+  const result = await agentRequest<AgentHostResultMap["turn.list"]>("turn.list", {
     externalConversationId: conversationId,
     statuses: ["queued", "running", "awaiting_review"],
     limit: 100,
@@ -194,7 +194,7 @@ async function cancelConversationTurns(instanceId: string, conversationId: strin
   await Promise.allSettled((result.turns || []).map((raw) => {
     const turn = record(raw);
     return turn.id
-      ? agentRequest(instanceId, "turn.abort", { turnId: String(turn.id) })
+      ? agentRequest("turn.abort", { turnId: String(turn.id) })
       : Promise.resolve();
   }));
 }
@@ -344,13 +344,13 @@ export function OpenIMAgentPolicyDialog({
     try {
       const peerId = String(target.peerId || "").trim();
       const [catalogResult, bindingResult, sessionResult] = await Promise.all([
-        agentRequest<AgentHostResultMap["catalog.list"]>(instanceId, "catalog.list", {}),
-        agentRequest<BindingResult>(instanceId, "binding.get", {
+        agentRequest<AgentHostResultMap["catalog.list"]>("catalog.list", {}),
+        agentRequest<BindingResult>("binding.get", {
           externalConversationId: target.conversationId,
           defaultConversationId,
         }),
         target.kind === "contact" && peerId
-          ? agentRequest<Record<string, any>>(instanceId, "session.current", {
+          ? agentRequest<Record<string, any>>("session.current", {
               externalUserId: peerId,
               externalConversationId: target.conversationId,
             }).catch(() => ({ session: null }))
@@ -390,13 +390,13 @@ export function OpenIMAgentPolicyDialog({
     setError("");
     try {
       if (target.kind === "contact" && followDefault) {
-        await agentRequest(instanceId, "binding.reset", {
+        await agentRequest("binding.reset", {
           externalConversationId: target.conversationId,
           defaultConversationId,
           expectedRevision: binding?.revision || 0,
         });
       } else {
-        await agentRequest(instanceId, "binding.update", {
+        await agentRequest("binding.update", {
           externalConversationId: target.conversationId,
           defaultConversationId,
           expectedRevision: binding?.revision || 0,
@@ -404,7 +404,7 @@ export function OpenIMAgentPolicyDialog({
         });
       }
       if (target.kind === "contact") {
-        await cancelConversationTurns(instanceId, target.conversationId);
+        await cancelConversationTurns(target.conversationId);
         window.dispatchEvent(new Event("openim:agent-turns-changed"));
       }
       onClose();
@@ -426,7 +426,7 @@ export function OpenIMAgentPolicyDialog({
     setResettingSession(true);
     setError("");
     try {
-      const result = await agentRequest<Record<string, any>>(instanceId, "session.create", {
+      const result = await agentRequest<Record<string, any>>("session.create", {
         externalUserId: peerId,
         externalConversationId: target.conversationId,
         externalEventId: `context-reset:${crypto.randomUUID()}`,
@@ -576,7 +576,7 @@ export function OpenIMPendingReviews({
       return;
     }
     try {
-      const result = await agentRequest<AgentHostResultMap["turn.list"]>(instanceId, "turn.list", {
+      const result = await agentRequest<AgentHostResultMap["turn.list"]>("turn.list", {
         externalConversationId: conversationId,
         statuses: ["awaiting_review"],
         limit: 100,
@@ -611,7 +611,7 @@ export function OpenIMPendingReviews({
     setBusyTurnId(turn.id);
     setError("");
     try {
-      await agentRequest(instanceId, "turn.review", {
+      await agentRequest("turn.review", {
         turnId: turn.id,
         action,
         ...(action === "approve" ? { text: drafts[turn.id] || "" } : {}),
@@ -673,7 +673,7 @@ export function OpenIMAgentActivity({
       if (status) setActivity({ status, error: String(data.error || "") });
     };
     if (instanceId) {
-      void agentRequest<AgentHostResultMap["turn.list"]>(instanceId, "turn.list", {
+      void agentRequest<AgentHostResultMap["turn.list"]>("turn.list", {
         externalConversationId: conversationId,
         statuses: ["queued", "running"],
         limit: 1,

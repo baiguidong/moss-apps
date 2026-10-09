@@ -29,7 +29,7 @@ bun run --cwd apps/library test:desktop
 
 ## Host 要求
 
-需要本次 Core 变更新增的两个通用协议（Host API 2.3 的扩展机制，不修改 SDK 副本）：
+需要本次 Core 变更新增的两个通用协议（Host API 3.0.0 的扩展机制，不修改 SDK 副本）：
 
 | 协议 | 方法 | 用途 |
 | --- | --- | --- |

@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "id": "moss.http-client",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "displayName": "HTTP 调试",
   "description": "编辑请求、查看响应，常用接口调试在本地完成。",
   "icon": "assets/icon.svg",
-  "hostApi": "^2.2.0",
+  "hostApi": "^3.0.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"

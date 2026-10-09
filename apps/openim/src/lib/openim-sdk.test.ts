@@ -18,12 +18,12 @@ it("uses the App action bridge without exposing OpenIM credentials to the UI", a
       mossApp: {
         instances: { list: async () => [{ id: "moss.openim--default", enabled: true }] },
         actions: {
-          invoke: async (_instanceId: string, name: string, input: any) => {
+          invoke: async (name: string, input: any) => {
             calls.push({ name, input });
             if (name !== "sdk.call") throw new Error(`Unexpected action: ${name}`);
-            if (input.method === "getLoginStatus") return { errCode: 0, data: 2 };
-            if (input.method === "getSelfUserInfo") return { errCode: 0, data: selfInfo };
-            if (input.method === "logout") return { errCode: 0, data: null };
+            if (input.method === "getLoginStatus") return { ok: true, result: { errCode: 0, data: 2 } };
+            if (input.method === "getSelfUserInfo") return { ok: true, result: { errCode: 0, data: selfInfo } };
+            if (input.method === "logout") return { ok: true, result: { errCode: 0, data: null } };
             throw new Error(`Unexpected OpenIM method: ${input.method}`);
           },
         },

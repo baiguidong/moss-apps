@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.9
+
+- 适配 Host API 3：使用绑定当前 App 的 SDK，统一调用取消及错误处理。
+
 ## 0.2.8 - 2026-09-29
 
 - 将 OpenIM 的 `10303: unread count has zero` 作为标记已读成功处理，避免页面与 AI 自动回复重复标记时产生 IPC 报错。

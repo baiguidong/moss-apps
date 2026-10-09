@@ -14,6 +14,8 @@
 
 重试同一次启动复用 `submissionKey`。发布版本选择必须固定；发送前重新校验，不能静默换版本。大结果通过 `resourceRef` 分块读取。节点/边状态快照与详细事件分开存储，`run.events` 支持从序号分页读取。
 
+Host API 3.0 起使用有类型的 Tasks / Execution 客户端，单个 Backend 订阅按执行 ID 分派状态事件，按 sequence 忽略旧进度。注册后立即查询，运行时每 5 秒查询兜底，覆盖完成事件早于启动响应和漏推。App 只需当前执行快照，不重复拉取 Core 的事件历史；工作流自己的节点事件照常保存在运行记录中。停止/结束/关闭时释放对应等待、查询和监听，恢复仍使用原幂等执行收据。
+
 ```sh
 bun run check
 bun run test
@@ -26,4 +28,4 @@ node scripts/verify-experience-cdp.mjs
 
 CDP 验证使用 Moss 的 9222 端口和 Main inspector 的 9223 端口。测试会记录精确的工作流、会话及运行 ID；验证后按清单清理测试数据。验证记录在 `artifacts/moss.workflow/verification/<version>/`。
 
-市场版本由 CI 签名并发布；需要 Host API 2.8。包验证使用固定的 `vendor/moss-core` 和 Manifest 当前版本，发布时增加 `--require-signature` 校验受信任签名。
+市场版本由 CI 签名并发布；需要 Host API 3.0。包验证使用 `vendor/moss-core` 和 Manifest 当前版本；本地联调可指定 `MOSS_CORE_ROOT` 为对应 Core 工作区，构建用的 SDK 必须与其一致。发布时增加 `--require-signature` 校验受信任签名。

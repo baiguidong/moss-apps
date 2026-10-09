@@ -29,6 +29,7 @@
 
 - 单个 `on-demand` Backend，`request.send` action 仅供 App 界面发送请求，不向 Moss AI 助手注册工具。
 - 使用公开 `mossApp` action、取消、storage 与外观 API；无额外 Host 权限或协议。
+- 0.1.3 起需要 Host API 3.0；启动前取消由 Runtime 登记，一次 `actions.cancel` 即可，UI 等原调用结束后完成取消状态并移除监听。
 - UI 遵循 Moss token，自动同步主题和背景。输入不会写入浏览器持久存储。
 - 普通浏览器可编辑和查看示例输入；实际发送及模板持久化需要 Moss，不会以浏览器直连或虚构响应冒充 Backend 成功。
 

@@ -45,7 +45,7 @@ async function backendHarness(protocols: string[], grants: string[] = []) {
   return { client, sent, send, reply }
 }
 
-describe('SDK 2.8 consumer contract', () => {
+describe('SDK 3.0 consumer contract', () => {
   it('loads the public entry points in the Node Backend runtime', () => {
     const output = execFileSync('node', [
       '--input-type=module', '-e', `
@@ -61,7 +61,7 @@ describe('SDK 2.8 consumer contract', () => {
       `,
     ], { cwd: new URL('..', import.meta.url), encoding: 'utf8' })
     expect(JSON.parse(output)).toEqual({
-      version: '2.8.0', cloud: MOSS_CLOUD_STORAGE_PROTOCOL,
+      version: '3.0.0', cloud: MOSS_CLOUD_STORAGE_PROTOCOL,
       platform: MOSS_PLATFORM_PROTOCOL, sameExports: true,
     })
   })
@@ -69,7 +69,7 @@ describe('SDK 2.8 consumer contract', () => {
   it('accepts a cloud App and enforces its minimum Host version', () => {
     const source = {
       schemaVersion: 2, id: 'example.drive', version: '0.1.0', displayName: 'Drive',
-      hostApi: '^2.2.0', permissions: ['cloud-storage:read', 'cloud-storage:write'],
+      hostApi: '^3.0.0', permissions: ['cloud-storage:read', 'cloud-storage:write'],
       backend: {
         entry: 'dist/backend.mjs', runtime: 'node', apiVersion: 1, lifecycle: 'persistent',
         protocols: [MOSS_CLOUD_STORAGE_PROTOCOL], actions: [{ name: 'files.list' }],

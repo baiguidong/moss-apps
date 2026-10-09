@@ -6,7 +6,8 @@
   "packageManager": "bun@1.3.10",
   "workspaces": [
     "apps/*",
-    "vendor/moss-core/packages/app-sdk"
+    "vendor/moss-core/packages/app-sdk",
+    "vendor/moss-core/packages/host-contracts"
   ],
   "scripts": {
     "validate": "node scripts/validate-apps.mjs",

@@ -1,3 +1,4 @@
+import { createAppClient } from '@moss/app-sdk/ui'
 import React, { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import type { AppUiApi } from '@moss/app-sdk'
@@ -7,25 +8,21 @@ import { buildWorkflowGraph } from './engine/graph'
 import { syncAppearance } from './ui/appearance'
 import './style.css'
 declare global { interface Window { mossApp?: AppUiApi } }
-let instance: Promise<string>
 async function api(name: string, input: any = {}): Promise<any> {
   if (!window.mossApp) throw new Error('请在 Moss 中打开工作流 App')
-  const id = await (instance ??= window.mossApp.instances.list().then(items => {
-    if (!items[0]) throw new Error('工作流 App 未启用')
-    return String(items[0].id)
-  }))
+  const client = createAppClient(window.mossApp)
   const expand = async (value: any): Promise<any> => {
     if (!value?.truncated || !value.resourceRef) return value
     let text = '', offset = 0
     while (true) {
-      const chunk: any = await window.mossApp!.actions.invoke(id, 'resource.read', { resourceRef: value.resourceRef, offset })
+      const chunk: any = await client.actions.invoke('resource.read', { resourceRef: value.resourceRef, offset })
       text += chunk.text
       if (chunk.nextOffset === null) break
       offset = chunk.nextOffset
     }
     return JSON.parse(text)
   }
-  const result: any = await window.mossApp.actions.invoke(id, name, input)
+  const result: any = await client.actions.invoke(name, input)
   const value = Array.isArray(result) ? await Promise.all(result.map(expand)) : await expand(result)
   if (name === 'run.get' && value.definition?.truncated) value.definition = await expand(value.definition)
   return value

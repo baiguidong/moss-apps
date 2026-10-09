@@ -22,11 +22,11 @@ try {
  const commit=tree===git(core,['rev-parse','HEAD^{tree}']) ? base : git(core,['-c','user.name=Moss Local Snapshot','-c','user.email=snapshot@localhost','commit-tree',tree,'-p',base,'-m',`Workflow App ${version} compatible Core source snapshot`],env)
  const tar=execFileSync('git',['-C',core,'archive','--format=tar',commit],{maxBuffer:256*1024*1024});const archive=gzipSync(tar)
  fs.writeFileSync(path.join(output,'core-source.tar.gz'),archive)
- const files={};for(const file of git(vendor,['ls-files','--','packages/app-sdk','packages/app-runtime']).split('\n'))if(file&&!file.includes('node_modules')){
+ const files={};for(const file of git(vendor,['ls-files','--','packages/app-sdk','packages/app-runtime','packages/host-contracts']).split('\n'))if(file&&!file.includes('node_modules')){
   const body=fs.readFileSync(path.join(vendor,file));files[file]=hash(body)
   if(hash(fs.readFileSync(path.join(core,file)))!==files[file])throw new Error('Pinned vendor SDK differs from Core: '+file)
  }
- const metadata={version:'2.8.0',baseCommit:git(vendor,['rev-parse','HEAD']),files}
+ const metadata={version:JSON.parse(fs.readFileSync(path.join(vendor,'packages/app-sdk/package.json'),'utf8')).version,baseCommit:git(vendor,['rev-parse','HEAD']),files}
  const appFiles={};const walk=(dir)=>{for(const entry of fs.readdirSync(dir,{withFileTypes:true})){if(['node_modules','dist','.git'].includes(entry.name))continue;const file=path.join(dir,entry.name);if(entry.isDirectory())walk(file);else if(entry.isFile())appFiles[path.relative(repo,file)]=hash(fs.readFileSync(file))}};walk(path.join(repo,'apps/workflow'))
  const appArchive=path.join(output,'app-source.tar.gz')
  execFileSync('tar',['--exclude=node_modules','--exclude=dist','-czf',appArchive,'-C',repo,'apps/workflow','scripts/lib.mjs','scripts/package-app.mjs','package.json','bun.lock','publishers'])

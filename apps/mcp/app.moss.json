@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "id": "moss.mcp",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "displayName": "MCP",
   "description": "管理 MCP 服务连接，让常用工具融入对话。",
   "icon": "assets/icon.svg",
-  "hostApi": "^2.4.0",
+  "hostApi": "^3.0.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"

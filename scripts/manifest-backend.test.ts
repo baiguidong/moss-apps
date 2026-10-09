@@ -17,7 +17,7 @@ function manifest(backendOverrides: Record<string, unknown> = {}) {
     id: 'example.app',
     version: '1.0.0',
     displayName: 'Example',
-    hostApi: '^2.0.0',
+    hostApi: '^3.0.0',
     permissions: [],
     backend: { ...backend, ...backendOverrides },
   }
@@ -34,12 +34,11 @@ describe('App Backend manifest', () => {
     expect(() => validateAppManifest(source, { hostApiVersion: '2.3.0' })).toThrow(/requires Host API/)
     expect(() => validateRepositoryAppManifest({ ...source, hostApi: 'invalid' })).toThrow()
   })
-  it('advertises Host API 2.8 while accepting Apps built for compatible 2.x hosts', () => {
-    expect(APP_HOST_API_VERSION).toBe('2.8.0')
-    for (const hostApi of ['^2.0.0', '^2.1.0', '^2.2.0', '^2.3.0', '^2.4.0', '^2.5.0', '^2.6.0', '^2.7.0', '^2.8.0']) {
-      expect(validateAppManifest({ ...manifest(), hostApi }).hostApi).toBe(hostApi)
-    }
+  it('advertises Host API 3 and rejects old UI contracts', () => {
+    expect(APP_HOST_API_VERSION).toBe('3.0.0')
+    expect(validateAppManifest({ ...manifest(), hostApi: '^3.0.0' }).hostApi).toBe('^3.0.0')
     expect(() => validateAppManifest({ ...manifest(), hostApi: '^2.9.0' })).toThrow(/requires Host API/)
+    expect(() => validateAppManifest({ ...manifest(), hostApi: '^3.1.0' })).toThrow(/requires Host API/)
   })
 
   it('uses one Backend and accepts the legacy single declaration without retaining it', () => {

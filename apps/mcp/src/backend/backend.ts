@@ -1,12 +1,13 @@
+import { createMcpClient, type McpHostInputMap } from '@moss/app-sdk/mcp'
 import { AppBackendClient, type AppActionContext } from '@moss/app-sdk'
-import { METHODS, timeout, type Catalog, type McpConfig, type Result } from '../contracts'
+import { METHODS, timeout, type Catalog, type Method, type McpConfig, type Result } from '../contracts'
 import { isBuiltin, validateBuiltinAction, withBuiltins } from '../builtins'
 import { builtinServers, useBundledPlaywright } from './builtin-config'
 
 export function createMcpBackend(options: ConstructorParameters<typeof AppBackendClient>[0] = {}) {
   let initialized = false, initializing: Promise<void> | undefined
-  const readCatalog = async (method: string, input: Record<string, unknown>, requestOptions: { signal?: AbortSignal; timeoutMs: number }) => {
-    const data = await backend.host.request<Catalog>('moss.mcp/v1', method, input, requestOptions)
+  const readCatalog = async (method: Method, input: Record<string, unknown>, requestOptions: { signal?: AbortSignal; timeoutMs: number }) => {
+    const data = await createMcpClient(backend.host).request(method, input as McpHostInputMap[typeof method], requestOptions)
     if (!Array.isArray(data?.servers)) throw new Error('服务列表格式不正确，请更新 Moss 后重试。')
     return data
   }

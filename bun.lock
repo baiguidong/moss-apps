@@ -14,7 +14,7 @@
     },
     "apps/audit": {
       "name": "@moss/audit-app",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@radix-ui/react-scroll-area": "1.2.10",
@@ -41,7 +41,7 @@
     },
     "apps/devtools": {
       "name": "@moss/devtools-app",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "jsonc-parser": "3.3.1",
@@ -61,7 +61,7 @@
     },
     "apps/drive": {
       "name": "@moss/drive-app",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "lucide-react": "0.564.0",
@@ -80,7 +80,7 @@
     },
     "apps/feishu": {
       "name": "@moss/feishu-app",
-      "version": "0.4.7",
+      "version": "0.4.8",
       "dependencies": {
         "@larksuiteoapi/node-sdk": "^1.60.0",
         "@moss/app-sdk": "workspace:*",
@@ -92,7 +92,7 @@
     },
     "apps/http-client": {
       "name": "@moss/http-client-app",
-      "version": "0.1.1",
+      "version": "0.1.3",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "jsonc-parser": "3.3.1",
@@ -112,7 +112,7 @@
     },
     "apps/library": {
       "name": "@moss/library-app",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "lucide-react": "0.564.0",
@@ -132,7 +132,7 @@
     },
     "apps/mcp": {
       "name": "@moss/mcp-app",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@playwright/mcp": "0.0.83",
@@ -152,7 +152,7 @@
     },
     "apps/openim": {
       "name": "@moss/openim-app",
-      "version": "0.2.8",
+      "version": "0.2.9",
       "dependencies": {
         "@livekit/components-react": "2.6.9",
         "@livekit/components-styles": "1.1.6",
@@ -184,7 +184,7 @@
     },
     "apps/trace": {
       "name": "@moss/trace-app",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@radix-ui/react-slot": "1.2.4",
@@ -214,7 +214,7 @@
     },
     "apps/workflow": {
       "name": "@moss/workflow-app",
-      "version": "0.1.10",
+      "version": "0.1.12",
       "dependencies": {
         "@dagrejs/dagre": "^3.1.1",
         "@moss/app-sdk": "workspace:*",
@@ -241,10 +241,18 @@
     },
     "vendor/moss-core/packages/app-sdk": {
       "name": "@moss/app-sdk",
-      "version": "2.8.0",
+      "version": "3.0.0",
       "dependencies": {
+        "@moss/host-contracts": "3.0.0",
         "ajv": "^8.18.0",
         "semver": "^7.7.4",
+      },
+    },
+    "vendor/moss-core/packages/host-contracts": {
+      "name": "@moss/host-contracts",
+      "version": "3.0.0",
+      "dependencies": {
+        "ajv": "^8.18.0",
       },
     },
   },
@@ -394,6 +402,8 @@
     "@moss/drive-app": ["@moss/drive-app@workspace:apps/drive"],
 
     "@moss/feishu-app": ["@moss/feishu-app@workspace:apps/feishu"],
+
+    "@moss/host-contracts": ["@moss/host-contracts@workspace:vendor/moss-core/packages/host-contracts"],
 
     "@moss/http-client-app": ["@moss/http-client-app@workspace:apps/http-client"],
 
