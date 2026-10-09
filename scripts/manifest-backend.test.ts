@@ -24,6 +24,16 @@ function manifest(backendOverrides: Record<string, unknown> = {}) {
 }
 
 describe('App Backend manifest', () => {
+  it.each([
+    ['moss.mcp/v1', '^2.4.0'],
+    ['moss.trace/v1', '^2.5.0'],
+    ['moss.audit/v1', '^2.6.0'],
+  ])('builds %s against its declared Host target while installation validates the actual Host', (protocol, hostApi) => {
+    const source = { ...manifest({ protocols: [protocol] }), hostApi }
+    expect(validateRepositoryAppManifest(source).hostApi).toBe(hostApi)
+    expect(() => validateAppManifest(source, { hostApiVersion: '2.3.0' })).toThrow(/requires Host API/)
+    expect(() => validateRepositoryAppManifest({ ...source, hostApi: 'invalid' })).toThrow()
+  })
   it('advertises Host API 2.8 while accepting Apps built for compatible 2.x hosts', () => {
     expect(APP_HOST_API_VERSION).toBe('2.8.0')
     for (const hostApi of ['^2.0.0', '^2.1.0', '^2.2.0', '^2.3.0', '^2.4.0', '^2.5.0', '^2.6.0', '^2.7.0', '^2.8.0']) {

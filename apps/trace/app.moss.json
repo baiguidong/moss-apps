@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.trace",
+  "version": "0.1.0",
+  "displayName": "Trace",
+  "description": "查看本地模型请求、响应、工具调用与诊断。启用应用即开始采集。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^2.5.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1200,
+      "height": 800,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "on-demand",
+    "protocols": [
+      "moss.trace/v1"
+    ],
+    "actions": [
+      {
+        "name": "traces.list",
+        "inputSchema": "schemas/request.json",
+        "timeoutMs": 60000
+      },
+      {
+        "name": "traces.get",
+        "inputSchema": "schemas/request.json",
+        "timeoutMs": 60000
+      },
+      {
+        "name": "traces.call",
+        "inputSchema": "schemas/request.json",
+        "timeoutMs": 60000
+      },
+      {
+        "name": "traces.revision",
+        "inputSchema": "schemas/request.json",
+        "timeoutMs": 60000
+      },
+      {
+        "name": "traces.delete",
+        "inputSchema": "schemas/request.json",
+        "timeoutMs": 60000
+      },
+      {
+        "name": "status.get",
+        "inputSchema": "schemas/request.json",
+        "timeoutMs": 60000
+      },
+      {
+        "name": "result.read",
+        "inputSchema": "schemas/transfer.json"
+      },
+      {
+        "name": "result.release",
+        "inputSchema": "schemas/transfer.json"
+      }
+    ]
+  },
+  "permissions": [
+    "trace:capture"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "traces",
+        "title": "Trace",
+        "route": "#/",
+        "icon": "activity",
+        "order": 240
+      }
+    ]
+  }
+}

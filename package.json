@@ -20,6 +20,7 @@
   "devDependencies": {
     "@moss/app-sdk": "workspace:*",
     "fflate": "^0.8.2",
-    "semver": "^7.7.4"
+    "semver": "^7.7.4",
+    "yauzl": "^3.2.1"
   }
 }

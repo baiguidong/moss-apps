@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import semver from 'semver'
 import { loadJsonSchema, validateAppManifest, validateAppToolInputSchema } from '@moss/app-sdk'
 
 export const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -25,7 +26,12 @@ export function validateRepositoryAppManifest(rawManifest) {
       throw new Error(`App ${rawManifest.id} must not declare moss.remote/v1; App Backends run only in Moss Desktop`)
     }
   }
-  return validateAppManifest(rawManifest)
+  // This repository builds packages for a declared Host target, it is not the
+  // executing Host. Generic SDK transport can call newer Desktop protocols.
+  // Installation/marketplace validation still checks the actual Host version.
+  const target = semver.validRange(rawManifest?.hostApi || '')
+    ? semver.minVersion(rawManifest.hostApi)?.version : undefined
+  return validateAppManifest(rawManifest, { hostApiVersion: target })
 }
 
 export function validateRepositoryAppToolSchemas(packageRoot, manifest) {
