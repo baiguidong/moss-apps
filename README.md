@@ -2,7 +2,7 @@
 
 Moss 官方 App 的独立源码与发布仓库。每个 App 位于 `apps/<name>`，独立维护版本、源码、配置 Schema、资源与测试。
 
-当前应用：[开发工具](apps/devtools/README.md)、[HTTP 调试](apps/http-client/README.md)、[网盘](apps/drive/README.md)、[知识库](apps/library/README.md)、[飞书](apps/feishu/README.md)、[OpenIM](apps/openim/README.md)。
+当前应用：[开发工具](apps/devtools/README.md)、[HTTP 调试](apps/http-client/README.md)、[网盘](apps/drive/README.md)、[知识库](apps/library/README.md)、[飞书](apps/feishu/README.md)、[OpenIM](apps/openim/README.md)、[工作流](apps/workflow/README.md)。
 
 规划中的本地工具扩展见 [本地工具 App 选型与接入方案](docs/local-tool-apps-plan.md)，覆盖开发工具、HTTP 调试、图片和音视频处理。
 
@@ -136,7 +136,7 @@ App ZIP 与 Moss 桌面安装包分开。纯 JavaScript App 可以用同一个�
 
 SDK 源码只在 Moss Core 的 `packages/app-sdk` 维护。本仓库通过 Git 子模块 `vendor/moss-core` 固定引用 Core 提交，将其中的 SDK 纳入 Bun workspace；App 和构建脚本统一通过 `@moss/app-sdk` 包导入，不再保存 SDK 副本。
 
-当前引用的 SDK 为 `2.3.0`，包含 `moss.cloud-storage/v1`；通用文件、截图和外链使用 `moss.platform/v1`。接入方式见 [SDK 接入说明](docs/app-sdk.md)。SDK 会忽略 Manifest 的未知字段；本仓库的构建与发布校验仍会在规范化前拒绝 `backend.targets`、`backend.serverOwnerScope` 和 `moss.remote/v1` 声明。
+当前引用的 SDK 为 `2.8.0`，包含 `moss.cloud-storage/v1`；通用文件、截图和外链使用 `moss.platform/v1`。接入方式见 [SDK 接入说明](docs/app-sdk.md)。SDK 会忽略 Manifest 的未知字段；本仓库的构建与发布校验仍会在规范化前拒绝 `backend.targets`、`backend.serverOwnerScope` 和 `moss.remote/v1` 声明。
 
 初次检出使用 `git clone --recurse-submodules`，已有检出按上方命令初始化子模块。CI、App 发布和市场索引工作流都会检出相同的固定提交。
 

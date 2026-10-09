@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.workflow",
+  "summary": "创建、运行和管理结构化工作流。",
+  "description": "由独立 App 调度 Agent、条件、并行和循环，查看节点记录与运行结果。",
+  "categories": [
+    "开发工具"
+  ],
+  "keywords": [
+    "工作流",
+    "Workflow",
+    "Agent",
+    "编排"
+  ],
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/workflow",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}
