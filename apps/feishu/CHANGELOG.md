@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.9
+
+- Host 协议统一声明在 `host.protocols`，供 UI 和 Backend 共用。
+- 浏览器 SDK 随 App 构建打包，适配 Host 契约模块依赖。
+
 ## 0.4.8
 
 - 适配 Host API 3：使用绑定当前 App 的 SDK，统一调用取消及错误处理。

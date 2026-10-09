@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.devtools",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "displayName": "开发工具",
   "description": "时间戳、Base64、AES 与 JSON，常用转换在本地完成。",
   "icon": "assets/icon.svg",

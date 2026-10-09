@@ -22,7 +22,7 @@ async function fixture(respond: (method: string, input: any) => any = () => ({ s
       })
     }
   } })
-  await client.handleMessage(createEnvelope('service.init', { ...identity, protocols: manifest.backend.protocols, permissions: manifest.permissions, grants: manifest.permissions }))
+  await client.handleMessage(createEnvelope('service.init', { ...identity, protocols: manifest.host.protocols, permissions: manifest.permissions, grants: manifest.permissions }))
   return { client, messages, setResponse: (fn: typeof respond) => { response = fn }, async invoke(name: string, input = {}) {
     const envelope = createEnvelope('action.invoke', { name, input })
     await client.handleMessage(envelope)
@@ -80,7 +80,7 @@ test('directory creation and deletion validate inputs, responses and error codes
   expect((await f.invoke('folders.create', { name: '' })).payload.result.ok).toBe(false)
   expect(f.messages.filter(message => message.type === 'host.request')).toHaveLength(requests)
   f.setResponse(() => ({ ok: false }))
-  expect((await f.invoke('files.delete', { fileId: 'file' })).payload.result.error.code).toBe('APP_HOST_PROTOCOL')
+  expect((await f.invoke('files.delete', { fileId: 'file' })).payload.result.error.code).toBe('APP_HOST_PROTOCOL_ERROR')
   f.setResponse(() => { throw Object.assign(new Error('No deletion grant'), { code: 'PERMISSION_DENIED' }) })
   expect((await f.invoke('files.delete', { fileId: 'file' })).payload.result.error.code).toBe('PERMISSION_DENIED')
   expect(manifest.permissions).toContain('cloud-storage:delete')

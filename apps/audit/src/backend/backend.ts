@@ -70,7 +70,7 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
   async function deliverAlerts() {
     for (const alert of service!.listPendingAlerts()) {
       await backend.host.request(protocol, 'notification.publish', {
-        id: alert.fingerprint,
+        id: String(alert.fingerprint),
         severity: alert.severity === 'critical' ? 'error' : 'warning',
         title: String(alert.title || '审计发现').slice(0, 240),
         message: [alert.ruleName, alert.sessionTitle, alert.toolName].filter(Boolean).join(' · ').slice(0, 4000),
@@ -93,7 +93,7 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
     await deliverAlerts().catch(error => backend.status('degraded', { error: error.message }))
     return transfer.pack(result)
   }))
-  backend.registerAction('session.open', async (input: unknown) => transfer.pack(await backend.host.request(protocol, 'session.open', input as Record<string, unknown>)))
+  backend.registerAction('session.open', async (input: unknown) => transfer.pack(await backend.host.request(protocol, 'session.open', input as { sessionId: string; toolUseId?: string })))
   backend.registerAction('status.get', () => transfer.pack({ ready: Boolean(service), scanning: service?.isRunning() || false }))
   backend.registerAction('result.read', (input: any) => transfer.read(input))
   backend.registerAction('result.release', (input: any) => transfer.release(input.id))

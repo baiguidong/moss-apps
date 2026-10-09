@@ -16,7 +16,7 @@ it("selects and downloads files using the Platform protocol declared by the App"
         host: {
           request: async (protocol: string, method: keyof typeof PLATFORM_HOST_METHOD_PERMISSIONS, input: unknown) => {
             expect(protocol).toBe(MOSS_PLATFORM_PROTOCOL);
-            expect(manifest.backend.protocols).toContain(protocol);
+            expect(manifest.host.protocols).toContain(protocol);
             expect(manifest.permissions).toContain(PLATFORM_HOST_METHOD_PERMISSIONS[method]);
             validatePlatformHostInput(method, input);
             calls.push({ protocol, method, input });

@@ -12,8 +12,8 @@ describe("OpenIM Desktop boundary", () => {
     const backendSource = fs.readFileSync(path.join(appRoot, "src/backend/main.ts"), "utf8");
     const clientSource = fs.readFileSync(path.join(appRoot, "src/backend/openim-client.ts"), "utf8");
     expect(manifest.backend).not.toHaveProperty("targets");
-    expect(manifest.backend.protocols).toEqual(["moss.agent/v1", MOSS_PLATFORM_PROTOCOL, MOSS_OPENIM_PROTOCOL]);
-    expect(manifest.backend.protocols).not.toContain("moss.remote/v1");
+    expect(manifest.host.protocols).toEqual(["moss.agent/v1", MOSS_PLATFORM_PROTOCOL, MOSS_OPENIM_PROTOCOL]);
+    expect(manifest.host.protocols).not.toContain("moss.remote/v1");
     expect(manifest.permissions).not.toContain("remote:actions");
     expect(manifest.backend).not.toHaveProperty("serverOwnerScope");
     expect(backendSource).not.toContain("client.remote");

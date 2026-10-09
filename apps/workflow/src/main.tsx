@@ -1,3 +1,4 @@
+import { readJsonRanges } from '@moss/app-sdk/results'
 import { createAppClient } from '@moss/app-sdk/ui'
 import React, { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -8,24 +9,19 @@ import { buildWorkflowGraph } from './engine/graph'
 import { syncAppearance } from './ui/appearance'
 import './style.css'
 declare global { interface Window { mossApp?: AppUiApi } }
-async function api(name: string, input: any = {}): Promise<any> {
+async function api(name: string, input: any = {}, signal?: AbortSignal): Promise<any> {
   if (!window.mossApp) throw new Error('请在 Moss 中打开工作流 App')
   const client = createAppClient(window.mossApp)
   const expand = async (value: any): Promise<any> => {
     if (!value?.truncated || !value.resourceRef) return value
-    let text = '', offset = 0
-    while (true) {
-      const chunk: any = await client.actions.invoke('resource.read', { resourceRef: value.resourceRef, offset })
-      text += chunk.text
-      if (chunk.nextOffset === null) break
-      offset = chunk.nextOffset
-    }
-    return JSON.parse(text)
+    return readJsonRanges((range, options) => client.actions.invoke('resource.read', { resourceRef: value.resourceRef, ...range }, options), { signal })
   }
-  const result: any = await client.actions.invoke(name, input)
+  try {
+  const result: any = await client.actions.invoke(name, input, { signal })
   const value = Array.isArray(result) ? await Promise.all(result.map(expand)) : await expand(result)
   if (name === 'run.get' && value.definition?.truncated) value.definition = await expand(value.definition)
   return value
+  } finally { client.dispose() }
 }
 const labels: Record<string, string> = { draft:'草稿',published:'已发布',archived:'已归档',running:'运行中',completed:'已完成',failed:'失败',cancelled:'已停止',interrupted:'已中断',blocked:'受阻',submitting:'准备中' }
 function getRoute() {

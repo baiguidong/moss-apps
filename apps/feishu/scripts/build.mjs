@@ -30,4 +30,6 @@ if (result.status !== 0) process.exit(result.status ?? 1)
 
 fs.copyFileSync(path.join(appRoot, 'src', 'index.html'), uiFile)
 
-fs.copyFileSync(fileURLToPath(import.meta.resolve('@moss/app-sdk/ui')), path.join(path.dirname(uiFile), 'app-client.mjs'))
+const uiBuild = spawnSync('bun', ['build', fileURLToPath(import.meta.resolve('@moss/app-sdk/ui')), '--target=browser', '--format=esm', `--outfile=${path.join(path.dirname(uiFile), 'app-client.mjs')}`], { cwd: appRoot, stdio: 'inherit' })
+if (uiBuild.error) throw uiBuild.error
+if (uiBuild.status !== 0) process.exit(uiBuild.status ?? 1)

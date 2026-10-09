@@ -918,15 +918,13 @@ export function OpenIMView() {
   const cancelPendingAgentReplies = React.useCallback(async (target: ConversationItem) => {
     if (!appInstance?.enabled || !profile?.userID || target.conversationType !== SessionType.Single) return;
     const externalConversationId = openIMDirectConversationId(profile.userID, target.userID);
-    const result = await createAppClient(window.mossApp).host.request<{
-      turns?: Array<{ id?: string; status?: string; deliveredAt?: number | null }>;
-    }>(
+    const result = await createAppClient(window.mossApp).host.request(
       "moss.agent/v1",
       "turn.list",
       { externalConversationId, statuses: ["queued", "running", "awaiting_review", "completed"], limit: 100 },
     );
     await Promise.allSettled((result.turns || []).map((turn) => {
-      if (!turn.id || (turn.status === "completed" && turn.deliveredAt)) return Promise.resolve();
+      if (typeof turn.id !== "string" || (turn.status === "completed" && turn.deliveredAt)) return Promise.resolve();
       return createAppClient(window.mossApp).host.request(
           "moss.agent/v1",
         turn.status === "awaiting_review" ? "turn.review" : "turn.abort",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.library",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "displayName": "知识库",
   "description": "导入文档、管理资料集、全文检索和编辑本地知识。",
   "icon": "assets/icon.svg",
@@ -23,10 +23,6 @@
     "runtime": "node",
     "apiVersion": 1,
     "lifecycle": "persistent",
-    "protocols": [
-      "moss.local-files/v1",
-      "moss.runtimes/v1"
-    ],
     "actions": [
       {
         "name": "collections.list",
@@ -225,6 +221,12 @@
         ],
         "resolveAction": "resource.resolve"
       }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.local-files/v1",
+      "moss.runtimes/v1"
     ]
   }
 }

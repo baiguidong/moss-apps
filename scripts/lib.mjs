@@ -22,7 +22,7 @@ export function validateRepositoryAppManifest(rawManifest) {
         throw new Error(`App ${rawManifest.id} must not declare backend.${field}; App Backends run only in Moss Desktop`)
       }
     }
-    if (Array.isArray(backend.protocols) && backend.protocols.includes('moss.remote/v1')) {
+    if (rawManifest.host?.protocols?.includes('moss.remote/v1')) {
       throw new Error(`App ${rawManifest.id} must not declare moss.remote/v1; App Backends run only in Moss Desktop`)
     }
   }

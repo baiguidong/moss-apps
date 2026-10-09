@@ -56,15 +56,16 @@ test('large Unicode requests cross App IPC in bounded chunks without truncation'
   const packed = transport.pack(value)
   expect('transfer' in packed).toBe(true)
   if (!packed.transfer) throw new Error('missing transfer')
+  const transfer = packed.transfer
   const chunks: Buffer[] = []; let offset = 0
   while (offset < packed.transfer.size) {
-    const part = transport.read({ id: packed.transfer.id, offset })
+    const part = transport.read({ id: transfer.id, offset })
     expect(Buffer.byteLength(JSON.stringify(part))).toBeLessThan(1024 * 1024)
     chunks.push(Buffer.from(part.data, 'base64')); offset = part.nextOffset
   }
   expect(JSON.parse(Buffer.concat(chunks).toString())).toEqual(value)
-  expect(() => transport.read({ id: packed.transfer.id, offset: -1 })).toThrow()
-  transport.release(packed.transfer.id)
-  expect(() => transport.read({ id: packed.transfer.id, offset: 0 })).toThrow('过期')
+  expect(() => transport.read({ id: transfer.id, offset: -1 })).toThrow()
+  transport.release(transfer.id)
+  expect(() => transport.read({ id: transfer.id, offset: 0 })).toThrow('expired')
   transport.close()
 })

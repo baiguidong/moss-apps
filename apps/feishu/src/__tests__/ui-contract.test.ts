@@ -89,7 +89,7 @@ describe('Feishu App UI contract', () => {
       'agent:turns:write',
     ])
     expect(manifest.backend).not.toHaveProperty('targets')
-    expect(manifest.backend.protocols).toEqual(['moss.agent/v1'])
+    expect(manifest.host.protocols).toEqual(['moss.agent/v1'])
     expect(source).not.toContain("'server'")
     expect(backendSource).not.toContain("'server'")
     expect(backendSource).toContain("if (chatType !== 'p2p') return")

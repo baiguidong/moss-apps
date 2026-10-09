@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.5
+
+- Host 协议统一声明在 `host.protocols`，供 UI 和 Backend 共用。
+- 配置内置服务前使用 Host 能力发现检查支持、权限和可用状态。
+
 ## 0.1.4
 
 - 适配 Host API 3：使用绑定当前 App 的 SDK，统一调用取消及错误处理。

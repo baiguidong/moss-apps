@@ -56,7 +56,7 @@ async function platform<Method extends PlatformHostMethod>(
   input: PlatformHostRequestMap[Method],
   signal?: AbortSignal,
 ): Promise<PlatformHostResultMap[Method]> {
-  return createAppClient(window.mossApp).host.request<PlatformHostResultMap[Method]>(PLATFORM_PROTOCOL, method, input, { signal, timeoutMs: 300000 });
+  return createAppClient(window.mossApp).host.request(PLATFORM_PROTOCOL, method, input, { signal, timeoutMs: 300000 });
 }
 
 export const openIMHost = {

@@ -10,6 +10,7 @@ const identity = { appId: 'moss.mcp', instanceId: 'default', generation: 'test' 
 async function fixture(respond?: (method: string, input: any) => unknown, initial: McpServer[] = []) {
   let servers = structuredClone(initial)
   const handle = async (method: string, input: SaveInput) => {
+    if (method === 'capabilities.get') return { capabilities: [{ protocol: 'moss.mcp/v1', method: 'servers.save', supported: true, allowed: true, available: true, reason: null, permission: 'mcp:write', surfaces: ['backend'], limits: {} }] }
     const response = await respond?.(method, input)
     if (response !== undefined) return response
     if (method === 'servers.save') {
@@ -26,11 +27,11 @@ async function fixture(respond?: (method: string, input: any) => unknown, initia
   const backend = createMcpBackend({ send: (message: AppServiceEnvelope<any>) => {
     messages.push(message)
     if (message.type === 'host.request') void Promise.resolve().then(async () => {
-      try { await backend.handleMessage(createEnvelope('host.response', { ...identity, protocol: 'moss.mcp/v1', ok: true, result: await handle(message.payload.method, message.payload.input) }, { id: message.id })) }
-      catch (error: any) { await backend.handleMessage(createEnvelope('host.response', { ...identity, protocol: 'moss.mcp/v1', ok: false, error: { code: 'REQUEST_FAILED', message: error.message } }, { id: message.id })) }
+      try { await backend.handleMessage(createEnvelope('host.response', { ...identity, protocol: message.payload.protocol, ok: true, result: await handle(message.payload.method, message.payload.input) }, { id: message.id })) }
+      catch (error: any) { await backend.handleMessage(createEnvelope('host.response', { ...identity, protocol: message.payload.protocol, ok: false, error: { code: 'REQUEST_FAILED', message: error.message } }, { id: message.id })) }
     })
   } })
-  await backend.handleMessage(createEnvelope('service.init', { ...identity, protocols: manifest.backend.protocols, permissions: manifest.permissions, grants: manifest.permissions }))
+  await backend.handleMessage(createEnvelope('service.init', { ...identity, protocols: ['moss.host/v1', ...manifest.host.protocols], permissions: manifest.permissions, grants: manifest.permissions }))
   return { backend, messages, stored: () => structuredClone(servers), async invoke(name: string, input = {}) {
     const message = createEnvelope('action.invoke', { name, input })
     await backend.handleMessage(message)

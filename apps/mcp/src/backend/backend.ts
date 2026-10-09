@@ -16,6 +16,9 @@ export function createMcpBackend(options: ConstructorParameters<typeof AppBacken
     return initializing ??= (async () => {
       // Stay within the Backend handshake deadline; retry on the next list if Host is unavailable.
       const requestOptions = { timeoutMs: 3000 }
+      const { capabilities } = await backend.host.request('moss.host/v1', 'capabilities.get', { protocols: ['moss.mcp/v1'] }, requestOptions)
+      const save = capabilities.find(item => item.method === 'servers.save')
+      if (!save?.supported || !save.allowed || !save.available) throw Object.assign(new Error('MCP 配置能力不可用或尚未授权'), { code: save?.allowed ? 'APP_HOST_UNAVAILABLE' : 'APP_PERMISSION_DENIED' })
       let catalog = await readCatalog('servers.list', {}, requestOptions)
       for (const server of builtinServers) {
         const existing = catalog.servers.find(item => item.name === server.name)

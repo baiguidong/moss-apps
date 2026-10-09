@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.mcp",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "displayName": "MCP",
   "description": "管理 MCP 服务连接，让常用工具融入对话。",
   "icon": "assets/icon.svg",
@@ -23,9 +23,6 @@
     "runtime": "node",
     "apiVersion": 1,
     "lifecycle": "persistent",
-    "protocols": [
-      "moss.mcp/v1"
-    ],
     "actions": [
       {
         "name": "servers.list",
@@ -96,6 +93,11 @@
         "title": "管理 MCP 连接",
         "viewId": "connections"
       }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.mcp/v1"
     ]
   }
 }

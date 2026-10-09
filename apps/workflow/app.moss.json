@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.workflow",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "displayName": "工作流",
   "description": "创建、发布与调度结构化工作流，查看运行图和恢复记录。",
   "icon": "assets/icon.svg",
@@ -23,10 +23,6 @@
     "runtime": "node",
     "apiVersion": 1,
     "lifecycle": "persistent",
-    "protocols": [
-      "moss.agent-execution/v1",
-      "moss.tasks/v1"
-    ],
     "actions": [
       {
         "name": "catalog.list",
@@ -228,6 +224,12 @@
         "resolveAction": "composer.resolve",
         "listAction": "composer.list"
       }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.agent-execution/v1",
+      "moss.tasks/v1"
     ]
   }
 }

@@ -12,6 +12,7 @@ const backend = {
 }
 
 function manifest(backendOverrides: Record<string, unknown> = {}) {
+  const { protocols = [], ...overrides } = backendOverrides
   return {
     schemaVersion: 2,
     id: 'example.app',
@@ -19,7 +20,8 @@ function manifest(backendOverrides: Record<string, unknown> = {}) {
     displayName: 'Example',
     hostApi: '^3.0.0',
     permissions: [],
-    backend: { ...backend, ...backendOverrides },
+    backend: { ...backend, ...overrides },
+    host: { protocols },
   }
 }
 
@@ -90,9 +92,9 @@ describe('App Backend manifest', () => {
 
   it('accepts only a flat protocol list', () => {
     const result = validateAppManifest(manifest({ protocols: ['moss.platform/v1'] }))
-    expect(result.backend?.protocols).toEqual(['moss.platform/v1'])
+    expect(result.host?.protocols).toEqual(['moss.platform/v1'])
     expect(() => validateAppManifest(manifest({ protocols: { platform: ['moss.agent/v1'] } })))
-      .toThrow(/backend\/protocols/)
+      .toThrow(/host\/protocols/)
   })
 
   it('does not inject placement or Remote APIs into Backend contexts', async () => {

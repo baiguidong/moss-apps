@@ -6,7 +6,7 @@ import {
   APP_HOST_API_VERSION,
   compileJsonSchema,
   createEnvelope,
-  resolveBackendProtocols,
+  resolveAppProtocols,
   validateAccountHostOutput,
   validateAppManifest,
   type AppServiceEnvelope,
@@ -70,16 +70,17 @@ describe('SDK 3.0 consumer contract', () => {
     const source = {
       schemaVersion: 2, id: 'example.drive', version: '0.1.0', displayName: 'Drive',
       hostApi: '^3.0.0', permissions: ['cloud-storage:read', 'cloud-storage:write'],
-      backend: {
+      host: { protocols: [MOSS_CLOUD_STORAGE_PROTOCOL] },
+backend: {
         entry: 'dist/backend.mjs', runtime: 'node', apiVersion: 1, lifecycle: 'persistent',
-        protocols: [MOSS_CLOUD_STORAGE_PROTOCOL], actions: [{ name: 'files.list' }],
+         actions: [{ name: 'files.list' }],
       },
     }
     const manifest = validateAppManifest(source)
     expect(manifest.hostApi).toBe(source.hostApi)
-    const protocols = resolveBackendProtocols(manifest.backend)
+    const protocols = resolveAppProtocols(manifest)
     protocols.push(MOSS_PLATFORM_PROTOCOL)
-    expect(manifest.backend?.protocols).toEqual([MOSS_CLOUD_STORAGE_PROTOCOL])
+    expect(manifest.host?.protocols).toEqual([MOSS_CLOUD_STORAGE_PROTOCOL])
     expect(() => validateAppManifest(source, { hostApiVersion: '2.1.0' }))
       .toThrow(/requires Host API/)
   })

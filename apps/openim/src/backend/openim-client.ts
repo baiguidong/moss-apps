@@ -278,12 +278,12 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "host" 
   }
 
   async function issueProfile(): Promise<RemoteProfile> {
-    return client.host.request<RemoteProfile>(
+    return client.host.request(
       MOSS_OPENIM_PROTOCOL,
       "session.issue",
       { platformId: platformId() },
       { timeoutMs: 35_000 },
-    );
+    ) as Promise<RemoteProfile>;
   }
 
   async function ensureSession(): Promise<PublicOpenIMProfile> {

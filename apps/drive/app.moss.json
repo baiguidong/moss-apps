@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.drive",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "displayName": "网盘",
   "description": "管理个人云端文件，上传、下载和分享。",
   "icon": "assets/icon.svg",
@@ -23,9 +23,6 @@
     "runtime": "node",
     "apiVersion": 1,
     "lifecycle": "persistent",
-    "protocols": [
-      "moss.cloud-storage/v1"
-    ],
     "actions": [
       {
         "name": "status.get",
@@ -140,6 +137,11 @@
         "icon": "folder",
         "order": 210
       }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.cloud-storage/v1"
     ]
   }
 }

@@ -1,3 +1,4 @@
+import { readJsonRanges } from '@moss/app-sdk/results'
 import fs from 'node:fs'
 import path from 'node:path'
 import { createInterface } from 'node:readline'
@@ -8,7 +9,7 @@ import { resolveDefinition, resolveChildren } from './validation'
 import { Worker } from 'node:worker_threads'
 import { AsyncResource } from 'node:async_hooks'
 import { createTasksClient, createExecutionClient, type AppHostApi } from '@moss/app-sdk'
-import { ExecutionWatcher, DEFAULT_EXECUTION_REFRESH_MS as HOST_REFRESH_MS } from '@moss/app-sdk/execution'
+import { ExecutionWatcher, TaskChangesWatcher, DEFAULT_EXECUTION_REFRESH_MS as HOST_REFRESH_MS } from '@moss/app-sdk/execution'
 const terminal = new Set(['completed', 'failed', 'cancelled', 'interrupted'])
 export class RunManager {
   runs: Record<string, any> = {}
@@ -28,7 +29,7 @@ export class RunManager {
   private tasks: ReturnType<typeof createTasksClient>
   private executions: ReturnType<typeof createExecutionClient>
   private executionEvents: ExecutionWatcher
-  private unsubscribeTasks: () => void
+  private taskChanges: TaskChangesWatcher
   constructor(
     private directory: string,
     host: AppHostApi,
@@ -37,14 +38,24 @@ export class RunManager {
     this.tasks = createTasksClient(host)
     this.executions = createExecutionClient(host)
     this.executionEvents = new ExecutionWatcher(this.executions)
-    this.unsubscribeTasks = this.tasks.on('task.changed', ({ task }) => {
+    this.taskChanges = new TaskChangesWatcher(this.tasks, async task => {
       if (!terminal.has(task.status)) return
       for (const run of Object.values(this.runs)) {
         if (run.status === 'running' && run.taskId === task.id && run.attempt === task.attempt) {
-          void this.cancel(run.id, task.error || 'Moss 已停止任务').catch(() => {})
+          await this.cancel(run.id, task.error || 'Moss 已停止任务')
         }
       }
-    })
+    }, { onReset: async () => {
+      for (const run of Object.values(this.runs)) if (run.status === 'running' && run.taskId) {
+        try {
+          const task = await this.tasks.request('task.get', { taskId: run.taskId })
+          if (terminal.has(task.status) && run.attempt === task.attempt) await this.cancel(run.id, task.error || 'Moss 已停止任务')
+        } catch (error: any) {
+          if (error.code !== 'APP_NOT_FOUND') throw error
+          await this.cancel(run.id, 'Moss 任务已过期或不存在')
+        }
+      }
+    } })
     fs.mkdirSync(directory, { recursive: true })
     this.resources = new Resources(path.join(directory, 'resources'))
     for (const name of fs
@@ -255,20 +266,10 @@ export class RunManager {
       if (state.status !== 'completed')
         throw new Error(state.error || state.status)
       if (!state.resultRef) throw new Error('Moss 未返回执行结果引用')
-      let text = '',
-        offset = 0
-      while (true) {
-        const chunk = await this.executions.request('execution.result.read', {
-          resultRef: state.resultRef,
-          offset,
-        }, { signal })
-        text += chunk.text
-        if (chunk.nextOffset === null) break
-        offset = chunk.nextOffset
-      }
+      const value = await readJsonRanges((range, options) => this.executions.request('execution.result.read', { resultRef: state.resultRef!, ...range }, options), { signal })
       return {
         agentId: state.contextRef,
-        value: JSON.parse(text),
+        value,
         tokens: state.tokens,
         toolCalls: state.toolCalls,
       }
@@ -301,6 +302,11 @@ export class RunManager {
           (run.status === 'completed' ? '工作流已完成' : '工作流未完成'),
         ...(run.result !== undefined ? { result: this.resources.bound(run.result) } : {}),
       })
+    if (['cancelled', 'interrupted'].includes(task.status) && task.attempt === run.attempt) {
+      run.status = task.status
+      run.error = task.error || 'Moss 已停止任务'
+      this.emit({ runId: run.id, status: run.status })
+    }
     run.hostFinished = true
     delete run.notificationError
     this.save(run)
@@ -348,7 +354,7 @@ export class RunManager {
     return this.summary(run)
   }
   async close() {
-    this.unsubscribeTasks()
+    this.taskChanges.close()
     this.executionEvents.close()
     clearInterval(this.completionTimer)
     await Promise.all(

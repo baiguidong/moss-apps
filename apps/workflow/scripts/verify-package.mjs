@@ -13,12 +13,12 @@ const { createExecutionProtocolDefinitions } = await fromCore('packages/app-sdk/
 const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'workflow-package-'))
 const protocols = createExecutionProtocolDefinitions()
 let calls = 0
-let dropExecutionEvents = false
+let dropExecutionEvents = false, dropTaskEvents = false
 const requests = [], acknowledgements = []
 const host = new AppExecutionHost({ directory: path.join(directory, 'tasks'), createSource: async context => {
   assert.equal(context.invocation?.surface, 'app'); return { sessionId: 'fixture-session' }
 }, publishEvent: (target, protocol, name, data, options) => {
-  if (dropExecutionEvents && name === 'execution.changed') return
+  if ((dropExecutionEvents && name === 'execution.changed') || (dropTaskEvents && name === 'task.changed')) return
   return runtime.withOwner(target.owner, () => runtime.publishHostEvent(target.appId, target.instanceId, protocol, name, data, options))
     .then(() => { acknowledgements.push({ name, data }) })
 }, execute: async ({ input, controller, onProgress }) => {
@@ -76,11 +76,25 @@ try {
   const stopped = await waitFor(async () => { const r = await invoke('run.get', { runId: stoppedByHost.id }); return r.status === 'cancelled' ? r : false })
   assert.equal(stopped.error, 'Host stopped task')
   assert.ok(Date.now() - hostStoppedAt < 2000, 'task cancellation should use push')
+  dropTaskEvents = true
+  const reordered = await invoke('run.start', { definition: agentDefinition })
+  await waitFor(() => calls === 5)
+  host.cancelTask(host.tasks[reordered.taskId], 'Task cancellation beats execution failure')
+  const reorderedResult = await waitFor(async () => { const r = await invoke('run.get', { runId: reordered.id }); return r.status === 'cancelled' ? r : false })
+  assert.equal(reorderedResult.error, 'Task cancellation beats execution failure')
+  dropExecutionEvents = true
+  const missedTask = await invoke('run.start', { definition: agentDefinition })
+  await waitFor(() => calls === 6)
+  host.cancelTask(host.tasks[missedTask.taskId], 'Recovered durable task cancellation')
+  const recoveredTask = await waitFor(async () => { const r = await invoke('run.get', { runId: missedTask.id }); return r.status === 'cancelled' ? r : false })
+  assert.equal(recoveredTask.error, 'Recovered durable task cancellation')
+  assert.ok(requests.some(request => request.method === 'task.changes' && request.input.afterCursor))
+  dropTaskEvents = false; dropExecutionEvents = false
   await runtime.restartInstance('moss.workflow', instance.id)
   assert.equal((await invoke('run.get', { runId: run.id })).result, 42)
   await invoke('catalog.archive', { workflowId: id }); assert.equal((await invoke('catalog.get', { workflowId: id })).record.status, 'archived')
   await invoke('catalog.restore', { workflowId: id }); assert.equal((await invoke('catalog.get', { workflowId: id })).record.status, 'draft')
-  const report = { package: `moss.workflow@${version}`, signatureRequired: requireSignature, tests: ['create/publish/code 21 → 42', 'typed SDK with real Core IPC', 'execution push without frequent polling', 'missed push recovers via query', 'Host task cancellation push', 'short action returns while running', 'cancellation', 'backend restart persists history', 'archive/restore'], passed: true, timestamp: new Date().toISOString() }
+  const report = { package: `moss.workflow@${version}`, signatureRequired: requireSignature, tests: ['create/publish/code 21 → 42', 'typed SDK with real Core IPC', 'execution push without frequent polling', 'missed push recovers via query', 'Host task cancellation push', 'missed task event recovers from durable cursor', 'task cancellation remains authoritative when execution arrives first', 'short action returns while running', 'cancellation', 'backend restart persists history', 'archive/restore'], passed: true, timestamp: new Date().toISOString() }
   const reports = reportsDir; await fs.mkdir(reports, { recursive: true }); await fs.writeFile(path.join(reports, 'package.json'), JSON.stringify(report, null, 2))
   console.log(JSON.stringify(report, null, 2))
 } finally { await runtime.shutdown(); await host.close(); await fs.rm(directory, { recursive: true, force: true }) }

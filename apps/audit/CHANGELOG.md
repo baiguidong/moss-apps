@@ -1,5 +1,10 @@
 # 更新记录
 
+## 0.1.3
+
+- Host 协议统一声明在 `host.protocols`，供 UI 和 Backend 共用。
+- 使用 SDK 公共大结果传输与有类型的审计 Host 契约。
+
 ## 0.1.2
 
 - 适配 Host API 3：使用绑定当前 App 的 SDK，统一调用取消及错误处理。
