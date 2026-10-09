@@ -55,6 +55,12 @@ jobs:
         run: |
           bun x playwright install --with-deps chromium
           bun run test:browser
+      - name: Verify MCP connection management UI
+        if: steps.release.outputs.app_id == 'moss.mcp'
+        working-directory: apps/mcp
+        run: |
+          bun x playwright install --with-deps chromium
+          bun run test:browser
       - name: Verify Audit UI and local database
         if: steps.release.outputs.app_id == 'moss.audit'
         working-directory: apps/audit
@@ -70,6 +76,11 @@ jobs:
       - name: Verify signed Audit package with the pinned Core Host
         if: steps.release.outputs.app_id == 'moss.audit'
         run: node apps/audit/scripts/verify-package.mjs --require-signature
+      - name: Verify signed Workflow package with the pinned Core Host
+        if: steps.release.outputs.app_id == 'moss.workflow'
+        run: |
+          node apps/workflow/scripts/verify-package.mjs --require-signature
+          node apps/workflow/scripts/review-package.mjs --require-signature
       - name: Publish immutable release assets
         env:
           GH_TOKEN: ${{ github.token }}

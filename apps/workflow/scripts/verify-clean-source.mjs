@@ -1,10 +1,11 @@
+import { version, reportsDir } from './package-context.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
 import {createHash} from 'node:crypto'
 import {execFileSync} from 'node:child_process'
 import {fileURLToPath} from 'node:url'
-const repo=fileURLToPath(new URL('../../../',import.meta.url)),output=path.join(repo,'artifacts/moss.workflow/verification/0.1.9'),scratch=fs.mkdtempSync(path.join(os.tmpdir(),'workflow-clean-'))
+const repo=fileURLToPath(new URL('../../../',import.meta.url)),output=reportsDir,scratch=fs.mkdtempSync(path.join(os.tmpdir(),'workflow-clean-'))
 const provenance=JSON.parse(fs.readFileSync(path.join(output,'source-provenance.json'),'utf8'))
 const hash=file=>createHash('sha256').update(fs.readFileSync(file)).digest('hex')
 const run=(command,args,cwd,env={})=>execFileSync(command,args,{cwd,stdio:'inherit',env:{...process.env,...env}})
@@ -20,7 +21,7 @@ try {
  run('bun',['install','--ignore-scripts'],apps)
  run('bun',['run','build'],path.join(apps,'apps/workflow'))
  run('node',['scripts/package-app.mjs','--app','workflow','--skip-build'],apps)
- const zip=path.join(apps,'artifacts/moss.workflow/0.1.9/moss.workflow-0.1.9.zip'),actual=hash(zip)
+ const zip=path.join(apps,`artifacts/moss.workflow/${version}/moss.workflow-${version}.zip`),actual=hash(zip)
  if(actual!==provenance.appZipSha256)throw new Error(`Rebuilt ZIP differs: ${actual} vs ${provenance.appZipSha256}`)
  run(process.execPath,['apps/workflow/scripts/review-package.mjs'],apps,{MOSS_CORE_ROOT:core})
  const report={passed:true,identicalArchive:true,sha256:actual,coreCommit:provenance.coreCommit,coreDependencies:'Existing lockfile dependencies reused; source isolated',appDependencies:'Fresh bun install from archived lockfile',timestamp:new Date().toISOString()}

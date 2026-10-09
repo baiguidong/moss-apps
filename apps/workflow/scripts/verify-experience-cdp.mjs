@@ -1,9 +1,10 @@
+import { version, archivePath, reportsDir } from './package-context.mjs'
 import {chromium} from '@playwright/test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
-const root=fileURLToPath(new URL('..',import.meta.url)),repo=path.resolve(root,'../..'),out=path.join(repo,'artifacts/moss.workflow/verification/0.1.9')
+const root=fileURLToPath(new URL('..',import.meta.url)),repo=path.resolve(root,'../..'),out=reportsDir
 await fs.mkdir(out,{recursive:true})
 const browser=await chromium.connectOverCDP('http://127.0.0.1:9222')
 const page=browser.contexts().flatMap(c=>c.pages()).find(p=>p.url().includes('/renderer/'))
@@ -24,11 +25,11 @@ const receipt={tests:[],fixtureIds:[],sessionIds:[],runIds:[]}
 let appPage
 try {
  if(process.env.SKIP_INSTALL!=='1'){
-  const zip=path.join(repo,'artifacts/moss.workflow/0.1.9/moss.workflow-0.1.9.zip')
+  const zip=archivePath
   await main(`Promise.resolve(process.getBuiltinModule('module').createRequire(process.cwd()+'/src/main.mjs')('electron')).then(({dialog})=>{globalThis.__experienceDialogs={open:dialog.showOpenDialog,message:dialog.showMessageBox};dialog.showOpenDialog=async(...a)=>a.at(-1)?.title==='Install Moss App'?{canceled:false,filePaths:[${JSON.stringify(zip)}]}:globalThis.__experienceDialogs.open(...a);dialog.showMessageBox=async(...a)=>a.at(-1)?.title==='安装 Moss App'&&a.at(-1)?.message?.includes('工作流')?{response:1,checkboxChecked:false}:globalThis.__experienceDialogs.message(...a);return true})`)
   const installation=await page.evaluate(()=>window.agentDesktop.installAppArchive());assert.equal(installation.ok,true,installation.error)
   await main("Promise.resolve(process.getBuiltinModule('module').createRequire(process.cwd()+'/src/main.mjs')('electron')).then(({dialog})=>{dialog.showOpenDialog=globalThis.__experienceDialogs.open;dialog.showMessageBox=globalThis.__experienceDialogs.message;delete globalThis.__experienceDialogs;return true})")
-  receipt.tests.push('installed actual 0.1.9 ZIP')
+  receipt.tests.push(`installed actual ${version} ZIP`)
  }
  assert.equal((await page.evaluate(()=>window.agentDesktop.launchApp({name:'moss.workflow'}))).ok,true)
  appPage=await wait(()=>browser.contexts().flatMap(c=>c.pages()).find(p=>p!==page&&p.url().startsWith('moss-app:')))

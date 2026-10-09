@@ -24,4 +24,6 @@ node scripts/review-package.mjs
 node scripts/verify-experience-cdp.mjs
 ```
 
-CDP 验证使用 Moss 的 9222 端口和 Main inspector 的 9223 端口。测试会记录精确的工作流、会话及运行 ID；验证后按清单清理测试数据。验证记录在 `artifacts/moss.workflow/verification/0.1.9/`。
+CDP 验证使用 Moss 的 9222 端口和 Main inspector 的 9223 端口。测试会记录精确的工作流、会话及运行 ID；验证后按清单清理测试数据。验证记录在 `artifacts/moss.workflow/verification/<version>/`。
+
+市场版本由 CI 签名并发布；需要 Host API 2.8。包验证使用固定的 `vendor/moss-core` 和 Manifest 当前版本，发布时增加 `--require-signature` 校验受信任签名。

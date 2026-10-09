@@ -38,9 +38,16 @@ jobs:
       - name: Verify Trace UI and App data reader
         working-directory: apps/trace
         run: bun run test:browser
+      - name: Verify MCP connection management UI
+        working-directory: apps/mcp
+        run: bun run test:browser
       - name: Verify Audit UI and local database
         working-directory: apps/audit
         run: bun run test:browser
       - run: bun run package -- --skip-build
       - name: Verify Audit package with the pinned Core Host
         run: node apps/audit/scripts/verify-package.mjs
+      - name: Verify Workflow package with the pinned Core Host
+        run: |
+          node apps/workflow/scripts/verify-package.mjs
+          node apps/workflow/scripts/review-package.mjs

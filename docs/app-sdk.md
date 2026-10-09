@@ -91,11 +91,13 @@ UI 调用已声明的 `mossApp.actions.invoke(instanceId, action, input)`，订�
 
 新增 `CloudShare`、`shares.create/list/revoke` 与 `cloud-storage:share`。网盘要求 `hostApi: ^2.3.0`，接收页由 Server 的 `/s/:token` 提供；浏览器不依赖 Desktop Host。详见 [分享实施方案](drive-sharing-plan.md) 及 Core 云端存储文档。
 
+Trace App 通过通用 `backend.host.request()` 使用 Host API `^2.5.0` 的 `moss.trace/v1` 协议。构建按 App 声明的最低 Host 版本校验；市场和安装时仍检查实际 Host 版本。参见 [Trace App](../apps/trace/README.md)。
+
 审计中心使用 Host API `^2.6.0` 的 `moss.audit/v1` 协议。App 自己维护规则引擎、SQLite 和扫描；Host 只导出脱敏会话、迁移旧库、保留撤销事件、定位会话和投递通知。固定的 Core 提交也用于最终签名 ZIP 的集成验证，避免依赖开发者的相邻工作区。参见 [审计中心](../apps/audit/README.md)。
 
 
 ## 2.8 Workflow App 与会话资源
 
-Workflow 使用通用 `moss.execution/v1` 执行合同、App 任务、`resourceProviders.listAction` 和 `composer.prepare`。Core 不包含 Workflow 引擎；定义、画布和调度位于 `apps/workflow`。
+Workflow 使用通用 `moss.agent-execution/v1` 执行接口与 `moss.tasks/v1`、App 任务、`resourceProviders.listAction` 和 `composer.prepare`。Core 不包含 Workflow 引擎；定义、画布和调度位于 `apps/workflow`。
 
 Workflow 固定使用 `vendor/moss-core` 中 Core 提交 `570209f8a0175216e94502d8737e0d93183d91a8` 的 SDK/Runtime 2.8。执行 `git submodule update --init --recursive` 后即可安装和构建，无需额外 SDK 补丁。

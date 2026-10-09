@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.workflow",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "displayName": "工作流",
   "description": "创建、发布与调度结构化工作流，查看运行图和恢复记录。",
   "icon": "assets/icon.svg",

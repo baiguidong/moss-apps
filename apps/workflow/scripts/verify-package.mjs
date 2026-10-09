@@ -1,9 +1,10 @@
+import { version, archivePath, reportsDir, coreRoot, requireSignature, trustedPublishers } from './package-context.mjs'
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
-import { pathToFileURL, fileURLToPath } from 'node:url'
-const root = fileURLToPath(new URL('..', import.meta.url)), repo = path.resolve(root, '../..'), core = process.env.MOSS_CORE_ROOT || path.resolve(repo, '../moss')
+import { pathToFileURL } from 'node:url'
+const core = coreRoot
 const fromCore = file => import(pathToFileURL(path.join(core, file)).href)
 const { AppRuntimeHost } = await fromCore('packages/app-runtime/src/host/index.mjs')
 const { AppExecutionHost } = await fromCore('ui/src/apps/app-execution-host.mjs')
@@ -15,7 +16,7 @@ let calls = 0
 const host = new AppExecutionHost({ directory: path.join(directory, 'tasks'), createSource: async context => {
   assert.equal(context.invocation?.surface, 'app'); return { sessionId: 'fixture-session' }
 }, execute: async ({ input, controller }) => { calls++; if (input.prompt.includes('WAIT')) await new Promise((resolve, reject) => { const timer = setTimeout(resolve, 10000); controller.signal.addEventListener('abort', () => { clearTimeout(timer); reject(new Error('stopped')) }, { once: true }) }); return { value: { status: 'completed', output: { answer: 42 } }, tokens: 10, toolCalls: 1 } } })
-const runtime = new AppRuntimeHost({ rootDir: directory, nodeExecutable: process.execPath, beforeAppDeactivation: appId => host.deactivate(appId), hostCapabilityOptions: { protocols } })
+const runtime = new AppRuntimeHost({ rootDir: directory, nodeExecutable: process.execPath, trustedPublishers, requireTrustedPublisher: requireSignature, beforeAppDeactivation: appId => host.deactivate(appId), hostCapabilityOptions: { protocols } })
 for (const def of protocols) for (const method of Object.keys(def.methods)) runtime.registerHostHandler(def.protocol, method, (input, context) => host.handle(def.protocol, method, input, context))
 const definition = { version: 3, kind: 'state-machine', meta: { name: 'verify-flow', title: '验证工作流', description: '真实 App 包集成验证' }, graph: { entry: 'input', nodes: [
   { id: 'input', type: 'start', title: '输入', outputSchema: { type: 'object' } },
@@ -25,7 +26,7 @@ const definition = { version: 3, kind: 'state-machine', meta: { name: 'verify-fl
 const waitFor = async get => { for (let i=0;i<150;i++) { const result = await get(); if (result) return result; await new Promise(r => setTimeout(r, 100)) } throw new Error('Timed out') }
 try {
   await runtime.initialize()
-  await installAppArchive(runtime, path.join(repo, 'artifacts/moss.workflow/0.1.9/moss.workflow-0.1.9.zip'))
+  await installAppArchive(runtime, archivePath)
   await runtime.setAppGrants('moss.workflow', ['execution:read','execution:run','execution:cancel','tasks:read','tasks:write','tasks:cancel'])
   const instance = (await runtime.listInstances('moss.workflow'))[0]
   const invoke = (name, input = {}) => runtime.invoke('moss.workflow', instance.id, name, input, { invocation: { surface: 'app' } })
@@ -50,7 +51,7 @@ try {
   assert.equal((await invoke('run.get', { runId: run.id })).result, 42)
   await invoke('catalog.archive', { workflowId: id }); assert.equal((await invoke('catalog.get', { workflowId: id })).record.status, 'archived')
   await invoke('catalog.restore', { workflowId: id }); assert.equal((await invoke('catalog.get', { workflowId: id })).record.status, 'draft')
-  const report = { package: 'moss.workflow@0.1.9', tests: ['create/publish/code 21 → 42', 'structured Agent through Core protocol', 'short action returns while running', 'cancellation', 'backend restart persists history', 'archive/restore'], passed: true, timestamp: new Date().toISOString() }
-  const reports = path.join(repo, 'artifacts/moss.workflow/verification/0.1.9'); await fs.mkdir(reports, { recursive: true }); await fs.writeFile(path.join(reports, 'package.json'), JSON.stringify(report, null, 2))
+  const report = { package: `moss.workflow@${version}`, signatureRequired: requireSignature, tests: ['create/publish/code 21 → 42', 'structured Agent through Core protocol', 'short action returns while running', 'cancellation', 'backend restart persists history', 'archive/restore'], passed: true, timestamp: new Date().toISOString() }
+  const reports = reportsDir; await fs.mkdir(reports, { recursive: true }); await fs.writeFile(path.join(reports, 'package.json'), JSON.stringify(report, null, 2))
   console.log(JSON.stringify(report, null, 2))
 } finally { await runtime.shutdown(); host.close(); await fs.rm(directory, { recursive: true, force: true }) }
