@@ -1,0 +1,233 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.workflow",
+  "version": "0.1.9",
+  "displayName": "工作流",
+  "description": "创建、发布与调度结构化工作流，查看运行图和恢复记录。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^2.8.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1200,
+      "height": 800,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "protocols": [
+      "moss.agent-execution/v1",
+      "moss.tasks/v1"
+    ],
+    "actions": [
+      {
+        "name": "catalog.list",
+        "inputSchema": "schemas/catalog.list.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "catalog.get",
+        "inputSchema": "schemas/catalog.get.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "catalog.create",
+        "inputSchema": "schemas/catalog.create.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "catalog.edit",
+        "inputSchema": "schemas/catalog.edit.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "catalog.duplicate",
+        "inputSchema": "schemas/catalog.duplicate.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "run.start",
+        "inputSchema": "schemas/run.start.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "run.list",
+        "inputSchema": "schemas/run.list.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "run.get",
+        "inputSchema": "schemas/run.get.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "run.events",
+        "inputSchema": "schemas/run.events.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "catalog.publish",
+        "inputSchema": "schemas/catalog.publish.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "catalog.unpublish",
+        "inputSchema": "schemas/catalog.unpublish.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "catalog.archive",
+        "inputSchema": "schemas/catalog.archive.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "catalog.restore",
+        "inputSchema": "schemas/catalog.restore.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "catalog.delete",
+        "inputSchema": "schemas/catalog.delete.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "run.cancel",
+        "inputSchema": "schemas/run.cancel.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "run.resume",
+        "inputSchema": "schemas/run.resume.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "resource.read",
+        "inputSchema": "schemas/resource.read.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "workflow_read",
+        "inputSchema": "schemas/workflow_read.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "workflow_manage",
+        "inputSchema": "schemas/workflow_manage.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "workflow_run",
+        "inputSchema": "schemas/workflow_run.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "workflow_remove",
+        "inputSchema": "schemas/workflow_remove.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "run.export",
+        "inputSchema": "schemas/run.export.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "composer.list",
+        "inputSchema": "schemas/composer.list.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "composer.resolve",
+        "inputSchema": "schemas/composer.resolve.json",
+        "timeoutMs": 30000
+      }
+    ]
+  },
+  "permissions": [
+    "execution:read",
+    "execution:run",
+    "execution:cancel",
+    "tasks:read",
+    "tasks:write",
+    "tasks:cancel"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "workflow",
+        "title": "工作流",
+        "route": "#/",
+        "order": 240
+      }
+    ],
+    "tools": [
+      {
+        "id": "workflow_read",
+        "title": "读取工作流",
+        "effect": "read",
+        "action": "workflow_read",
+        "description": "读取目录、定义、运行和分块资源。列表每页最多20条，使用offset翻页。大结果包含resourceRef，operation=resource分块读取。",
+        "inputSchema": "schemas/workflow_read.json"
+      },
+      {
+        "id": "workflow_create",
+        "title": "创建工作流",
+        "effect": "write",
+        "action": "catalog.create",
+        "description": "创建 Definition v3 草稿；完整创作规则和节点结构见输入 Schema。按用户要求设计流程，显式绑定数据，不执行节点。默认 user 范围；只有明确要求时使用 project。代码和 JSON Schema 会在保存前校验。",
+        "inputSchema": "schemas/catalog.create.json"
+      },
+      {
+        "id": "workflow_edit",
+        "title": "编辑工作流",
+        "effect": "write",
+        "action": "catalog.edit",
+        "description": "编辑 Definition v3 草稿；完整创作规则见输入 Schema。baseRevision 必须等于当前版本；只修改用户要求的阶段，不因运行失败自行改写流程。",
+        "inputSchema": "schemas/catalog.edit.json"
+      },
+      {
+        "id": "workflow_manage",
+        "title": "管理工作流",
+        "effect": "write",
+        "action": "workflow_manage",
+        "description": "发布、复制、恢复归档。publish 发布当前草稿；不会执行。",
+        "inputSchema": "schemas/workflow_manage.json"
+      },
+      {
+        "id": "workflow_run",
+        "title": "运行工作流",
+        "effect": "write",
+        "action": "workflow_run",
+        "description": "start/cancel/resume。仅用户要求执行时启动。正式运行只接受当前已发布修订；test可运行指定草稿。来源四选一：workflowId、name、definitionPath、definition。文件/内联是独立快照。返回后台runId，无需循环等待。重试同一次提交时复用submissionKey；新运行使用新key。Agent继承普通会话的模型和权限。",
+        "inputSchema": "schemas/workflow_run.json"
+      },
+      {
+        "id": "workflow_remove",
+        "title": "移除工作流",
+        "effect": "destructive",
+        "action": "workflow_remove",
+        "description": "取消发布、归档或永久删除；按照用户要求执行。",
+        "inputSchema": "schemas/workflow_remove.json"
+      }
+    ],
+    "commands": [],
+    "resourceProviders": [
+      {
+        "id": "workflows",
+        "title": "工作流",
+        "schemes": [
+          "moss-workflow"
+        ],
+        "resolveAction": "composer.resolve",
+        "listAction": "composer.list"
+      }
+    ]
+  }
+}

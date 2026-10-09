@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "intent": {
+      "enum": [
+        "create",
+        "edit",
+        "use"
+      ]
+    },
+    "ref": {
+      "type": "object",
+      "properties": {
+        "workflowId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "workflowId",
+        "revision"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "intent"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,1143 @@
+{
+  "type": "object",
+  "definitions": {
+    "__schema0": {
+      "type": "number",
+      "const": 3
+    },
+    "__schema1": {
+      "type": "string",
+      "const": "state-machine"
+    },
+    "__schema2": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+        },
+        "title": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "name",
+        "title",
+        "description"
+      ],
+      "additionalProperties": false
+    },
+    "__schema3": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "__schema4": {
+      "type": "object",
+      "properties": {
+        "concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema5": {
+      "type": "object",
+      "properties": {
+        "maxAgentCalls": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "maxNodeExecutions": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "maxConcurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "maxDurationMs": {
+          "description": "Hard deadline for the complete run, not a source for per-node timeout estimates.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/__schema6"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema6": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 86400000
+    },
+    "__schema7": {
+      "type": "object",
+      "properties": {
+        "entry": {
+          "$ref": "#/definitions/__schema8"
+        },
+        "nodes": {
+          "minItems": 1,
+          "maxItems": 240,
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/__schema9"
+          }
+        },
+        "edges": {
+          "maxItems": 2048,
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/__schema40"
+          }
+        }
+      },
+      "required": [
+        "entry",
+        "nodes",
+        "edges"
+      ],
+      "additionalProperties": false
+    },
+    "__schema8": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+    },
+    "__schema9": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/__schema8"
+            },
+            "title": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "description": {
+              "$ref": "#/definitions/__schema10"
+            },
+            "disabled": {
+              "$ref": "#/definitions/__schema11"
+            },
+            "type": {
+              "type": "string",
+              "const": "start"
+            },
+            "outputSchema": {
+              "$ref": "#/definitions/__schema12"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "type",
+            "outputSchema"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/__schema8"
+            },
+            "title": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "description": {
+              "$ref": "#/definitions/__schema10"
+            },
+            "disabled": {
+              "$ref": "#/definitions/__schema11"
+            },
+            "type": {
+              "type": "string",
+              "const": "end"
+            },
+            "inputSchema": {
+              "$ref": "#/definitions/__schema12"
+            },
+            "input": {
+              "maxItems": 128,
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/__schema13"
+              }
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "type",
+            "inputSchema",
+            "input"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/definitions/__schema18"
+        },
+        {
+          "$ref": "#/definitions/__schema22"
+        },
+        {
+          "$ref": "#/definitions/__schema23"
+        },
+        {
+          "$ref": "#/definitions/__schema27"
+        },
+        {
+          "$ref": "#/definitions/__schema29"
+        },
+        {
+          "$ref": "#/definitions/__schema30"
+        },
+        {
+          "$ref": "#/definitions/__schema38"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/__schema8"
+            },
+            "title": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "description": {
+              "$ref": "#/definitions/__schema10"
+            },
+            "disabled": {
+              "$ref": "#/definitions/__schema11"
+            },
+            "type": {
+              "type": "string",
+              "const": "foreach"
+            },
+            "items": {
+              "$ref": "#/definitions/__schema15"
+            },
+            "concurrency": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            },
+            "body": {
+              "type": "object",
+              "properties": {
+                "entry": {
+                  "$ref": "#/definitions/__schema8"
+                },
+                "nodes": {
+                  "minItems": 1,
+                  "maxItems": 240,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/__schema39"
+                  }
+                },
+                "edges": {
+                  "maxItems": 2048,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/__schema40"
+                  }
+                }
+              },
+              "required": [
+                "entry",
+                "nodes",
+                "edges"
+              ],
+              "additionalProperties": false
+            },
+            "output": {
+              "maxItems": 128,
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/__schema13"
+              }
+            },
+            "outputSchema": {
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/definitions/__schema46"
+              },
+              "additionalProperties": {
+                "$ref": "#/definitions/__schema47"
+              },
+              "description": "Schema for the complete foreach result array. output bindings build one item in that array."
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "type",
+            "items",
+            "body",
+            "outputSchema"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "__schema10": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "__schema11": {
+      "type": "boolean"
+    },
+    "__schema12": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {}
+        }
+      ]
+    },
+    "__schema13": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "maxItems": 64,
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/__schema14"
+          }
+        },
+        "source": {
+          "$ref": "#/definitions/__schema15"
+        }
+      },
+      "required": [
+        "target",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    "__schema14": {
+      "type": "string",
+      "minLength": 1
+    },
+    "__schema15": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "literal"
+            },
+            "value": {
+              "$ref": "#/definitions/__schema16"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "workflow-input"
+            },
+            "path": {
+              "$ref": "#/definitions/__schema17"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "node-output"
+            },
+            "nodeId": {
+              "$ref": "#/definitions/__schema8"
+            },
+            "path": {
+              "$ref": "#/definitions/__schema17"
+            }
+          },
+          "required": [
+            "kind",
+            "nodeId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "iteration-item"
+            },
+            "path": {
+              "$ref": "#/definitions/__schema17"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "iteration-index"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "__schema16": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/__schema16"
+          }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/definitions/__schema16"
+          }
+        }
+      ]
+    },
+    "__schema17": {
+      "maxItems": 64,
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/__schema14"
+      }
+    },
+    "__schema18": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/__schema8"
+        },
+        "title": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "description": {
+          "$ref": "#/definitions/__schema10"
+        },
+        "disabled": {
+          "$ref": "#/definitions/__schema11"
+        },
+        "type": {
+          "type": "string",
+          "const": "agent"
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 524288
+        },
+        "inputSchema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/__schema12"
+            }
+          ]
+        },
+        "input": {
+          "maxItems": 128,
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/__schema13"
+          }
+        },
+        "outputSchema": {
+          "$ref": "#/definitions/__schema12"
+        },
+        "agentType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "execution": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/__schema19"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "type",
+        "prompt",
+        "outputSchema"
+      ],
+      "additionalProperties": false
+    },
+    "__schema19": {
+      "type": "object",
+      "properties": {
+        "timeoutMs": {
+          "$ref": "#/definitions/__schema20"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Optional node execution safety policy; it does not estimate normal latency."
+    },
+    "__schema20": {
+      "description": "Hard cancellation deadline for this node. Omit unless the user explicitly requires a per-node deadline.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/__schema21"
+        }
+      ]
+    },
+    "__schema21": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 86400000
+    },
+    "__schema22": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/__schema8"
+        },
+        "title": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "description": {
+          "$ref": "#/definitions/__schema10"
+        },
+        "disabled": {
+          "$ref": "#/definitions/__schema11"
+        },
+        "type": {
+          "type": "string",
+          "const": "code"
+        },
+        "language": {
+          "type": "string",
+          "const": "javascript"
+        },
+        "script": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 524288
+        },
+        "inputSchema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/__schema12"
+            }
+          ]
+        },
+        "input": {
+          "maxItems": 128,
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/__schema13"
+          }
+        },
+        "outputSchema": {
+          "$ref": "#/definitions/__schema12"
+        },
+        "execution": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/__schema19"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "type",
+        "language",
+        "script",
+        "outputSchema"
+      ],
+      "additionalProperties": false
+    },
+    "__schema23": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/__schema8"
+        },
+        "title": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "description": {
+          "$ref": "#/definitions/__schema10"
+        },
+        "disabled": {
+          "$ref": "#/definitions/__schema11"
+        },
+        "type": {
+          "type": "string",
+          "const": "condition"
+        },
+        "branches": {
+          "minItems": 1,
+          "maxItems": 32,
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/__schema24"
+          }
+        },
+        "default": {
+          "type": "object",
+          "properties": {
+            "port": {
+              "$ref": "#/definitions/__schema25"
+            },
+            "label": {
+              "$ref": "#/definitions/__schema3"
+            }
+          },
+          "required": [
+            "port",
+            "label"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "type",
+        "branches",
+        "default"
+      ],
+      "additionalProperties": false
+    },
+    "__schema24": {
+      "type": "object",
+      "properties": {
+        "port": {
+          "$ref": "#/definitions/__schema25"
+        },
+        "label": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "when": {
+          "$ref": "#/definitions/__schema26"
+        }
+      },
+      "required": [
+        "port",
+        "label",
+        "when"
+      ],
+      "additionalProperties": false
+    },
+    "__schema25": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+    },
+    "__schema26": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "all": {
+              "minItems": 1,
+              "maxItems": 32,
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/__schema26"
+              }
+            }
+          },
+          "required": [
+            "all"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "any": {
+              "minItems": 1,
+              "maxItems": 32,
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/__schema26"
+              }
+            }
+          },
+          "required": [
+            "any"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "not": {
+              "$ref": "#/definitions/__schema26"
+            }
+          },
+          "required": [
+            "not"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "left": {
+              "$ref": "#/definitions/__schema15"
+            },
+            "operator": {
+              "type": "string",
+              "enum": [
+                "equals",
+                "not-equals",
+                "greater-than",
+                "greater-than-or-equal",
+                "less-than",
+                "less-than-or-equal",
+                "contains",
+                "not-contains",
+                "starts-with",
+                "ends-with",
+                "is-empty",
+                "is-not-empty",
+                "exists",
+                "not-exists"
+              ]
+            },
+            "right": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema15"
+                }
+              ]
+            }
+          },
+          "required": [
+            "left",
+            "operator"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "__schema27": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/__schema8"
+        },
+        "title": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "description": {
+          "$ref": "#/definitions/__schema10"
+        },
+        "disabled": {
+          "$ref": "#/definitions/__schema11"
+        },
+        "type": {
+          "type": "string",
+          "const": "parallel"
+        },
+        "branches": {
+          "minItems": 2,
+          "maxItems": 32,
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/__schema28"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "type",
+        "branches"
+      ],
+      "additionalProperties": false
+    },
+    "__schema28": {
+      "type": "object",
+      "properties": {
+        "port": {
+          "$ref": "#/definitions/__schema25"
+        },
+        "label": {
+          "$ref": "#/definitions/__schema3"
+        }
+      },
+      "required": [
+        "port",
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "__schema29": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/__schema8"
+        },
+        "title": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "description": {
+          "$ref": "#/definitions/__schema10"
+        },
+        "disabled": {
+          "$ref": "#/definitions/__schema11"
+        },
+        "type": {
+          "type": "string",
+          "const": "join"
+        },
+        "parallelId": {
+          "$ref": "#/definitions/__schema8"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "type",
+        "parallelId"
+      ],
+      "additionalProperties": false
+    },
+    "__schema30": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/__schema8"
+        },
+        "title": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "description": {
+          "$ref": "#/definitions/__schema10"
+        },
+        "disabled": {
+          "$ref": "#/definitions/__schema11"
+        },
+        "type": {
+          "$ref": "#/definitions/__schema31"
+        },
+        "workflowId": {
+          "$ref": "#/definitions/__schema32"
+        },
+        "name": {
+          "$ref": "#/definitions/__schema33"
+        },
+        "revision": {
+          "$ref": "#/definitions/__schema34"
+        },
+        "input": {
+          "$ref": "#/definitions/__schema35"
+        },
+        "inputSchema": {
+          "$ref": "#/definitions/__schema36"
+        },
+        "outputSchema": {
+          "$ref": "#/definitions/__schema12"
+        },
+        "execution": {
+          "$ref": "#/definitions/__schema37"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "type",
+        "outputSchema"
+      ],
+      "additionalProperties": false
+    },
+    "__schema31": {
+      "type": "string",
+      "const": "workflow"
+    },
+    "__schema32": {
+      "type": "string",
+      "minLength": 1
+    },
+    "__schema33": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "__schema34": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "__schema35": {
+      "maxItems": 128,
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/__schema13"
+      }
+    },
+    "__schema36": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/__schema12"
+        }
+      ]
+    },
+    "__schema37": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/__schema19"
+        }
+      ]
+    },
+    "__schema38": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/__schema8"
+        },
+        "title": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "description": {
+          "$ref": "#/definitions/__schema10"
+        },
+        "disabled": {
+          "$ref": "#/definitions/__schema11"
+        },
+        "type": {
+          "type": "string",
+          "const": "merge"
+        },
+        "mode": {
+          "type": "string",
+          "const": "first-available"
+        },
+        "sources": {
+          "minItems": 1,
+          "maxItems": 64,
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/__schema15"
+          }
+        },
+        "outputSchema": {
+          "$ref": "#/definitions/__schema12"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "type",
+        "mode",
+        "sources",
+        "outputSchema"
+      ],
+      "additionalProperties": false
+    },
+    "__schema39": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/__schema18"
+        },
+        {
+          "$ref": "#/definitions/__schema22"
+        },
+        {
+          "$ref": "#/definitions/__schema23"
+        },
+        {
+          "$ref": "#/definitions/__schema27"
+        },
+        {
+          "$ref": "#/definitions/__schema29"
+        },
+        {
+          "$ref": "#/definitions/__schema30"
+        },
+        {
+          "$ref": "#/definitions/__schema38"
+        }
+      ]
+    },
+    "__schema40": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "$ref": "#/definitions/__schema8"
+        },
+        "target": {
+          "$ref": "#/definitions/__schema41"
+        },
+        "sourcePort": {
+          "$ref": "#/definitions/__schema42"
+        },
+        "label": {
+          "$ref": "#/definitions/__schema43"
+        },
+        "kind": {
+          "$ref": "#/definitions/__schema44"
+        },
+        "maxTraversals": {
+          "$ref": "#/definitions/__schema45"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "__schema41": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "__schema42": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/__schema25"
+        }
+      ]
+    },
+    "__schema43": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/__schema3"
+        }
+      ]
+    },
+    "__schema44": {
+      "type": "string",
+      "const": "back"
+    },
+    "__schema45": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "__schema46": {
+      "type": "string"
+    },
+    "__schema47": {}
+  },
+  "properties": {
+    "cwd": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ]
+    },
+    "publishedOnly": {
+      "type": "boolean"
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 32000
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "list",
+        "get",
+        "runs",
+        "run",
+        "events",
+        "export",
+        "resource"
+      ]
+    },
+    "workflowId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "afterSequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "resourceRef": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "required": [
+    "operation"
+  ],
+  "additionalProperties": false,
+  "description": "list: required operation; get: required operation, workflowId; runs: required operation; run: required operation, runId; events: required operation, runId; export: required operation, runId; resource: required operation, resourceRef"
+}
