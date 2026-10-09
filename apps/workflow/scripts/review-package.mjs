@@ -1,11 +1,11 @@
+import { version, archivePath, reportsDir, coreRoot, requireSignature, trustedPublishers } from './package-context.mjs'
 // Packaged regression checks: every reviewed defect must fail closed or complete safely.
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
-const repo = fileURLToPath(new URL('../../../', import.meta.url))
-const core = process.env.MOSS_CORE_ROOT || path.resolve(repo, '../moss')
+import { pathToFileURL } from 'node:url'
+const core = coreRoot
 const fromCore = file => import(pathToFileURL(path.join(core, file)).href)
 const { AppRuntimeHost } = await fromCore('packages/app-runtime/src/host/index.mjs')
 const { AppExecutionHost } = await fromCore('ui/src/apps/app-execution-host.mjs')
@@ -14,17 +14,17 @@ const { createExecutionProtocolDefinitions } = await fromCore('packages/app-sdk/
 const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'workflow-review-'))
 const protocols = createExecutionProtocolDefinitions()
 const host = new AppExecutionHost({ directory: path.join(directory, 'tasks'), createSource: async () => ({ sessionId: 'review-fixture' }), execute: async ({input}) => ({ value: { status: 'completed', output: { answer: input.prompt.includes('large-agent') ? '中文😀'.repeat(300000) : 42 } }, tokens: 1, toolCalls: 0 }) })
-const runtime = new AppRuntimeHost({ rootDir: directory, nodeExecutable: process.execPath, beforeAppDeactivation: id => host.deactivate(id), hostCapabilityOptions: { protocols } })
+const runtime = new AppRuntimeHost({ rootDir: directory, nodeExecutable: process.execPath, trustedPublishers, requireTrustedPublisher: requireSignature, beforeAppDeactivation: id => host.deactivate(id), hostCapabilityOptions: { protocols } })
 for (const def of protocols) for (const method of Object.keys(def.methods)) runtime.registerHostHandler(def.protocol, method, (input, context) => host.handle(def.protocol, method, input, context))
 const definition = { version: 3, kind: 'state-machine', meta: { name: 'review-flow', title: '隔离审查', description: '隔离目录，无外部工具' }, graph: { entry: 'start', nodes: [
   { id: 'start', type: 'start', title: '开始', outputSchema: {} },
   { id: 'code', type: 'code', title: '代码', language: 'javascript', outputSchema: {}, script: 'return 42' },
   { id: 'end', type: 'end', title: '结束', inputSchema: {}, input: [{ target: [], source: { kind: 'node-output', nodeId: 'code' } }] },
 ], edges: [{ source: 'start', target: 'code' }, { source: 'code', target: 'end' }] } }
-const report = {}
+const report = { package: `moss.workflow@${version}` }
 try {
   await runtime.initialize()
-  await installAppArchive(runtime, path.join(repo, 'artifacts/moss.workflow/0.1.9/moss.workflow-0.1.9.zip'))
+  await installAppArchive(runtime, archivePath)
   await runtime.setAppGrants('moss.workflow', ['execution:read','execution:run','execution:cancel','tasks:read','tasks:write','tasks:cancel'])
   const instance = (await runtime.listInstances('moss.workflow'))[0]
   const invoke = (name, input = {}, extra = {}) => runtime.invoke('moss.workflow', instance.id, name, input, { invocation: { surface: 'app' }, ...extra })
@@ -69,9 +69,10 @@ try {
   for(let i=0;i<22;i++)await wait(await invoke('workflow_run',{operation:'start',definition}))
   const page1=await invoke('run.list',{limit:20}),page2=await invoke('run.list',{offset:20,limit:20});assert.equal(page1.length,20);assert.ok(page2.length>0);assert.ok(!page1.some(r=>page2.some(x=>x.id===r.id)))
   report.historyPagination=true
+  report.signatureRequired=requireSignature
   report.passed=true
   report.timestamp=new Date().toISOString()
-  await fs.mkdir(path.join(repo, 'artifacts/moss.workflow/verification/0.1.9'), { recursive: true })
-  await fs.writeFile(path.join(repo, 'artifacts/moss.workflow/verification/0.1.9/review.json'),JSON.stringify(report,null,2))
+  await fs.mkdir(reportsDir, { recursive: true })
+  await fs.writeFile(path.join(reportsDir, 'review.json'),JSON.stringify(report,null,2))
   console.log(JSON.stringify(report,null,2))
 }finally{await runtime.shutdown();host.close();await fs.rm(directory,{recursive:true,force:true})}

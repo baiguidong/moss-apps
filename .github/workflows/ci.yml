@@ -47,3 +47,7 @@ jobs:
       - run: bun run package -- --skip-build
       - name: Verify Audit package with the pinned Core Host
         run: node apps/audit/scripts/verify-package.mjs
+      - name: Verify Workflow package with the pinned Core Host
+        run: |
+          node apps/workflow/scripts/verify-package.mjs
+          node apps/workflow/scripts/review-package.mjs

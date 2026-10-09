@@ -98,6 +98,6 @@ Trace App 通过通用 `backend.host.request()` 使用 Host API `^2.5.0` 的 `mo
 
 ## 2.8 Workflow App 与会话资源
 
-Workflow 使用通用 `moss.execution/v1` 执行合同、App 任务、`resourceProviders.listAction` 和 `composer.prepare`。Core 不包含 Workflow 引擎；定义、画布和调度位于 `apps/workflow`。
+Workflow 使用通用 `moss.agent-execution/v1` 执行接口与 `moss.tasks/v1`、App 任务、`resourceProviders.listAction` 和 `composer.prepare`。Core 不包含 Workflow 引擎；定义、画布和调度位于 `apps/workflow`。
 
 Workflow 固定使用 `vendor/moss-core` 中 Core 提交 `570209f8a0175216e94502d8737e0d93183d91a8` 的 SDK/Runtime 2.8。执行 `git submodule update --init --recursive` 后即可安装和构建，无需额外 SDK 补丁。
