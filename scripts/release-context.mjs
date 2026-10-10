@@ -1,6 +1,11 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { listApps, repoRoot } from './lib.mjs'
+import { fileURLToPath } from 'node:url'
+const repoRoot = fileURLToPath(new URL('../', import.meta.url))
+const listApps = () => fs.readdirSync(path.join(repoRoot, 'apps')).flatMap(name => {
+  const root = path.join(repoRoot, 'apps', name), manifest = path.join(root, 'app.moss.json')
+  return fs.existsSync(manifest) ? [{ root, manifest: JSON.parse(fs.readFileSync(manifest, 'utf8')) }] : []
+})
 
 const tag = String(process.argv[2] || '').trim()
 const match = tag.match(/^(.+)-v(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)$/)
@@ -13,6 +18,7 @@ if (app.manifest.version !== version) {
 }
 const values = {
   app_id: appId,
+  package_name: JSON.parse(fs.readFileSync(path.join(app.root, 'package.json'), 'utf8')).name,
   app_dir: path.relative(repoRoot, app.root).split(path.sep).join('/'),
   version,
   tag,

@@ -21,6 +21,7 @@ jobs:
       matrix:
         os: [macos-14, macos-15-intel, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,9 +33,14 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.10
-      - run: bun install --frozen-lockfile
       - id: release
         run: node scripts/release-context.mjs "${{ github.ref_name }}"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-1.3.10-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-1.3.10-
+      - run: bun install --frozen-lockfile --filter moss-apps --filter "${{ steps.release.outputs.package_name }}"
       - name: Validate source and runtime on the target desktop platform
         run: node scripts/package-app.mjs --app "${{ steps.release.outputs.app_id }}"
       - name: Rebuild final archive independently
@@ -42,6 +48,7 @@ jobs:
   release:
     needs: source-platforms
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment:
       name: github-pages
     steps:
@@ -55,9 +62,14 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.10
-      - run: bun install --frozen-lockfile
       - id: release
         run: node scripts/release-context.mjs "$GITHUB_REF_NAME"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-1.3.10-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-1.3.10-
+      - run: bun install --frozen-lockfile --filter moss-apps --filter "${{ steps.release.outputs.package_name }}"
       - run: node scripts/validate-apps.mjs --app "${{ steps.release.outputs.app_id }}"
       - run: node scripts/run-apps.mjs check --app "${{ steps.release.outputs.app_id }}"
       - run: node scripts/run-apps.mjs test --app "${{ steps.release.outputs.app_id }}"
