@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import OpenIMSDK from "@openim/node-client-sdk";
+import OpenIMSDK from "./native-sdk.mjs";
 import { MOSS_OPENIM_PROTOCOL, type AppBackendClient, type AppBackendContext } from "@moss/app-sdk";
 import { openIMDirectConversationId, parseOpenIMDirectConversationId } from "../lib/conversation-identifiers";
 import { markOpenIMConversationRead, normalizeOpenIMError } from "./sdk-errors";
@@ -307,6 +307,7 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "host" 
         const current = requireContext();
         const initialized = await currentSdk.initSDK({
           platformID: platformId(),
+          systemType: process.platform,
           apiAddr: profile.apiAddr,
           wsAddr: profile.wsAddr,
           dataDir: path.join(current.dataDir, "sdk"),
@@ -377,14 +378,14 @@ export function createOpenIMClientService(client: Pick<AppBackendClient, "host" 
     const currentSdk = ensureSdk();
     const conversationID = text(input.conversationID);
     if (!conversationID) throw new Error("Conversation ID is required.");
-    const results = [];
-    if (typeof input.isPinned === "boolean") {
-      results.push(await currentSdk.pinConversation({ conversationID, isPinned: input.isPinned } as any));
-    }
-    if (Number.isInteger(input.recvMsgOpt)) {
-      results.push(await currentSdk.setConversationRecvMessageOpt({ conversationID, recvMsgOpt: input.recvMsgOpt } as any));
-    }
-    return results.at(-1) || { errCode: 0, errMsg: "", data: null };
+    const changes = {
+      conversationID,
+      ...(typeof input.isPinned === "boolean" ? { isPinned: input.isPinned } : {}),
+      ...(Number.isInteger(input.recvMsgOpt) ? { recvMsgOpt: Number(input.recvMsgOpt) } : {}),
+    };
+    return Object.keys(changes).length > 1
+      ? currentSdk.setConversation(changes)
+      : { errCode: 0, errMsg: "", data: null };
   }
 
   async function call(methodValue: unknown, argsValue: unknown) {

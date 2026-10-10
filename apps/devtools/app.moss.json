@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.devtools",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "displayName": "开发工具",
   "description": "时间戳、Base64、AES、JSON 与 HTTP 调试，常用开发工具集中使用。",
   "icon": "assets/icon.svg",

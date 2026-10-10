@@ -9,8 +9,7 @@ import { fileURLToPath } from "node:url";
 import { createEnvelope } from "@moss/app-sdk";
 
 const require = createRequire(import.meta.url);
-const sdkPackage = require.resolve("@openim/node-client-sdk/package.json");
-const sdkRequire = createRequire(sdkPackage);
+const sdkPackage = require.resolve("@openim/electron-client-sdk/package.json");
 const nativeFolder = `${process.platform === "darwin" ? "mac" : process.platform === "win32" ? "win" : "linux"}_${process.arch}`;
 const nativeFile = process.platform === "darwin" ? "libopenimsdk.dylib" : process.platform === "win32" ? "libopenimsdk.dll" : "libopenimsdk.so";
 const library = path.join(path.dirname(sdkPackage), "assets", nativeFolder, nativeFile);
@@ -23,7 +22,7 @@ beforeAll(async () => {
   await fs.writeFile(entry, `
 import { AppBackendClient } from ${JSON.stringify(fileURLToPath(import.meta.resolve("@moss/app-sdk")))};
 import { installOpenIMShutdownHandlers } from ${JSON.stringify(fileURLToPath(new URL("./lifecycle.ts", import.meta.url)))};
-import { createRequire } from 'node:module';
+import OpenIMSDK from ${JSON.stringify(fileURLToPath(new URL("./native-sdk.mjs", import.meta.url)))};
 const shutdown = installOpenIMShutdownHandlers(async () => {
   console.log('cleanup');
   if (process.env.TEST_CLEANUP === 'hang') await new Promise(() => {});
@@ -31,7 +30,7 @@ const shutdown = installOpenIMShutdownHandlers(async () => {
   await new Promise(resolve => setTimeout(resolve, 80));
 }, 300);
 // Loading the actual Go library is necessary to reproduce the signal loop.
-createRequire(import.meta.url)(${JSON.stringify(sdkRequire.resolve("koffi"))}).load(${JSON.stringify(library)});
+new OpenIMSDK(${JSON.stringify(library)}, () => {});
 new AppBackendClient({ onShutdown: shutdown }).start();
 setInterval(() => {}, 1000);
 `);

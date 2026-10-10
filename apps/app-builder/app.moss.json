@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.app-builder",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "displayName": "应用构建",
   "description": "在普通会话里创建、预览和迭代自己的 App。",
   "icon": "assets/icon.svg",

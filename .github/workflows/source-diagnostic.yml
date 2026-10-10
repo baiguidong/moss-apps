@@ -1,10 +1,21 @@
-name: Diagnose source toolchain
-on: workflow_dispatch
+name: Verify source toolchain
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: App ID to build and independently rebuild
+        required: true
+        default: moss.openim
 permissions:
   contents: read
 jobs:
-  windows-lock:
-    runs-on: windows-latest
+  source-platforms:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, macos-15-intel, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - name: Preserve source bytes on every platform
         run: git config --global core.autocrlf false
@@ -22,7 +33,6 @@ jobs:
           path: ~/.bun/install/cache
           key: ${{ runner.os }}-bun-1.3.10-${{ hashFiles('bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-1.3.10-
-      - run: bun install --frozen-lockfile --filter moss-apps --filter "@moss/app-builder"
-      - run: node scripts/diagnose-source-lock.mjs
-      - run: node scripts/package-app.mjs --app moss.app-builder
-      - run: node scripts/verify-source-package.mjs --app moss.app-builder --rebuild
+      - run: bun install --frozen-lockfile
+      - run: node scripts/package-app.mjs --app "${{ inputs.app }}"
+      - run: node scripts/verify-source-package.mjs --app "${{ inputs.app }}" --rebuild

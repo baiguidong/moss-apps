@@ -23,3 +23,9 @@ bun run package --app moss.openim
 聊天客户端和自动回复仅运行在 Desktop；Moss Desktop 退出后不继续保持 OpenIM 在线。账号供应由 Moss Server integration 处理。单聊支持 AI 策略，群聊保持人工处理。拖拽或粘贴的大文件分块写入 App 私有缓存。App 构建会把 Koffi 和 OpenIM 桌面平台原生库放入 Backend 产物，Host 不携带 OpenIM SDK 运行依赖。
 
 OpenIM Server 及其 Moss Server integration 属于服务端基础设施，部署脚本由 `moss/deploy/im` 维护，不包含在 App 的构建或发布包中。本仓库只维护 OpenIM Desktop App。
+
+### 固定原生 SDK 与源码重建
+
+Backend 使用 `@openim/electron-client-sdk@3.8.3-patch.10` 的平台无关核心及同一包内的原生库。旧 `@openim/node-client-sdk@1.1.0` 将 ARM 库误放在 `mac_x64`，因此不再用于 Backend。`scripts/sync-native-sdk.mjs` 仅移除 Electron IPC 包装并导出原始核心，生成的源码、MIT 许可证及脚本均随包保留；升级依赖时先审查该脚本，再重新生成。`check` 会逐字验证生成内容，原生测试会核对各平台架构并在当前平台实际构造 SDK、绑定函数及测试关闭。
+
+Linux 原生文件也随包提供，用于 CI 中验证最终包。构建时将依赖使用的 `__filename` 指向最终 Backend 文件，避免产物带入构建机临时绝对路径。

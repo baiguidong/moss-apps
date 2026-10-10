@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.trace",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "displayName": "调用追踪",
   "description": "查看本地模型请求、响应、工具调用与诊断。启用应用即开始采集。",
   "icon": "assets/icon.svg",

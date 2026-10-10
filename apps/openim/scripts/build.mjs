@@ -11,6 +11,7 @@ const marketplace = JSON.parse(fs.readFileSync(path.join(appRoot, 'marketplace.j
 const nativePlatforms = Object.freeze({
   'darwin-arm64': { openim: 'mac_arm64', koffi: 'darwin_arm64' },
   'darwin-x64': { openim: 'mac_x64', koffi: 'darwin_x64' },
+  'linux-x64': { openim: 'linux_x64', koffi: 'linux_x64' },
   'win32-x64': { openim: 'win_x64', koffi: 'win32_x64' },
 })
 fs.rmSync(backendRoot, { recursive: true, force: true })
@@ -24,6 +25,8 @@ for (const command of [
     '--target=node',
     '--format=esm',
     '--external=koffi',
+    '--define=__filename=__mossBundledFilename',
+    '--banner=import { fileURLToPath as __mossFileURLToPath } from "node:url"; const __mossBundledFilename = __mossFileURLToPath(import.meta.url);',
     `--outfile=${backendFile}`,
   ]],
 ]) {
@@ -37,7 +40,7 @@ for (const command of [
 }
 
 const require = createRequire(import.meta.url)
-const sdkPackage = fs.realpathSync(require.resolve('@openim/node-client-sdk/package.json'))
+const sdkPackage = fs.realpathSync(require.resolve('@openim/electron-client-sdk/package.json'))
 const sdkRoot = path.dirname(sdkPackage)
 const sdkRequire = createRequire(sdkPackage)
 const koffiRoot = path.dirname(fs.realpathSync(sdkRequire.resolve('koffi/package.json')))
@@ -46,7 +49,8 @@ fs.mkdirSync(packagedKoffiRoot, { recursive: true })
 for (const name of ['package.json', 'index.js', 'indirect.js']) {
   fs.copyFileSync(path.join(koffiRoot, name), path.join(packagedKoffiRoot, name))
 }
-for (const platform of marketplace.platforms || []) {
+// Include the CI/server runtime too so the published Backend can be smoke-tested on Linux.
+for (const platform of new Set([...(marketplace.platforms || []), 'linux-x64'])) {
   const directories = nativePlatforms[platform]
   if (!directories) throw new Error(`OpenIM build does not define native assets for ${platform}`)
   const openIMSource = path.join(sdkRoot, 'assets', directories.openim)

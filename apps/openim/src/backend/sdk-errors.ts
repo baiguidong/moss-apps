@@ -1,5 +1,5 @@
 import { AppServiceError } from "@moss/app-sdk";
-import type OpenIMSDK from "@openim/node-client-sdk";
+import type OpenIMSDK from "./native-sdk.mjs";
 
 const UNREAD_COUNT_ALREADY_ZERO = 10303;
 
