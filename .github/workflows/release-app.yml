@@ -23,6 +23,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
+      - name: Preserve source bytes on every platform
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
         with:
           submodules: true
@@ -52,6 +54,8 @@ jobs:
     environment:
       name: github-pages
     steps:
+      - name: Preserve source bytes on every platform
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0

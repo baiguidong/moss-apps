@@ -54,7 +54,13 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
         catch (error) { if (error.code !== 'ENOENT') throw error }
       }
       await fs.copyFile(path.join(root, 'app.moss.json'), path.join(output, 'app.moss.json'))
-      if (JSON.stringify(await runtimeFileList(output)) !== JSON.stringify(await runtimeFileList(root))) throw new Error('ZIP source rebuild does not match shipped runtime files')
+      const actual = await runtimeFileList(output), expected = await runtimeFileList(root)
+      if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+        const byPath = new Map(actual.map(file => [file.path, file.sha256]))
+        const changed = expected.filter(file => byPath.get(file.path) !== file.sha256).map(file => file.path)
+        const added = actual.filter(file => !expected.some(before => before.path === file.path)).map(file => file.path)
+        throw new Error(`ZIP source rebuild does not match shipped runtime files: ${[...changed, ...added].slice(0, 20).join(', ')}`)
+      }
     }
     return { appId: pkg.manifest.id, version: pkg.manifest.version, sourceHash: source.descriptor.sourceHash, rebuild }
   } finally { await fs.rm(temp, { recursive: true, force: true }) }

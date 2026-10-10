@@ -8,10 +8,16 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: moss-app-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
+      - name: Preserve source bytes on every platform
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
         with:
           submodules: true
@@ -68,6 +74,8 @@ jobs:
         os: [macos-14, macos-15-intel, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Preserve source bytes on every platform
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
         with:
           submodules: true

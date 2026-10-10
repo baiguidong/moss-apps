@@ -10,7 +10,7 @@ const vendor = path.join(appsRepo, 'vendor/moss-core')
 async function snapshot(root) {
   const hash = createHash('sha256')
   async function visit(source) {
-    for (const entry of (await fs.readdir(source, { withFileTypes: true })).sort((a,b) => a.name.localeCompare(b.name))) {
+    for (const entry of (await fs.readdir(source, { withFileTypes: true })).sort((a,b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)) {
       if (['node_modules', '.git'].includes(entry.name)) continue
       const file = path.join(source, entry.name)
       if (entry.isDirectory()) await visit(file)
@@ -29,7 +29,7 @@ if (process.argv.includes('--check')) {
 } else {
 async function sync(source, destination) {
   await fs.mkdir(destination, { recursive: true })
-  for (const entry of (await fs.readdir(source, { withFileTypes: true })).sort((a,b) => a.name.localeCompare(b.name))) {
+  for (const entry of (await fs.readdir(source, { withFileTypes: true })).sort((a,b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)) {
     if (['node_modules', '.git'].includes(entry.name)) continue
     const from = path.join(source, entry.name), to = path.join(destination, entry.name)
     if (entry.isDirectory()) await sync(from, to)

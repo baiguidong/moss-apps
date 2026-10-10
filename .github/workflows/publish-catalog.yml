@@ -23,6 +23,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Preserve source bytes on every platform
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
         with:
           submodules: true
