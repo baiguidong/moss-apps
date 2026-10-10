@@ -75,7 +75,7 @@ async function packageApp(app, options) {
   // --skip-build cannot reuse an unbound dist directory. Always build the exact
   // exported snapshot that ships with this version.
   const privateKeyPem = signingKeyFromEnvironment()
-  const temporary = await fsp.mkdtemp(path.join(os.tmpdir(), 'moss-source-build-'))
+  const temporary = await fsp.realpath(await fsp.mkdtemp(path.join(os.tmpdir(), 'moss-source-build-')))
   try {
   const sourceRoot = path.join(temporary, 'source')
   const spec = await exportAppSource(app, sourceRoot, { release: options.requireSignature || Boolean(privateKeyPem) })

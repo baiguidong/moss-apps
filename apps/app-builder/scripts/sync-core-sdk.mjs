@@ -14,7 +14,7 @@ async function snapshot(root) {
       if (['node_modules', '.git'].includes(entry.name)) continue
       const file = path.join(source, entry.name)
       if (entry.isDirectory()) await visit(file)
-      else if (entry.isFile()) { const bytes = await fs.readFile(file); hash.update(path.relative(root, file)); hash.update(bytes) }
+      else if (entry.isFile()) { const bytes = await fs.readFile(file); hash.update(path.relative(root, file).split(path.sep).join('/')); hash.update(bytes) }
       else throw new Error(`Unsupported SDK source entry: ${file}`)
     }
   }

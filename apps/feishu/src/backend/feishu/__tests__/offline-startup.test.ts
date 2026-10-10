@@ -6,7 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createEnvelope } from '@moss/app-sdk'
 
-const nodeExecutable = execFileSync('which', ['node'], { encoding: 'utf8' }).trim()
+const nodeExecutable = execFileSync(process.platform === 'win32' ? 'where.exe' : 'which', ['node'], { encoding: 'utf8' }).trim().split(/\r?\n/)[0]!
 
 it('completes local startup and answers heartbeats while Host and Feishu connections are unavailable, then reconnects in place', async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'feishu-offline-'))

@@ -10,7 +10,7 @@ import { repoRoot, selectApps } from './lib.mjs'
 import { run } from './source-package.mjs'
 
 export async function verifySourceArchive(archive, { rebuild = false, requireSignature = false } = {}) {
-  const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-zip-source-'))
+  const temp = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'moss-zip-source-')))
   const root = path.join(temp, 'package')
   try {
     const bytes = await fs.readFile(archive)

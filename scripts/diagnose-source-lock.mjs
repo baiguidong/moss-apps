@@ -5,7 +5,7 @@ import { selectApps } from './lib.mjs'
 import { exportAppSource, parseLock, run } from './source-package.mjs'
 
 // Diagnostic only: never produces or signs a release package.
-const root = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-lock-diagnostic-'))
+const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'moss-lock-diagnostic-')))
 try {
   await exportAppSource(selectApps(['--app', 'moss.app-builder'])[0], root)
   const before = parseLock(await fs.readFile(path.join(root, 'bun.lock'), 'utf8'))
