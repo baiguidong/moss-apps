@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.http-client",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "displayName": "HTTP 调试",
   "description": "编辑请求、查看响应，常用接口调试在本地完成。",
   "icon": "assets/icon.svg",

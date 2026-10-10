@@ -81,8 +81,7 @@ test('follows host appearance events and reports backend failures without fallin
   await page.addInitScript(() => {
     const callbacks = new Map<string, (data: unknown) => void>()
     const bridge: any = { appearance: { themeMode: 'dark', cssThemeId: 'dot-theme' },
-      app: { getInfo: async () => ({ appearance: bridge.appearance }), getInstallationState: async () => ({ enabled: true }) },
-      instances: { list: async () => [{ id: 'default' }], getStatus: async () => ({ state: 'error' }) },
+      app: { getInfo: async () => ({ appearance: bridge.appearance }), getInstallationState: async () => ({ enabled: true }), getStatus: async () => ({ state: 'error' }) },
       events: { on: (name: string, fn: (data: unknown) => void) => { callbacks.set(name, fn); return () => callbacks.delete(name) } },
       actions: { invoke: async () => { throw new Error('Backend unavailable') } },
       changeTheme: () => { bridge.appearance = { themeMode: 'light', cssThemeId: 'gradient-theme' }; callbacks.get('appearance')?.({}) },

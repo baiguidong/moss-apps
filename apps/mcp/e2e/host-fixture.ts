@@ -49,9 +49,9 @@ export async function installHostFixture(page: Page, options: { holdInitialList?
       app: {
         getInfo: async () => ({ appearance: { themeMode: 'system', cssThemeId: 'default' } }),
         getInstallationState: async () => ({ installation: { enabled: true } }),
+        getStatus: async () => ({ state: 'running' }),
       },
-      instances: { list: async () => [{ id: 'fixture' }], getStatus: async () => ({ state: 'running' }) },
-      actions: { invoke: (_instance: string, method: string, input: unknown) => invoke(method, input), cancel: () => (window as any).mcpFixtureCancel() },
+      actions: { invoke: async (method: string, input: unknown) => ({ ok: true, result: await invoke(method, input) }), cancel: () => (window as any).mcpFixtureCancel() },
       events: { on: () => () => {} },
     } })
   })

@@ -1,4 +1,5 @@
 export function userError(error: unknown): string {
+  if (error && typeof error === 'object' && 'code' in error && error.code === 'APP_ACTION_CANCELED') return '请求已取消。'
   const message = (error instanceof Error ? error.message : '').replace(/^Error invoking remote method '[^']+':\s*(?:[A-Za-z]*Error:\s*)?/, '')
   if (/[\u3400-\u9fff]/.test(message)) return message
   if (/disabled|not enabled/i.test(message)) return '应用已停用，请在 Moss 应用管理中启用后重试。'

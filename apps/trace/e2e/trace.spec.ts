@@ -18,8 +18,8 @@ test('real App reader drives list, full prompt, filters, refresh, theme and dele
       return transfer.pack(result)
     })
     await page.addInitScript(() => {
-      window.mossApp = { instances: { list: async () => [{ id: 'moss.trace--default' }] },
-        actions: { invoke: (_id: string, name: string, input: unknown) => (window as any).traceAction(name, input) },
+      window.mossApp = {
+        actions: { invoke: async (name: string, input: unknown) => ({ ok: true, result: await (window as any).traceAction(name, input) }) },
         app: { getInfo: async () => ({ appearance: { themeMode: 'dark' } }) } } as any
     })
     await page.goto('/')

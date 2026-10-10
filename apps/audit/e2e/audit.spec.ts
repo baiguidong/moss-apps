@@ -28,8 +28,8 @@ for (const themeMode of ['light', 'dark']) test(`real audit data, navigation, de
       return transfer.pack(await methods[name]())
     })
     await page.addInitScript(mode => {
-      window.mossApp = { instances: { list: async () => [{ id: 'moss.audit--default' }] },
-        actions: { invoke: (_id: string, name: string, input: unknown) => (window as any).auditAction(name, input) },
+      window.mossApp = {
+        actions: { invoke: async (name: string, input: unknown) => ({ ok: true, result: await (window as any).auditAction(name, input) }) },
         events: { on: () => () => {} }, app: { getInfo: async () => ({ appearance: { themeMode: mode } }) } } as any
     }, themeMode)
     await page.goto('/')

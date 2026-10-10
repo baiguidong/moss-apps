@@ -10,17 +10,16 @@ async function setup(page: Page) {
     const rpc = async (route: string, value: unknown) => (await fetch(`${bridge}/${route}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(value) })).json()
     const api: any = {
       appearance: { themeMode: 'light', cssThemeId: 'grid-theme' }, fail: false,
-      app: { getInfo: async () => ({ appearance: api.appearance }), getInstallationState: async () => ({ enabled: true }) },
-      instances: { list: async () => [{ id: 'default' }], getStatus: async () => ({ state: api.fail ? 'error' : 'running' }) },
+      app: { getInfo: async () => ({ appearance: api.appearance }), getInstallationState: async () => ({ enabled: true }), getStatus: async () => ({ state: api.fail ? 'error' : 'running' }) },
       events: { on: (name: string, callback: (data: unknown) => void) => { callbacks.set(name, callback); return () => callbacks.delete(name) } },
       actions: {
-        invoke: async (_instance: string, _name: string, input: unknown, options: { requestId: string }) => {
+        invoke: async (_name: string, input: unknown, options: { requestId: string }) => {
           if (api.fail) throw new Error('Backend unavailable')
           const response = await rpc('invoke', { id: options.requestId, input })
           if (response.error) throw new Error(response.error)
-          return response.result
+          return { ok: true, result: response.result }
         },
-        cancel: async (_instance: string, id: string) => rpc('cancel', { id }),
+        cancel: async (id: string) => rpc('cancel', { id }),
       },
       storage: { getItem: async (key: string) => JSON.parse(sessionStorage.getItem(key) || 'null'), setItem: async (key: string, value: unknown) => { sessionStorage.setItem(key, JSON.stringify(value)); return { ok: true, key } } },
       update: (themeMode: string, cssThemeId: string) => { api.appearance = { themeMode, cssThemeId }; callbacks.get('appearance')?.({}); callbacks.get('runtime')?.({}) },
