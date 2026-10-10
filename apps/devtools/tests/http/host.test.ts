@@ -5,13 +5,14 @@ import path from 'node:path'
 import os from 'node:os'
 import { pathToFileURL } from 'node:url'
 import type { AppUiApi } from '@moss/app-sdk'
-import { send } from '../src/lib/host'
-import { emptyRequest } from '../src/contracts'
+import { send } from '../../src/http/lib/host'
+import { emptyRequest } from '../../src/http/contracts'
 import { createTestServer } from './fixtures.mjs'
+import manifest from '../../app.moss.json'
 
 const core = path.resolve(process.env.MOSS_CORE_ROOT || '../../vendor/moss-core')
 const { AppRuntimeHost, writePackageChecksums, defaultInstanceId } = await import(pathToFileURL(path.join(core, 'packages/app-runtime/src/index.mjs')).href)
-const appId = 'moss.http-client', instanceId = defaultInstanceId(appId)
+const appId = 'moss.devtools', instanceId = defaultInstanceId(appId)
 const deferred = () => { let resolve!: () => void; const promise = new Promise<void>(r => { resolve = r }); return { promise, resolve } }
 async function waitFor(predicate: () => boolean) {
   for (let i = 0; i < 200; i++) { if (predicate()) return; await new Promise(resolve => setTimeout(resolve, 10)) }
@@ -23,9 +24,10 @@ async function setup() {
   const source = path.join(root, 'source')
   await fs.mkdir(source)
   await fs.copyFile(process.env.MOSS_HTTP_TEST_BACKEND!, path.join(source, 'main.mjs'))
+  await fs.cp(path.resolve('schemas'), path.join(source, 'schemas'), { recursive: true })
   await fs.writeFile(path.join(source, 'app.moss.json'), JSON.stringify({
-    schemaVersion: 2, id: appId, version: '0.1.2', hostApi: '^3.0.0', displayName: 'HTTP test', permissions: [],
-    backend: { entry: 'main.mjs', runtime: 'node', apiVersion: 1, lifecycle: 'on-demand', actions: [{ name: 'request.send' }] },
+    ...manifest, ui: undefined, icon: undefined, contributes: undefined,
+    backend: { ...manifest.backend, entry: 'main.mjs' },
   }))
   await writePackageChecksums(source)
   const runtime = await new AppRuntimeHost({ rootDir: path.join(root, 'runtime'), nodeExecutable: process.execPath }).initialize()
@@ -41,7 +43,7 @@ async function setup() {
       cancel: async (requestId: string) => { cancels++; return { cancelled: runtime.cancel(appId, instanceId, requestId) } },
     },
   } as unknown as AppUiApi
-  windowStub.addEventListener('http-operation', () => { changes++ })
+  windowStub.addEventListener('devtools-operation', () => { changes++ })
   globalThis.window = windowStub as unknown as Window & typeof globalThis
   return { runtime, server, counters: () => ({ cancels, invokes, changes }), close: async () => {
     globalThis.window = oldWindow

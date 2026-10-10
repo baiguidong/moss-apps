@@ -11,8 +11,8 @@ try {
   }
   const requestTests = join(directory, 'request.test.mjs'), hostTests = join(directory, 'host.test.mjs'), backend = join(directory, 'backend.mjs')
   for (const [command, args] of [
-    ['bun', ['build', 'tests/request.test.ts', '--target=node', `--outfile=${requestTests}`]],
-    ['bun', ['build', 'tests/host.test.ts', '--target=node', `--outfile=${hostTests}`]],
+    ['bun', ['build', 'tests/http/request.test.ts', '--target=node', `--outfile=${requestTests}`]],
+    ['bun', ['build', 'tests/http/host.test.ts', '--target=node', `--outfile=${hostTests}`]],
     ['bun', ['build', 'src/backend/main.ts', '--target=node', `--outfile=${backend}`]],
     [process.execPath, ['--test', requestTests, hostTests]],
   ]) {

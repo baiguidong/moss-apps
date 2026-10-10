@@ -4,6 +4,7 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { resolve, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildEmbeddedShell } from './build-embedded-shell.mjs'
+import { createTestServer } from '../tests/http/fixtures.mjs'
 const root = fileURLToPath(new URL('..', import.meta.url)), repo = resolve(root, '../..'), core = process.env.MOSS_CORE_ROOT
 if (!core) throw new Error('Set MOSS_CORE_ROOT to a complete Core checkout with Electron/UI dependencies installed.')
 const manifest = JSON.parse(await readFile(join(root, 'app.moss.json'), 'utf8'))
@@ -74,6 +75,25 @@ try {
   await click(page.getByRole('button', { name: '解密文本' }))
   await expect(page.getByRole('textbox', { name: '解密结果' })).toHaveValue('Moss desktop AES 👋')
   passed('AES key generation, native GCM and decryption in packaged UI and Backend')
+  const server = await createTestServer()
+  try {
+    await click(page.getByRole('link', { name: 'HTTP 调试', exact: true }))
+    await enter('请求地址', `${server.url}/bigint`)
+    await click(page.getByRole('button', { name: '发送请求', exact: true }))
+    await expect(page.getByRole('textbox', { name: '响应正文' })).toHaveValue(/9007199254740993/)
+    await click(page.getByRole('button', { name: '保存模板', exact: true }))
+    await enter('模板名称', '桌面测试接口')
+    await click(page.getByRole('button', { name: '确认保存', exact: true }))
+    await expect(page.getByRole('button', { name: 'GET 桌面测试接口' })).toBeVisible()
+    assert.match(await desktop.evaluate(() => globalThis.devtoolsFixture.storage()), /桌面测试接口/)
+    await screenshot('http-light.png')
+    await click(page.getByRole('link', { name: 'JSON', exact: true }))
+    await expect(page.getByRole('textbox', { name: 'JSON 结果' })).toHaveValue(/9007199254740993/)
+    await click(page.getByRole('link', { name: 'HTTP 调试', exact: true }))
+    await expect(page.getByRole('textbox', { name: '响应正文' })).toHaveValue(/9007199254740993/)
+    passed('HTTP requests and template storage share the developer tools App; tool switching preserves results')
+  } finally { await server.close() }
+  await click(page.getByRole('link', { name: 'AES', exact: true }))
   await desktop.evaluate(() => globalThis.devtoolsFixture.theme({ themeMode: 'dark', cssThemeId: 'dot-theme' }))
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await expect(page.locator('html')).toHaveAttribute('data-background-style', 'dot-theme')

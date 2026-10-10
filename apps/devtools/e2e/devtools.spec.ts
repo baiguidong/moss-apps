@@ -63,7 +63,7 @@ for (const theme of ['light', 'dark'] as const) test(`${theme} screenshots, all 
   await page.goto('/')
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
   await mkdir(shots, { recursive: true })
-  for (const [name, id] of [['时间戳', 'timestamp'], ['Base64', 'base64'], ['AES', 'aes'], ['JSON', 'json']]) {
+  for (const [name, id] of [['时间戳', 'timestamp'], ['Base64', 'base64'], ['AES', 'aes'], ['JSON', 'json'], ['HTTP 调试', 'http']]) {
     await page.getByRole('link', { name, exact: true }).click()
     await page.screenshot({ path: path.join(shots, `${id}-${theme}.png`) })
     for (const width of [760, 600, 390, 320]) {

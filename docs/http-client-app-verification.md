@@ -1,4 +1,6 @@
-# HTTP 调试 App 验证记录
+# HTTP 调试 App 历史验证记录
+
+> 2026-10-10 起 HTTP 调试已合并到 [开发工具](../apps/devtools/README.md)。以下保留独立应用 0.1.0 的历史结果与路径；当前验证请在 `apps/devtools` 执行。
 
 验证日期：2026-09-28。App：`moss.http-client@0.1.0`，源码目录 `apps/http-client`。
 

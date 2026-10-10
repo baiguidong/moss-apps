@@ -7,18 +7,18 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createEnvelope } from '@moss/app-sdk'
-import { createTestServer } from '../tests/fixtures.mjs'
+import { createTestServer } from '../tests/http/fixtures.mjs'
 const appVersion = JSON.parse(readFileSync(new URL('../app.moss.json', import.meta.url), 'utf8')).version
 const directory = await mkdtemp(join(tmpdir(), 'moss-http-browser-'))
 const fixture = await createTestServer(), pending = new Map()
 const identity = { generation: 1, launchToken: 'browser-integration' }
-const backend = fork(fileURLToPath(new URL('../dist/backend/main.mjs', import.meta.url)), [], { cwd: directory, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], env: { PATH: process.env.PATH, MOSS_APP_ID: 'moss.http-client', MOSS_APP_VERSION: appVersion, MOSS_APP_INSTANCE_ID: 'default', MOSS_APP_GENERATION: '1', MOSS_APP_LAUNCH_TOKEN: identity.launchToken } })
+const backend = fork(fileURLToPath(new URL('../dist/backend/main.mjs', import.meta.url)), [], { cwd: directory, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], env: { PATH: process.env.PATH, MOSS_APP_ID: 'moss.devtools', MOSS_APP_VERSION: appVersion, MOSS_APP_INSTANCE_ID: 'default', MOSS_APP_GENERATION: '1', MOSS_APP_LAUNCH_TOKEN: identity.launchToken } })
 backend.stdout.pipe(process.stdout); backend.stderr.pipe(process.stderr)
 await new Promise((resolve, reject) => {
   backend.once('error', reject)
   backend.once('exit', code => reject(new Error(`Backend exit ${code}`)))
   backend.on('message', message => {
-    if (message.type === 'service.hello') backend.send(createEnvelope('service.init', { ...identity, appId: 'moss.http-client', version: appVersion, instanceId: 'default', config: {}, secrets: {}, dataDir: directory, runtimeDir: directory, permissions: [], grants: [], protocols: [] }))
+    if (message.type === 'service.hello') backend.send(createEnvelope('service.init', { ...identity, appId: 'moss.devtools', version: appVersion, instanceId: 'default', config: {}, secrets: {}, dataDir: directory, runtimeDir: directory, permissions: [], grants: [], protocols: [] }))
     if (message.type === 'service.ready') resolve()
     if (message.type === 'action.result' || message.type === 'action.error') {
       const callback = pending.get(message.id)
@@ -28,8 +28,8 @@ await new Promise((resolve, reject) => {
 })
 const server = createServer(async (req, res) => {
   const origin = req.headers.origin
-  if (origin && origin !== 'http://127.0.0.1:4179') { res.writeHead(403); res.end(); return }
-  res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:4179')
+  if (origin && origin !== 'http://127.0.0.1:4178') { res.writeHead(403); res.end(); return }
+  res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:4178')
   res.setHeader('Access-Control-Allow-Headers', 'content-type')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return }
@@ -44,7 +44,7 @@ const server = createServer(async (req, res) => {
     if (req.url === '/cancel') { backend.send(createEnvelope('action.cancel', { requestId: value.id, ...identity })); finish({ canceled: true }); return }
     if (req.url !== '/invoke') throw new Error('invalid route')
     pending.set(value.id, finish)
-    backend.send(createEnvelope('action.invoke', { name: 'request.send', input: value.input, ...identity }, { id: value.id }))
+    backend.send(createEnvelope('action.invoke', { name: value.name, input: value.input, ...identity }, { id: value.id }))
   } catch { res.writeHead(400); res.end() }
 })
 await new Promise(resolve => server.listen(4181, '127.0.0.1', resolve))

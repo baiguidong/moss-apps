@@ -29,11 +29,8 @@ jobs:
       - name: Install browser for developer tools checks
         working-directory: apps/devtools
         run: bun x playwright install --with-deps chromium
-      - name: Verify developer tools UI
+      - name: Verify developer tools UI and local HTTP requests
         working-directory: apps/devtools
-        run: bun run test:browser
-      - name: Verify HTTP client UI and local requests
-        working-directory: apps/http-client
         run: bun run test:browser
       - name: Verify Trace UI and App data reader
         working-directory: apps/trace

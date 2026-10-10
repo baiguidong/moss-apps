@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { ArrowDownToLine } from 'lucide-react'
 import type { RequestResult } from '../contracts'
 import { formatJson } from '../core/json'
-import { CopyButton } from './Fields'
+import { CopyButton } from '../../components/shared'
 
 export function Response({ result, busy }: { result: RequestResult | null; busy: boolean }) {
   const [tab, setTab] = useState('body'), [pretty, setPretty] = useState(true)

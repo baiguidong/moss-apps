@@ -4,6 +4,7 @@ import { App } from './App'
 import { syncAppearance } from './lib/appearance'
 import './theme.css'
 import './styles.css'
+import './http/styles.css'
 class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false }
   static getDerivedStateFromError() { return { failed: true } }

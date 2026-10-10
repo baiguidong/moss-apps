@@ -14,6 +14,8 @@ for (const [command, args] of [
   if (result.status !== 0) process.exit(result.status ?? 1)
 }
 collectLicenses(cwd)
-const verified = spawnSync(process.execPath, ['scripts/verify-backend.mjs'], { cwd, stdio: 'inherit' })
-if (verified.error) throw verified.error
-if (verified.status !== 0) process.exit(verified.status ?? 1)
+for (const script of ['scripts/verify-backend.mjs', 'scripts/verify-http-backend.mjs']) {
+  const verified = spawnSync(process.execPath, [script], { cwd, stdio: 'inherit' })
+  if (verified.error) throw verified.error
+  if (verified.status !== 0) process.exit(verified.status ?? 1)
+}

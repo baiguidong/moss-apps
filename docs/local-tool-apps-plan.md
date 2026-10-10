@@ -1,15 +1,14 @@
 # 本地工具 App 选型与接入方案
 
-核对日期：2026-09-28。开发工具和 HTTP 调试已分别实现为独立的 [moss.devtools](../apps/devtools/README.md) 与 [moss.http-client](../apps/http-client/README.md)，验证范围见 [开发工具记录](devtools-app-verification.md) 和 [HTTP 记录](http-client-app-verification.md)；图片和音视频 App 仍为源码调研与实施设计，尚未创建或完成实际转码测试。
+应用划分更新：2026-10-10。HTTP 调试已合并到 [moss.devtools](../apps/devtools/README.md)，不再单独提供 `moss.http-client`。原始验证范围见 [开发工具记录](devtools-app-verification.md) 和 [HTTP 历史记录](http-client-app-verification.md)；图片和音视频 App 仍为源码调研与实施设计，尚未创建或完成实际转码测试。
 
-目标是把不同开源项目中的实用能力接入 Moss Desktop，形成多个可以独立安装、升级和停用的本地 App。用户已选择按开发工具、图片工具、音视频工具等类别拆分。HTTP 调试单独成一个 App，便于独立维护请求集合、网络行为和凭据。
+目标是把不同开源项目中的实用能力接入 Moss Desktop，形成多个可以独立安装、升级和停用的本地 App。用户已选择按开发工具、图片工具、音视频工具等类别拆分。HTTP 调试作为开发工具中的工作区，与转换工具共用应用入口。
 
-## 建议的四个 App
+## 三类 App
 
 | App | 建议 ID / 目录 | 首版功能 | 开源来源与集成方式 |
 | --- | --- | --- | --- |
-| 开发工具 | `moss.devtools` / `apps/devtools` | 秒/毫秒时间戳与时区转换，Base64 文本/文件编码，JSON 格式化/压缩/校验，AES 加解密 | 从 [Ctool](https://github.com/baiy/Ctool) 和 [OmniTools](https://github.com/iib0011/omni-tools) 选择适用的功能与交互；数据处理优先使用标准 API、Node `Buffer` / `crypto`；按需要移植独立模块 |
-| HTTP 调试 | `moss.http-client` / `apps/http-client` | 请求方法、URL、Query、Headers、Body、Basic/Bearer 鉴权，状态码/耗时/响应查看，请求集合 | [Hoppscotch](https://github.com/hoppscotch/hoppscotch) 提供交互和模块来源；使用 App 自带 Node Backend 执行 HTTP 请求 |
+| 开发工具 | `moss.devtools` / `apps/devtools` | 时间戳、Base64 文本转换、JSON 格式化/压缩/校验、AES 加解密；HTTP 请求、鉴权、响应查看和模板 | 转换工具参考 [Ctool](https://github.com/baiy/Ctool) 和 [OmniTools](https://github.com/iib0011/omni-tools)，HTTP 交互参考 [Hoppscotch](https://github.com/hoppscotch/hoppscotch)；使用标准 API 与 App 自带 Node Backend |
 | 图片工具 | `moss.image-tools` / `apps/image-tools` | JPEG/PNG/WebP/AVIF 转换，压缩、缩放、裁剪、批量处理与预览 | [OmniTools](https://github.com/iib0011/omni-tools) 的图片工作流 + [sharp](https://github.com/lovell/sharp) 本地处理引擎；纯 JS 轻量版本可考虑 [Jimp](https://github.com/jimp-dev/jimp) |
 | 音视频工具 | `moss.media-tools` / `apps/media-tools` | 格式转换、提取音轨、剪裁、压缩、视频转 GIF，任务进度与取消 | [FFmpeg / ffprobe](https://github.com/FFmpeg/FFmpeg) 随 App 分平台打包；[OmniTools](https://github.com/iib0011/omni-tools)、[ConvertX](https://github.com/C4illin/ConvertX)、[VERT](https://github.com/VERT-sh/VERT) 提供可评估的工作流和实现来源 |
 
@@ -44,7 +43,7 @@ CryptoJS 的 README 已明确停止维护。新的 AES 模块优先使用原生 
 - 每个 App 有一个 Desktop 本地 Node Backend，可使用 `on-demand` 或 `persistent` 生命周期。
 - UI 通过 `mossApp.actions.invoke()` 调用 Backend，操作通过 `backend.actions` 声明输入/输出 Schema。
 - Backend 获得当前 App 的 `dataDir` / `runtimeDir`；文件选择等公开能力使用 `moss.platform/v1`。
-- `contributes.tools` 只用于明确需要 AI 调用的能力，安装和管理时必须向用户展示。开发工具与 HTTP 调试 App 仅提供页面操作，不注册 AI 工具。
+- `contributes.tools` 只用于明确需要 AI 调用的能力，安装和管理时必须向用户展示。开发工具（含 HTTP 调试）仅提供页面操作，不注册 AI 工具。
 - 已有 [OpenIM 构建脚本](../apps/openim/scripts/build.mjs) 可参考分平台原生运行文件的裁剪和打包。
 
 接入关系：
@@ -103,7 +102,7 @@ flowchart LR
 ## 实施顺序与验收
 
 1. **开发工具 App**：先实现时间戳、Base64、JSON、AES，完成本地 UI 和 Backend action，不注册 AI 工具；验证 Unicode、无效输入、大整数格式化、时区/毫秒，以及标准 AES 测试向量。
-2. **HTTP 调试 App**：验证本地测试服务的各类方法、请求体、鉴权、重定向、超时/取消和大响应。请求在 Node 执行，普通 HTTP 调试无需依赖浏览器 CORS 代理。响应正文按容量限制或分页读取，凭据不进入请求历史明文。
+2. **开发工具中的 HTTP 调试**：验证本地测试服务的各类方法、请求体、鉴权、重定向、超时/取消和大响应。请求在 Node 执行，普通 HTTP 调试无需依赖浏览器 CORS 代理。响应正文按容量限制或分页读取，凭据不进入请求历史明文。
 3. **公共文件能力 + 图片工具 App**：补齐保存路径，验证透明度、EXIF 方向、动画输入的处理策略、格式支持、批量部分失败与输出质量；HEIC/RAW 等按选定引擎构建能力另行加入。
 4. **音视频工具 App**：完成 FFmpeg 跨平台运行包、长任务与大文件路径，验证视频/音轨转换、超过 100 MiB 的文件、取消、磁盘不足、宿主退出、产物可播放性。可选格式和编码器从实际二进制能力生成，不把容器后缀等同于编码器可用。
 

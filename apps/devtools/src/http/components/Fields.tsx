@@ -1,5 +1,4 @@
-import { Plus, X, Copy, Check } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { Plus, X } from 'lucide-react'
 import { emptyPair, type Pair } from '../contracts'
 
 export function PairEditor({ label, rows, onChange, valuePlaceholder = '值' }: { label: string; rows: Pair[]; onChange: (rows: Pair[]) => void; valuePlaceholder?: string }) {
@@ -10,12 +9,4 @@ export function PairEditor({ label, rows, onChange, valuePlaceholder = '值' }: 
     <input aria-label={`${label}值 ${index + 1}`} placeholder={valuePlaceholder} value={row.value} maxLength={16384} onChange={e => change(index, { value: e.target.value })} spellCheck={false} />
     <button type="button" aria-label={`删除${label} ${index + 1}`} onClick={() => onChange(rows.length === 1 ? [emptyPair()] : rows.filter((_, i) => i !== index))}><X size={14} /></button>
   </div>)}<button type="button" className="subtle" disabled={rows.length >= 100} onClick={() => onChange([...rows, emptyPair()])}><Plus size={14} />添加{label}</button></div>
-}
-export function CopyButton({ value, label = '复制' }: { value: string; label?: string }) {
-  const [message, setMessage] = useState(''), timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  useEffect(() => { setMessage(''); return () => clearTimeout(timer.current) }, [value])
-  return <button type="button" aria-label={label} onClick={async () => {
-    try { await navigator.clipboard.writeText(value); setMessage('已复制') } catch { setMessage('请选中文本复制') }
-    clearTimeout(timer.current); timer.current = setTimeout(() => setMessage(''), 2000)
-  }}>{message === '已复制' ? <Check size={14} /> : <Copy size={14} />}{message || label}</button>
 }

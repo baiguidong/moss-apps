@@ -62,6 +62,8 @@ await fsp.mkdir(path.join(siteRoot, 'v1', 'assets'), { recursive: true })
 const sourceApps = new Map(listApps().map((app) => [app.manifest.id, app]))
 const summaries = []
 for (const [appId, entry] of [...byApp.entries()].sort(([left], [right]) => left.localeCompare(right))) {
+  // Removed Apps stay retired even when their GitHub releases still exist.
+  if (!sourceApps.has(appId)) continue
   let versions = [...entry.versions.values()].sort((left, right) => semver.rcompare(left.version, right.version))
   if (mirrorApps.has(appId)) {
     const mirrored = []

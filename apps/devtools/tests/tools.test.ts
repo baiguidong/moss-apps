@@ -106,8 +106,8 @@ test('published contracts keep UI actions without registering Agent tools', asyn
   const samples = { 'timestamp.convert': time, 'base64.convert': { operation: 'encode', input: 'hello', urlSafe: false }, 'json.process': { operation: 'format', input: '{"x":1}', indent: '2' }, 'aes.process': aesInput }
   expect(manifest.permissions).toEqual([])
   expect(manifest.contributes?.tools || []).toEqual([])
-  expect(manifest.backend!.actions).toHaveLength(4)
-  for (const action of manifest.backend!.actions) {
+  expect(manifest.backend!.actions).toHaveLength(5)
+  for (const action of manifest.backend!.actions.filter(action => action.name !== 'request.send')) {
     const inputSchema = JSON.parse(readFileSync(new URL('../' + action.inputSchema, import.meta.url), 'utf8'))
     const outputSchema = JSON.parse(readFileSync(new URL('../' + action.outputSchema, import.meta.url), 'utf8'))
     const input = samples[action.name as keyof typeof samples]

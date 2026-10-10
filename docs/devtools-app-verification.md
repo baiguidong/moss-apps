@@ -1,4 +1,18 @@
-# 开发工具 0.1.0 验证记录
+# 开发工具验证记录
+
+## 0.2.0：合并 HTTP 调试
+
+验证日期：2026-10-10。应用说明见 [开发工具](../apps/devtools/README.md)。
+
+- 类型检查与仓库 Manifest 校验通过；核心转换 14 项、HTTP/Host 集成 17 项测试通过。
+- 18 项浏览器测试通过，覆盖五个工作区、HTTP 真实请求、模板保存、取消、工具切换保留输入，以及明暗主题与 320–1080px 布局。
+- 构建与 ZIP 打包通过，隔离 Node 环境验证转换、HTTP 鉴权、响应上限、取消和无日志/文件写入。
+- macOS arm64 桌面验证通过：真实 Moss 容器、preload、Runtime、ZIP 安装、五项工具、HTTP 模板存储与停用/恢复。
+- 市场目录回归测试确认保留 `moss.devtools`，即使读取历史发布记录，也不再列出 `moss.http-client`。
+
+安装包位于 `artifacts/moss.devtools/0.2.0/`；桌面报告与截图位于 `artifacts/moss.devtools/verification/0.2.0/`。本次未发布到远程市场。旧 HTTP 应用模板不会自动迁移。
+
+## 0.1.0 历史记录
 
 日期：2026-09-28。应用源码：[apps/devtools](../apps/devtools/README.md)。
 

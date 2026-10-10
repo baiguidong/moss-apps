@@ -1,0 +1,93 @@
+.http-tool h2 { margin: 0; font-size: 13px; font-weight: 600; }
+.http-tool textarea { flex: initial; padding: 14px; border: 1px solid var(--border); border-radius: calc(var(--radius) - 3px); }
+.http-tool .request-line input, .http-tool .pair-row input:not([type='checkbox']) { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: 12px; }
+.http-tool .danger, .http-tool .bad { color: var(--destructive); }
+.http-tool .request-templates { margin-bottom: 18px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--color-surface-container); }
+.http-tool .collection-title { display: flex; gap: 8px; font-size: 11px; color: var(--muted-foreground); line-height: 1.8; }
+.http-tool .template-list { display: flex; flex-wrap: wrap; gap: 4px 8px; max-height: 144px; overflow-y: auto; }
+.http-tool .template-row { display: flex; align-items: center; min-width: 0; max-width: 100%; border-radius: calc(var(--radius) - 3px); }
+.http-tool .template-row:hover { background: var(--color-surface-hover); }
+.http-tool .template-row > button:first-child { flex: 1; min-width: 0; justify-content: flex-start; gap: 8px; padding: 7px; }
+.http-tool .method-label { color: var(--primary); font-size: 9px; font-weight: 700; min-width: 35px; text-align: left; }
+.http-tool .template-name { font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
+.http-tool .delete-template { padding: 0 5px; flex-shrink: 0; color: var(--muted-foreground); }
+.http-tool .collection-empty { font-size: 11px; line-height: 1.9; color: var(--muted-foreground); margin-top: 4px; }
+.http-tool .request-line { display: flex; gap: 8px; margin-bottom: 18px; }
+.http-tool .request-line select { width: 96px; font-weight: 600; color: var(--primary); }
+.http-tool .request-line input { flex: 1; min-width: 0; }
+.http-tool .request-line button, .http-tool .request-line input, .http-tool .request-line select { min-height: 38px; }
+.http-tool .panel { border: 1px solid var(--border); background: var(--card); border-radius: var(--radius); min-width: 0; overflow: hidden; }
+.http-tool fieldset { padding: 0; margin: 0; }
+.http-tool .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.http-tool .tabs { display: flex; align-items: stretch; gap: 2px; }
+.http-tool .tabs button { color: var(--muted-foreground); border-radius: 0; min-height: 41px; padding: 0 15px; border-bottom: 2px solid transparent; font-size: 12px; }
+.http-tool .tabs button[aria-pressed='true'] { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.http-tool .tabs small { font-size: 9px; padding: 1px 5px; background: var(--muted); color: var(--muted-foreground); border-radius: 4px; }
+.http-tool .request-tabs { border-bottom: 1px solid var(--border); background: var(--color-surface-container); }
+.http-tool .request-content { padding: 14px; min-height: 154px; }
+.http-tool .pair-labels, .http-tool .pair-row { display: grid; grid-template-columns: 16px minmax(0, 1fr) minmax(0, 1.4fr) 26px; gap: 8px; align-items: center; margin-bottom: 8px; }
+.http-tool .pair-labels { font-size: 10px; color: var(--muted-foreground); margin-bottom: 7px; }
+.http-tool .pair-row input:not([type='checkbox']) { width: 100%; }
+.http-tool .pair-row button { padding: 0; color: var(--muted-foreground); }
+.http-tool .subtle { font-size: 11px; color: var(--color-text-secondary); padding: 0 4px; min-height: 28px; }
+.http-tool .hint { font-size: 11px; color: var(--muted-foreground); line-height: 1.9; margin-top: 10px; }
+.http-tool .inline-field, .http-tool .check { display: inline-flex; align-items: center; gap: 9px; font-size: 12px; color: var(--color-text-secondary); }
+.http-tool .body-options { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
+.http-tool .body-options button { font-size: 11px; }
+.http-tool .body-editor { min-height: 170px; }
+.http-tool .inline-empty { color: var(--muted-foreground); font-size: 12px; padding: 18px 0; }
+.http-tool .auth-fields { max-width: 520px; display: flex; flex-direction: column; gap: 12px; }
+.http-tool .auth-fields label, .http-tool .template-dialog label { display: flex; flex-direction: column; gap: 7px; font-size: 12px; color: var(--color-text-secondary); }
+.http-tool .options-fields { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+.http-tool .options-fields .hint { width: 100%; }
+.http-tool .response { margin-top: 22px; }
+.http-tool .response-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 15px; border-bottom: 1px solid var(--border); }
+.http-tool .metrics { display: flex; flex-wrap: wrap; gap: 14px; font-size: 11px; color: var(--muted-foreground); }
+.http-tool .metrics strong { font-weight: 600; }
+.http-tool .good { color: var(--color-success); }
+.http-tool .warning-text { color: var(--color-text-secondary); }
+.http-tool .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 240px; padding: 30px 20px; color: var(--muted-foreground); gap: 12px; }
+.http-tool .empty svg { opacity: .65; margin-bottom: 3px; }
+.http-tool .empty p { color: var(--color-text-secondary); font-size: 13px; }
+.http-tool .empty span { font-size: 11px; text-align: center; line-height: 1.8; }
+.http-tool .response-url { display: flex; gap: 10px; padding: 11px 15px; font-size: 10px; color: var(--muted-foreground); align-items: baseline; overflow-wrap: anywhere; }
+.http-tool .response-url code { font-size: 11px; min-width: 0; }
+.http-tool .response-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--color-surface-container); }
+.http-tool .response-actions { display: flex; align-items: center; gap: 3px; padding: 0 5px; }
+.http-tool .response-actions button { font-size: 11px; }
+.http-tool .response-body { min-height: 280px; border: 0; border-radius: 0; outline-offset: -3px; font-size: 12px; }
+.http-tool .empty-body { padding: 40px 15px; text-align: center; font-size: 12px; color: var(--muted-foreground); }
+.http-tool .header-list { margin: 0; padding: 0 15px; font-size: 12px; }
+.http-tool .header-list > div { display: grid; grid-template-columns: minmax(100px, 1fr) 2fr; gap: 14px; padding: 11px 0; border-bottom: 1px solid var(--border); line-height: 1.7; overflow-wrap: anywhere; }
+.http-tool .header-list > div:last-child { border: 0; }
+.http-tool .header-list dt { color: var(--muted-foreground); }
+.http-tool .header-list dd { margin: 0; }
+.http-tool .redirect-list { padding: 0 15px; list-style: none; }
+.http-tool .redirect-list li { display: flex; gap: 14px; padding: 10px 0; overflow-wrap: anywhere; }
+.http-tool .redirect-list strong { color: var(--muted-foreground); font-size: 11px; }
+.http-tool .error, .http-tool .notice, .http-tool .success { font-size: 12px; line-height: 1.8; padding: 10px 13px; margin: 14px 0 0; overflow-wrap: anywhere; }
+.http-tool .error { color: var(--destructive); border-left: 3px solid var(--destructive); background: color-mix(in oklab, var(--destructive) 5%, var(--card)); }
+.http-tool .notice { color: var(--color-text-secondary); border-left: 3px solid var(--color-warning); background: var(--muted); margin: 0; }
+.http-tool .success { color: var(--color-success); padding-left: 0; }
+.http-tool .template-dialog { margin-bottom: 20px; padding: 15px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+.http-tool .template-dialog input { max-width: 420px; }
+.http-tool .template-dialog p { font-size: 12px; line-height: 1.8; color: var(--color-text-secondary); margin: 12px 0; }
+.http-tool .template-dialog > div { display: flex; gap: 7px; }
+
+@media (max-width: 760px) {
+  .http-tool .tool-header { flex-wrap: wrap; }
+  .http-tool .request-line { flex-wrap: wrap; }
+  .http-tool .request-line select { width: 86px; }
+  .http-tool .request-line input { flex-basis: calc(100% - 100px); }
+  .http-tool .request-line > button { margin-left: auto; }
+  .http-tool .request-content { padding: 11px; }
+  .http-tool .tabs button { padding: 0 11px; }
+  .http-tool .response-heading { align-items: flex-start; }
+  .http-tool .metrics { justify-content: flex-end; gap: 7px 10px; }
+  .http-tool .response-body { min-height: 230px; }
+  .http-tool .header-list > div { grid-template-columns: 1fr; gap: 4px; }
+  .http-tool .pair-labels, .http-tool .pair-row { gap: 5px; grid-template-columns: 16px minmax(0, 1fr) minmax(0, 1.3fr) 23px; }
+  .http-tool .pair-row input { padding: 6px; }
+  .http-tool .response-actions { margin-left: auto; }
+  .http-tool .options-fields { gap: 14px; }
+}

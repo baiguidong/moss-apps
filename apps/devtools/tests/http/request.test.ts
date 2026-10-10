@@ -5,18 +5,18 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { AddressInfo } from 'node:net'
 import { createTestServer } from './fixtures.mjs'
-import { prepareRequest, sendRequest } from '../src/core/request'
-import { emptyRequest, METHODS, RESPONSE_LIMIT } from '../src/contracts'
-import { formatJson } from '../src/core/json'
-import { readTemplates, templateRequest } from '../src/lib/templates'
-import manifest from '../app.moss.json'
+import { prepareRequest, sendRequest } from '../../src/http/core/request'
+import { emptyRequest, METHODS, RESPONSE_LIMIT } from '../../src/http/contracts'
+import { formatJson } from '../../src/http/core/json'
+import { readTemplates, templateRequest } from '../../src/http/lib/templates'
+import manifest from '../../app.moss.json'
 let server: Awaited<ReturnType<typeof createTestServer>>, other: typeof server
 beforeAll(async () => { server = await createTestServer(); other = await createTestServer() })
 afterAll(async () => { await server.close(); await other.close() })
 const pair = (name: string, value: string, enabled = true) => ({ name, value, enabled })
 test('the App exposes its UI action without registering an Agent tool', () => {
   assert.deepEqual((manifest.contributes as { tools?: unknown[] }).tools || [], [])
-  assert.deepEqual(manifest.backend.actions.map((action: { name: string }) => action.name), ['request.send'])
+  assert.deepEqual(manifest.backend.actions.map((action: { name: string }) => action.name), ['timestamp.convert', 'base64.convert', 'json.process', 'aes.process', 'request.send'])
 })
 test('methods, duplicate query parameters, Unicode, enabled headers and error status bodies', async () => {
   for (const method of METHODS) {

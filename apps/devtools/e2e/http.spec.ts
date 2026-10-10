@@ -13,9 +13,9 @@ async function setup(page: Page) {
       app: { getInfo: async () => ({ appearance: api.appearance }), getInstallationState: async () => ({ enabled: true }), getStatus: async () => ({ state: api.fail ? 'error' : 'running' }) },
       events: { on: (name: string, callback: (data: unknown) => void) => { callbacks.set(name, callback); return () => callbacks.delete(name) } },
       actions: {
-        invoke: async (_name: string, input: unknown, options: { requestId: string }) => {
+        invoke: async (name: string, input: unknown, options: { requestId: string }) => {
           if (api.fail) throw new Error('Backend unavailable')
-          const response = await rpc('invoke', { id: options.requestId, input })
+          const response = await rpc('invoke', { id: options.requestId, name, input })
           if (response.error) throw new Error(response.error)
           return { ok: true, result: response.result }
         },
@@ -27,9 +27,30 @@ async function setup(page: Page) {
     window.mossApp = api
   }, { bridge })
   page.on('dialog', dialog => void dialog.accept())
-  await page.goto('/')
+  await page.goto('/#/http')
 }
 const send = (page: Page) => page.getByRole('button', { name: '发送请求', exact: true }).click()
+test('HTTP shares developer tools navigation and preserves requests and conversion results when switching', async ({ page }) => {
+  await setup(page)
+  await expect(page.getByRole('navigation', { name: '开发工具分类' }).getByRole('link')).toHaveCount(5)
+  await expect(page.getByRole('link', { name: 'HTTP 调试', exact: true })).toHaveAttribute('aria-current', 'page')
+  await page.getByRole('textbox', { name: '请求地址' }).fill(`${target}/echo`)
+  await page.getByRole('button', { name: '鉴权', exact: true }).click()
+  await page.getByLabel('鉴权方式').selectOption('bearer')
+  await page.getByLabel('Bearer Token').fill('switch-test-token')
+  await send(page)
+  await expect(page.getByRole('textbox', { name: '响应正文' })).toHaveValue(/switch-test-token/)
+  await page.getByRole('link', { name: 'JSON', exact: true }).click()
+  await page.getByRole('region', { name: 'JSON工作区' }).getByRole('button', { name: '填入示例' }).click()
+  await page.getByRole('button', { name: '格式化', exact: true }).click()
+  await expect(page.getByRole('textbox', { name: 'JSON 结果' })).toHaveValue(/9007199254740993/)
+  await page.getByRole('link', { name: 'HTTP 调试', exact: true }).click()
+  await expect(page.getByRole('textbox', { name: '请求地址' })).toHaveValue(`${target}/echo`)
+  await expect(page.getByLabel('Bearer Token')).toHaveValue('switch-test-token')
+  await expect(page.getByRole('textbox', { name: '响应正文' })).toHaveValue(/switch-test-token/)
+  await page.getByRole('link', { name: 'JSON', exact: true }).click()
+  await expect(page.getByRole('textbox', { name: 'JSON 结果' })).toHaveValue(/9007199254740993/)
+})
 test('sends actual GET with Unicode duplicate parameters and custom headers', async ({ page }) => {
   await setup(page)
   await page.getByRole('textbox', { name: '请求地址' }).fill(`${target}/echo?first=1`)
@@ -100,6 +121,8 @@ test('timeout and cancellation are explicit and stop the actual backend request'
   await page.getByLabel('请求超时').selectOption('30000')
   await send(page)
   await expect.poll(async () => (await (await request.get(`${bridge}/inspect`)).json()).requests.filter((item: { url: string }) => item.url === '/slow').length).toBeGreaterThanOrEqual(2)
+  await page.getByRole('link', { name: 'Base64', exact: true }).click()
+  await page.getByRole('link', { name: 'HTTP 调试', exact: true }).click()
   await page.getByRole('button', { name: '取消请求', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('请求已取消')
   await expect.poll(async () => (await (await request.get(`${bridge}/inspect`)).json()).closedSlowRequests).toBeGreaterThanOrEqual(before + 2)
@@ -126,7 +149,7 @@ for (const theme of ['light', 'dark']) test(`${theme} appearance and responsive 
   await page.getByRole('textbox', { name: '请求地址' }).fill(`${target}/bigint`)
   await send(page)
   await expect(page.getByRole('textbox', { name: '响应正文' })).toHaveValue(/9007199254740993/)
-  const directory = path.resolve(import.meta.dirname, '../../../artifacts/moss.http-client/screenshots/0.1.0')
+  const directory = path.resolve(import.meta.dirname, '../../../artifacts/moss.devtools/screenshots/0.2.0')
   await mkdir(directory, { recursive: true })
   await page.screenshot({ path: path.join(directory, `http-${theme}.png`) })
   for (const width of [760, 600, 390, 320]) {
@@ -153,7 +176,7 @@ test('host errors remain visible and appearance failure falls back without clear
   await expect(page.getByRole('textbox', { name: '请求地址' })).toHaveValue(`${target}/echo`)
 })
 test('ordinary browser remains usable for editing and does not fake network responses', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/#/http')
   await expect(page.getByText('浏览器预览 · 在 Moss 中发送请求')).toBeVisible()
   await page.getByRole('button', { name: '填入示例' }).click()
   await send(page)

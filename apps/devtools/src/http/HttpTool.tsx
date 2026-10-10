@@ -1,38 +1,27 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Globe2, Plus, Send, Square, Bookmark, Trash2, FlaskConical } from 'lucide-react'
+import { Plus, Send, Square, Bookmark, Trash2, FlaskConical } from 'lucide-react'
 import { METHODS, emptyRequest, type RequestInput, type RequestResult, type Template } from './contracts'
-import { loadTemplates, runtimeStatus, send, storeTemplates } from './lib/host'
+import { loadTemplates, send, storeTemplates } from './lib/host'
 import { readTemplates, templateRequest } from './lib/templates'
-import { userError } from './lib/errors'
+import { userError } from '../lib/errors'
 import { formatJson } from './core/json'
 import { PairEditor } from './components/Fields'
 import { Response } from './components/Response'
+import { ToolHeader } from '../components/shared'
 
 const requestTabs = [{ id: 'query', name: '参数' }, { id: 'headers', name: '请求头' }, { id: 'body', name: '正文' }, { id: 'auth', name: '鉴权' }, { id: 'options', name: '选项' }]
-export function App() {
+export function HttpTool() {
   const [request, setRequest] = useState(emptyRequest), [result, setResult] = useState<RequestResult | null>(null)
   const [tab, setTab] = useState('query'), [busy, setBusy] = useState(false), [canceling, setCanceling] = useState(false)
-  const [error, setError] = useState(''), [status, setStatus] = useState('正在准备…'), [message, setMessage] = useState('')
+  const [error, setError] = useState(''), [message, setMessage] = useState('')
   const [templates, setTemplates] = useState<Template[]>([]), [loaded, setLoaded] = useState(false), [saving, setSaving] = useState(false)
   const [saveOpen, setSaveOpen] = useState(false), [name, setName] = useState(''), [deleteId, setDeleteId] = useState('')
   const controller = useRef<AbortController | null>(null), mounted = useRef(true), dirty = useRef(false)
   const patch = (value: Partial<RequestInput>) => { dirty.current = true; setRequest(current => ({ ...current, ...value })); setResult(null); setError(''); setMessage('') }
   useEffect(() => {
     mounted.current = true
-    let pending = false, again = false
-    const refresh = async () => {
-      if (!mounted.current) return
-      if (pending) { again = true; return }
-      pending = true
-      try { const text = await runtimeStatus(); if (mounted.current) setStatus(text) }
-      catch { if (mounted.current) setStatus('暂时无法连接本地服务，请重试') }
-      finally { pending = false; if (again && mounted.current) { again = false; void refresh() } }
-    }
-    void refresh()
     void loadTemplates().then(raw => { if (mounted.current) { setTemplates(readTemplates(raw)); setLoaded(true) } }).catch(() => { if (mounted.current) setError('请求模板读取失败，请重新打开应用后重试。') })
-    const off = window.mossApp?.events.on('runtime', () => void refresh())
-    window.addEventListener('focus', refresh); window.addEventListener('http-operation', refresh)
-    return () => { mounted.current = false; controller.current?.abort(); off?.(); window.removeEventListener('focus', refresh); window.removeEventListener('http-operation', refresh) }
+    return () => { mounted.current = false; controller.current?.abort() }
   }, [])
   const replace = (next: RequestInput) => {
     if (busy || (dirty.current && !window.confirm('替换当前请求？尚未保存的输入将被清空。'))) return
@@ -66,13 +55,12 @@ export function App() {
     catch (error) { setError(userError(error)) } finally { setSaving(false) }
   }
   const example = () => replace({ ...emptyRequest(), url: 'https://httpbin.org/anything', query: [{ name: 'hello', value: 'Moss', enabled: true }] })
-  return <div className="app-shell"><aside className="sidebar"><div className="brand"><Globe2 size={19} /><span>HTTP 调试</span></div>
-    <button className="new-request bordered" disabled={busy} onClick={() => replace(emptyRequest())}><Plus size={15} />新建请求</button>
-    <div className="collection-title">请求模板 <span>{templates.length}</span></div>
-    <nav aria-label="请求模板">{templates.map(item => <div className="template-row" key={item.id}><button disabled={busy} onClick={() => replace(item.request)} title={item.request.url}><span className="method-label">{item.request.method}</span><span className="template-name">{item.name}</span></button><button className="delete-template" disabled={saving} aria-label={`删除模板 ${item.name}`} onClick={() => { setDeleteId(item.id); setSaveOpen(false) }}><Trash2 size={13} /></button></div>)}</nav>
-    {!templates.length && <p className="collection-empty">保存常用接口，下次从这里打开。</p>}<div className="sidebar-note">请求与响应不自动保存。</div>
-  </aside><div className="main-column"><main>
-    <header className="workspace-header"><div><h1>HTTP 调试</h1><p>编辑请求，查看响应。</p></div><div className="header-actions"><button disabled={busy} onClick={example}><FlaskConical size={14} />填入示例</button><button disabled={busy || !loaded || saving} onClick={() => { setName(''); setSaveOpen(true); setDeleteId(''); setError('') }}><Bookmark size={14} />保存模板</button></div></header>
+  return <div className="http-tool">
+    <ToolHeader title="HTTP 调试" description="编辑请求，查看响应。"><button disabled={busy} onClick={() => replace(emptyRequest())}><Plus size={14} />新建请求</button><button disabled={busy} onClick={example}><FlaskConical size={14} />填入示例</button><button disabled={busy || !loaded || saving} onClick={() => { setName(''); setSaveOpen(true); setDeleteId(''); setError('') }}><Bookmark size={14} />保存模板</button></ToolHeader>
+    <div className="request-templates"><div className="collection-title">请求模板 <span>{templates.length}</span></div>
+      <div className="template-list" role="group" aria-label="请求模板">{templates.map(item => <div className="template-row" key={item.id}><button disabled={busy} onClick={() => replace(item.request)} title={item.request.url}><span className="method-label">{item.request.method}</span><span className="template-name">{item.name}</span></button><button className="delete-template" disabled={saving} aria-label={`删除模板 ${item.name}`} onClick={() => { setDeleteId(item.id); setSaveOpen(false) }}><Trash2 size={13} /></button></div>)}</div>
+      {!templates.length && <p className="collection-empty">保存常用接口，下次从这里打开。</p>}
+    </div>
     {saveOpen && <form className="template-dialog" onSubmit={save} aria-label="保存请求模板"><label>模板名称<input autoFocus aria-label="模板名称" maxLength={80} value={name} onChange={e => setName(e.target.value)} placeholder="例如：获取用户列表" disabled={saving} /></label><p>保存方法、地址和参数名；参数值、正文与鉴权不保存。</p><div><button className="primary" disabled={saving} type="submit">{saving ? '正在保存…' : '确认保存'}</button><button disabled={saving} type="button" onClick={() => setSaveOpen(false)}>取消</button></div></form>}
     {deleteId && <div className="template-dialog" role="group" aria-label="删除请求模板"><p>删除“{templates.find(item => item.id === deleteId)?.name}”模板？</p><div><button className="danger" disabled={saving} onClick={() => void remove()}>确认删除</button><button disabled={saving} onClick={() => setDeleteId('')}>取消</button></div></div>}
     <form className="request-form" onSubmit={execute} onKeyDown={e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); void execute() } }}>
@@ -89,5 +77,5 @@ export function App() {
     </form>
     {error && <p className="error" role="alert">{error}</p>}{message && <p className="success" role="status">{message}</p>}
     <Response key={result ? `${result.url}-${result.durationMs}` : 'empty'} result={result} busy={busy} />
-  </main><footer className="app-footer"><span>{status}</span><span>本机发送 · 响应上限 1 MiB</span></footer></div></div>
+  </div>
 }
