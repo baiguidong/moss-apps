@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
 import { spawnSync } from 'node:child_process'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
 
@@ -27,6 +27,7 @@ for (const [appId, listed] of [['moss.http-client', false], ['moss.devtools', tr
 
 test('older release metadata cannot overwrite the latest Chinese display name', async () => {
   const root = path.resolve(import.meta.dirname, '..')
+  await mkdir(path.join(root, 'artifacts'), { recursive: true })
   const fixture = await mkdtemp(path.join(root, 'artifacts/catalog-name-test-'))
   const output = await mkdtemp(path.join(os.tmpdir(), 'moss-catalog-name-'))
   try {
