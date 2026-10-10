@@ -1,12 +1,13 @@
 import { expect, it } from 'bun:test'
-import { fork, execFileSync } from 'node:child_process'
+import { fork } from 'node:child_process'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createEnvelope } from '@moss/app-sdk'
 
-const nodeExecutable = execFileSync(process.platform === 'win32' ? 'where.exe' : 'which', ['node'], { encoding: 'utf8' }).trim().split(/\r?\n/)[0]!
+const nodeExecutable = process.env.MOSS_NODE_PATH || Bun.which(process.platform === 'win32' ? 'node.exe' : 'node')
+if (!nodeExecutable) throw new Error('Node is required for the offline Backend test')
 
 it('completes local startup and answers heartbeats while Host and Feishu connections are unavailable, then reconnects in place', async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'feishu-offline-'))

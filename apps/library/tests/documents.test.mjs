@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
@@ -6,7 +7,7 @@ import os from 'node:os'
 import { preparePython } from '../scripts/prepare-python.mjs'
 import { createLibraryService, parseLibraryDocumentWithPython } from '../src/backend/store.mjs'
 import { resolveToolAction } from '../src/backend/tools.mjs'
-const parserPath = new URL('../src/backend/library_parser.py', import.meta.url).pathname
+const parserPath = fileURLToPath(new URL('../src/backend/library_parser.py', import.meta.url))
 async function fixture(t) {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-library-app-'))
   const service = createLibraryService({ libraryRoot: path.join(directory, 'data'), parserPath })

@@ -899,7 +899,7 @@ function sourceSelect() {
 export function createLibraryService(options) {
   const requestedLibraryRoot = path.resolve(options.libraryRoot);
   fs.mkdirSync(requestedLibraryRoot, { recursive: true });
-  const libraryRoot = fs.realpathSync(requestedLibraryRoot);
+  const libraryRoot = fs.realpathSync.native(requestedLibraryRoot);
   const dbPath = path.resolve(options.dbPath || path.join(libraryRoot, 'library.db'));
   const parserPath = path.resolve(options.parserPath);
   const getPythonModulePaths = options.getPythonModulePaths || (() => []);
@@ -2761,7 +2761,15 @@ export function createLibraryService(options) {
       FROM library_resources r JOIN library_sources s ON s.id = r.source_id WHERE r.id = ?`).get(resourceId);
     if (!row || row.status === 'missing') throw new Error('文档不存在或已移除。');
     const candidate = await fsp.realpath(row.locator), source = await fsp.realpath(row.source_locator);
-    if (candidate !== path.resolve(row.locator) || source !== path.resolve(row.source_locator)) throw new Error('文档路径不能包含符号链接。');
+    for (const [original, canonical] of [[row.locator, candidate], [row.source_locator, source]]) {
+      if (canonical === path.resolve(original)) continue;
+      // Windows can expand an 8.3 alias or normalize case without traversing a link.
+      // Inspect every component so aliases remain usable while junctions and links fail.
+      if (process.platform !== 'win32') throw new Error('文档路径不能包含符号链接。');
+      for (let current = path.resolve(original); current !== path.dirname(current); current = path.dirname(current)) {
+        if ((await fsp.lstat(current)).isSymbolicLink()) throw new Error('文档路径不能包含符号链接。');
+      }
+    }
     const stat = await fsp.stat(candidate), sourceStat = await fsp.stat(source);
     if (!stat.isFile() || (sourceStat.isDirectory() ? !isPathInside(source, candidate) : source !== candidate)) throw new Error('文档不在来源目录内。');
     return { path: candidate, row };

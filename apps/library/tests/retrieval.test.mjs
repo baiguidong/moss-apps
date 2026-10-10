@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -17,9 +18,15 @@ import {
   tokenizeLibraryText,
 } from '../src/backend/store.mjs';
 
+const cleanups = new WeakMap();
 function temporaryDirectory(t) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'moss-library-'));
-  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const callbacks = [];
+  cleanups.set(t, callbacks);
+  t.after(async () => {
+    for (const callback of callbacks.reverse()) await callback();
+    fs.rmSync(directory, { recursive: true, force: true });
+  });
   return directory;
 }
 
@@ -58,7 +65,7 @@ test('Library field ranking and automatic broad fallback stay deterministic', as
     parserPath: path.join(directory, 'unused.py'),
     parseDocument: parser(),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   const source = await service.addLocalSource({ path: corpus });
   await service.waitForIdle();
 
@@ -96,7 +103,7 @@ test('Library expands bounded neighboring context and preserves citation ranges'
       blocks: [{ text: longText, heading: 'Context section', page: 3, startLine: 10 }],
     }),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   await service.addLocalSource({ path: sourcePath });
   await service.waitForIdle();
 
@@ -126,7 +133,7 @@ test('Library context assembly keeps matches inside the total character budget',
     parserPath: path.join(directory, 'unused.py'),
     parseDocument: parser(),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   await service.addLocalSource({ path: corpus });
   await service.waitForIdle();
   const results = service.search({
@@ -163,7 +170,7 @@ test('Library diversifies top evidence across resources before adding another ch
         : [{ text: 'shared topic from another file', heading: 'Only' }],
     }),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   await service.addLocalSource({ path: corpus });
   await service.waitForIdle();
 
@@ -190,7 +197,7 @@ test('Library reuses a bounded parse cache across sources and bypasses it for a 
       return parser()(filePath);
     },
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   const firstSource = await service.addLocalSource({ path: firstPath });
   await service.waitForIdle();
   const secondSource = await service.addLocalSource({ path: secondPath });
@@ -260,7 +267,7 @@ test('Library stores real-data evaluation cases and explains search decisions', 
     parserPath: path.join(directory, 'unused.py'),
     parseDocument: parser(),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   const collection = service.listCollections()[0];
   await service.addLocalSource({ collectionId: collection.id, path: sourcePath });
   await service.waitForIdle();
@@ -307,7 +314,7 @@ test('Library treats SQL LIKE wildcard characters as literal fallback text', asy
     parserPath: path.join(directory, 'unused.py'),
     parseDocument: parser(),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   await service.addLocalSource({ path: sourcePath });
   await service.waitForIdle();
   assert.equal(service.search({ query: '%' }).length, 0);
@@ -324,7 +331,7 @@ test('Library preserves a local resource id across a content-identical rename', 
     parserPath: path.join(directory, 'unused.py'),
     parseDocument: parser(),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
 
   const source = await service.addLocalSource({ path: directory });
   await service.waitForIdle();
@@ -351,7 +358,7 @@ test('Library rejects a resource replaced by a symlink outside its registered so
     parserPath: path.join(directory, 'unused.py'),
     parseDocument: parser(),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   const source = await service.addLocalSource({ path: corpus });
   await service.waitForIdle();
   const resource = service.listResources({ sourceId: source.id })[0];
@@ -383,7 +390,7 @@ test('Library skips unsupported and oversized files instead of cataloging them',
     parserPath: path.join(directory, 'unused.py'),
     parseDocument: parser(),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   const source = await service.addLocalSource({ path: corpus, maxFileBytes: 10 });
   await service.waitForIdle();
   const resources = service.listResources({ sourceId: source.id });
@@ -408,7 +415,7 @@ test('Directory sources default to supported files within three nested levels', 
     parserPath: path.join(directory, 'unused.py'),
     parseDocument: parser(),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
 
   const source = await service.addLocalSource({ path: corpus });
   await service.waitForIdle();
@@ -440,7 +447,7 @@ test('Directory sources keep one resource for files with identical content', asy
       return parser()(filePath);
     },
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
 
   const source = await service.addLocalSource({ path: corpus });
   await service.waitForIdle();
@@ -480,7 +487,7 @@ test('Removing an indexing source aborts work and leaves no indexed content', as
       }, { once: true });
     }),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   const collection = service.listCollections()[0];
   const source = await service.addLocalSource({ collectionId: collection.id, path: sourcePath });
   await waitUntil(() => service.listJobs({ sourceId: source.id })[0]?.status === 'running');
@@ -509,7 +516,7 @@ test('A watched local source coalesces file changes into an incremental refresh'
     watchSources: true,
     watchDebounceMs: 50,
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   await service.addLocalSource({ path: corpus });
   await service.waitForIdle();
   await fsp.writeFile(path.join(corpus, 'added.txt'), 'automatically refreshed evidence');
@@ -537,7 +544,7 @@ test('Cancelling a job terminates the active parser promptly', async (t) => {
       }, { once: true });
     }),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   const source = await service.addLocalSource({ path: sourcePath });
   await waitUntil(() => service.listJobs({ sourceId: source.id })[0]?.status === 'running');
   const job = service.listJobs({ sourceId: source.id })[0];
@@ -553,7 +560,7 @@ test('The bundled parser uses the versioned worker protocol', async (t) => {
   const directory = temporaryDirectory(t);
   const documentPath = path.join(directory, 'protocol.md');
   await fsp.writeFile(documentPath, '# Protocol title\n\nStructured parser evidence.');
-  const parserPath = new URL('../src/backend/library_parser.py', import.meta.url).pathname;
+  const parserPath = fileURLToPath(new URL('../src/backend/library_parser.py', import.meta.url));
   assert.ok(parserPath);
   const parsed = await parseLibraryDocumentWithPython({ documentPath, filePath: documentPath, parserPath });
   assert.equal(parsed.title, 'Protocol title');
@@ -563,7 +570,7 @@ test('The bundled parser uses the versioned worker protocol', async (t) => {
 
 test('The bundled parser preserves built-in Markdown and Office structure', async (t) => {
   const directory = temporaryDirectory(t);
-  const parserPath = new URL('../src/backend/library_parser.py', import.meta.url).pathname;
+  const parserPath = fileURLToPath(new URL('../src/backend/library_parser.py', import.meta.url));
   assert.ok(parserPath);
 
   const markdownPath = path.join(directory, 'structure.md');
@@ -682,7 +689,7 @@ test('Library does not refresh completed watched sources on startup or fallback 
     watchSources: true,
     watchFallbackMs: 1_000,
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   await new Promise((resolve) => setTimeout(resolve, 1_150));
   await service.waitForIdle();
   assert.equal(parseCount, 1);
@@ -705,7 +712,7 @@ test('Library watcher does not retry an unchanged failed resource', async (t) =>
     watchSources: true,
     watchDebounceMs: 50,
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   const source = await service.addLocalSource({ path: sourcePath });
   await service.waitForIdle();
   assert.equal(parseCount, 1);
@@ -760,7 +767,7 @@ test('Library resumes an interrupted follow-up refresh without re-parsing unchan
       return parser()(filePath);
     },
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   await service.waitForIdle();
   const interrupted = service.listJobs({ sourceId: source.id })
     .find((job) => job.id === 'follow-up-job');
@@ -796,7 +803,7 @@ test('Library resumes an interrupted first index', async (t) => {
     parserPath: path.join(directory, 'unused.py'),
     parseDocument: parser(),
   });
-  t.after(() => service.close());
+  cleanups.get(t).push(async () => { service.close(); await service.waitForIdle(); });
   await service.waitForIdle();
   assert.equal(service.listJobs({ sourceId: source.id })[0].status, 'completed');
   assert.equal(service.listJobs({ sourceId: source.id })[0].attemptCount, 1);

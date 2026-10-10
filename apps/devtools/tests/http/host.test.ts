@@ -15,7 +15,9 @@ const { AppRuntimeHost, writePackageChecksums, defaultInstanceId } = await impor
 const appId = 'moss.devtools', instanceId = defaultInstanceId(appId)
 const deferred = () => { let resolve!: () => void; const promise = new Promise<void>(r => { resolve = r }); return { promise, resolve } }
 async function waitFor(predicate: () => boolean) {
-  for (let i = 0; i < 200; i++) { if (predicate()) return; await new Promise(resolve => setTimeout(resolve, 10)) }
+  // Windows process identity checks can take several seconds on a cold runner.
+  const deadline = Date.now() + 15_000
+  while (Date.now() < deadline) { if (predicate()) return; await new Promise(resolve => setTimeout(resolve, 10)) }
   throw new Error('Timed out')
 }
 

@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
@@ -5,13 +6,17 @@ import os from 'node:os'
 import path from 'node:path'
 import { createLibraryService } from '../src/backend/store.mjs'
 import { createActionLane, listResult } from '../src/backend/actions.mjs'
-const parserPath = new URL('../src/backend/library_parser.py', import.meta.url).pathname
+const parserPath = fileURLToPath(new URL('../src/backend/library_parser.py', import.meta.url))
 const parse = async file => ({ parser: 'test', blocks: [{ text: await fs.readFile(file, 'utf8') }] })
 async function fixture(t, options = {}) {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-library-review-'))
   const service = createLibraryService({ libraryRoot: path.join(directory, 'data'), parserPath, parseDocument: parse, ...options })
-  t.after(async () => { service.close(); await service.waitForIdle(); await fs.rm(directory, { recursive: true, force: true }) })
-  return { directory, service, collectionId: service.listCollections()[0].id }
+  const services = [service]
+  t.after(async () => {
+    for (const current of services.reverse()) { current.close(); await current.waitForIdle() }
+    await fs.rm(directory, { recursive: true, force: true })
+  })
+  return { directory, service, collectionId: service.listCollections()[0].id, track: value => { services.push(value); return value } }
 }
 function blocker() {
   let entered
@@ -30,14 +35,13 @@ function blocker() {
 }
 test('graceful restart resumes the latest edited content after a previous successful index', async t => {
   const blocked = blocker()
-  const { directory, service: s, collectionId } = await fixture(t, { parseDocument: blocked.parse })
+  const { directory, service: s, collectionId, track } = await fixture(t, { parseDocument: blocked.parse })
   const doc = (await s.createDocument({ collectionId, title: 'Recovery', content: 'original evidence' })).resource
   await s.waitForIdle()
   await s.updateDocument({ resourceId: doc.id, revision: doc.revision, content: 'blocked replacement evidence' })
   await blocked.started
   s.close(); await s.waitForIdle()
-  const resumed = createLibraryService({ libraryRoot: path.join(directory, 'data'), parserPath, parseDocument: parse })
-  t.after(async () => { resumed.close(); await resumed.waitForIdle() })
+  const resumed = track(createLibraryService({ libraryRoot: path.join(directory, 'data'), parserPath, parseDocument: parse }))
   await resumed.waitForIdle()
   assert.equal(resumed.search({ query: 'replacement' })[0].resourceId, doc.id)
   assert.equal(resumed.search({ query: 'original' }).length, 0)
@@ -102,8 +106,8 @@ test('long Unicode titles and sanitized file names retain distinct documents', a
   const doc = (await s.createDocument({ collectionId, title, content: 'unicode note' })).resource
   assert.equal(doc.title, title)
   const source = path.join(directory, 'originals'); await fs.mkdir(source)
-  await fs.writeFile(path.join(source, 'a:b.md'), 'first distinct')
-  await fs.writeFile(path.join(source, 'a?b.md'), 'second distinct')
+  await fs.writeFile(path.join(source, '知'.repeat(70) + 'a.md'), 'first distinct')
+  await fs.writeFile(path.join(source, '知'.repeat(70) + 'b.md'), 'second distinct')
   const result = await s.importFiles({ collectionId, paths: [source, source] })
   assert.equal(result.written.length, 2); assert.deepEqual(result.failed, [])
   await s.waitForIdle()
