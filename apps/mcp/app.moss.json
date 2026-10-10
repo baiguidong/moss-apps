@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "id": "moss.mcp",
-  "version": "0.1.5",
-  "displayName": "MCP",
+  "version": "0.1.6",
+  "displayName": "MCP 管理",
   "description": "管理 MCP 服务连接，让常用工具融入对话。",
   "icon": "assets/icon.svg",
   "hostApi": "^3.0.0",
@@ -81,7 +81,7 @@
     "views": [
       {
         "id": "connections",
-        "title": "MCP",
+        "title": "MCP 管理",
         "route": "#/",
         "icon": "plug",
         "order": 220

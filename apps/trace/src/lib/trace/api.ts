@@ -9,7 +9,7 @@ export type TraceSessionSnapshot = TraceSession & { messages: MessageEntry[]; me
 export type TraceSessionRevision = { sessionId: string; revision: number; revisionToken?: string; changed: boolean; reset: boolean }
 async function invoke<T>(name: string, input: Record<string, unknown>): Promise<T> {
   const bridge = window.mossApp
-  if (!bridge) throw new Error('请在 Moss 中打开 Trace App。')
+  if (!bridge) throw new Error('请在 Moss 中打开调用追踪。')
   const host = createAppClient(bridge)
   const result = await host.actions.invoke<{ value?: T; transfer?: { id: string; size: number } }>(name, input, { timeoutMs: 60_000 })
   return readJsonResult<T>(result, {

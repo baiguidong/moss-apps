@@ -86,7 +86,7 @@ export function TraceSplitLayout({ tree, detail }: { tree: ReactNode; detail: Re
       <div
         role="separator"
         aria-orientation="vertical"
-        aria-label="调整 Trace 列表宽度"
+        aria-label="调整 追踪列表宽度"
         aria-valuemin={MIN_WIDTH}
         aria-valuemax={MAX_WIDTH}
         aria-valuenow={width}

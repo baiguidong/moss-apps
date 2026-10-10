@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.6
+
+- 随安装包提供完整源码、固定 SDK 和锁定构建入口，支持安装后直接恢复迭代。
+
+
 ## 0.1.5
 
 - Host 协议统一声明在 `host.protocols`，供 UI 和 Backend 共用。

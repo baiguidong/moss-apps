@@ -1,4 +1,4 @@
-# Trace
+# 调用追踪
 
 查看 Moss 本地模型请求、响应、完整提示词、工具调用和异常。需要支持 Host API `^3.0.0` 的 Moss Desktop。
 

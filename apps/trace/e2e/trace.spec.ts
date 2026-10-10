@@ -49,5 +49,5 @@ test('real App reader drives list, full prompt, filters, refresh, theme and dele
 
 test('standalone page explains missing Host instead of showing fake records', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByText('请在 Moss 中打开 Trace App。')).toBeVisible()
+  await expect(page.getByText('请在 Moss 中打开调用追踪。')).toBeVisible()
 })

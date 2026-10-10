@@ -4,6 +4,11 @@ import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { zipSync } from 'fflate'
+import os from 'node:os'
+import { verifySourceArchive } from './verify-source-package.mjs'
+import { exportAppSource, run } from './source-package.mjs'
+import { attachSourcePackage, validateSourcePackage, copySourceTree, sourceFileList } from '../vendor/moss-core/packages/app-runtime/src/packages/source.mjs'
+import { verifyPackageRuntime } from '../vendor/moss-core/packages/app-runtime/src/packages/verify-runtime.mjs'
 import {
   artifactsRoot,
   canonicalChecksums,
@@ -67,29 +72,42 @@ async function verifyPackageDirectory(packageRoot, manifest, expectedSignature) 
 }
 
 async function packageApp(app, options) {
-  if (!options.skipBuild) {
-    const result = spawnSync('bun', ['run', 'build'], { cwd: app.root, stdio: 'inherit', env: process.env })
-    if (result.error) throw result.error
-    if (result.status !== 0) throw new Error(`Build failed for ${app.manifest.id}`)
-  }
+  // --skip-build cannot reuse an unbound dist directory. Always build the exact
+  // exported snapshot that ships with this version.
+  const privateKeyPem = signingKeyFromEnvironment()
+  const temporary = await fsp.mkdtemp(path.join(os.tmpdir(), 'moss-source-build-'))
+  try {
+  const sourceRoot = path.join(temporary, 'source')
+  const spec = await exportAppSource(app, sourceRoot, { release: options.requireSignature || Boolean(privateKeyPem) })
+  const builtApp = path.join(sourceRoot, spec.appRoot)
+  const frozenSource = path.join(temporary, 'frozen')
+  await copySourceTree(sourceRoot, frozenSource)
+  const sourceHash = sha256Hex(Buffer.from(JSON.stringify(await sourceFileList(frozenSource))))
+  run('bun', ['install', '--frozen-lockfile'], sourceRoot)
+  for (const script of ['check', 'test', 'build']) if (spec.commands[script]) run('bun', ['run', script], builtApp)
+  const after = path.join(temporary, 'after')
+  await copySourceTree(sourceRoot, after)
+  if (sha256Hex(Buffer.from(JSON.stringify(await sourceFileList(after)))) !== sourceHash) throw new Error('Build or tests changed source inputs; regenerate and commit them before packaging')
 
   const outputDir = path.join(artifactsRoot, app.manifest.id, app.manifest.version)
   const packageRoot = path.join(outputDir, 'package')
   await fsp.rm(outputDir, { recursive: true, force: true })
   await fsp.mkdir(packageRoot, { recursive: true })
 
-  for (const directory of ['dist', 'schemas', 'assets']) {
-    await copyIfPresent(path.join(app.root, directory), path.join(packageRoot, directory))
+  for (const directory of ['dist', 'schemas', 'assets', 'resources']) {
+    await copyIfPresent(path.join(builtApp, directory), path.join(packageRoot, directory))
   }
   for (const fileName of ['README.md', 'LICENSE', 'LICENSE.md']) {
-    await copyIfPresent(path.join(app.root, fileName), path.join(packageRoot, fileName))
+    await copyIfPresent(path.join(builtApp, fileName), path.join(packageRoot, fileName))
   }
   await writeJson(path.join(packageRoot, 'app.moss.json'), app.manifest)
 
+  const sourceDescriptor = await attachSourcePackage(packageRoot, frozenSource, { appRoot: spec.appRoot, origin: spec.origin, sdk: spec.sdk })
+  const verification = await verifyPackageRuntime(packageRoot, { nodeExecutable: process.execPath })
+  await validateSourcePackage(packageRoot, { required: true })
   const checksums = await createChecksums(packageRoot)
   await writeJson(path.join(packageRoot, 'checksums.json'), checksums)
 
-  const privateKeyPem = signingKeyFromEnvironment()
   let signatureMetadata = null
   if (privateKeyPem) {
     if (!app.manifest.publisher?.id) throw new Error(`${app.manifest.id} must declare publisher.id before signing`)
@@ -127,6 +145,7 @@ async function packageApp(app, options) {
   const zipPath = path.join(outputDir, fileName)
   const checksum = sha256Hex(archive)
   await fsp.writeFile(zipPath, archive)
+  await verifySourceArchive(zipPath, { requireSignature: options.requireSignature })
   await fsp.writeFile(path.join(outputDir, `${app.manifest.id}-${app.manifest.version}.sha256`), `${checksum}  ${fileName}\n`, 'utf8')
 
   const repository = String(process.env.GITHUB_REPOSITORY || 'baiguidong/moss-apps').trim()
@@ -155,6 +174,7 @@ async function packageApp(app, options) {
       publishedAt: process.env.MOSS_APP_PUBLISHED_AT || new Date().toISOString(),
       releaseNotes: releaseNotesForVersion(app.root, app.manifest.version),
       artifact: {
+        sourceIncluded: true, sourceFormat: 1, sourceHash: sourceDescriptor.sourceHash,
         fileName,
         downloadUrl: `https://github.com/${repository}/releases/download/${tag}/${fileName}`,
         sha256: checksum,
@@ -167,8 +187,9 @@ async function packageApp(app, options) {
   }
   const releasePath = path.join(outputDir, `${app.manifest.id}-${app.manifest.version}.release.json`)
   await writeJson(releasePath, release)
-  console.log(JSON.stringify({ appId: app.manifest.id, version: app.manifest.version, zipPath, releasePath, sha256: checksum }))
+  console.log(JSON.stringify({ appId: app.manifest.id, version: app.manifest.version, zipPath, releasePath, sha256: checksum, sourceHash: sourceDescriptor.sourceHash, verification }))
   return release
+  } finally { await fsp.rm(temporary, { recursive: true, force: true }) }
 }
 
 const argv = process.argv.slice(2)

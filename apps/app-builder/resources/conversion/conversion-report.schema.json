@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Moss Skill App Conversion Report",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "sourceSkill",
+    "app",
+    "product",
+    "sourceReview",
+    "resourceMappings",
+    "capabilities",
+    "environment",
+    "security",
+    "coverage"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "sourceSkill": {
+      "type": "object",
+      "required": ["name", "source", "fingerprint"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "fingerprint": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "app": {
+      "type": "object",
+      "required": ["id", "displayName"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "displayName": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "product": {
+      "type": "object",
+      "required": ["concept", "primaryWorkflow", "informationArchitecture"],
+      "properties": {
+        "concept": { "type": "string", "minLength": 1 },
+        "primaryWorkflow": { "type": "string", "minLength": 1 },
+        "informationArchitecture": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "sourceReview": {
+      "type": "object",
+      "required": ["inspectionFile", "reviewedFiles", "unresolvedImports"],
+      "properties": {
+        "inspectionFile": { "type": "string", "minLength": 1 },
+        "reviewedFiles": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "unresolvedImports": { "type": "array", "items": { "type": "object" } }
+      },
+      "additionalProperties": true
+    },
+    "resourceMappings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["source", "strategy", "generatedFiles"],
+        "properties": {
+          "source": { "type": "string", "minLength": 1 },
+          "strategy": { "enum": ["reuse", "bundle", "adapter", "reimplement"] },
+          "generatedFiles": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "reason": { "type": "string" },
+          "equivalenceTestCases": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "goal",
+          "primary",
+          "disposition",
+          "sourceEvidence",
+          "inputs",
+          "outputs",
+          "risks",
+          "testCases"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "goal": { "type": "string", "minLength": 1 },
+          "primary": { "type": "boolean" },
+          "disposition": {
+            "enum": ["visual", "ai-assisted", "manual", "excluded"]
+          },
+          "backendAction": { "type": ["string", "null"] },
+          "implementationSources": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "sourceEvidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["file", "note"],
+              "properties": {
+                "file": { "type": "string", "minLength": 1 },
+                "line": { "type": ["integer", "null"], "minimum": 1 },
+                "note": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": true
+            },
+            "minItems": 1
+          },
+          "inputs": { "type": "array", "items": { "type": "object" } },
+          "outputs": { "type": "array", "items": { "type": "object" } },
+          "risks": {
+            "type": "array",
+            "items": {
+              "enum": ["read", "write", "network", "install", "destructive", "credential"]
+            }
+          },
+          "testCases": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "gapReason": { "type": ["string", "null"] }
+        },
+        "additionalProperties": true
+      }
+    },
+    "environment": { "type": "array", "items": { "type": "object" } },
+    "security": {
+      "type": "object",
+      "required": ["notes"],
+      "properties": {
+        "notes": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["discovered", "visual", "aiAssisted", "manual", "excluded"],
+      "properties": {
+        "discovered": { "type": "integer", "minimum": 0 },
+        "visual": { "type": "integer", "minimum": 0 },
+        "aiAssisted": { "type": "integer", "minimum": 0 },
+        "manual": { "type": "integer", "minimum": 0 },
+        "excluded": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

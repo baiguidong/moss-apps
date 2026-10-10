@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.app-builder",
+  "summary": "在普通 Agent 会话中创建、预览和迭代 App。",
+  "description": "使用当前 Moss 提供的开发契约和 SDK，创建 App、继续已有项目或分析 Skill 转换资料。",
+  "categories": ["开发工具"],
+  "keywords": ["App", "开发", "迭代"],
+  "platforms": ["darwin-arm64", "darwin-x64", "win32-x64"],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/app-builder",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

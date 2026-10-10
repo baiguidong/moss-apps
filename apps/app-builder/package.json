@@ -1,0 +1,17 @@
+{
+  "name": "@moss/app-builder",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/backend/actions.mjs && node --check src/backend/main.mjs && node --check src/ui/main.mjs && node --check src/conversion/analyze.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "bun test tests",
+    "test:browser": "node scripts/test-browser.mjs",
+    "test:desktop": "node scripts/test-desktop.mjs",
+    "test:agent": "node scripts/test-agent.mjs"
+  },
+  "dependencies": {
+    "@moss/app-sdk": "workspace:*"
+  }
+}

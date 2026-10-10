@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "intent": {
+      "enum": [
+        "create",
+        "edit",
+        "use"
+      ]
+    },
+    "ref": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

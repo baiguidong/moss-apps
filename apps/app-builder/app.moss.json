@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.app-builder",
+  "version": "0.1.1",
+  "displayName": "应用构建",
+  "description": "在普通会话里创建、预览和迭代自己的 App。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.0.0",
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1080,
+      "height": 820
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "on-demand",
+    "actions": [
+      {
+        "name": "builder_inspect",
+        "inputSchema": "schemas/builder_inspect.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "builder_prepare",
+        "inputSchema": "schemas/builder_prepare.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "builder_build",
+        "inputSchema": "schemas/builder_build.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "builder_preview",
+        "inputSchema": "schemas/builder_preview.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "builder_release",
+        "inputSchema": "schemas/builder_release.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "composer.list",
+        "inputSchema": "schemas/composer.list.json"
+      },
+      {
+        "name": "composer.resolve",
+        "inputSchema": "schemas/composer.resolve.json"
+      }
+    ]
+  },
+  "permissions": [
+    "apps:read",
+    "apps:author",
+    "apps:build",
+    "apps:install"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "home",
+        "title": "应用构建",
+        "route": "#/projects",
+        "icon": "blocks",
+        "order": 230
+      }
+    ],
+    "tools": [
+      {
+        "id": "builder_inspect",
+        "title": "检查 App 项目",
+        "description": "Read App catalog, source, current developer contracts, operation receipts and static Skill analysis.",
+        "effect": "read",
+        "action": "builder_inspect",
+        "inputSchema": "schemas/builder_inspect.json",
+        "permission": "apps:read"
+      },
+      {
+        "id": "builder_prepare",
+        "title": "准备 App 项目",
+        "description": "Prepare a bound App source project and the current Core SDK for this ordinary Agent conversation.",
+        "effect": "write",
+        "action": "builder_prepare",
+        "inputSchema": "schemas/builder_prepare.json",
+        "permission": "apps:author"
+      },
+      {
+        "id": "builder_build",
+        "title": "构建 App",
+        "description": "Build immutable App source snapshots under the ordinary session command policy; query or cancel builds.",
+        "effect": "write",
+        "action": "builder_build",
+        "inputSchema": "schemas/builder_build.json",
+        "permission": "apps:build"
+      },
+      {
+        "id": "builder_preview",
+        "title": "预览 App",
+        "description": "Open isolated target App previews and test declared Backend Actions; query or close previews.",
+        "effect": "write",
+        "action": "builder_preview",
+        "inputSchema": "schemas/builder_preview.json",
+        "permission": "apps:build"
+      },
+      {
+        "id": "builder_release",
+        "title": "安装 App 版本",
+        "description": "Prepare, review and commit local App installations using immutable artifacts and conflict-checked receipts.",
+        "effect": "write",
+        "action": "builder_release",
+        "inputSchema": "schemas/builder_release.json",
+        "permission": "apps:install"
+      }
+    ],
+    "resourceProviders": [
+      {
+        "id": "projects",
+        "schemes": [
+          "moss-app-project"
+        ],
+        "title": "App 项目",
+        "listAction": "composer.list",
+        "resolveAction": "composer.resolve",
+        "permission": "apps:author",
+        "authoring": {
+          "target": "moss-app",
+          "intents": [
+            "create",
+            "edit"
+          ]
+        }
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.host/v1",
+      "moss.apps/v1"
+    ]
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  }
+}

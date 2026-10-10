@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>应用构建</title><link rel="stylesheet" href="style.css"></head>
+<body><main>
+  <header><div class="brand"><span class="mark">＋</span><div><strong>应用构建</strong><span class="muted">把想法变成自己的 App</span></div></div><button id="refresh" class="secondary">刷新</button></header>
+  <div id="notice" role="status" hidden></div>
+  <section class="intro"><span class="eyebrow">从一个想法开始</span><h1>你想创建什么？</h1><p>写下需求，在会话里一起完成创建、预览和迭代。</p></section>
+  <section class="compose"><form id="create"><label for="requirements">描述你的 App</label><textarea id="requirements" rows="4" placeholder="例如：一个记录读书笔记、按主题整理摘录的小工具…" required></textarea><details><summary>从已有 Skill 创建</summary><label for="skill">Skill 源目录</label><input id="skill" placeholder="填写源目录路径"><p class="muted">会话会分析源文件和依赖，再验证转换后的功能。</p></details><div class="compose-bottom"><span class="muted">提交后进入普通 Agent 会话</span><button id="submit" type="submit">开始创建 <span aria-hidden="true">↗</span></button></div></form></section>
+  <section><div class="section-title"><h2>继续项目</h2><span id="project-count" class="muted"></span></div><div id="projects" class="cards"><p class="muted">正在加载项目…</p></div></section>
+  <section><div class="section-title"><h2>迭代已有 App</h2><span class="muted">选择 App，带着需求进入会话</span></div><div id="apps" class="cards"><p class="muted">正在加载 App…</p></div></section>
+</main><script type="module" src="main.mjs"></script></body></html>

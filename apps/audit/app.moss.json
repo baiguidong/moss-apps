@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.audit",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "displayName": "审计中心",
   "description": "审计本地会话与工具调用，管理风险规则、发现项和操作历史。",
   "icon": "assets/icon.svg",

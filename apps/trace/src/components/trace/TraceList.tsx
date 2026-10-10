@@ -117,7 +117,7 @@ export function TraceList({ onOpen }: { onOpen: (sessionId: string) => void }) {
           <Button variant="outline" onClick={() => void load()}><RefreshCw className="size-3.5" />{t('trace.refresh')}</Button>
         </div>
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">启用 Trace App 后自动记录本地模型请求，停用 App 即停止采集。</p>
+      <p className="mt-3 text-xs text-muted-foreground">启用调用追踪后自动记录本地模型请求，停用 App 即停止采集。</p>
       <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
         <MetaChip label={t('trace.list.sessions')} value={state.status === 'ready' ? String(state.data.total) : '—'} />
         <MetaChip label={t('trace.apiCalls')} value={String(summary.apiCalls)} />

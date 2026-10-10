@@ -1,0 +1,99 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation"
+  ],
+  "properties": {
+    "operation": {
+      "enum": [
+        "info",
+        "contracts",
+        "contract",
+        "apps",
+        "projects",
+        "target",
+        "source",
+        "guidance",
+        "skill",
+        "operation"
+      ],
+      "description": "info: no other arguments; contracts: kind, offset, limit; contract: kind (required), member (required), contractHash (required); apps: no other arguments; projects: no other arguments; target: projectRef, targetRef, appId; source: projectRef, targetRef, appId; guidance: no other arguments; skill: path (required); operation: operationRef (required), offset, limit, family (required)"
+    },
+    "kind": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$",
+      "description": "For contracts/contract: manifest, ui, backend, host, event, sdk or validation. List contracts first to obtain exact kind/member pairs."
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "limit": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65536
+        }
+      ]
+    },
+    "member": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    },
+    "contractHash": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    },
+    "projectRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    },
+    "targetRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    },
+    "appId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "description": "Skill directory relative to the ordinary session workspace."
+    },
+    "operationRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    },
+    "family": {
+      "enum": [
+        "build",
+        "release",
+        "artifact"
+      ]
+    }
+  }
+}

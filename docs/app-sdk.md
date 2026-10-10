@@ -4,6 +4,16 @@
 
 App 可通过通用 `backend.host.request()` 使用 Desktop 提供的协议。Tasks/Execution 和 MCP 优先使用 `@moss/app-sdk/execution`、`@moss/app-sdk/mcp` 的 typed client，其类型和校验器来自同一份 host-contracts。仓库构建校验采用 Manifest 声明的最低 Host 版本；市场和安装阶段继续按实际运行的 Host 版本判断兼容性。详见 [MCP App](../apps/mcp/README.md)。
 
+## 源码随包发布
+
+后续新发布的 App 必须遵循 [源码随包发布规范](app-source-packaging.md)。发布源码快照包含固定 Core 提交的 SDK、host-contracts 及必要本地构建依赖，并保留有效的 workspace 配置和锁文件。快照由打包器自动导出，SDK 仍只在 Core 维护；只携带 App 的 `src/` 或依赖一个包外 `workspace:*` SDK 不满足可重建要求。自动导出、锁定构建、最终 ZIP 校验和独立重建已接入打包器及 CI。
+
+App Builder 创建或修改后直接安装的 App 也遵循同一要求：已安装版本内保存完整源码和本次构建实际使用的 SDK 输入，不能只引用会话中的 `.moss-sdk` 或构建缓存。换会话、重启或清理原 workspace 后仍须可恢复。
+
+Backend 的运行产物必须包含所需 SDK：优先编译入 bundle，无法内联的运行依赖按打包规范随产物放置。发布验证必须在没有源码目录、开发仓库和全局 SDK 的环境完成真实握手，防止出现构建成功但 `Cannot find package '@moss/app-sdk'` 的包。
+
+历史版本重建使用随包固定 SDK；迭代如需适配当前 Core，在草稿中明确更新 SDK、契约与锁文件，并保留原发布快照。
+
 ## 3.0 UI 调用与公共辅助函数
 
 ```ts

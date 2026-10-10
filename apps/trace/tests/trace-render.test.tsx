@@ -41,7 +41,7 @@ const messages = [
 describe('moss Trace composition', () => {
   test('App collection follows installation, without another capture switch', () => {
     const markup = renderToStaticMarkup(<TraceList onOpen={() => {}} />)
-    expect(markup).toContain('启用 Trace App 后自动记录')
+    expect(markup).toContain('启用调用追踪后自动记录')
     expect(markup).not.toContain('type="checkbox"')
   })
 
@@ -57,7 +57,7 @@ describe('moss Trace composition', () => {
     expect(markup).toContain('role="listitem"')
     expect(markup).toContain('排查模型重试')
     expect(markup).toContain('fixture-model')
-    expect(markup).toContain('aria-label="删除 Trace"')
+    expect(markup).toContain('aria-label="删除追踪"')
     expect(markup).not.toContain('trace.list.')
   })
 

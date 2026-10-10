@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.drive",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "displayName": "网盘",
   "description": "管理个人云端文件，上传、下载和分享。",
   "icon": "assets/icon.svg",

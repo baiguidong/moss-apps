@@ -30,7 +30,7 @@ async function readWindow(target: TraceTarget, query: string, limit: number, off
     readCount += page.traces.length
     if (page.traces.length === 0 || offset + readCount >= page.total) break
   }
-  if (!response) throw new Error('Trace 列表分页参数无效。')
+  if (!response) throw new Error('追踪列表分页参数无效。')
   const seen = new Set<string>()
   return { ...response, traces: traces.filter((trace) => {
     if (seen.has(trace.sessionId)) return false

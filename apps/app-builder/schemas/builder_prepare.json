@@ -1,0 +1,79 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation"
+  ],
+  "properties": {
+    "operation": {
+      "enum": [
+        "project",
+        "sdk"
+      ],
+      "description": "project: intent (required), projectId (required), projectRef, draftRef, targetRef, appId, sourcePath, replaceOriginal, title, requirements, analysis; sdk: projectRef (required), sdkHash (required)"
+    },
+    "intent": {
+      "enum": [
+        "create",
+        "edit"
+      ]
+    },
+    "projectId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    },
+    "projectRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    },
+    "draftRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    },
+    "targetRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    },
+    "appId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    },
+    "sourcePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    },
+    "replaceOriginal": {
+      "type": "boolean"
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 160
+    },
+    "requirements": {
+      "type": "string",
+      "maxLength": 12000
+    },
+    "analysis": {
+      "type": "string",
+      "maxLength": 12000
+    },
+    "sdkHash": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[^\\u0000]*\\S[^\\u0000]*$"
+    }
+  }
+}
