@@ -48,8 +48,11 @@ if (explicitRelease) records.push(readJson(path.resolve(explicitRelease)))
 
 const byApp = new Map()
 for (const raw of records.map(validateRelease)) {
-  const current = byApp.get(raw.app.id) || { app: raw.app, versions: new Map() }
-  current.app = raw.app
+  const current = byApp.get(raw.app.id) || { app: raw.app, metadataVersion: raw.version.version, versions: new Map() }
+  if (semver.gte(raw.version.version, current.metadataVersion)) {
+    current.app = raw.app
+    current.metadataVersion = raw.version.version
+  }
   current.versions.set(raw.version.version, raw.version)
   byApp.set(raw.app.id, current)
 }
