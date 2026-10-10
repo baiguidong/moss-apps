@@ -8,7 +8,6 @@ import { createLocalAuditService } from '../src/backend/service.mjs';
 
 test('local audit service persists redacted current results and preserves finding decisions', async (t) => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'moss-audit-'));
-  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const sessions = [
     {
       id: 'local-1',
@@ -38,7 +37,10 @@ test('local audit service persists redacted current results and preserves findin
     getLocalSessions: () => sessions,
     onChanged: (event) => events.push(event),
   });
-  t.after(() => service.close());
+  t.after(() => {
+    service.close();
+    fs.rmSync(directory, { recursive: true, force: true });
+  });
 
   service.updateRule({ id: 'failed-tool-call', config: { minimumFailures: 1 } });
   const firstRun = await service.runAudit();
@@ -128,7 +130,6 @@ test('local audit service persists redacted current results and preserves findin
 
 test('incremental audit skips busy and unchanged sessions', async (t) => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'moss-audit-incremental-'));
-  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const sessions = [{
     id: 'incremental-1',
     title: 'Incremental session',
@@ -143,7 +144,10 @@ test('incremental audit skips busy and unchanged sessions', async (t) => {
     dbPath: path.join(directory, 'audit.db'),
     getLocalSessions: () => sessions,
   });
-  t.after(() => service.close());
+  t.after(() => {
+    service.close();
+    fs.rmSync(directory, { recursive: true, force: true });
+  });
 
   const first = await service.runIncrementalAudit();
   assert.equal(first.sessionCount, 1);
@@ -172,7 +176,6 @@ test('incremental audit skips busy and unchanged sessions', async (t) => {
 
 test('audit attributes duplicated worker tool calls to the child session only', async (t) => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'moss-audit-subagent-dedupe-'));
-  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const toolUse = {
     type: 'tool_use',
     id: 'shared-tool-id',
@@ -205,7 +208,10 @@ test('audit attributes duplicated worker tool calls to the child session only', 
     dbPath: path.join(directory, 'audit.db'),
     getLocalSessions: () => sessions,
   });
-  t.after(() => service.close());
+  t.after(() => {
+    service.close();
+    fs.rmSync(directory, { recursive: true, force: true });
+  });
 
   await service.runAudit();
   const dashboard = service.getDashboard();
@@ -216,7 +222,6 @@ test('audit attributes duplicated worker tool calls to the child session only', 
 
 test('serious findings are pending only until reported or processed', async (t) => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'moss-audit-alerts-'));
-  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const sessions = [{
     id: 'alert-session',
     title: 'Alert session',
@@ -241,7 +246,10 @@ test('serious findings are pending only until reported or processed', async (t) 
     getLocalSessions: () => sessions,
     onChanged: (event) => events.push(event),
   });
-  t.after(() => service.close());
+  t.after(() => {
+    service.close();
+    fs.rmSync(directory, { recursive: true, force: true });
+  });
 
   await service.runAudit();
   const pending = service.listPendingAlerts();
@@ -263,7 +271,6 @@ test('serious findings are pending only until reported or processed', async (t) 
 
 test('local audit service recovers interrupted runs on startup', (t) => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'moss-audit-recovery-'));
-  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const dbPath = path.join(directory, 'audit.db');
   const first = createLocalAuditService({ dbPath, getLocalSessions: () => [] });
   first.close();
@@ -291,7 +298,10 @@ test('local audit service recovers interrupted runs on startup', (t) => {
   db.close();
 
   const recovered = createLocalAuditService({ dbPath, getLocalSessions: () => [] });
-  t.after(() => recovered.close());
+  t.after(() => {
+    recovered.close();
+    fs.rmSync(directory, { recursive: true, force: true });
+  });
   const dashboard = recovered.getDashboard();
   assert.equal(dashboard.summary.running, false);
   assert.equal(dashboard.summary.rulesStale, false);
