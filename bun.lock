@@ -48,7 +48,7 @@
     },
     "apps/devtools": {
       "name": "@moss/devtools-app",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "jsonc-parser": "3.3.1",

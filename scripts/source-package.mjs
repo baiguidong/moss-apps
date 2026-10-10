@@ -43,7 +43,12 @@ export function focusedLock(original, workspaces) {
 }
 
 export function run(command, args, cwd) {
-  const env = { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, HOME: os.homedir(), CI: '1', TMPDIR: os.tmpdir() }
+  const env = { PATH: process.env.PATH, HOME: os.homedir(), CI: '1', TMPDIR: os.tmpdir() }
+  // PowerShell/CIM and Python need these Windows system locations even in an
+  // isolated build. Keep the allowlist explicit so signing keys never enter it.
+  for (const key of ['SystemRoot', 'SystemDrive', 'WINDIR', 'ComSpec', 'PATHEXT', 'TEMP', 'TMP', 'USERPROFILE', 'HOMEDRIVE', 'HOMEPATH', 'APPDATA', 'LOCALAPPDATA', 'ProgramData', 'ProgramFiles', 'ProgramFiles(x86)', 'ProgramW6432', 'PSModulePath']) {
+    if (process.env[key] !== undefined) env[key] = process.env[key]
+  }
   const result = spawnSync(command, args, { cwd, env, stdio: 'inherit', timeout: 300000 })
   if (result.error || result.status !== 0) throw result.error || new Error(`${command} ${args.join(' ')} failed (${result.status})`)
 }
