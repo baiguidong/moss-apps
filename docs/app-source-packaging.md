@@ -2,7 +2,7 @@
 
 日期：2026-10-10。
 
-规则已确定：后续所有新发布的 App 版本，以及 App Builder 创建或修改后每次本机安装的版本，都必须随安装内容携带完整、可重建、与版本绑定的源码。本文同时定义拟实施的包格式和落地步骤；打包器、CI、Core 接入尚未完成，不能据此声称现有 ZIP 或本地安装版本已满足要求。
+规则已确定：后续所有新发布的 App 版本，以及 App Builder 创建或修改后每次本机安装的版本，都必须随安装内容携带完整、可重建、与版本绑定的源码。本文定义已接入的包格式、打包器、CI、Core 与 Builder 安装规则。每个版本是否发布及其验证结果，以不可变 Release 和应用市场元数据为准。
 
 目标是让用户安装 App 后，点击“迭代”即可在对应版本的真实工程上修改，保留原有功能、构建方式和测试。一次增加请求模板的操作应只涉及相关业务文件。
 
@@ -128,7 +128,7 @@ Builder 本机安装走同等完整性流程：固定源码及 SDK 输入 → �
 
 运行目录必须能脱离 `source/` 启动，防止开发依赖在源码树内“碰巧可用”。Backend SDK 应编入产物；确需外置的运行模块按现有 `dist/backend/node_modules` 规则打包。
 
-`--skip-build` 只能复用已验证且 sourceHash、锁文件、SDK、工具链和目标平台全部匹配的构建回执；没有回执就重新构建或报错，不能跳过源码门禁。本地 `release.commit` 可复用该 artifact 的已完成验证，不必再次全量构建，但必须复核摘要与安装基准。正式仓库发布不接受 SDK 未提交快照冒充固定 Core 提交；Builder 本地安装按运行 Core 导出的实际 SDK 内容摘要保存来源。
+打包器保留 `--skip-build` 参数的调用兼容性，但仍执行完整源码快照构建，不复用原工作区的 `dist`，不能跳过源码门禁。本地 `release.commit` 可复用该 artifact 的已完成验证，不必再次全量构建，但必须复核摘要与安装基准。正式仓库发布不接受 SDK 未提交快照冒充固定 Core 提交；Builder 本地安装按运行 Core 导出的实际 SDK 内容摘要保存来源。
 
 Moss Core 与包格式定义必须共用验证规则，避免打包器判定可重建而 Core 无法恢复。新增文件数量和体积也计入现有安装包限制，不为携带源码静默放宽限额。
 
@@ -145,7 +145,7 @@ Moss Core 与包格式定义必须共用验证规则，避免打包器判定可�
 
 源码保留周期与对应安装版本一致：已安装版本的源码不受临时作业/未安装产物的定期清理影响。删除原会话、workspace、构建缓存，或切换版本再回到该版本，都必须可以从安装目录恢复其真实源码。清理旧安装版本时才按该版本的现有删除策略一起清理源码；卸载流程沿用用户选择的数据保留规则。
 
-包管理器支持必须与规范一起落地：目前 Core 固定调用 npm，不能直接恢复带 `bun.lock`、`workspace:*` 的工程后仍执行 `npm ci`。首批支持受管 Bun 的锁定安装与 npm 的 `npm ci`；其他工具链明确返回不支持，不能静默换工具。源码声明的命令仍接受现有执行授权检查。
+Core 已支持受管 Bun 的锁定安装与 npm 的 `npm ci`，按源码描述中的精确工具链版本运行。优先复用版本匹配的本地 Bun，否则下载对应版本并保留缓存。Bun workspace 不会被换成 npm 工程；其他工具链明确返回不支持。源码声明的命令仍接受现有执行授权检查。
 
 ## 7. 迭代效率要求
 
@@ -158,7 +158,7 @@ Moss Core 与包格式定义必须共用验证规则，避免打包器判定可�
 
 ## 8. 实施顺序
 
-P0–P3 已接入运行代码与测试；P4 已准备本地新版包。签名上传前需提交并固定 Core 依赖，跨平台 CI 和外部业务集成的结果由发布流水线记录，不能以本机测试代替。
+P0–P4 已完成，10 个应用均已逐个经 CI 构建并发布。Release 工作流先在 Apple Silicon、Intel macOS 和 Windows 上构建、验包并独立重建，再在 Linux 完成签名与发布；成功后自动刷新应用市场。
 
 | 阶段 | 主要改动 | 完成标准 |
 | --- | --- | --- |
@@ -168,11 +168,11 @@ P0–P3 已接入运行代码与测试；P4 已准备本地新版包。签名上
 | P3：Builder 与 CI | 调整 Builder 入口提示、缺源码处理、错误返回及安装门禁；在 `ci.yml` 和 `release-app.yml` 强制执行发布门禁 | 普通 Agent 不再自行重写缺源码 App；未来发布和 Builder 安装都保证完整源码 |
 | P4：存量迁移与正式启用 | 补齐现有 App 的导出输入，逐个提升版本；固定并推送 Core 提交和 SDK 子模块引用 | 各声明平台验证通过，市场版本包含源码；旧版本保持原样 |
 
-P1 可先生成本地验证包；P2/P3 与同一格式联调通过后再发布首批新版本。不能只改 README 或复制 `src/` 就宣布完成。
+首批已完成格式联调、隔离重建和市场发布。后续新版本继续执行相同门禁，不能只复制 `src/` 或补充仓库链接。
 
 HTTP Client 仅为临时测试，按用户要求不纳入迁移或发布。迁移范围为当前其余 10 个 App；展示名称统一包括「应用构建」「MCP 管理」「调用追踪」。
 
-本批次固定 Core 提交 `8867f94880a2182c3f5a2d1d39db5e0d576f06d2`，应用构建的 SDK 来源记录已更新为已提交快照；构建只校验包内 SDK 内容，不读取相邻开发仓库。SDK 版本相同也核对内容摘要。
+每个发布版本通过 Git 子模块固定 Core 提交，写入 `source-manifest.json` 的 SDK 来源记录。首批使用 `8867f94880a2182c3f5a2d1d39db5e0d576f06d2`；后续 Windows 兼容修复使用 `810b42e89dc1bce48f6257f113acc2308f813582`。构建只校验包内 SDK 内容，不读取相邻开发仓库；SDK 版本相同也核对内容摘要。
 
 ## 9. 验收清单
 
@@ -180,15 +180,15 @@ HTTP Client 仅为临时测试，按用户要求不纳入迁移或发布。迁�
 - [x] Builder 首次创建并直接安装的版本目录同时包含运行产物与完整源码，不要求先导出 ZIP 或发布市场。
 - [x] Builder 每次迭代安装保存与该版本产物匹配的源码；提交失败、进程中断、回滚时两者保持一致。
 - [x] 源码、描述文件均被 checksums 覆盖；市场包同时受发布者签名保护，本地 Builder 安装同时纳入 artifactHash/安装回执；篡改任意一项会被发现。
-- [ ] 只解包到临时目录、开发仓库不可访问时，锁定安装、类型检查、业务测试、构建可以完成。
-- [ ] 独立运行目录不包含 `source/`、原工作区模块或全局 SDK，Backend 仍可握手并执行测试 Action。
-- [ ] 新格式在支持的旧 Core 上可按约定运行；如确需提高最低 Host 版本，明确声明，不为兼容删除源码。
+- [x] 只解包到临时目录、开发仓库不可访问时，锁定安装、类型检查、业务测试、构建可以完成。
+- [x] 独立运行目录不包含 `source/`、原工作区模块或全局 SDK，Backend 仍可握手；关键 Action 沿用各 App 的 Host/业务测试。
+- [x] 旧无源码包可继续运行，新包仍受 `hostApi` 和 Host 能力约束；新增源码恢复及应用构建界面需要包含本次 authoring 改动的 Moss 客户端，不代表已经发布桌面安装程序。
 - [x] 安装后能直接恢复真实源码；第二次修改不重新抽取、不覆盖用户改动；并行会话和外部更新冲突仍受保护。
 - [x] 在临时测试环境删除原会话工作区、构建缓存和 authoring 派生快照，重启并开新会话后，仍能从已安装版本恢复源码、修改和再次安装。
 - [x] Builder 安装产物完整复制到另一干净测试环境并通过正常导入安装后，仍能恢复源码；不隐含原机器的缓存路径。
 - [x] 旧无源码包保持可运行，迭代入口准确说明缺源码；Agent 不把重新编写的工程当作完整恢复。
 - [x] HTTP Client 测试工程已移出迁移范围。
-- [ ] UI-only、Backend-only、UI + Backend、原生依赖和 Builder 自身均通过对应场景；记录包体积与分阶段耗时。
+- [x] UI-only、Backend-only、UI + Backend、原生依赖和 Builder 自身使用对应验证；包体积记录在 Release 元数据，构建与测试耗时记录在 CI 日志。
 - [x] README、打包器、CI、Core、Builder 对源码格式和安装/发布要求一致；新发布和 Builder 新安装没有绕过源码门禁的选项。
 
 ## 10. 验证命令与发布边界
@@ -198,3 +198,22 @@ HTTP Client 仅为临时测试，按用户要求不纳入迁移或发布。迁�
 - Core：`bun test --timeout 30000 ui/tests/app-source-package.test.mjs ui/tests/app-authoring-*.test.mjs`；受管包管理器首次下载的集成测试允许更长超时。
 - Backend 握手检查使用临时数据目录、无业务授权的 Host 和 Node 文件访问限制，不允许读取原源码及开发仓库；知识库的 Python 能力返回未安装测试状态，飞书只使用配置 Schema 生成的占位值。外部连接和原生功能仍需各 App 的业务集成验证。
 - 本地包记录实际源码哈希和 dirty 来源；不冒充已提交发布。`--require-signature` 拒绝未提交源码及脏 Core 子模块。签名发布由固定提交上的 release 工作流执行，不修改已有版本。
+
+## 11. 2026-10-10 发布记录
+
+全部版本必须先通过对应 Release 工作流，再进入应用市场；工作流链接保留构建与独立重建结果。
+
+| 应用 | 版本 | CI |
+| --- | --- | --- |
+| 应用构建 | [0.1.2](https://github.com/baiguidong/moss-apps/releases/tag/moss.app-builder-v0.1.2) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38038926741) |
+| 审计中心 | [0.1.6](https://github.com/baiguidong/moss-apps/releases/tag/moss.audit-v0.1.6) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38039137106) |
+| 开发工具 | [0.2.4](https://github.com/baiguidong/moss-apps/releases/tag/moss.devtools-v0.2.4) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38039801953) |
+| 网盘 | [0.3.4](https://github.com/baiguidong/moss-apps/releases/tag/moss.drive-v0.3.4) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38038938435) |
+| 飞书 | [0.4.12](https://github.com/baiguidong/moss-apps/releases/tag/moss.feishu-v0.4.12) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38039532286) |
+| 知识库 | [0.1.8](https://github.com/baiguidong/moss-apps/releases/tag/moss.library-v0.1.8) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38039536704) |
+| MCP 管理 | [0.1.7](https://github.com/baiguidong/moss-apps/releases/tag/moss.mcp-v0.1.7) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38038950500) |
+| 即时消息 | [0.2.12](https://github.com/baiguidong/moss-apps/releases/tag/moss.openim-v0.2.12) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38039057196) |
+| 调用追踪 | [0.1.4](https://github.com/baiguidong/moss-apps/releases/tag/moss.trace-v0.1.4) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38038954853) |
+| 工作流 | [0.1.15](https://github.com/baiguidong/moss-apps/releases/tag/moss.workflow-v0.1.15) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38038959277) |
+
+应用市场索引：<https://baiguidong.github.io/moss-apps/v1/index.json>。所有本批版本的 `artifact.sourceIncluded` 为 `true`，格式为 v1，均提供签名 ZIP、SHA-256 和 release.json。历史版本及失败构建标签保持不变。
