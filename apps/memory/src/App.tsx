@@ -58,7 +58,7 @@ export function App() {
     finally { if (mounted.current) { setBusy(false); void load() } }
   }
   const tools = (server?.check?.tools || []).filter(tool => `${tool.name} ${tool.description}`.toLowerCase().includes(query.toLowerCase()))
-  
+
   return <main className="app-shell"><div className="memory-workspace">
     <header className="memory-header"><div className="memory-brand"><span className="memory-mark"><Brain size={24} strokeWidth={1.6} /></span><div><h1>记忆</h1><p>Memory <span className="official-tag">官方</span></p></div></div><button className="button" onClick={() => setEditor(true)} disabled={!catalog || busy || unavailable}><Settings2 size={15} />记忆设置</button></header>
     {!window.mossApp && <div className="demo-note">演示模式 · 仅展示界面，操作不会写入真实记忆</div>}

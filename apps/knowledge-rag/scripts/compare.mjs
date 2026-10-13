@@ -95,4 +95,3 @@ try {
   console.log(JSON.stringify({summary:result.summary,byKind,report:path.join(output,'report.html')},null,2))
 } catch(error){console.error(rag.logs);throw error}
 finally{await second?.close().catch(()=>{});await rag.close();library.close();await library.waitForIdle()}
-

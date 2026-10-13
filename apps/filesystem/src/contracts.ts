@@ -22,6 +22,6 @@ export function validateSettings(raw: unknown): Settings {
     if (!Array.isArray(list) || list.length > max || list.some(item => typeof item !== 'string' || !item.trim() || item.length > length || /[\x00\r\n]/.test(item))) throw new Error(`请填写有效的${label}，每行一项。`)
     return [...new Set(list.map(item => item.trim()))]
   }
-  
+
   return { directories: validateList(value.directories, 32, 4096, '目录路径'), disabledTools: validateList(value.disabledTools, 200, 128, '工具名称'),  }
 }

@@ -42,13 +42,13 @@ test('first-use settings, validation, exclusions and clearing the scope', async 
   await dialog.getByRole('button', { name: '保存设置' }).click()
   await expect(dialog.getByRole('alert')).toContainText('目录不存在')
   await dialog.getByLabel('公共目录（可选）').fill('/demo/Work Folder')
-  
+
   await dialog.getByLabel('不启用的工具').fill('write_file')
   await dialog.getByRole('button', { name: '保存设置' }).click()
   await expect(dialog).toHaveCount(0)
   await expect(page.getByRole('status')).toContainText('服务可用')
   expect(f.catalog.settings.directories).toEqual(['/demo/Work Folder'])
-  
+
   await page.locator('.service-tools summary').click()
   await expect(page.getByRole('heading', { name: 'write_file已排除' })).toBeVisible()
   await page.getByLabel('搜索工具').fill('no-such-tool')

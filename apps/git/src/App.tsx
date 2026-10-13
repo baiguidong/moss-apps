@@ -58,7 +58,7 @@ export function App() {
     finally { if (mounted.current) { setBusy(false); void load() } }
   }
   const tools = (server?.check?.tools || []).filter(tool => `${tool.name} ${tool.description}`.toLowerCase().includes(query.toLowerCase()))
-  
+
   return <main className="app-shell"><div className="service-workspace">
     <header className="service-header"><div className="service-brand"><span className="service-mark"><GitBranch size={24} strokeWidth={1.6} /></span><div><h1>{TITLE}</h1><p>Git <span className="official-tag">官方</span></p></div></div><button className="button" onClick={() => setEditor(true)} disabled={!catalog || busy || unavailable}><Settings2 size={15} />Git 仓库设置</button></header>
     {!window.mossApp && <div className="demo-note">演示模式 · 仅展示界面，操作不会访问真实目录或仓库</div>}

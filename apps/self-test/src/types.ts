@@ -18,4 +18,3 @@ export type SelfTestInstanceStatus = {
   id?: string; pid?: number | null; startedAt?: number; preparedAt?: number; inheritedApps?: { id: string; version: string; enabled: boolean }[];
   progress?: SelfTestStatus['preparation'] | null;
 };
-

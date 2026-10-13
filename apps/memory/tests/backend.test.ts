@@ -112,4 +112,3 @@ test('settings cancel stale inspection and cannot change the managed command or 
   expect(await f.invoke('servers.inspect', { name: 'another-service' })).toMatchObject({ ok: false })
   expect(await f.invoke('servers.save', { disabledTools: [4] })).toMatchObject({ ok: false })
 })
-
