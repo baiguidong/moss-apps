@@ -42,7 +42,10 @@ export class ComputerUseService {
       this.phase = 'starting'; this.error = ''; this.changed();
       try {
         if (restart) { await this.host.stop(); this.captureVerified = false; }
-        const p = structured(await this.host.call('check_permissions'));
+        // Windows has no TCC grants. Its check_permissions tool starts legacy
+        // PowerShell for optional integrity metadata and reports UIA as a
+        // constant; readiness must use the actual capability probes below.
+        const p = this.platform === 'win32' ? null : structured(await this.host.call('check_permissions'));
         if (epoch !== this.epoch) return this.status();
         const health = structured(await this.host.call('health_report', { include: this.platform === 'win32' ? ['ax_capability', 'screen_capture_capability'] : ['bundle_identity'] }));
         if (epoch !== this.epoch) return this.status();
@@ -51,9 +54,8 @@ export class ComputerUseService {
           // ID before handing us the transport; Windows has no TCC attribution.
           const identityOk = Number(this.host.connection?.pid) > 0 && this.host.connection?.driverVersion === CUA_VERSION;
           this.permissions = { hostIdentity: identityOk,
-            accessibility: p.uia === true && health.checks?.some(c => c.name === 'ax_capability' && c.status === 'pass'),
-            screenRecording: health.checks?.some(c => c.name === 'screen_capture_capability' && c.status === 'pass') === true,
-            elevated: p.elevated === true, integrityLevel: p.integrity_level || 'unknown' };
+            accessibility: health.checks?.some(c => c.name === 'ax_capability' && c.status === 'pass') === true,
+            screenRecording: health.checks?.some(c => c.name === 'screen_capture_capability' && c.status === 'pass') === true };
           if (!identityOk) throw new Error('Windows 驱动身份检查未通过，请重新检查。');
           this.phase = this.permissions.accessibility && this.permissions.screenRecording ? 'ready' : 'error';
           if (this.phase !== 'ready') this.error = 'Windows UI Automation 或屏幕捕获不可用，请确认当前桌面已登录并解锁。';
@@ -91,7 +93,10 @@ export class ComputerUseService {
   async invoke(input, session, outerSignal) {
     this.control.assertLocal(session);
     if (!actions.has(input?.action)) throw new Error('不支持的电脑操控操作。');
-    if (input.action === 'status') return { content: [{ type: 'text', text: JSON.stringify(this.control.status()) }] };
+    if (input.action === 'status') {
+      const status = this.control.status();
+      return { structuredContent: status, content: [] };
+    }
     if (input.action === 'end_session') { await this.control.finish(session.id); return { content: [{ type: 'text', text: '控制已结束。' }] }; }
     return this.control.run(session, outerSignal, async (signal, epoch) => {
       this.owner.action = input.action;
@@ -100,7 +105,8 @@ export class ComputerUseService {
       const apps = await this.listApps(signal); this.guard(session, epoch);
       if (input.action === 'list_apps') {
         const q = String(input.query || '').toLowerCase();
-        return { content: [{ type: 'text', text: JSON.stringify({ apps: apps.filter(a => !q || `${a.name} ${a.bundleId}`.toLowerCase().includes(q)).map(a => ({ name: a.name, bundleId: a.bundleId, running: a.running })) }) }] };
+        const result = { apps: apps.filter(a => !q || `${a.name} ${a.bundleId}`.toLowerCase().includes(q)).map(a => ({ name: a.name, bundleId: a.bundleId, running: a.running })) };
+        return { structuredContent: result, content: [] };
       }
       const matches = apps.filter(a => a.bundleId === input.app || a.name === input.app);
       if (matches.length !== 1) throw new Error('应用不存在或名称不唯一，请先 list_apps，再使用准确 bundleId 应用标识。');

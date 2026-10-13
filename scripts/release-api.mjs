@@ -15,7 +15,10 @@ export function githubClient(repository, { token = process.env.GITHUB_TOKEN || p
       ...(body ? { body: Buffer.isBuffer(body) ? body : JSON.stringify(body) } : {}),
     })
     if (optional && response.status === 404) return null
-    if (!response.ok) throw new Error(`GitHub ${method} ${new URL(url).pathname}: HTTP ${response.status}`)
+    if (!response.ok) {
+      const detail = await response.json().catch(() => ({}))
+      throw Object.assign(new Error(`GitHub ${method} ${new URL(url).pathname}: HTTP ${response.status}${typeof detail.message === 'string' ? ` (${detail.message.slice(0, 300)})` : ''}`), { status: response.status })
+    }
     if (response.status === 204) return null
     return bytes ? Buffer.from(await response.arrayBuffer()) : response.json()
   }

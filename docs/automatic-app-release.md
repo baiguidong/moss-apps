@@ -66,11 +66,13 @@ Actions → **Release Changed Apps** → **Run workflow**，默认 `dry_run=true
 
 重试上传失败的任务时，使用原 Actions run 的 **Re-run failed jobs**，它仍绑定原提交。草稿不允许换成另一提交，也不覆盖其中的冲突文件；如果确实需要换源码，应提升版本。tag 指向不同提交、未知草稿、已有资产内容不同，均保留现场并失败。
 
+构建期间 main 可能出现新的工作流提交。GitHub 的默认 Actions token 可能拒绝为旧提交创建 tag（HTTP 403）；尚未创建草稿的 App 会标记为 `deferred/source-advanced`，交给排队中的新提交或下一次定时任务重新构建。不会把旧 ZIP 标成新提交，也不会额外授予 token 权限。若当前源码仍是 main 最新提交，403 仍作为真实权限错误报告。
+
 `publish-release.mjs` 是实际写入 GitHub 的入口，仅由工作流在校验后调用。初次实现时仅进行了本地验证；线上执行状态以 Actions 和 Releases 为准。
 
 ## 上线前提与验证边界
 
-- Core 对配置型 App 的 publisher、源码随包与安装校验支持已提交到 `da234bfedf66105ccbf74b640b020cd1e4abbc07`，并推送到 Core main。moss-apps 子模块固定到此提交，Builder SDK 来源记录同步更新；签名门禁仍拒绝脏源码。
+- Core 对配置型 App 的 publisher、源码随包与安装校验支持已推送到 Core main。moss-apps 子模块固定到 `656b8ac244076cc0231cd394d1703212ea9f2335`，Builder SDK 来源记录同步更新；签名门禁仍拒绝脏源码。
 - 使用已有 `MOSS_APP_SIGNING_PRIVATE_KEY` Actions Secret、`publishers/moss/release-1.pem` 公钥及 GitHub Pages 配置；Core 客户端须含 Host API 3.9 的配置型 App 支持。
 - 本地验证覆盖真正的签名与重建、普通 App 回归及模拟 GitHub 发布重试。macOS Intel / Windows / Linux 托管 runner 和线上部署由首次 CI 运行验证。
 - 锁文件固定的是包内生成器与构建依赖。Draw.io 仍按配置运行 `npx -y @drawio/mcp`，实际启动时解析第三方服务版本；如需固定服务版本，应在 app.json 明确写入 npm 版本。
@@ -85,3 +87,9 @@ Actions → **Release Changed Apps** → **Run workflow**，默认 `dry_run=true
 - 只读扫描 GitHub 得到 20 个待发布 App，包含 Draw.io；计划保存在 `artifacts/automatic-release/plan.json`。日志保存在同目录。该记录来自首次本地验证；线上发布状态以 Actions 为准。
 
 2026-10-13 发布跟进：普通 CI 按 `--supported-platform` 区分通用包与原生包；电脑操控在 macOS/Windows runner 构建，Linux 继续检查全部 App 的类型与业务测试。Core 全量桌面测试通过 1170 项及 24 项 Node 测试。
+
+发布恢复：ZIP 使用固定本地日历时间并验证跨时区字节一致；旧源码被 GitHub 拒绝创建 tag 时自动延后；Git/Filesystem MCP 集成测试使用生产环境相同的 Node 进程；原生验证保留真实截图与输入检查，并输出启动阶段日志。
+
+Git 与 Filesystem 的真实 MCP 集成测试由 Node test runner 执行，双方均运行编译后的 Node 代码；权限拒绝断言检查明确错误，连接超时不能算作隔离验证通过。
+
+Windows 原生验证改为启动可见测试窗口并等待 WinForms `Shown` 事件，保留窗口启动错误诊断。隔离 runner 已通过实际窗口截图、UI Automation 和中文输入；正式发布仍验证 Host 信任的原始签名包。

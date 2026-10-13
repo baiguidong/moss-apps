@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-import { spawnSync } from 'node:child_process';
+import { build } from 'esbuild';
 import { compile } from 'tailwindcss';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -19,9 +19,11 @@ export async function buildAppSettings(appRoot, { outputDir, html: sourceHtml } 
     primaryRoute: primary?.route || '#/', toolSelection: manifest.toolSelection || 'app',
     mcp: manifest.host?.protocols?.includes('moss.mcp/v1') || false, tools: manifest.contributes.tools || [],
   };
-  const result = spawnSync('bun', ['build', path.join(root, 'src/main.tsx'), '--target=browser', '--format=esm', '--minify',
-    '--define', `__APP_SETTINGS__=${JSON.stringify(options)}`, '--outfile', path.join(target, 'app-settings.js')], { cwd: appRoot, stdio: 'inherit' });
-  if (result.error || result.status !== 0) throw result.error || new Error('Shared App settings build failed');
+  // Keep CommonJS interop and React's build mode identical across desktop OSes.
+  await build({ entryPoints: [path.join(root, 'src/main.tsx')], absWorkingDir: appRoot,
+    bundle: true, platform: 'browser', format: 'esm', target: 'es2022', jsx: 'automatic', minify: true,
+    define: { __APP_SETTINGS__: JSON.stringify(options), 'process.env.NODE_ENV': '"production"' },
+    outfile: path.join(target, 'app-settings.js') });
   const require = createRequire(import.meta.url);
   const theme = await fs.readFile(require.resolve('tailwindcss/theme.css'), 'utf8');
   const source = (await Promise.all((await fs.readdir(path.join(root, 'src'))).filter(name => name.endsWith('.tsx')).map(name => fs.readFile(path.join(root, 'src', name), 'utf8')))).join('\n');
