@@ -412,6 +412,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
+        "esbuild": "0.25.12",
         "lucide-react": "0.564.0",
         "react": "19.2.0",
         "react-dom": "19.2.0",
@@ -425,7 +426,7 @@
     },
     "vendor/moss-core/packages/app-runtime": {
       "name": "@moss/app-runtime",
-      "version": "3.8.0",
+      "version": "3.9.0",
       "dependencies": {
         "@moss/app-sdk": "3.8.0",
         "ajv": "^8.18.0",
@@ -434,7 +435,7 @@
     },
     "vendor/moss-core/packages/app-sdk": {
       "name": "@moss/app-sdk",
-      "version": "3.8.0",
+      "version": "3.9.0",
       "dependencies": {
         "@moss/host-contracts": "3.0.0",
         "ajv": "^8.18.0",
