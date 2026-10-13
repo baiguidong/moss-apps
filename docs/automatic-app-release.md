@@ -72,7 +72,7 @@ Actions → **Release Changed Apps** → **Run workflow**，默认 `dry_run=true
 
 ## 上线前提与验证边界
 
-- Core 对配置型 App 的 publisher、源码随包与安装校验支持已提交到 `57785b30b411356587f8387b2b698403ba753767`，并推送到 Core main。moss-apps 子模块固定到此提交，Builder SDK 来源记录同步更新；签名门禁仍拒绝脏源码。
+- Core 对配置型 App 的 publisher、源码随包与安装校验支持已推送到 Core main。moss-apps 子模块固定到 `656b8ac244076cc0231cd394d1703212ea9f2335`，Builder SDK 来源记录同步更新；签名门禁仍拒绝脏源码。
 - 使用已有 `MOSS_APP_SIGNING_PRIVATE_KEY` Actions Secret、`publishers/moss/release-1.pem` 公钥及 GitHub Pages 配置；Core 客户端须含 Host API 3.9 的配置型 App 支持。
 - 本地验证覆盖真正的签名与重建、普通 App 回归及模拟 GitHub 发布重试。macOS Intel / Windows / Linux 托管 runner 和线上部署由首次 CI 运行验证。
 - 锁文件固定的是包内生成器与构建依赖。Draw.io 仍按配置运行 `npx -y @drawio/mcp`，实际启动时解析第三方服务版本；如需固定服务版本，应在 app.json 明确写入 npm 版本。
@@ -91,3 +91,5 @@ Actions → **Release Changed Apps** → **Run workflow**，默认 `dry_run=true
 发布恢复：ZIP 使用固定本地日历时间并验证跨时区字节一致；旧源码被 GitHub 拒绝创建 tag 时自动延后；Git/Filesystem MCP 集成测试使用生产环境相同的 Node 进程；原生验证保留真实截图与输入检查，并输出启动阶段日志。
 
 Git 与 Filesystem 的真实 MCP 集成测试由 Node test runner 执行，双方均运行编译后的 Node 代码；权限拒绝断言检查明确错误，连接超时不能算作隔离验证通过。
+
+Windows 原生验证改为启动可见测试窗口并等待 WinForms `Shown` 事件，保留窗口启动错误诊断。隔离 runner 已通过实际窗口截图、UI Automation 和中文输入；正式发布仍验证 Host 信任的原始签名包。
