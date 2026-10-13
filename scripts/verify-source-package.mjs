@@ -67,6 +67,12 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
         const byPath = new Map(actual.map(file => [file.path, file.sha256]))
         const changed = expected.filter(file => byPath.get(file.path) !== file.sha256).map(file => file.path)
         const added = actual.filter(file => !expected.some(before => before.path === file.path)).map(file => file.path)
+        for (const relative of changed) {
+          const destination = path.join(repoRoot, 'diagnostics', relative)
+          await fs.mkdir(path.dirname(destination), { recursive: true })
+          await fs.copyFile(path.join(root, relative), destination + '.shipped')
+          await fs.copyFile(path.join(output, relative), destination + '.rebuilt')
+        }
         throw new Error(`ZIP source rebuild does not match shipped runtime files: ${[...changed, ...added].slice(0, 20).join(', ')}`)
       }
     }
