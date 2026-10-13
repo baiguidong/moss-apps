@@ -1,3 +1,4 @@
+import { normalizeResult } from '../src/tool/result.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { WindowsApps } from '../src/native/windows-apps.mjs';
@@ -79,4 +80,17 @@ test('Windows refuses an observed HWND when its PID was recycled before observat
   const [app] = await service.listApps();
   await assert.rejects(service.invoke({ action: 'get_window_state', app: app.bundleId, window_id: '123' }, session), /不属于|进程已变化/);
   assert.equal(calls.some(c => c.name === 'get_window_state'), false);
+});
+
+test('discovery and status keep their data in the first normalized text block with timing metadata', async () => {
+  const { service, session } = fixture();
+  for (const action of ['list_apps', 'status']) {
+    const result = await service.invoke({ action }, session);
+    const normalized = normalizeResult({ ...result, structuredContent: { ...result.structuredContent, moss: { action, elapsed_ms: 1 } } });
+    assert.equal(normalized.content.length, 1);
+    const payload = JSON.parse(normalized.content[0].text);
+    assert.equal(payload.moss.action, action);
+    if (action === 'list_apps') { assert.equal(payload.apps.length, 1); assert.equal(typeof payload.apps[0].bundleId, 'string'); }
+    else assert.equal(payload.enabled, true);
+  }
 });
