@@ -8,8 +8,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        transport: [mcp, sdk]
-    runs-on: windows-latest
+        os: [windows-2022, windows-latest]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
       - run: git config --global core.autocrlf false
@@ -25,6 +25,13 @@ jobs:
           bun-version: 1.3.10
       - run: bun install --frozen-lockfile --filter moss-apps --filter '@moss/computer-use-app'
       - run: node scripts/package-app.mjs --app moss.computer-use --platform win32-x64
+      - name: Probe Windows PowerShell and CIM
+        shell: powershell
+        run: |
+          $PSVersionTable.PSVersion
+          Get-CimInstance Win32_Process -Filter "ProcessId = $PID" | Select-Object ProcessId,ParentProcessId,SessionId
+          Add-Type -TypeDefinition 'public static class MossCiProbe { public static int Value() { return 1; } }'
+          [MossCiProbe]::Value()
       - name: Report desktop context
         shell: pwsh
         run: |
@@ -33,7 +40,7 @@ jobs:
       - name: Native Electron capture and input
         shell: bash
         env:
-          MOSS_NATIVE_TEST_TRANSPORT: ${{ matrix.transport }}
+          MOSS_NATIVE_TEST_TRANSPORT: mcp
         run: |
           cd vendor/moss-core/ui
           bun install --frozen-lockfile

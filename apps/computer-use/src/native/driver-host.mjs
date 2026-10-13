@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
@@ -97,6 +98,12 @@ export class CuaDriverHost {
       const result = await this.client.callTool({ name, arguments: args }, undefined, { timeout: 30000, signal });
       console.error('DRIVER_CALL_DONE', name, Date.now() - started); return result;
     } catch (error) {
+      if (process.platform === 'win32') {
+        try {
+          const script = "Get-CimInstance Win32_Process | Where-Object { $_.Name -match '^(cua-driver|powershell|pwsh|csc|electron)' } | Select-Object Name,ProcessId,ParentProcessId,SessionId | ConvertTo-Json -Compress";
+          console.error('WINDOWS_PROCESS_DIAGNOSTIC', execFileSync('pwsh.exe', ['-NoProfile', '-NonInteractive', '-Command', script], { encoding: 'utf8', timeout: 5000, windowsHide: true }));
+        } catch (diagnosticError) { console.error('WINDOWS_DIAGNOSTIC_FAILED', diagnosticError.message); }
+      }
       throw new Error(`${name}: ${error?.message || String(error)}`, { cause: error });
     }
   }
