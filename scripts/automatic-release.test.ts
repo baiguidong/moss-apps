@@ -45,6 +45,8 @@ test('GitHub scan paginates and API failures fail closed', async () => {
   const failing = githubClient('test/apps', { token: '', fetchImpl: async () => new Response('', { status: 503 }) })
   await expect(failing.pages('/releases')).rejects.toThrow('HTTP 503')
   await expect(failing.request('https://example.com')).rejects.toThrow('Unexpected')
+  const denied = githubClient('test/apps', { token: '', fetchImpl: async () => Response.json({ message: 'Resource not accessible by integration' }, { status: 403 }) })
+  await expect(denied.request('/git/refs')).rejects.toMatchObject({ status: 403, message: expect.stringContaining('Resource not accessible') })
 })
 
 function fake() {
@@ -119,6 +121,24 @@ test('rejects foreign drafts and tags; does not publish over a newer release', a
 test('annotated tags resolve to commits', async () => {
   const client = { request: async route => route.startsWith('/git/ref') ? { object: { type: 'tag', sha: other } } : { object: { type: 'commit', sha } } }
   expect(await tagCommit(client, 'example')).toBe(sha)
+})
+test('defers denied historical tags to the next source batch without publishing or moving a tag', async () => {
+  const { client, state } = fake()
+  const original = client.request
+  const denied = Object.assign(new Error('tag denied'), { status: 403 })
+  let currentSha = other
+  client.request = async (route, options) => {
+    if (route === '/git/refs') throw denied
+    if (route === '') return { default_branch: 'main' }
+    if (route === '/commits/main') return { sha: currentSha }
+    return original(route, options)
+  }
+  expect(await publishRelease(client, request())).toMatchObject({ status: 'deferred', reason: 'source-advanced', currentSha: other })
+  expect(state.releases).toHaveLength(0)
+  expect(state.tag).toBeNull()
+  expect(state.uploads).toBe(0)
+  currentSha = sha
+  await expect(publishRelease(client, request())).rejects.toThrow('tag denied')
 })
 test('release asset validation rejects incomplete targets, changed bytes and wrong source commits', async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'release-assets-'))

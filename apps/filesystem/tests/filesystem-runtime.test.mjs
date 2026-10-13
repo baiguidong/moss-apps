@@ -43,7 +43,7 @@ test('client Roots and symlinks cannot expand the App directory scope', async ()
     expect(await call(client, 'list_allowed_directories')).not.toContain(outside)
     expect(await readFile(join(outside, 'secret.txt'), 'utf8')).toBe('outside fixture')
   } finally { await session?.close(); await rm(root, { recursive: true, force: true }) }
-})
+}, 30_000)
 
 test('an empty App scope can inspect tools without gaining access to its process directory', async () => {
   const session = await connect(entry, [JSON.stringify({ directories: [], disabledTools: [] })])

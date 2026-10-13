@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { execFileSync } from 'node:child_process'
-import { zipSync } from 'fflate'
+import { createDeterministicZip } from './archive.mjs'
 import os from 'node:os'
 import { verifySourceArchive } from './verify-source-package.mjs'
 import { exportAppSource, run } from './source-package.mjs'
@@ -25,8 +25,6 @@ import {
   validateRepositoryAppToolSchemas,
   writeJson,
 } from './lib.mjs'
-
-const FIXED_ZIP_TIME = new Date('1980-01-01T00:00:00.000Z')
 
 function signingKeyFromEnvironment() {
   const keyFile = String(process.env.MOSS_APP_SIGNING_PRIVATE_KEY_FILE || '').trim()
@@ -146,9 +144,9 @@ async function packageApp(app, options) {
   await verifyPackageDirectory(packageRoot, manifest, signatureMetadata)
   const zipEntries = {}
   for (const entry of await listFiles(packageRoot)) {
-    zipEntries[entry.relativePath] = [new Uint8Array(await fsp.readFile(entry.absolutePath)), { mtime: FIXED_ZIP_TIME }]
+    zipEntries[entry.relativePath] = new Uint8Array(await fsp.readFile(entry.absolutePath))
   }
-  const archive = Buffer.from(zipSync(zipEntries, { level: 9 }))
+  const archive = createDeterministicZip(zipEntries)
   const stem = `${manifest.id}-${manifest.version}${platform ? `-${platform}` : ''}`
   const fileName = `${stem}.zip`
   const zipPath = path.join(outputDir, fileName)

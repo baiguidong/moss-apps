@@ -57,7 +57,21 @@ export async function publishRelease(client, { appId, version, sourceSha, files,
   let commit = await tagCommit(client, tag)
   if (commit && commit !== sourceSha) throw new Error(`Tag ${tag} points to another commit`)
   if (!commit) {
-    await client.request('/git/refs', { method: 'POST', body: { ref: `refs/tags/${tag}`, sha: sourceSha } })
+    try {
+      await client.request('/git/refs', { method: 'POST', body: { ref: `refs/tags/${tag}`, sha: sourceSha } })
+    } catch (error) {
+      // GITHUB_TOKEN cannot tag an older commit whose workflows differ from
+      // the default branch. Let the queued push/scheduled batch rebuild the
+      // current source; never move the tag or publish bytes from another SHA.
+      if (error.status === 403 && !release) {
+        const repository = await client.request('')
+        const current = await client.request(`/commits/${encodeURIComponent(repository.default_branch)}`)
+        if (/^[a-f0-9]{40}$/.test(current.sha) && current.sha !== sourceSha) {
+          return { status: 'deferred', reason: 'source-advanced', tag, sourceSha, currentSha: current.sha }
+        }
+      }
+      throw error
+    }
   }
   if (!release) release = await client.request('/releases', { method: 'POST', body: {
     tag_name: tag, target_commitish: sourceSha, name: `${appId} v${version}`,
@@ -95,5 +109,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   const repository = optionValue(argv, '--repository') || process.env.GITHUB_REPOSITORY
   const client = githubClient(repository)
   const files = await collectReleaseAssets(app, path.join(repoRoot, 'artifacts', appId, version), sourceSha, repository)
-  console.log(JSON.stringify(await publishRelease(client, { appId, version, sourceSha, files, notes: releaseNotesForVersion(app.root, version) })))
+  const result = await publishRelease(client, { appId, version, sourceSha, files, notes: releaseNotesForVersion(app.root, version) })
+  console.log(JSON.stringify(result))
+  if (result.status === 'deferred' && process.env.GITHUB_STEP_SUMMARY) {
+    await fs.appendFile(process.env.GITHUB_STEP_SUMMARY, `\n${result.tag}: source advanced during the build; GitHub refused the old tag. The queued push or next scheduled batch will rebuild the current commit. No release was published.\n`)
+  }
 }
