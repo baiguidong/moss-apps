@@ -35,6 +35,7 @@ jobs:
         env:
           MOSS_NATIVE_TEST_TRANSPORT: mcp
         run: |
+          git -C vendor/moss-core apply "$GITHUB_WORKSPACE/windows-native-test.patch"
           cd vendor/moss-core/ui
           bun install --frozen-lockfile
           node node_modules/electron/cli.js tests/native-control.electron.mjs --package="$GITHUB_WORKSPACE/artifacts/moss.computer-use/0.2.1/package-win32-x64"

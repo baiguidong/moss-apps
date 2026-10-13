@@ -1,0 +1,38 @@
+diff --git a/ui/tests/native-control.electron.mjs b/ui/tests/native-control.electron.mjs
+index 18039f1c..657f4f71 100644
+--- a/ui/tests/native-control.electron.mjs
++++ b/ui/tests/native-control.electron.mjs
+@@ -87,6 +87,7 @@ void (async () => { try {
+   } else if (process.platform === 'win32') {
+     assert.equal(enabled.phase, 'ready', enabled.error);
+     const valueFile = path.join(root, 'windows-input.txt');
++    const readyFile = path.join(root, 'windows-ready.txt');
+     const script = `Add-Type -AssemblyName System.Windows.Forms
+ $form = New-Object System.Windows.Forms.Form
+ $form.Text = 'Moss Windows control test'
+@@ -99,9 +100,23 @@ $text.Top = 120
+ $text.Width = 540
+ $text.Add_TextChanged({ [System.IO.File]::WriteAllText('${valueFile.replaceAll("'", "''")}', $text.Text) })
+ $form.Controls.Add($text)
++$form.Add_Shown({ [System.IO.File]::WriteAllText('${readyFile.replaceAll("'", "''")}', 'ready') })
+ [System.Windows.Forms.Application]::Run($form)`;
+-    target = spawn(path.join(process.env.SystemRoot, 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoProfile', '-NonInteractive', '-STA', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')], { windowsHide: true, stdio: 'ignore' });
+-    await new Promise((resolve, reject) => { target.once('error', reject); setTimeout(resolve, 3000); });
++    progress('windows-target-ready');
++    // This fixture needs a visible UIA window. Cold PowerShell/WinForms startup
++    // can exceed a fixed delay, so wait for the actual Shown event instead.
++    let targetError;
++    let targetOutput = '';
++    target = spawn(path.join(process.env.SystemRoot, 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoProfile', '-NonInteractive', '-STA', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')], { windowsHide: false, stdio: ['ignore', 'pipe', 'pipe'] });
++    target.once('error', error => { targetError = error; });
++    for (const stream of [target.stdout, target.stderr]) stream.on('data', chunk => { targetOutput = (targetOutput + chunk.toString()).slice(-8000); });
++    const readyDeadline = Date.now() + 30000;
++    while (await fs.readFile(readyFile, 'utf8').catch(() => '') !== 'ready') {
++      if (targetError) throw targetError;
++      assert.equal(target.exitCode, null, `Windows test window exited: ${targetOutput}`);
++      assert.ok(Date.now() < readyDeadline, `Windows test window did not become visible: ${targetOutput}`);
++      await new Promise(resolve => setTimeout(resolve, 100));
++    }
+     const appsResult = await invoke({ action: 'list_apps' });
+     const apps = JSON.parse(appsResult.content.find(c => c.type === 'text').text).apps;
+     const targetApp = apps.find(a => a.running && /powershell\.exe/i.test(a.name));
