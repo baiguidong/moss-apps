@@ -78,8 +78,12 @@ export class CuaDriverHost {
     }
   }
   async call(name, args = {}, signal) {
-    await this.start();
-    return this.client.callTool({ name, arguments: args }, undefined, { timeout: 30000, signal });
+    try {
+      await this.start();
+      return await this.client.callTool({ name, arguments: args }, undefined, { timeout: 30000, signal });
+    } catch (error) {
+      throw new Error(`${name}: ${error?.message || String(error)}`, { cause: error });
+    }
   }
   async stop() {
     if (this.stopping) return this.stopping;
