@@ -38,7 +38,7 @@ jobs:
       - run: bun run test
       - name: Verify signed configuration App release in an isolated fixture
         run: node scripts/verify-release-smoke.mjs
-      - run: bun run build
+      - run: node scripts/run-apps.mjs build --supported-platform linux-x64
       - name: Install browser for developer tools checks
         working-directory: apps/devtools
         run: bun x playwright install --with-deps chromium
@@ -55,9 +55,9 @@ jobs:
         working-directory: apps/audit
         run: bun run test:browser
       - name: Package exact source snapshots and verify final archives
-        run: bun run package
+        run: node scripts/package-app.mjs --supported-platform linux-x64
       - name: Rebuild installed source without repository dependencies
-        run: node scripts/verify-source-package.mjs --rebuild
+        run: node scripts/verify-source-package.mjs --rebuild --supported-platform linux-x64
       - name: Verify Audit package with the pinned Core Host
         run: node apps/audit/scripts/verify-package.mjs
       - name: Verify Workflow package with the pinned Core Host
@@ -73,7 +73,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-14, macos-15-intel, windows-latest]
+        include:
+          - os: macos-14
+            platform: darwin-arm64
+          - os: macos-15-intel
+            platform: darwin-x64
+          - os: windows-latest
+            platform: win32-x64
     runs-on: ${{ matrix.os }}
     steps:
       - name: Preserve source bytes on every platform
@@ -98,5 +104,7 @@ jobs:
         with:
           name: source-packages
           path: artifacts
+      - name: Build native packages on their supported desktop platform
+        run: node scripts/package-app.mjs --platform-packages --supported-platform ${{ matrix.platform }}
       - name: Verify source rebuild and packaged Backend on each desktop platform
-        run: node scripts/verify-source-package.mjs --rebuild
+        run: node scripts/verify-source-package.mjs --rebuild --supported-platform ${{ matrix.platform }}

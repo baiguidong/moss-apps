@@ -176,12 +176,16 @@ export function listApps({ root: repositoryRoot = repoRoot, onError } = {}) {
 export function selectApps(argv = process.argv.slice(2)) {
   const selector = optionValue(argv, '--app') || optionValue(argv, '--app-id')
   const errors = []
-  const apps = listApps(selector ? { onError: error => errors.push(error) } : {})
-  if (!selector) return apps
-  const selected = apps.filter((app) => app.manifest.id === selector || app.directoryName === selector)
-  if (selected.length > 1) throw new Error(`Ambiguous App selector: ${selector}; use the App id`)
-  if (!selected.length) throw new Error(`Unknown or invalid App: ${selector}. ${errors.filter(e => e.appId === selector || path.basename(path.dirname(e.path)) === selector).map(e => e.error).join('; ')}`)
-  return selected
+  let apps = listApps(selector ? { onError: error => errors.push(error) } : {})
+  if (selector) {
+    apps = apps.filter((app) => app.manifest.id === selector || app.directoryName === selector)
+    if (apps.length > 1) throw new Error(`Ambiguous App selector: ${selector}; use the App id`)
+    if (!apps.length) throw new Error(`Unknown or invalid App: ${selector}. ${errors.filter(e => e.appId === selector || path.basename(path.dirname(e.path)) === selector).map(e => e.error).join('; ')}`)
+  }
+  if (hasOption(argv, '--platform-packages')) apps = apps.filter(app => app.manifest.platforms?.length)
+  const target = optionValue(argv, '--supported-platform')
+  if (target) apps = apps.filter(app => !app.manifest.platforms || app.manifest.platforms.includes(target))
+  return apps
 }
 
 export async function listFiles(root, options = {}) {

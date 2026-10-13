@@ -70,7 +70,7 @@ Actions → **Release Changed Apps** → **Run workflow**，默认 `dry_run=true
 
 ## 上线前提与验证边界
 
-- Core 对配置型 App 的 publisher、源码随包与安装校验支持已提交到 `b8517d8757f768cac155bb86ef70c54b10bb4429`，并推送到 Core main。moss-apps 子模块固定到此提交，Builder SDK 来源记录同步更新；签名门禁仍拒绝脏源码。
+- Core 对配置型 App 的 publisher、源码随包与安装校验支持已提交到 `da234bfedf66105ccbf74b640b020cd1e4abbc07`，并推送到 Core main。moss-apps 子模块固定到此提交，Builder SDK 来源记录同步更新；签名门禁仍拒绝脏源码。
 - 使用已有 `MOSS_APP_SIGNING_PRIVATE_KEY` Actions Secret、`publishers/moss/release-1.pem` 公钥及 GitHub Pages 配置；Core 客户端须含 Host API 3.9 的配置型 App 支持。
 - 本地验证覆盖真正的签名与重建、普通 App 回归及模拟 GitHub 发布重试。macOS Intel / Windows / Linux 托管 runner 和线上部署由首次 CI 运行验证。
 - 锁文件固定的是包内生成器与构建依赖。Draw.io 仍按配置运行 `npx -y @drawio/mcp`，实际启动时解析第三方服务版本；如需固定服务版本，应在 app.json 明确写入 npm 版本。
@@ -83,3 +83,5 @@ Actions → **Release Changed Apps** → **Run workflow**，默认 `dry_run=true
 - 普通 App `moss.sequential-thinking`：检查、5 项业务测试、打包、Backend 握手和 ZIP 独立重建通过。
 - 四个相关 Actions workflow 通过 actionlint；冻结锁文件安装通过。
 - 只读扫描 GitHub 得到 20 个待发布 App，包含 Draw.io；计划保存在 `artifacts/automatic-release/plan.json`。日志保存在同目录。该记录来自首次本地验证；线上发布状态以 Actions 为准。
+
+2026-10-13 发布跟进：普通 CI 按 `--supported-platform` 区分通用包与原生包；电脑操控在 macOS/Windows runner 构建，Linux 继续检查全部 App 的类型与业务测试。Core 全量桌面测试通过 1170 项及 24 项 Node 测试。

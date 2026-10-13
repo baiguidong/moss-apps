@@ -213,5 +213,5 @@ const options = {
   platform: optionValue(argv, '--platform'),
 }
 const apps = selectApps(argv)
-if (!apps.length) throw new Error('No Apps found under apps/')
+if (!apps.length && !hasOption(argv, '--platform-packages')) throw new Error('No matching Apps found')
 for (const app of apps) await packageApp(app, options)

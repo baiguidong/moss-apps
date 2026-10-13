@@ -44,3 +44,10 @@ test('MCP source snapshot contains its shared generator and a focused locked wor
     expect(lock.workspaces[spec.appRoot].version).toBe('0.1.4')
   } finally { await fs.rm(root, { recursive: true, force: true }) }
 })
+
+test('platform jobs include universal Apps and build native packages only on supported hosts', () => {
+  expect(selectApps(['--supported-platform', 'linux-x64']).some(app => app.manifest.id === 'moss.computer-use')).toBe(false)
+  expect(selectApps(['--supported-platform', 'linux-x64']).some(app => app.manifest.id === 'moss.drawio')).toBe(true)
+  expect(selectApps(['--platform-packages', '--supported-platform', 'darwin-arm64']).map(app => app.manifest.id)).toContain('moss.computer-use')
+  expect(selectApps(['--platform-packages', '--supported-platform', 'linux-x64'])).toHaveLength(0)
+})
