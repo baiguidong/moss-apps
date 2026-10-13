@@ -37,8 +37,8 @@ function fixture({ checks = ['ax_capability', 'screen_capture_capability'], reus
   } });
   const host = { supported: true, client: {}, connection: { pid: 7, driverVersion: '0.34.0' }, async call(name, args) {
     calls.push({ name, args });
-    const data = name === 'check_permissions' ? { elevated: false, integrity_level: 'Medium', uia: true, post_message: true }
-      : name === 'health_report' ? { checks: checks.map(name => ({ name, status: 'pass' })) }
+    if (name === 'check_permissions') throw new Error('Legacy PowerShell integrity diagnostics are unavailable');
+    const data = name === 'health_report' ? { checks: checks.map(name => ({ name, status: 'pass' })) }
       : name === 'list_apps' ? { apps: [{ pid: 42, running: true, kind: 'desktop', name: 'Editor' }] }
       : name === 'list_windows' ? { windows: [{ pid: 42, window_id: 123 }] }
       : name === 'get_window_state' ? { snapshot_id: 's00000001', elements: [{ element_token: 's00000001:1' }] } : {};
@@ -51,12 +51,17 @@ function fixture({ checks = ['ax_capability', 'screen_capture_capability'], reus
 test('Windows uses live UIA/capture probes and authenticated embedded connection, without TCC', async () => {
   const { service, calls } = fixture();
   const status = await service.check();
-  assert.equal(status.phase, 'ready'); assert.equal(status.permissions.elevated, false);
+  assert.equal(status.phase, 'ready');
+  assert.equal(Object.hasOwn(status.permissions, 'elevated'), false);
+  assert.equal(calls.some(c => c.name === 'check_permissions'), false);
   assert.equal(status.permissions.hostIdentity, true);
   assert.deepEqual(calls.find(c => c.name === 'health_report').args.include, ['ax_capability', 'screen_capture_capability']);
   const failed = fixture({ checks: ['ax_capability'] });
   assert.equal((await failed.service.check()).phase, 'error');
   await assert.rejects(failed.service.invoke({ action: 'list_apps' }, failed.session), /屏幕捕获/);
+  const noUia = fixture({ checks: ['screen_capture_capability'] });
+  assert.equal((await noUia.service.check()).permissions.accessibility, false);
+  await assert.rejects(noUia.service.invoke({ action: 'list_apps' }, noUia.session), /UI Automation/);
 });
 test('Windows authorizes the discovered executable, dispatches UIA expand, and consumes snapshots', async () => {
   const { service, session, calls, grants } = fixture();

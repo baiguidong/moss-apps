@@ -42,7 +42,10 @@ export class ComputerUseService {
       this.phase = 'starting'; this.error = ''; this.changed();
       try {
         if (restart) { await this.host.stop(); this.captureVerified = false; }
-        const p = structured(await this.host.call('check_permissions'));
+        // Windows has no TCC grants. Its check_permissions tool starts legacy
+        // PowerShell for optional integrity metadata and reports UIA as a
+        // constant; readiness must use the actual capability probes below.
+        const p = this.platform === 'win32' ? null : structured(await this.host.call('check_permissions'));
         if (epoch !== this.epoch) return this.status();
         const health = structured(await this.host.call('health_report', { include: this.platform === 'win32' ? ['ax_capability', 'screen_capture_capability'] : ['bundle_identity'] }));
         if (epoch !== this.epoch) return this.status();
@@ -51,9 +54,8 @@ export class ComputerUseService {
           // ID before handing us the transport; Windows has no TCC attribution.
           const identityOk = Number(this.host.connection?.pid) > 0 && this.host.connection?.driverVersion === CUA_VERSION;
           this.permissions = { hostIdentity: identityOk,
-            accessibility: p.uia === true && health.checks?.some(c => c.name === 'ax_capability' && c.status === 'pass'),
-            screenRecording: health.checks?.some(c => c.name === 'screen_capture_capability' && c.status === 'pass') === true,
-            elevated: p.elevated === true, integrityLevel: p.integrity_level || 'unknown' };
+            accessibility: health.checks?.some(c => c.name === 'ax_capability' && c.status === 'pass') === true,
+            screenRecording: health.checks?.some(c => c.name === 'screen_capture_capability' && c.status === 'pass') === true };
           if (!identityOk) throw new Error('Windows 驱动身份检查未通过，请重新检查。');
           this.phase = this.permissions.accessibility && this.permissions.screenRecording ? 'ready' : 'error';
           if (this.phase !== 'ready') this.error = 'Windows UI Automation 或屏幕捕获不可用，请确认当前桌面已登录并解锁。';
