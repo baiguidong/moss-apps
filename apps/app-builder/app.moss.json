@@ -1,11 +1,17 @@
 {
   "schemaVersion": 2,
   "id": "moss.app-builder",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "displayName": "应用构建",
+  "category": "development",
+  "keywords": [
+    "App",
+    "开发",
+    "迭代"
+  ],
   "description": "在普通会话里创建、预览和迭代自己的 App。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.0.0",
+  "hostApi": "^3.6.0",
   "ui": {
     "entry": "dist/ui/index.html",
     "window": {
@@ -68,6 +74,13 @@
         "route": "#/projects",
         "icon": "blocks",
         "order": 230
+      },
+      {
+        "id": "moss-settings",
+        "title": "通用设置",
+        "route": "#/moss-settings",
+        "icon": "settings",
+        "order": -1000
       }
     ],
     "tools": [
@@ -135,6 +148,15 @@
           ]
         }
       }
+    ],
+    "settings": [
+      {
+        "id": "shared-settings",
+        "title": "通用设置",
+        "viewId": "moss-settings",
+        "group": "apps",
+        "order": -1000
+      }
     ]
   },
   "host": {
@@ -146,5 +168,10 @@
   "publisher": {
     "id": "moss",
     "name": "Moss"
+  },
+  "toolScope": "session",
+  "navigation": {
+    "location": "more",
+    "viewId": "home"
   }
 }

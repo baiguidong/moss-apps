@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.self-test",
+  "summary": "AI 操作独立 Moss 测试实例，生成实际观察与截图报告。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "license": "MIT"
+}

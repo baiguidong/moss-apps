@@ -2,7 +2,6 @@ import { useState, type FormEvent } from 'react'
 import { ArrowRight, ChevronDown, Eye, EyeOff, Globe2, KeyRound, Loader2, Plus, Radio, Terminal, Trash2 } from 'lucide-react'
 import type { McpConfig, McpServer, SaveInput, Transport } from '../contracts'
 import { Dialog } from './dialog'
-import { PLAYWRIGHT_VERSION } from '../builtins'
 type Row = { id: string; key: string; value: string; saved?: boolean }
 const row = (key = '', value = '', saved = false): Row => ({ id: crypto.randomUUID(), key, value, saved })
 function Values({ title, rows, onChange }: { title: string; rows: Row[]; onChange: (rows: Row[]) => void }) {
@@ -13,12 +12,11 @@ function Values({ title, rows, onChange }: { title: string; rows: Row[]; onChang
   </div>
 }
 export function ServerEditor({ server, onClose, onSave }: { server?: McpServer; onClose: () => void; onSave: (input: SaveInput) => Promise<void> }) {
-  const bundled = Boolean(server?.bundled)
   const [name, setName] = useState(server?.name || '')
   const [transport, setTransport] = useState<Transport>(server?.config.type || 'http')
   const [url, setUrl] = useState(server?.config.url || '')
   const [command, setCommand] = useState(server?.config.command || '')
-  const [args, setArgs] = useState(server?.config.args?.slice(bundled ? 1 : 0).join('\n') || '')
+  const [args, setArgs] = useState(server?.config.args?.join('\n') || '')
   const [env, setEnv] = useState<Row[]>(() => Object.keys(server?.config.env || {}).map(key => row(key, '', !server?.credentialsMissing)))
   const [headers, setHeaders] = useState<Row[]>(() => Object.keys(server?.config.headers || {}).map(key => row(key, '', !server?.credentialsMissing)))
   const [clientId, setClientId] = useState(String(server?.config.oauth?.clientId || ''))
@@ -39,7 +37,7 @@ export function ServerEditor({ server, onClose, onSave }: { server?: McpServer; 
     try {
       if (transport === 'stdio') {
         if (!command.trim()) throw new Error('请填写启动命令。')
-        Object.assign(config, { command: command.trim(), args: [...(bundled ? [server!.config.args![0]] : []), ...args.split('\n').map(v => v.trim()).filter(Boolean)], env: records(env) })
+        Object.assign(config, { command: command.trim(), args: [...args.split('\n').map(v => v.trim()).filter(Boolean)], env: records(env) })
       } else {
         let address: URL
         try { address = new URL(url.trim()) } catch { throw new Error('请填写有效的服务地址。') }
@@ -59,10 +57,10 @@ export function ServerEditor({ server, onClose, onSave }: { server?: McpServer; 
   return <Dialog title={server ? '编辑连接' : '添加 MCP 服务'} description={server ? '更新连接信息，保留已有的工具与授权配置。' : '选择连接方式，接入你需要的工具。'} onClose={onClose} busy={busy}>
     <form onSubmit={save}><div className="editor-scroll"><fieldset disabled={busy} className="editor-body">
       <span className="field-heading">连接方式</span><div className="transport-choices" role="group" aria-label="连接方式">
-        {([{ id: 'http', label: 'HTTP', description: '远程服务', icon: Globe2 }, { id: 'stdio', label: '本地进程', description: '命令行启动', icon: Terminal }, { id: 'sse', label: 'SSE', description: '兼容旧服务', icon: Radio }] as const).map(item => <button type="button" disabled={bundled} key={item.id} className={transport === item.id ? 'transport active' : 'transport'} aria-pressed={transport === item.id} onClick={() => setTransport(item.id)}><item.icon size={19} /><strong>{item.label}</strong><small>{item.description}</small></button>)}
+        {([{ id: 'http', label: 'HTTP', description: '远程服务', icon: Globe2 }, { id: 'stdio', label: '本地进程', description: '命令行启动', icon: Terminal }, { id: 'sse', label: 'SSE', description: '兼容旧服务', icon: Radio }] as const).map(item => <button type="button" key={item.id} className={transport === item.id ? 'transport active' : 'transport'} aria-pressed={transport === item.id} onClick={() => setTransport(item.id)}><item.icon size={19} /><strong>{item.label}</strong><small>{item.description}</small></button>)}
       </div>
-      <label className="field"><span>服务名称 <small>必填</small></span><input readOnly={server?.builtin} value={name} onChange={e => setName(e.target.value)} placeholder="例如 design-library" autoComplete="off" spellCheck={false} maxLength={64} /><small>{server?.builtin ? '内置服务名称固定，可修改配置或停用服务。' : '用于识别连接及其工具，建议使用简短的英文名称。'}</small></label>
-      {transport === 'stdio' ? <>{bundled ? <p className="config-hint">Playwright MCP {PLAYWRIGHT_VERSION} 随应用提供，无需安装 Node.js、npm 或联网下载。</p> : <label className="field"><span>启动命令 <small>必填</small></span><input value={command} onChange={e => setCommand(e.target.value)} placeholder="例如 npx、uvx 或可执行文件路径" autoComplete="off" spellCheck={false} /></label>}<label className="field"><span>启动参数</span><textarea value={args} onChange={e => setArgs(e.target.value)} placeholder={'每行一个参数\n-y\n@modelcontextprotocol/server-filesystem\n~/workspace'} spellCheck={false} rows={4} /><small>每行一个参数；路径支持 ~/，例如 ~/.moss/artifacts/playwright。启动时会展开为当前用户目录，无需加引号。</small></label><Values title="环境变量" rows={env} onChange={setEnv} /></> : <><label className="field"><span>服务地址 <small>必填</small></span><input value={url} onChange={e => setUrl(e.target.value)} placeholder={transport === 'http' ? 'https://example.com/mcp' : 'https://example.com/sse'} autoComplete="off" spellCheck={false} /></label><Values title="请求头" rows={headers} onChange={setHeaders} /></>}
+      <label className="field"><span>服务名称 <small>必填</small></span><input value={name} onChange={e => setName(e.target.value)} placeholder="例如 design-library" autoComplete="off" spellCheck={false} maxLength={64} /><small>用于识别连接及其工具，建议使用简短的英文名称。</small></label>
+      {transport === 'stdio' ? <>{<label className="field"><span>启动命令 <small>必填</small></span><input value={command} onChange={e => setCommand(e.target.value)} placeholder="例如 npx、uvx 或可执行文件路径" autoComplete="off" spellCheck={false} /></label>}<label className="field"><span>启动参数</span><textarea value={args} onChange={e => setArgs(e.target.value)} placeholder={'每行一个参数\n-y\n@modelcontextprotocol/server-filesystem\n~/workspace'} spellCheck={false} rows={4} /><small>每行一个参数；路径支持 ~/，例如 ~/.moss/artifacts/playwright。启动时会展开为当前用户目录，无需加引号。</small></label><Values title="环境变量" rows={env} onChange={setEnv} /></> : <><label className="field"><span>服务地址 <small>必填</small></span><input value={url} onChange={e => setUrl(e.target.value)} placeholder={transport === 'http' ? 'https://example.com/mcp' : 'https://example.com/sse'} autoComplete="off" spellCheck={false} /></label><Values title="请求头" rows={headers} onChange={setHeaders} /></>}
       <details className="advanced"><summary><ChevronDown size={15} />高级选项<span>工具与授权</span></summary><div>
         {transport !== 'stdio' && <div className="oauth-fields"><label className="field"><span>OAuth Client ID</span><input value={clientId} onChange={e => setClientId(e.target.value)} placeholder="服务要求时填写" /></label><label className="field"><span>OAuth 回调地址</span><input value={redirectUri} onChange={e => setRedirectUri(e.target.value)} placeholder="通常留空，使用自动发现" /></label></div>}
         <label className="field"><span>不启用的工具</span><textarea rows={2} value={disabledTools} onChange={e => setDisabledTools(e.target.value)} placeholder="每行一个工具名称，可留空" spellCheck={false} /></label>

@@ -1,0 +1,558 @@
+{
+  "type": "object",
+  "properties": {
+    "request": {
+      "description": "Exactly one operation. Include only parameters declared for its action.",
+      "oneOf": [
+        {
+          "description": "Read readiness, system permissions, authorized apps and current control owner. No other parameters.",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "const": "status"
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Discover applications, exact bundleId and running state.",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "const": "list_apps"
+            },
+            "query": {
+              "description": "Case-insensitive substring of application name or bundleId. Omit to list all discoverable desktop apps.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Launch a discovered application after application authorization; then list its windows.",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "const": "launch_app"
+            },
+            "app": {
+              "description": "Exact opaque bundleId returned by list_apps (macOS Bundle ID or Windows executable/launch identity); a unique exact application name is also accepted.",
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "action",
+            "app"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "List windows of a running application. Select the exact window_id for observation.",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "const": "list_windows"
+            },
+            "app": {
+              "description": "Exact opaque bundleId returned by list_apps (macOS Bundle ID or Windows executable/launch identity); a unique exact application name is also accepted.",
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "action",
+            "app"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Observe the exact window: fresh snapshot, accessibility elements, completeness metadata and optional screenshot (long edge at most 1440 pixels).",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "const": "get_window_state"
+            },
+            "app": {
+              "description": "Exact opaque bundleId returned by list_apps (macOS Bundle ID or Windows executable/launch identity); a unique exact application name is also accepted.",
+              "type": "string",
+              "minLength": 1
+            },
+            "window_id": {
+              "description": "Exact window_id from list_windows, kept as a decimal string.",
+              "type": "string",
+              "pattern": "^[1-9]\\d*$"
+            },
+            "query": {
+              "description": "Case-insensitive accessibility tree filter: matching rows plus ancestors, with unchanged identifiers. Does not guarantee an exhaustive tree walk.",
+              "type": "string"
+            },
+            "include_screenshot": {
+              "description": "Default true: screenshot plus accessibility elements. False returns accessibility only; pixel actions require another observation with a valid screenshot.",
+              "type": "boolean"
+            },
+            "max_elements": {
+              "description": "accessibility element budget: default 600, maximum 1500. Inspect truncated and elements_complete before concluding a control is absent.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1500
+            },
+            "max_depth": {
+              "description": "accessibility depth limit: default 25, maximum 40. Increase for deeply nested controls. The Host also limits the walk to 5 seconds.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 40
+            }
+          },
+          "required": [
+            "action",
+            "app",
+            "window_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Activate an accessibility element or click screenshot pixels. Requires element_token OR the pair x,y.",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "const": "click"
+            },
+            "app": {
+              "description": "Exact opaque bundleId returned by list_apps (macOS Bundle ID or Windows executable/launch identity); a unique exact application name is also accepted.",
+              "type": "string",
+              "minLength": 1
+            },
+            "window_id": {
+              "description": "Exact window_id from list_windows, kept as a decimal string.",
+              "type": "string",
+              "pattern": "^[1-9]\\d*$"
+            },
+            "snapshot_id": {
+              "description": "snapshot_id from the latest get_window_state for this window. Valid for one action and at most 60 seconds; observe again after each action or refusal.",
+              "type": "string",
+              "minLength": 1
+            },
+            "element_token": {
+              "description": "Exact element_token from the latest observation. Prefer an enabled element with appropriate role/actions. Use this token OR x AND y, never both addressing modes.",
+              "type": "string",
+              "pattern": "^s[0-9a-f]{8}:\\d+$"
+            },
+            "x": {
+              "description": "X in returned window screenshot pixels from the top-left corner. Supply y too; omit element_token. Do not use desktop coordinates or unconverted accessibility frame coordinates.",
+              "type": "number",
+              "minimum": 0
+            },
+            "y": {
+              "description": "Y in the same window screenshot pixels as x. Supply x too; omit element_token.",
+              "type": "number",
+              "minimum": 0
+            },
+            "foreground": {
+              "description": "Default false: best-effort background delivery. Set true only after fresh observation confirms background failure; Moss requests foreground authorization for this run.",
+              "type": "boolean"
+            },
+            "button": {
+              "description": "Default left. With an accessibility token, right requests the context menu; middle may require the pixel route.",
+              "type": "string",
+              "enum": [
+                "left",
+                "right",
+                "middle"
+              ]
+            },
+            "count": {
+              "description": "Pixel clicks only: 1 (default) or 2 for double-click. Omit for accessibility actions.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2
+            },
+            "ax_action": {
+              "description": "accessibility token only. Match an observed action (AXPress → press, AXShowMenu → show_menu); macOS default press; Windows default invoke, expand opens a dropdown. Use only platform-supported actions.",
+              "type": "string",
+              "enum": [
+                "press",
+                "show_menu",
+                "pick",
+                "confirm",
+                "cancel",
+                "open",
+                "invoke",
+                "expand"
+              ]
+            },
+            "modifier": {
+              "description": "Click modifiers, e.g. [\"shift\"]. Modified clicks may need foreground delivery; observe after refusal before requesting it.",
+              "maxItems": 5,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "cmd",
+                  "shift",
+                  "option",
+                  "alt",
+                  "ctrl",
+                  "fn",
+                  "win"
+                ]
+              }
+            }
+          },
+          "required": [
+            "action",
+            "app",
+            "window_id",
+            "snapshot_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Insert text into a token-addressed field, pixel-focus a field and type, or use the already focused field. Use key actions for Return/Escape.",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "const": "type_text"
+            },
+            "app": {
+              "description": "Exact opaque bundleId returned by list_apps (macOS Bundle ID or Windows executable/launch identity); a unique exact application name is also accepted.",
+              "type": "string",
+              "minLength": 1
+            },
+            "window_id": {
+              "description": "Exact window_id from list_windows, kept as a decimal string.",
+              "type": "string",
+              "pattern": "^[1-9]\\d*$"
+            },
+            "snapshot_id": {
+              "description": "snapshot_id from the latest get_window_state for this window. Valid for one action and at most 60 seconds; observe again after each action or refusal.",
+              "type": "string",
+              "minLength": 1
+            },
+            "element_token": {
+              "description": "Exact element_token from the latest observation. Prefer an enabled element with appropriate role/actions. Use this token OR x AND y, never both addressing modes.",
+              "type": "string",
+              "pattern": "^s[0-9a-f]{8}:\\d+$"
+            },
+            "x": {
+              "description": "X in returned window screenshot pixels from the top-left corner. Supply y too; omit element_token. Do not use desktop coordinates or unconverted accessibility frame coordinates.",
+              "type": "number",
+              "minimum": 0
+            },
+            "y": {
+              "description": "Y in the same window screenshot pixels as x. Supply x too; omit element_token.",
+              "type": "number",
+              "minimum": 0
+            },
+            "foreground": {
+              "description": "Default false: best-effort background delivery. Set true only after fresh observation confirms background failure; Moss requests foreground authorization for this run.",
+              "type": "boolean"
+            },
+            "text": {
+              "description": "Insert at the cursor/selection; does not replace the whole field implicitly. Maximum 10000 characters; the driver may report a smaller safe chunk size.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 10000
+            }
+          },
+          "required": [
+            "action",
+            "app",
+            "window_id",
+            "snapshot_id",
+            "text"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Press one key in the exact window, optionally focusing an element or pixel-addressed field first.",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "const": "press_key"
+            },
+            "app": {
+              "description": "Exact opaque bundleId returned by list_apps (macOS Bundle ID or Windows executable/launch identity); a unique exact application name is also accepted.",
+              "type": "string",
+              "minLength": 1
+            },
+            "window_id": {
+              "description": "Exact window_id from list_windows, kept as a decimal string.",
+              "type": "string",
+              "pattern": "^[1-9]\\d*$"
+            },
+            "snapshot_id": {
+              "description": "snapshot_id from the latest get_window_state for this window. Valid for one action and at most 60 seconds; observe again after each action or refusal.",
+              "type": "string",
+              "minLength": 1
+            },
+            "element_token": {
+              "description": "Exact element_token from the latest observation. Prefer an enabled element with appropriate role/actions. Use this token OR x AND y, never both addressing modes.",
+              "type": "string",
+              "pattern": "^s[0-9a-f]{8}:\\d+$"
+            },
+            "x": {
+              "description": "X in returned window screenshot pixels from the top-left corner. Supply y too; omit element_token. Do not use desktop coordinates or unconverted accessibility frame coordinates.",
+              "type": "number",
+              "minimum": 0
+            },
+            "y": {
+              "description": "Y in the same window screenshot pixels as x. Supply x too; omit element_token.",
+              "type": "number",
+              "minimum": 0
+            },
+            "foreground": {
+              "description": "Default false: best-effort background delivery. Set true only after fresh observation confirms background failure; Moss requests foreground authorization for this run.",
+              "type": "boolean"
+            },
+            "key": {
+              "description": "One key: return, tab, escape, up/down/left/right, space, delete, home, end, pageup, pagedown, f1-f12, or a letter/digit.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "modifiers": {
+              "description": "Optional modifiers for this single key, e.g. [\"shift\"].",
+              "maxItems": 5,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "cmd",
+                  "shift",
+                  "option",
+                  "alt",
+                  "ctrl",
+                  "fn",
+                  "win"
+                ]
+              }
+            }
+          },
+          "required": [
+            "action",
+            "app",
+            "window_id",
+            "snapshot_id",
+            "key"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Send a keyboard chord. Delivered input is not proof of its effect; observe afterward.",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "const": "hotkey"
+            },
+            "app": {
+              "description": "Exact opaque bundleId returned by list_apps (macOS Bundle ID or Windows executable/launch identity); a unique exact application name is also accepted.",
+              "type": "string",
+              "minLength": 1
+            },
+            "window_id": {
+              "description": "Exact window_id from list_windows, kept as a decimal string.",
+              "type": "string",
+              "pattern": "^[1-9]\\d*$"
+            },
+            "snapshot_id": {
+              "description": "snapshot_id from the latest get_window_state for this window. Valid for one action and at most 60 seconds; observe again after each action or refusal.",
+              "type": "string",
+              "minLength": 1
+            },
+            "element_token": {
+              "description": "Exact element_token from the latest observation. Prefer an enabled element with appropriate role/actions. Use this token OR x AND y, never both addressing modes.",
+              "type": "string",
+              "pattern": "^s[0-9a-f]{8}:\\d+$"
+            },
+            "x": {
+              "description": "X in returned window screenshot pixels from the top-left corner. Supply y too; omit element_token. Do not use desktop coordinates or unconverted accessibility frame coordinates.",
+              "type": "number",
+              "minimum": 0
+            },
+            "y": {
+              "description": "Y in the same window screenshot pixels as x. Supply x too; omit element_token.",
+              "type": "number",
+              "minimum": 0
+            },
+            "foreground": {
+              "description": "Default false: best-effort background delivery. Set true only after fresh observation confirms background failure; Moss requests foreground authorization for this run.",
+              "type": "boolean"
+            },
+            "keys": {
+              "description": "Modifiers first, exactly one non-modifier last, e.g. [\"cmd\",\"a\"] or [\"cmd\",\"shift\",\"z\"]. Uses press_key key names.",
+              "minItems": 2,
+              "maxItems": 6,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              }
+            }
+          },
+          "required": [
+            "action",
+            "app",
+            "window_id",
+            "snapshot_id",
+            "keys"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Scroll a token/pixel-addressed region with wheel events, or the focused region with keys when no target is supplied. Target nested scrollers explicitly.",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "const": "scroll"
+            },
+            "app": {
+              "description": "Exact opaque bundleId returned by list_apps (macOS Bundle ID or Windows executable/launch identity); a unique exact application name is also accepted.",
+              "type": "string",
+              "minLength": 1
+            },
+            "window_id": {
+              "description": "Exact window_id from list_windows, kept as a decimal string.",
+              "type": "string",
+              "pattern": "^[1-9]\\d*$"
+            },
+            "snapshot_id": {
+              "description": "snapshot_id from the latest get_window_state for this window. Valid for one action and at most 60 seconds; observe again after each action or refusal.",
+              "type": "string",
+              "minLength": 1
+            },
+            "element_token": {
+              "description": "Exact element_token from the latest observation. Prefer an enabled element with appropriate role/actions. Use this token OR x AND y, never both addressing modes.",
+              "type": "string",
+              "pattern": "^s[0-9a-f]{8}:\\d+$"
+            },
+            "x": {
+              "description": "X in returned window screenshot pixels from the top-left corner. Supply y too; omit element_token. Do not use desktop coordinates or unconverted accessibility frame coordinates.",
+              "type": "number",
+              "minimum": 0
+            },
+            "y": {
+              "description": "Y in the same window screenshot pixels as x. Supply x too; omit element_token.",
+              "type": "number",
+              "minimum": 0
+            },
+            "foreground": {
+              "description": "Default false: best-effort background delivery. Set true only after fresh observation confirms background failure; Moss requests foreground authorization for this run.",
+              "type": "boolean"
+            },
+            "direction": {
+              "type": "string",
+              "enum": [
+                "up",
+                "down",
+                "left",
+                "right"
+              ]
+            },
+            "amount": {
+              "description": "Default 3. Wheel notches with a token or x,y; key repetitions without an element/pixel target.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "by": {
+              "description": "Default line (smaller step); page requests a larger step.",
+              "type": "string",
+              "enum": [
+                "line",
+                "page"
+              ]
+            }
+          },
+          "required": [
+            "action",
+            "app",
+            "window_id",
+            "snapshot_id",
+            "direction"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Set a supported accessibility value (slider, stepper, native field or select). Requires a token; no pixel/foreground mode. Use type_text for free-form web/Electron input.",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "const": "set_value"
+            },
+            "app": {
+              "description": "Exact opaque bundleId returned by list_apps (macOS Bundle ID or Windows executable/launch identity); a unique exact application name is also accepted.",
+              "type": "string",
+              "minLength": 1
+            },
+            "window_id": {
+              "description": "Exact window_id from list_windows, kept as a decimal string.",
+              "type": "string",
+              "pattern": "^[1-9]\\d*$"
+            },
+            "snapshot_id": {
+              "description": "snapshot_id from the latest get_window_state for this window. Valid for one action and at most 60 seconds; observe again after each action or refusal.",
+              "type": "string",
+              "minLength": 1
+            },
+            "element_token": {
+              "description": "Exact element_token from the latest observation. Prefer an enabled element with appropriate role/actions. Use this token OR x AND y, never both addressing modes.",
+              "type": "string",
+              "pattern": "^s[0-9a-f]{8}:\\d+$"
+            },
+            "value": {
+              "description": "Full accessibility value, or matching option label/value for a supported popup/select. Respect min/max. Empty string can clear a supported native text field.",
+              "type": "string",
+              "maxLength": 10000
+            }
+          },
+          "required": [
+            "action",
+            "app",
+            "window_id",
+            "snapshot_id",
+            "element_token",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Release this conversation's current control run and snapshots; conversation application grants remain. No other parameters.",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "const": "end_session"
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "required": [
+    "request"
+  ],
+  "additionalProperties": false
+}

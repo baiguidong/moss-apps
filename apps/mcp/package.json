@@ -1,6 +1,6 @@
 {
   "name": "@moss/mcp-app",
-  "version": "0.1.7",
+  "version": "0.1.10",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,10 +12,10 @@
   },
   "dependencies": {
     "@moss/app-sdk": "workspace:*",
-    "@playwright/mcp": "0.0.83",
     "lucide-react": "0.564.0",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "@moss/app-settings": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "1.58.2",

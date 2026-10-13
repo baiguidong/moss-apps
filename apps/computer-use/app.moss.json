@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.computer-use",
+  "version": "0.2.1",
+  "displayName": "电脑操控",
+  "category": "automation",
+  "keywords": [
+    "Computer Use",
+    "Cua",
+    "电脑操控",
+    "截图",
+    "辅助功能"
+  ],
+  "description": "读取并操作已授权的 Windows 和 Mac 应用，支持截图、辅助功能树、点击、输入和快捷键。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.6.0",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64"
+  ],
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1040,
+      "height": 780,
+      "resizable": true
+    }
+  },
+  "nativeAdapter": {
+    "kind": "desktop-control",
+    "apiVersion": 1,
+    "entry": "dist/native/entry.mjs"
+  },
+  "permissions": [
+    "desktop:control"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "control",
+        "title": "电脑操控",
+        "route": "#/",
+        "icon": "monitor"
+      },
+      {
+        "id": "moss-settings",
+        "title": "通用设置",
+        "route": "#/moss-settings",
+        "icon": "settings",
+        "order": -1000
+      }
+    ],
+    "settings": [
+      {
+        "id": "settings",
+        "title": "电脑操控设置",
+        "viewId": "control",
+        "group": "tools"
+      },
+      {
+        "id": "shared-settings",
+        "title": "通用设置",
+        "viewId": "moss-settings",
+        "group": "apps",
+        "order": -1000
+      }
+    ],
+    "tools": [
+      {
+        "id": "computer_use",
+        "title": "电脑操控",
+        "description": "Observe and interact with authorized Windows and macOS application windows using screenshots and accessibility elements. Discover and launch apps, inspect windows, activate controls, enter text, send keys and shortcuts, scroll, and set supported control values. Supports native and Electron apps, with best-effort background actions and explicit foreground fallback.",
+        "action": "computer_use",
+        "execution": "native",
+        "effect": "write",
+        "permission": "desktop:control",
+        "inputSchema": "schemas/computer-use.json",
+        "instructions": "assets/instructions.md"
+      }
+    ]
+  },
+  "navigation": {
+    "location": "settings",
+    "viewId": "control"
+  },
+  "host": {
+    "protocols": [
+      "moss.host/v1"
+    ]
+  }
+}

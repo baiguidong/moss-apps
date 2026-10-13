@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.memory",
+  "summary": "让 Moss 记住人物、项目和偏好，在后续对话中继续使用。",
+  "description": "在对话中创建、关联、搜索和删除记忆，通过 AntV G6 知识图谱直观查看人物、项目、偏好及其关系。支持节点详情、搜索筛选、列表和自动刷新，数据保存在本机。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/memory",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

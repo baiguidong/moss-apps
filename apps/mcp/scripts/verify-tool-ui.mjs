@@ -40,11 +40,8 @@ try {
   await installAppArchive(runtime, join(repo, 'artifacts/moss.mcp', manifest.version, `moss.mcp-${manifest.version}.zip`))
   const instance = (await runtime.listInstances('moss.mcp'))[0]
   const invoke = async (method, input = {}) => runtime.invoke('moss.mcp', instance.id, method, input, { timeoutMs: 65_000 })
-  const config = (await invoke('servers.list')).data.servers[0].config
-  if (process.env.MOSS_TEST_CDP_ENDPOINT) {
-    config.args[config.args.indexOf('--cdp-endpoint') + 1] = process.env.MOSS_TEST_CDP_ENDPOINT
-    assert.equal((await invoke('servers.save', { name: 'playwright-cdp', previousName: 'playwright-cdp', enabled: true, config })).ok, true)
-  }
+  const config = { type: 'stdio', command: process.execPath, args: [join(root, 'tests/tool-catalog-fixture.mjs')] }
+  assert.equal((await invoke('servers.save', { name: 'playwright-cdp', enabled: true, config })).ok, true)
   const pkg = await runtime.getActivePackage('moss.mcp')
   const appServer = createHttpServer(async (request, response) => {
     try {
@@ -67,16 +64,16 @@ try {
   await page.exposeFunction('invokeBackend', invoke)
   await page.addInitScript(({ instanceId }) => {
     window.mossApp = {
-      app: { getInfo: async () => ({ appearance: { themeMode: 'light', cssThemeId: 'default' } }), getInstallationState: async () => ({ installation: { enabled: true } }) },
+      app: { getInfo: async () => ({ appearance: { themeMode: 'light', cssThemeId: 'default' } }), getInstallationState: async () => ({ installation: { enabled: true } }), getStatus: async () => ({ state: 'running' }) },
       instances: { list: async () => [{ id: instanceId }], getStatus: async () => ({ state: 'running' }) },
-      actions: { invoke: (_id, method, input) => window.invokeBackend(method, input), cancel: async () => {} },
+      actions: { invoke: async (method, input) => ({ ok: true, result: await window.invokeBackend(method, input) }), cancel: async () => {} },
       events: { on: () => () => {} },
     }
   }, { instanceId: instance.id })
   await page.goto(`http://127.0.0.1:${appServer.address().port}`)
   await expect(page.getByRole('heading', { name: 'browser_click', exact: true })).toBeVisible({ timeout: 60_000 })
   const toolCount = host.toolCatalog('moss.mcp')[0].tools.length
-  assert.equal(toolCount, 25)
+  assert.equal(toolCount, 2)
   await expect(page.locator('.tool-row')).toHaveCount(toolCount)
   assert.equal(inspections, 1, 'first opening discovers once without clicking inspect')
   await mkdir(artifacts, { recursive: true })

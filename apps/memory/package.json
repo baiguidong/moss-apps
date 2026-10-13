@@ -1,0 +1,33 @@
+{
+  "name": "@moss/memory-app",
+  "version": "0.2.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "node scripts/build.mjs",
+    "check": "tsc --noEmit",
+    "test": "bun test src tests",
+    "test:browser": "playwright test"
+  },
+  "dependencies": {
+    "@antv/g6": "5.1.1",
+    "@modelcontextprotocol/server-memory": "2026.8.31",
+    "@moss/app-sdk": "workspace:*",
+    "lucide-react": "0.564.0",
+    "proper-lockfile": "4.1.2",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zod": "4.3.6",
+    "@moss/app-settings": "workspace:*"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "5.0.4",
+    "bun-types": "latest",
+    "typescript": "5.9.3",
+    "vite": "7.1.10"
+  }
+}

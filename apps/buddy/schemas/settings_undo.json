@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "receiptId": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "requestId": {
+      "type": "string",
+      "maxLength": 128
+    }
+  },
+  "required": [
+    "receiptId",
+    "requestId"
+  ]
+}

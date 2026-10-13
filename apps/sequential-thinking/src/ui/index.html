@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>分步思考设置</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main>
+    <section aria-labelledby="connection-title">
+      <div class="section-heading">
+        <div><h2 id="connection-title">服务状态</h2><p>为复杂任务提供步骤记录、修正和分支工具。</p></div>
+        <button id="refresh" type="button">刷新状态</button>
+      </div>
+      <div class="settings-group">
+        <div class="settings-row">
+          <div><h3>分步思考服务</h3><p id="status-detail">正在读取运行状态…</p></div>
+          <span id="status" class="badge" role="status" aria-live="polite">读取中</span>
+        </div>
+        <div class="settings-row">
+          <div><h3>使用范围</h3><p>启用且连接正常后，所有会话均可按需使用，无需单独选择 App。</p></div>
+          <span class="badge">全局</span>
+        </div>
+        <div class="settings-row">
+          <div><h3>连接检查</h3><p id="checked-at">尚未完成检查</p></div>
+          <button id="reconnect" type="button">重新连接</button>
+        </div>
+      </div>
+      <p id="error" class="error" role="alert" hidden></p>
+    </section>
+    <section aria-labelledby="tools-title">
+      <div class="section-heading"><div><h2 id="tools-title">可用工具</h2><p id="tool-count">连接完成后显示工具目录。</p></div></div>
+      <div id="tools" class="settings-group"><p class="empty">正在读取工具目录…</p></div>
+    </section>
+    <section aria-labelledby="usage-title">
+      <div class="section-heading"><h2 id="usage-title">使用说明</h2></div>
+      <div class="settings-group">
+        <div class="settings-row"><div><h3>按任务需要调用</h3><p>适合复杂排错、方案比较和规划。可在对话中说“用分步思考比较这两种方案”。</p></div></div>
+        <div class="settings-row"><div><h3>临时步骤记录</h3><p>步骤和分支仅保存在工具进程内，重启后清空。关闭设置页不会停止服务。</p></div></div>
+      </div>
+      <p class="footnote">在应用管理中启用或停用分步思考。</p>
+    </section>
+  </main>
+  <script type="module" src="./main.mjs"></script>
+</body>
+</html>

@@ -1,6 +1,5 @@
 import type { Page } from '@playwright/test'
 import type { Input, McpServer, Method, Tool } from '../src/contracts'
-import { withBuiltins } from '../src/builtins'
 
 /** Controlled Host responses for UI states; never installed in the App bundle. */
 export async function installHostFixture(page: Page, options: { holdInitialList?: boolean; failInitialList?: boolean; servers?: McpServer[]; inspectError?: string; holdInspection?: boolean; tools?: Tool[]; staleInspection?: boolean } = {}) {
@@ -34,13 +33,13 @@ export async function installHostFixture(page: Page, options: { holdInitialList?
         if (current?.updatedAt === server.updatedAt && current?.enabled === server.enabled) current.check = server.check
         if (options.staleInspection) server.updatedAt++
       }
-      return { ok: true, data: withBuiltins({ servers: snapshot }) }
+      return { ok: true, data: { servers: snapshot } }
     } else if (method === 'servers.set-enabled') {
       servers = servers.map(server => server.name === input.name ? { ...server, enabled: input.enabled!, updatedAt: Date.now(), check: null } : server)
     } else if (method === 'servers.remove') {
       servers = servers.filter(server => server.name !== input.name)
     }
-    return { ok: true, data: withBuiltins({ servers }) }
+    return { ok: true, data: { servers } }
   })
   await page.exposeFunction('mcpFixtureCancel', () => { cancellations++ })
   await page.addInitScript(() => {

@@ -28,7 +28,7 @@ async function setup() {
   await fs.copyFile(process.env.MOSS_HTTP_TEST_BACKEND!, path.join(source, 'main.mjs'))
   await fs.cp(path.resolve('schemas'), path.join(source, 'schemas'), { recursive: true })
   await fs.writeFile(path.join(source, 'app.moss.json'), JSON.stringify({
-    ...manifest, ui: undefined, icon: undefined, contributes: undefined,
+    ...manifest, ui: undefined, icon: undefined, contributes: undefined, navigation: undefined,
     backend: { ...manifest.backend, entry: 'main.mjs' },
   }))
   await writePackageChecksums(source)

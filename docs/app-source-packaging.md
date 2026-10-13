@@ -217,3 +217,7 @@ HTTP Client 仅为临时测试，按用户要求不纳入迁移或发布。迁�
 | 工作流 | [0.1.15](https://github.com/baiguidong/moss-apps/releases/tag/moss.workflow-v0.1.15) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38038959277) |
 
 应用市场索引：<https://baiguidong.github.io/moss-apps/v1/index.json>。所有本批版本的 `artifact.sourceIncluded` 为 `true`，格式为 v1，均提供签名 ZIP、SHA-256 和 release.json。历史版本及失败构建标签保持不变。
+
+## 配置型 MCP App 与统一发布
+
+`mcp-apps/<name>/app.json` 与资源也是可编辑源码。导出时补齐共享构建入口、临时 package.json、固定 Core 生成器与 Bun 锁文件，仍使用 v1 source descriptor、签名与独立重建校验。运行部分由 Core 内置 UI 承载；包内 source 不作为 Backend 运行。普通 App 和配置型 App 统一由版本检查 CI 发布，详见[自动发布规则](automatic-app-release.md)。

@@ -12,7 +12,7 @@ for (const app of apps) {
   if (!app.manifest.publisher) throw new Error(`${app.manifest.id} must declare a publisher`)
   for (const relativePath of [app.manifest.icon, app.manifest.ui?.entry, app.manifest.backend?.entry]) {
     if (!relativePath) continue
-    const absolutePath = path.join(app.root, relativePath)
+    const absolutePath = path.join(app.resourceRoot, relativePath)
     if (!fs.existsSync(absolutePath) && !relativePath.startsWith('dist/')) {
       throw new Error(`${app.manifest.id} references a missing file: ${relativePath}`)
     }

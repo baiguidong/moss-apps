@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "operation": {
+      "enum": [
+        "catalog",
+        "read"
+      ]
+    },
+    "domain": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "scope": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "target": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "key": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "query": {
+      "type": "string",
+      "maxLength": 200
+    }
+  },
+  "required": [
+    "operation"
+  ]
+}

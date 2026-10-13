@@ -1,6 +1,6 @@
 # Moss App SDK
 
-当前引用 SDK / Runtime `3.0.0`，全部 App 声明 `hostApi: "^3.0.0"`。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用 SDK 和 host-contracts workspace，仅维护接入说明和消费端回归测试。
+当前 SDK 为 3.4.0，新增 App 展示位置与设置分组；显式声明这些字段要求 Host API >=3.4.0。工具范围自 Host API 3.1.0 起支持。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用 SDK 和 host-contracts workspace，仅维护接入说明和消费端回归测试。
 
 App 可通过通用 `backend.host.request()` 使用 Desktop 提供的协议。Tasks/Execution 和 MCP 优先使用 `@moss/app-sdk/execution`、`@moss/app-sdk/mcp` 的 typed client，其类型和校验器来自同一份 host-contracts。仓库构建校验采用 Manifest 声明的最低 Host 版本；市场和安装阶段继续按实际运行的 Host 版本判断兼容性。详见 [MCP App](../apps/mcp/README.md)。
 
@@ -125,4 +125,14 @@ Trace App 使用 2.5 引入的 `moss.trace/v1` 协议，当前要求 Host API `^
 
 Workflow 使用通用 `moss.agent-execution/v1` 执行接口与 `moss.tasks/v1`、App 任务、`resourceProviders.listAction` 和 `composer.prepare`。Core 不包含 Workflow 引擎；定义、画布和调度位于 `apps/workflow`。
 
-Workflow 使用 `vendor/moss-core` 固定提交中的 SDK/Runtime 3.0 和 host-contracts。执行 `git submodule update --init --recursive` 后即可安装和构建，无需额外 SDK 补丁。
+Workflow 与其他 App 共享 `vendor/moss-core` 中的 SDK、Runtime 和 host-contracts。当前展示位置与工具范围能力使用 3.4 开发快照，来源摘要记录在 `apps/app-builder/assets/core-sdk-provenance.json`；发布时应固定到包含该能力的 Core 提交。
+
+## App 工具范围
+
+Manifest 根级 `toolScope` 为 `session`（默认）或 `global`，原生工具与 App 接入的所有 MCP 服务统一继承。session App 未被会话选择时不提供工具，global App 未选择时按需提供；选中后两者的全部可用工具在整个会话常驻，重启恢复有效。具体资源选择会自动加入 provider 所属 App。创建和转换按用途显式选择：分步思考这类启用后各会话可用的通用辅助能力使用 global，需要会话选择的专用能力使用 session；没有跨会话需求时仍默认 session，普通编辑保留原设置。无 UI 和导航位置不决定工具范围，启用、授权及连接要求始终有效。完整示例与 SDK 迁移要求见 [创建文档](https://github.com/baiguidong/moss/blob/main/ui/docs/app-authoring.md)。
+
+包含 `moss.host/v1 tools.scope.get/set` 的 Host 还支持 App 页面设置用户级范围覆盖。Manifest 是默认值，Host 按当前用户和 App 持久化实际选择，原生工具和全部 MCP 服务统一使用实际范围；不修改签名包。页面用 `tools.scope.get {}` 读取，用 `tools.scope.set {scope: "session" | "global" | null}` 保存或恢复默认。这两个方法仅允许 UI 调用，不能指定别的 App。忙碌会话保留当前轮工具范围，下一轮重建；显式从会话移除 App 仍即时撤销对应授权。
+
+## App 展示位置
+
+当前版本在 `app.moss.json` 根级声明 `navigation`，要求 Host API >=3.4.0。操作页使用 `more`，配置页使用 `settings` 并在 `contributes.settings` 中声明分组，纯后台使用 `none`。新建 App 必须按用途选择，仓库校验拒绝缺失声明；编辑与源码恢复保留原位置。飞书、电脑操控和分步思考均进入“设置 → Apps”；分步思考保留 `toolScope: "global"`，设置页提供状态与重连操作。具体契约与示例见 [Core 创建规则](https://github.com/baiguidong/moss/blob/main/ui/docs/app-authoring.md)。

@@ -37,10 +37,23 @@ describe('App Backend manifest', () => {
     expect(() => validateRepositoryAppManifest({ ...source, hostApi: 'invalid' })).toThrow()
   })
   it('advertises Host API 3 and rejects old UI contracts', () => {
-    expect(APP_HOST_API_VERSION).toBe('3.0.0')
+    expect(APP_HOST_API_VERSION).toBe('3.9.0')
     expect(validateAppManifest({ ...manifest(), hostApi: '^3.0.0' }).hostApi).toBe('^3.0.0')
     expect(() => validateAppManifest({ ...manifest(), hostApi: '^2.9.0' })).toThrow(/requires Host API/)
-    expect(() => validateAppManifest({ ...manifest(), hostApi: '^3.1.0' })).toThrow(/requires Host API/)
+    expect(() => validateAppManifest({ ...manifest(), hostApi: '^3.10.0' })).toThrow(/requires Host API/)
+  })
+
+  it('preserves App-wide scope in repository output and excludes older Hosts', () => {
+    for (const toolScope of ['session', 'global']) {
+      const source = { ...manifest(), hostApi: '^3.1.0', toolScope }
+      const result = validateRepositoryAppManifest(source)
+      expect(result.toolScope).toBe(toolScope)
+      expect(validateAppManifest(result).toolScope).toBe(toolScope)
+      expect(() => validateAppManifest(result, { hostApiVersion: '3.0.0' })).toThrow(/requires Host API/)
+      expect(() => validateRepositoryAppManifest({ ...source, hostApi: '^3.0.0' })).toThrow('3.1.0')
+    }
+    expect(() => validateAppManifest(validateRepositoryAppManifest(manifest()))).not.toThrow()
+    expect(() => validateRepositoryAppManifest({ ...manifest(), toolScope: 'tool' })).toThrow()
   })
 
   it('uses one Backend and accepts the legacy single declaration without retaining it', () => {

@@ -1,11 +1,19 @@
 {
   "schemaVersion": 2,
   "id": "moss.mcp",
-  "version": "0.1.7",
+  "version": "0.1.10",
   "displayName": "MCP 管理",
+  "category": "ai",
+  "keywords": [
+    "MCP",
+    "工具",
+    "集成",
+    "连接",
+    "自动化"
+  ],
   "description": "管理 MCP 服务连接，让常用工具融入对话。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.0.0",
+  "hostApi": "^3.8.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -85,19 +93,40 @@
         "route": "#/",
         "icon": "plug",
         "order": 220
+      },
+      {
+        "id": "moss-settings",
+        "title": "通用设置",
+        "route": "#/moss-settings",
+        "icon": "settings",
+        "order": -1000
       }
     ],
     "settings": [
       {
         "id": "manage",
         "title": "管理 MCP 连接",
-        "viewId": "connections"
+        "viewId": "connections",
+        "group": "integrations"
+      },
+      {
+        "id": "shared-settings",
+        "title": "通用设置",
+        "viewId": "moss-settings",
+        "group": "apps",
+        "order": -1000
       }
     ]
   },
   "host": {
     "protocols": [
-      "moss.mcp/v1"
+      "moss.mcp/v1",
+      "moss.host/v1"
     ]
-  }
+  },
+  "navigation": {
+    "location": "settings",
+    "viewId": "connections"
+  },
+  "toolSelection": "services"
 }

@@ -1,8 +1,17 @@
 # Moss Apps
 
-Moss 官方 App 的独立源码与发布仓库。每个 App 位于 `apps/<name>`，独立维护版本、源码、配置 Schema、资源与测试。
+Moss 官方 App 的独立源码与发布仓库。普通 App 位于 `apps/<name>`；配置型 MCP App 位于 `mcp-apps/<name>`，只维护定义和资源，由 Moss Core 提供公共 UI 与运行能力。两者共用自动发布与应用市场。
 
-当前应用：[开发工具](apps/devtools/README.md)、[网盘](apps/drive/README.md)、[知识库](apps/library/README.md)、[飞书](apps/feishu/README.md)、[OpenIM](apps/openim/README.md)、[MCP](apps/mcp/README.md)、[Trace](apps/trace/README.md)、[审计中心](apps/audit/README.md)、[工作流](apps/workflow/README.md)。
+当前 16 个 App 按主要用途分组：
+
+| 分类 | App |
+| --- | --- |
+| 沟通协作 `communication` | [飞书](apps/feishu/README.md)、[即时消息](apps/openim/README.md) |
+| 知识与文件 `knowledge` | [知识库](apps/library/README.md)、[网盘](apps/drive/README.md)、[文件系统](apps/filesystem/README.md) |
+| 自动化 `automation` | [工作流](apps/workflow/README.md)、[网页操控](apps/browser-use/README.md)、[电脑操控](apps/computer-use/README.md) |
+| AI 增强 `ai` | [记忆](apps/memory/README.md)、[分步思考](apps/sequential-thinking/README.md)、[MCP 管理](apps/mcp/README.md) |
+| 开发工具 `development` | [应用构建](apps/app-builder/README.md)、[开发工具](apps/devtools/README.md)、[Git 仓库](apps/git/README.md) |
+| 诊断与审计 `diagnostics` | [调用追踪](apps/trace/README.md)、[审计中心](apps/audit/README.md) |
 
 规划中的本地工具扩展见 [本地工具 App 选型与接入方案](docs/local-tool-apps-plan.md)，覆盖开发工具、HTTP 调试、图片和音视频处理。
 
@@ -10,11 +19,11 @@ Moss 官方 App 的独立源码与发布仓库。每个 App 位于 `apps/<name>`
 
 创建或修改 App 前，请阅读 Moss 主仓库维护的说明。只检出本仓库时，也可以直接通过以下 GitHub 链接查看：
 
-- [App 创建规范](https://github.com/baiguidong/moss/blob/main/assistants/app-builder/assistant.md)：创建流程、UI 与主题规范、Backend 生命周期、Host API 使用及自检要求。
+- [App 创建规范](https://github.com/baiguidong/moss/blob/main/ui/docs/app-authoring.md)：创建流程、UI 与主题规范、Backend 生命周期、Host API 使用及自检要求。
 - [App Runtime](https://github.com/baiguidong/moss/blob/main/ui/docs/app-runtime.md)：Manifest、安装包结构、配置与密钥、单进程运行约定。
 - [Host Capability API](https://github.com/baiguidong/moss/blob/main/ui/docs/app-host-capability-api.md)：Host 协议、权限声明与 Backend 调用方式。
 
-创建规范中的 `app_*` 工具用于 Moss 内置构建助手；在本仓库直接开发时，使用下文的本地开发和发布命令。
+[应用构建 App](apps/app-builder/README.md) 提供普通会话内的创建和编辑工具；在本仓库直接开发时，使用下文的本地开发和发布命令。App 工具范围在 Manifest 根级声明 `toolScope`，默认 `session`，所有原生和 MCP 工具继承。显式使用该字段要求 Host API >=3.1.0。
 
 ## 本地开发
 
@@ -44,20 +53,11 @@ artifacts/<app-id>/<version>/<app-id>-<version>.release.json
 
 ## 发布
 
-App 版本来自其 `app.moss.json`。发布标签格式为：
+`Release Changed Apps` 在 main 提交、每 6 小时检查或手动运行时，比较两个目录的版本与全部已发布 GitHub Releases。新 App / 更高版本自动校验、测试、构建、签名并发布；同版本跳过，落后版本提示，不自动提升版本。
 
-```text
-<app-id>-v<semver>
-```
+普通 App 的版本来自 `app.moss.json`（同步 package.json）；配置型 App 来自 `app.json`。发布标签仍为 `<app-id>-v<semver>`，由 CI 绑定被检查的提交自动创建。每个 App 独立执行，最后统一刷新一次市场。中断的草稿可重试，正式版本不可覆盖。
 
-例如：
-
-```bash
-git tag moss.feishu-v0.2.1
-git push origin moss.feishu-v0.2.1
-```
-
-`release-app.yml` 会校验、测试、构建并签名 App，将不可变 ZIP 上传到 GitHub Releases，然后把市场索引部署到 GitHub Pages：
+本地运行 `bun run release:plan` 只生成发布计划；Actions 手动运行默认 `dry_run=true`。完整规则、失败恢复及 Core 子模块上线前提见 [统一 App 自动发布](docs/automatic-app-release.md)。市场地址：
 
 - `https://baiguidong.github.io/moss-apps/v1/index.json`
 - `https://baiguidong.github.io/moss-apps/v1/apps/<app-id>.json`
@@ -96,6 +96,21 @@ apps/example/
 ```
 
 `marketplace.json` 只保存展示信息。版本、权限、Host API、下载地址和校验值由 CI 从 Manifest 与构建产物生成。
+
+### 分类与搜索
+
+每个 App 的 `app.moss.json` 必须显式设置一个 `category`，使用上表的固定英文标识；仅在确实不适合现有分类时使用 `other`。通过 `keywords` 声明相关别名和搜索词（最多 20 项，每项 1–40 字符）。例如：
+
+```json
+{
+  "category": "automation",
+  "keywords": ["浏览器", "Chrome", "Playwright"]
+}
+```
+
+`marketplace.json` 不再重复填写 `categories` 或 `keywords`。构建脚本从 Manifest 生成市场的 `category` 和 `keywords`，同时生成中文 `categories` 数组兼容旧客户端；残留的重复字段必须与 Manifest 一致，否则校验失败。市场索引使用仓库当前分类，可为旧发布记录补充展示分类；安装后使用包内 Manifest，旧包缺分类时显示“其他”。不得修改历史签名包，应在发布新版本时携带新分类。
+
+分类定义来自固定 Core SDK 的 Manifest Schema。变更 Schema 后先更新 SDK；本地联合开发可使用现有 `apps/app-builder/scripts/sync-core-sdk.mjs` 同步并记录快照，正式发布仍须固定已推送的 Core 提交。`bun run validate` 会校验全部 App 分类，打包时保留分类与关键词。创建、编辑、源码恢复与自检规则见 [App 创建规范：分类与搜索](https://github.com/baiguidong/moss/blob/main/ui/docs/app-authoring.md#分类与搜索)。
 
 ### 导航入口
 
@@ -144,7 +159,7 @@ App ZIP 与 Moss 桌面安装包分开。纯 JavaScript App 可以用同一个�
 
 SDK 源码只在 Moss Core 的 `packages/app-sdk` 维护。本仓库通过 Git 子模块 `vendor/moss-core` 固定引用 Core 提交，将其中的 SDK 纳入 Bun workspace；App 和构建脚本统一通过 `@moss/app-sdk` 包导入，不手工维护另一套 SDK。发布时由打包流程从固定提交自动导出所需 SDK、host-contracts 及本地构建依赖到源码快照，供该版本独立重建；这份不可变发布快照不是新的 SDK 维护分支。
 
-当前引用的 SDK 为 `3.0.0`，App 均要求 Host API `^3.0.0`；Tasks/Execution 与 MCP 的契约由同一 Core 提交中的 `packages/host-contracts` 提供。UI 使用 `@moss/app-sdk/ui` 自动绑定当前 App，普通调用不传实例 ID。通用文件、截图和外链使用 `moss.platform/v1`，审计中心使用 `moss.audit/v1`。接入方式见 [SDK 接入说明](docs/app-sdk.md)。SDK 会忽略 Manifest 的未知字段；本仓库的构建与发布校验仍会在规范化前拒绝 `backend.targets`、`backend.serverOwnerScope` 和 `moss.remote/v1` 声明。
+当前开发快照包含 Host API 3.9；各 App 按自身功能声明最低 Host 版本，配置型 MCP App 要求 `^3.9.0`。正式发布须将已推送的 Core 提交固定到子模块；Tasks/Execution 与 MCP 的契约由同一 Core 提交中的 `packages/host-contracts` 提供。UI 使用 `@moss/app-sdk/ui` 自动绑定当前 App，普通调用不传实例 ID。通用文件、截图和外链使用 `moss.platform/v1`，审计中心使用 `moss.audit/v1`。接入方式见 [SDK 接入说明](docs/app-sdk.md)。SDK 会忽略 Manifest 的未知字段；本仓库的构建与发布校验仍会在规范化前拒绝 `backend.targets`、`backend.serverOwnerScope` 和 `moss.remote/v1` 声明。
 
 初次检出使用 `git clone --recurse-submodules`，已有检出按上方命令初始化子模块。CI、App 发布和市场索引工作流都会检出相同的固定提交。
 
@@ -155,3 +170,7 @@ SDK 源码只在 Moss Core 的 `packages/app-sdk` 维护。本仓库通过 Git �
 SDK 会编入 App Backend；构建内容变化时应同步提升相应 App 的版本。未来发布 npm 包后，可以改为包版本依赖，App 的 import 无需改变。
 
 应用市场支持通过 `build-catalog.mjs --mirror-apps moss.library` 在目录同域托管指定 App 的签名 ZIP。构建目录时会验证原始 release 的大小与 SHA-256，只改分发地址，签名包和不可变 GitHub Release 保持原样。发布及手动目录部署使用同一配置；目前为知识库启用，以减少 GitHub 下载链路超时。
+
+## App 展示位置
+
+当前版本在 `app.moss.json` 根级声明 `navigation`，要求 Host API >=3.4.0。操作页使用 `more`，配置页使用 `settings` 并在 `contributes.settings` 中声明分组，纯后台使用 `none`。新建 App 必须按用途选择，仓库校验拒绝缺失声明；编辑与源码恢复保留原位置。飞书、电脑操控和分步思考均进入“设置 → Apps”；分步思考保留 `toolScope: "global"`，设置页提供状态与重连操作。具体契约与示例见 [Core 创建规则](https://github.com/baiguidong/moss/blob/main/ui/docs/app-authoring.md)。

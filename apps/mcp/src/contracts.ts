@@ -6,8 +6,8 @@ export type McpConfig = {
 }
 export type Tool = { name: string; description: string; disabled: boolean }
 export type ConnectionCheck = { state: 'connected' | 'needs-auth' | 'authorized' | 'unchecked' | 'failed'; tools: Tool[]; checkedAt: number; durationMs?: number; truncated?: boolean; error?: string; serverInfo?: { name: string; version: string } }
-export type McpServer = { name: string; enabled: boolean; config: McpConfig; updatedAt: number; builtin?: boolean; bundled?: boolean; credentialsMissing?: boolean; check?: ConnectionCheck | null }
-export type Catalog = { servers: McpServer[]; setupError?: string; resetSessionCount?: number; skippedBusySessionCount?: number }
+export type McpServer = { name: string; enabled: boolean; config: McpConfig; updatedAt: number; credentialsMissing?: boolean; check?: ConnectionCheck | null }
+export type Catalog = { servers: McpServer[]; resetSessionCount?: number; skippedBusySessionCount?: number }
 export type SaveInput = { name: string; previousName?: string; enabled: boolean; config: McpConfig }
 export const METHODS = ['servers.list', 'servers.save', 'servers.remove', 'servers.set-enabled', 'servers.inspect', 'auth.start', 'auth.clear'] as const
 export type Method = typeof METHODS[number]

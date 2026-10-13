@@ -3,21 +3,6 @@
   "appId": "moss.devtools",
   "summary": "时间戳、Base64、AES、JSON 与 HTTP 调试，一处完成。",
   "description": "本地开发工具，支持时间戳、Base64、AES 加解密、保留大整数精度的 JSON 处理，以及 HTTP 请求编辑、鉴权、响应查看和请求模板。HTTP 请求通过本机 Node 服务发送，可访问 localhost 与内网。跟随 Moss 外观。",
-  "categories": [
-    "开发工具",
-    "效率"
-  ],
-  "keywords": [
-    "时间戳",
-    "Base64",
-    "AES",
-    "JSON",
-    "格式化",
-    "本地工具",
-    "HTTP",
-    "API",
-    "接口调试"
-  ],
   "platforms": [
     "darwin-arm64",
     "darwin-x64",

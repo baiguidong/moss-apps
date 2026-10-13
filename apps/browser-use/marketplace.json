@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.browser-use",
+  "summary": "专用浏览器开箱即用，也可连接日常 Chrome。",
+  "description": "实际操作网页时才打开独立的专用浏览器，保留登录状态并复用同一个实例；可切换到日常 Chrome，通过扩展使用已有配置。在对话中完成网页导航、读取、截图和表单操作。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/browser-use",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

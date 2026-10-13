@@ -1,5 +1,4 @@
 import type { Catalog, Input, Method, McpServer } from '../contracts'
-import { BUILTIN_SERVERS, validateBuiltinAction, withBuiltins } from '../builtins'
 const now = Date.now()
 let servers: McpServer[] = [
   { name: 'design-library', enabled: true, updatedAt: now, config: { type: 'http', url: 'https://design.example.com/mcp', headers: { Authorization: '' } }, check: { state: 'connected', checkedAt: now, durationMs: 142, serverInfo: { name: 'Design Library', version: '1.2.0' }, tools: [
@@ -10,12 +9,10 @@ let servers: McpServer[] = [
   ] } },
   { name: 'workspace-files', enabled: true, updatedAt: now, config: { type: 'stdio', command: 'npx', args: ['-y', '@modelcontextprotocol/server-filesystem', '/workspace'] } },
   { name: 'team-notes', enabled: true, updatedAt: now, config: { type: 'http', url: 'https://notes.example.com/mcp' }, check: { state: 'needs-auth', tools: [], checkedAt: now } },
-  ...BUILTIN_SERVERS.map(server => ({ ...structuredClone(server), updatedAt: now })),
   { name: 'legacy-search', enabled: false, updatedAt: now, config: { type: 'sse', url: 'https://search.example.com/sse' } },
 ]
 export async function demoRequest(method: Method, input: Input): Promise<Catalog> {
   await new Promise(resolve => setTimeout(resolve, 160))
-  validateBuiltinAction(method, input)
   const item = servers.find(server => server.name === input.name)
   if (method === 'servers.save') {
     if (servers.some(server => server.name === input.name && server.name !== input.previousName)) throw new Error('已有同名服务。')
@@ -28,5 +25,5 @@ export async function demoRequest(method: Method, input: Input): Promise<Catalog
   else if (method === 'servers.inspect' && item) item.check = { state: 'connected', checkedAt: Date.now(), durationMs: 136, tools: item.check?.tools.length ? item.check.tools : [{ name: 'search', description: '搜索该服务提供的内容。', disabled: false }] }
   else if (method === 'auth.start' && item) item.check = { state: 'authorized', tools: [], checkedAt: Date.now() }
   else if (method === 'auth.clear' && item) item.check = null
-  return withBuiltins(structuredClone({ servers }))
+  return structuredClone({ servers })
 }

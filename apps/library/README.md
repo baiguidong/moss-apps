@@ -62,3 +62,5 @@ AI 仅注册 5 个工具：
 ## 发布验证
 
 审查修复和回归证据见 [REVIEW.md](REVIEW.md)。发布使用 `moss.library-v0.1.2` 标签触发 GitHub Actions，CI 在 Node 22 下运行测试、构建并签名 ZIP，再更新应用市场。
+
+本版本要求 Moss Host API >=3.4.0，展示入口为“更多” → 知识库。位置由 Manifest 声明；旧安装需要更新后生效。

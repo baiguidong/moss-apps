@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.buddy",
+  "version": "0.1.2",
+  "displayName": "Buddy 伴侣精灵",
+  "description": "孵化自己的宠物，和它聊天，了解 Moss 用法并管理桌面、Agent 与项目配置。",
+  "category": "ai",
+  "keywords": [
+    "宠物",
+    "精灵",
+    "陪伴",
+    "聊天",
+    "配置",
+    "使用手册"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.6.0",
+  "toolScope": "global",
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 620,
+      "height": 850
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "actions": [
+      {
+        "name": "pet.get",
+        "inputSchema": "schemas/pet.get.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "pet.hatch",
+        "inputSchema": "schemas/pet.hatch.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "pet.update",
+        "inputSchema": "schemas/pet.update.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "chat.send",
+        "inputSchema": "schemas/chat.send.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "chat.stop",
+        "inputSchema": "schemas/chat.stop.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "assistants.list",
+        "inputSchema": "schemas/assistants.list.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "settings_read",
+        "inputSchema": "schemas/settings_read.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "settings_apply",
+        "inputSchema": "schemas/settings_apply.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "settings_undo",
+        "inputSchema": "schemas/settings_undo.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "help_search",
+        "inputSchema": "schemas/help_search.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "notifications.list",
+        "inputSchema": "schemas/notifications.list.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "notifications.read",
+        "inputSchema": "schemas/notifications.read.json",
+        "timeoutMs": 120000
+      },
+      {
+        "name": "pet.import-legacy",
+        "inputSchema": "schemas/pet.import-legacy.json"
+      }
+    ]
+  },
+  "permissions": [
+    "agent:catalog:read",
+    "agent:bindings:read",
+    "agent:bindings:write",
+    "agent:sessions:read",
+    "agent:sessions:write",
+    "agent:turns:read",
+    "agent:turns:write",
+    "settings:read",
+    "settings:write",
+    "notifications:read",
+    "agent:permissions:bypass",
+    "settings:write:unrestricted"
+  ],
+  "host": {
+    "protocols": [
+      "moss.agent/v1",
+      "moss.settings/v1",
+      "moss.notifications/v1",
+      "moss.host/v1"
+    ]
+  },
+  "contributes": {
+    "views": [
+      {
+        "id": "home",
+        "title": "Buddy",
+        "route": "#/",
+        "icon": "sprout",
+        "order": 40
+      },
+      {
+        "id": "companion",
+        "title": "我的伙伴",
+        "route": "#/companion",
+        "order": 41
+      },
+      {
+        "id": "preferences",
+        "title": "伙伴设置",
+        "route": "#/preferences"
+      },
+      {
+        "id": "moss-settings",
+        "title": "通用设置",
+        "route": "#/moss-settings",
+        "icon": "settings",
+        "order": -1000
+      }
+    ],
+    "widgets": [
+      {
+        "id": "companion-widget",
+        "title": "Buddy",
+        "viewId": "companion",
+        "placement": "overlay"
+      }
+    ],
+    "settings": [
+      {
+        "id": "preferences-section",
+        "title": "Buddy 伴侣精灵",
+        "viewId": "preferences",
+        "group": "apps"
+      },
+      {
+        "id": "shared-settings",
+        "title": "通用设置",
+        "viewId": "moss-settings",
+        "group": "apps",
+        "order": -1000
+      }
+    ],
+    "tools": [
+      {
+        "id": "settings_read",
+        "title": "查询 Moss 配置",
+        "description": "Discover all Moss desktop, Agent, project, session, App and assistant settings, or read effective values, scopes, sources and revisions. Read catalog before modifying.",
+        "effect": "read",
+        "action": "settings_read",
+        "inputSchema": "schemas/settings_read.json",
+        "permission": "settings:read"
+      },
+      {
+        "id": "settings_apply",
+        "title": "修改 Moss 配置",
+        "description": "Apply explicit user-requested Moss configuration changes with a fresh revision and unique requestId. Supports preview. Respect scope, use exact catalog paths. Report application status from the receipt.",
+        "effect": "write",
+        "action": "settings_apply",
+        "inputSchema": "schemas/settings_apply.json",
+        "permission": "settings:write"
+      },
+      {
+        "id": "settings_undo",
+        "title": "撤销配置修改",
+        "description": "Undo a configuration receipt without overwriting subsequent user changes.",
+        "effect": "write",
+        "action": "settings_undo",
+        "inputSchema": "schemas/settings_undo.json",
+        "permission": "settings:write"
+      },
+      {
+        "id": "help_search",
+        "title": "查询 Moss 使用手册",
+        "description": "Search the bundled Moss user handbook for feature usage and configuration guidance.",
+        "effect": "read",
+        "action": "help_search",
+        "inputSchema": "schemas/help_search.json"
+      }
+    ]
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "navigation": {
+    "location": "more",
+    "viewId": "home"
+  }
+}

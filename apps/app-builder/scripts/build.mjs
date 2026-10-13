@@ -1,3 +1,4 @@
+import { buildAppSettings } from '@moss/app-settings/build'
 import fs from 'node:fs/promises'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
@@ -13,4 +14,6 @@ for (const [source, target, environment] of [['src/ui/main.mjs', 'dist/ui/main.m
   const result = spawnSync('bun', ['build', source, `--target=${environment}`, '--format=esm', `--outfile=${target}`], { cwd, stdio: 'inherit' })
   if (result.error || result.status !== 0) throw result.error || new Error('App build failed')
 }
-for (const name of ['index.html', 'style.css']) await fs.copyFile(new URL(`../src/ui/${name}`, import.meta.url), new URL(`../dist/ui/${name}`, import.meta.url))
+for (const name of ['index.html', 'style.css', 'theme.css']) await fs.copyFile(new URL(`../src/ui/${name}`, import.meta.url), new URL(`../dist/ui/${name}`, import.meta.url))
+
+await buildAppSettings(fileURLToPath(new URL('..', import.meta.url)))

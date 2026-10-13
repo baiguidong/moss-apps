@@ -4,9 +4,9 @@ import os from 'node:os'
 import { pathToFileURL } from 'node:url'
 import { unzipSync } from 'fflate'
 import { copySourceTree, validateSourcePackage, sourcePath, runtimeFileList, restoreSourceModes } from '../vendor/moss-core/packages/app-runtime/src/packages/source.mjs'
-import { validateAppPackage } from '../vendor/moss-core/packages/app-runtime/src/packages/index.mjs'
+import { validateAppPackage, DEFAULT_PACKAGE_LIMITS } from '../vendor/moss-core/packages/app-runtime/src/packages/index.mjs'
 import { verifyPackageRuntime } from '../vendor/moss-core/packages/app-runtime/src/packages/verify-runtime.mjs'
-import { repoRoot, selectApps } from './lib.mjs'
+import { repoRoot, selectApps, optionValue } from './lib.mjs'
 import { run } from './source-package.mjs'
 
 export async function verifySourceArchive(archive, { rebuild = false, requireSignature = false } = {}) {
@@ -22,7 +22,7 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
       if (seen.has(destination)) throw new Error(`Duplicate archive path: ${entry.name}`)
       seen.add(destination)
       total += entry.originalSize; count++
-      if (entry.originalSize > 50 * 1024 * 1024 || total > 250 * 1024 * 1024 || count > 10000) throw new Error('Expanded archive exceeds package limits')
+      if (entry.originalSize > DEFAULT_PACKAGE_LIMITS.maxFileBytes || total > DEFAULT_PACKAGE_LIMITS.maxPackageBytes || count > DEFAULT_PACKAGE_LIMITS.maxFiles) throw new Error('Expanded archive exceeds package limits')
       return true
     } })
     for (const [relative, data] of Object.entries(entries)) {
@@ -36,7 +36,11 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
       for (const value of [signature.publisherId, signature.keyId]) if (!/^[a-zA-Z0-9._-]+$/.test(value)) throw new Error('Invalid signing identity')
       trustedPublishers[signature.publisherId] = { keys: { [signature.keyId]: await fs.readFile(path.join(repoRoot, 'publishers', signature.publisherId, `${signature.keyId}.pem`), 'utf8') } }
     }
-    const pkg = await validateAppPackage(root, { requireSource: true, requireTrustedPublisher: requireSignature, trustedPublishers })
+    // This is an offline archive verifier, not an installer. Validate against
+    // the signed target so foreign-platform source can be rebuilt here.
+    const manifest = JSON.parse(await fs.readFile(path.join(root, 'app.moss.json'), 'utf8'))
+    const platform = manifest.platforms?.length === 1 ? manifest.platforms[0] : undefined
+    const pkg = await validateAppPackage(root, { platform, requireSource: true, requireTrustedPublisher: requireSignature, trustedPublishers })
     const source = await validateSourcePackage(root, { required: true })
     await verifyPackageRuntime(root, { nodeExecutable: process.execPath })
     if (rebuild) {
@@ -49,11 +53,15 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
       }
       const output = path.join(temp, 'rebuilt'), app = sourcePath(workspace, source.descriptor.appRoot)
       await fs.mkdir(output)
-      for (const name of ['dist', 'schemas', 'assets', 'resources', 'README.md', 'LICENSE', 'LICENSE.md']) {
-        try { await fs.cp(path.join(app, name), path.join(output, name), { recursive: true }) }
-        catch (error) { if (error.code !== 'ENOENT') throw error }
+      if (manifest.mcpApp) {
+        await fs.cp(path.join(app, 'dist'), output, { recursive: true })
+      } else {
+        for (const name of ['dist', 'schemas', 'assets', 'resources', 'README.md', 'LICENSE', 'LICENSE.md']) {
+          try { await fs.cp(path.join(app, name), path.join(output, name), { recursive: true }) }
+          catch (error) { if (error.code !== 'ENOENT') throw error }
+        }
+        await fs.copyFile(path.join(root, 'app.moss.json'), path.join(output, 'app.moss.json'))
       }
-      await fs.copyFile(path.join(root, 'app.moss.json'), path.join(output, 'app.moss.json'))
       const actual = await runtimeFileList(output), expected = await runtimeFileList(root)
       if (JSON.stringify(actual) !== JSON.stringify(expected)) {
         const byPath = new Map(actual.map(file => [file.path, file.sha256]))
@@ -62,13 +70,16 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
         throw new Error(`ZIP source rebuild does not match shipped runtime files: ${[...changed, ...added].slice(0, 20).join(', ')}`)
       }
     }
-    return { appId: pkg.manifest.id, version: pkg.manifest.version, sourceHash: source.descriptor.sourceHash, rebuild }
+    return { appId: pkg.manifest.id, version: pkg.manifest.version, sourceHash: source.descriptor.sourceHash, platforms: pkg.manifest.platforms, publisherId: signature?.publisherId, keyId: signature?.keyId, origin: source.descriptor.origin, sdk: source.descriptor.sdk, rebuild }
   } finally { await fs.rm(temp, { recursive: true, force: true }) }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   const argv = process.argv.slice(2)
   const files = argv.filter(arg => arg.endsWith('.zip'))
-  if (!files.length) for (const app of selectApps(argv)) files.push(path.join(repoRoot, 'artifacts', app.manifest.id, app.manifest.version, `${app.manifest.id}-${app.manifest.version}.zip`))
+  if (!files.length) for (const app of selectApps(argv)) {
+    const platform = app.manifest.platforms ? (optionValue(argv, '--platform') || `${process.platform}-${process.arch}`) : ''
+    files.push(path.join(repoRoot, 'artifacts', app.manifest.id, app.manifest.version, `${app.manifest.id}-${app.manifest.version}${platform ? `-${platform}` : ''}.zip`))
+  }
   for (const file of files) console.log(JSON.stringify(await verifySourceArchive(file, { rebuild: argv.includes('--rebuild'), requireSignature: argv.includes('--require-signature') })))
 }

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 2,
+  "id": "example.backend",
+  "version": "1.0.0",
+  "displayName": "Example App",
+  "category": "other",
+  "keywords": [],
+  "hostApi": "^3.4.0",
+  "toolScope": "session",
+  "permissions": [],
+  "navigation": {
+    "location": "none"
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "on-demand",
+    "actions": []
+  }
+}

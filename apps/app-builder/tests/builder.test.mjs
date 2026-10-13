@@ -60,6 +60,23 @@ test('SK-01: static conversion inventory identifies real dependencies without ex
   } finally { await fs.rm(root, { recursive: true, force: true }) }
 })
 
+test('selected skills and assistants survive composer resolution as conversion material', async () => {
+  const actions = createBuilderActions(async () => { throw new Error('Preparing conversion must not execute tools') })
+  const resources = [
+    { kind: 'skill', name: 'notes', displayName: '笔记整理', source: '/installed/skills/notes' },
+    { kind: 'assistant', name: 'writer', displayName: '写作助手', source: '/installed/assistants/writer' },
+  ]
+  const result = await actions['composer.resolve']({ intent: 'create', ref: { draftRef: 'draft', resources } })
+  assert.match(result.prompt, /技能「笔记整理」.*助手「写作助手」/)
+  assert.deepEqual(result.ref.resources, resources)
+  assert.match(result.instruction, /\/installed\/skills\/notes/)
+  assert.match(result.instruction, /\/installed\/assistants\/writer/)
+  assert.match(result.instruction, /copy the needed conversion material into the workspace/)
+  assert.match(result.instruction, /Never modify the installed originals/)
+  const legacy = await actions['composer.resolve']({ intent: 'create', ref: { skillPath: 'fixture-skill' } })
+  assert.match(legacy.prompt, /fixture-skill/)
+})
+
 test('AP-03/04: notes survive restart, cannot own Core state and cannot block committed project preparation', async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'builder-notes-'))
   try {

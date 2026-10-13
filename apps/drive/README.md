@@ -62,3 +62,5 @@ MOSS_CORE_ROOT=/path/to/moss MOSS_DRIVE_TEST_DEPLOY=/path/to/test-deployment bun
 分享方案见 [分享实施方案](../../docs/drive-sharing-plan.md)。Server 配置 `server.publicUrl` 可指定分享域名；未配置时使用当前连接地址，接收者必须能够访问该地址。旧 Server 的分享入口会提示升级，原有文件和传输操作仍可用。
 
 详细范围见 [开发计划](../../docs/drive-app-plan.md)，验证方式与结果见 [验证记录](../../docs/drive-app-verification.md)。
+
+本版本要求 Moss Host API >=3.4.0，展示入口为“更多” → 网盘。位置由 Manifest 声明；旧安装需要更新后生效。

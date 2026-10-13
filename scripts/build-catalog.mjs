@@ -4,12 +4,14 @@ import path from 'node:path'
 import semver from 'semver'
 import { artifactsRoot, listApps, optionValue, readJson, repoRoot, writeJson } from './lib.mjs'
 import { fetchGitHubReleaseRecords } from './github-releases.mjs'
+import { mergeReleaseVersions } from './release-variants.mjs'
 import { mirrorCatalogArtifact } from './catalog-artifacts.mjs'
 
 const argv = process.argv.slice(2)
 const siteRoot = path.resolve(optionValue(argv, '--output') || path.join(repoRoot, 'site'))
 const catalogBaseUrl = String(process.env.MOSS_APP_MARKET_BASE_URL || 'https://baiguidong.github.io/moss-apps').replace(/\/+$/, '')
 const githubRepository = optionValue(argv, '--github-repository') || ''
+const releaseArtifactsRoot = path.resolve(optionValue(argv, '--artifacts') || artifactsRoot)
 const explicitRelease = optionValue(argv, '--release')
 const mirrorApps = new Set(String(optionValue(argv, '--mirror-apps') || '').split(',').filter(Boolean))
 
@@ -31,29 +33,30 @@ function validateRelease(record) {
   if (record?.schemaVersion !== 1 || !record?.app?.id || !semver.valid(record?.version?.version)) {
     throw new Error('Invalid App release metadata')
   }
-  const artifact = record.version.artifact
+  for (const artifact of Object.values(record.version.artifacts || { universal: record.version.artifact })) {
   if (!artifact?.downloadUrl || !/^[a-f0-9]{64}$/.test(artifact.sha256 || '')) {
     throw new Error(`Invalid artifact metadata for ${record.app.id}@${record.version.version}`)
   }
   if (new URL(artifact.downloadUrl).protocol !== 'https:') {
     throw new Error(`Artifact URL must use HTTPS: ${artifact.downloadUrl}`)
   }
+  }
   return record
 }
 
 const records = []
 if (githubRepository) records.push(...await fetchGitHubReleaseRecords(githubRepository))
-for (const filePath of await findFiles(artifactsRoot, '.release.json')) records.push(readJson(filePath))
+for (const filePath of await findFiles(releaseArtifactsRoot, '.release.json')) records.push(readJson(filePath))
 if (explicitRelease) records.push(readJson(path.resolve(explicitRelease)))
 
 const byApp = new Map()
-for (const raw of records.map(validateRelease)) {
+for (const raw of records.map(validateRelease).filter(record => !semver.prerelease(record.version.version))) {
   const current = byApp.get(raw.app.id) || { app: raw.app, metadataVersion: raw.version.version, versions: new Map() }
   if (semver.gte(raw.version.version, current.metadataVersion)) {
     current.app = raw.app
     current.metadataVersion = raw.version.version
   }
-  current.versions.set(raw.version.version, raw.version)
+  current.versions.set(raw.version.version, mergeReleaseVersions(current.versions.get(raw.version.version), raw.version))
   byApp.set(raw.app.id, current)
 }
 if (!byApp.size) throw new Error('No App release metadata found')
@@ -62,30 +65,37 @@ await fsp.rm(siteRoot, { recursive: true, force: true })
 await fsp.mkdir(path.join(siteRoot, 'v1', 'apps'), { recursive: true })
 await fsp.mkdir(path.join(siteRoot, 'v1', 'assets'), { recursive: true })
 
-const sourceApps = new Map(listApps().map((app) => [app.manifest.id, app]))
+const sourceErrors = []
+const sourceApps = new Map(listApps({ onError: error => sourceErrors.push(error) }).map((app) => [app.manifest.id, app]))
 const summaries = []
 for (const [appId, entry] of [...byApp.entries()].sort(([left], [right]) => left.localeCompare(right))) {
   // Removed Apps stay retired even when their GitHub releases still exist.
-  if (!sourceApps.has(appId)) continue
+  if (!sourceApps.has(appId) && !sourceErrors.length) continue
   let versions = [...entry.versions.values()].sort((left, right) => semver.rcompare(left.version, right.version))
   if (mirrorApps.has(appId)) {
     const mirrored = []
-    for (const version of versions) mirrored.push(await mirrorCatalogArtifact(appId, version, { siteRoot, artifactsRoot, catalogBaseUrl }))
+    for (const version of versions) mirrored.push(await mirrorCatalogArtifact(appId, version, { siteRoot, artifactsRoot: releaseArtifactsRoot, catalogBaseUrl }))
     versions = mirrored
   }
+  // Older Hosts can still parse the catalog and report the >=3.3 requirement.
+  // New Hosts select exclusively from artifacts; this legacy field is never a fallback.
+  versions = versions.map(version => version.artifacts ? { ...version, artifact: version.artifacts[version.platforms[0]] } : version)
   const latest = versions[0]
   const sourceApp = sourceApps.get(appId)
   let iconUrl = ''
   if (sourceApp?.manifest.icon) {
     const extension = path.extname(sourceApp.manifest.icon).toLowerCase() || '.png'
     const iconName = `${appId}${extension}`
-    await fsp.copyFile(path.join(sourceApp.root, sourceApp.manifest.icon), path.join(siteRoot, 'v1', 'assets', iconName))
+    await fsp.copyFile(path.join(sourceApp.resourceRoot, sourceApp.manifest.icon), path.join(siteRoot, 'v1', 'assets', iconName))
     iconUrl = `${catalogBaseUrl}/v1/assets/${iconName}`
   }
   const detailUrl = `${catalogBaseUrl}/v1/apps/${appId}.json`
   const detail = {
     schemaVersion: 1,
     ...entry.app,
+    category: sourceApp?.manifest.category ?? entry.app.category,
+    categories: sourceApp?.marketplace.categories ?? entry.app.categories,
+    keywords: sourceApp?.manifest.keywords ?? entry.app.keywords,
     iconUrl,
     latestVersion: latest.version,
     versions,
@@ -96,7 +106,9 @@ for (const [appId, entry] of [...byApp.entries()].sort(([left], [right]) => left
     displayName: entry.app.displayName,
     summary: entry.app.summary,
     publisher: entry.app.publisher,
-    categories: entry.app.categories,
+    category: detail.category,
+    categories: detail.categories,
+    keywords: detail.keywords,
     featured: entry.app.featured,
     iconUrl,
     latestVersion: latest.version,
@@ -115,3 +127,5 @@ await writeJson(path.join(siteRoot, 'v1', 'index.json'), {
 })
 await writeJson(path.join(siteRoot, 'schemas', 'marketplace-v1.json'), readJson(path.join(repoRoot, 'schemas', 'marketplace.schema.json')))
 console.log(`generated ${summaries.length} App entries in ${siteRoot}`)
+
+for (const error of sourceErrors) console.warn(`Kept published metadata while source is invalid: ${error.path}: ${error.error}`)

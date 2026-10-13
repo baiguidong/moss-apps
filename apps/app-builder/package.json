@@ -1,6 +1,6 @@
 {
   "name": "@moss/app-builder",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,6 +12,10 @@
     "test:agent": "node scripts/test-agent.mjs"
   },
   "dependencies": {
-    "@moss/app-sdk": "workspace:*"
+    "@moss/app-sdk": "workspace:*",
+    "@moss/app-settings": "workspace:*"
+  },
+  "devDependencies": {
+    "@moss/app-runtime": "workspace:*"
   }
 }

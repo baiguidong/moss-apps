@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "text": {
+      "type": "string",
+      "maxLength": 20000
+    },
+    "requestId": {
+      "type": "string",
+      "maxLength": 120
+    }
+  },
+  "required": [
+    "text",
+    "requestId"
+  ]
+}

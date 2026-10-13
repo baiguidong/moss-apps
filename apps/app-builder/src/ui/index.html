@@ -1,10 +1,33 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>应用构建</title><link rel="stylesheet" href="style.css"></head>
-<body><main>
-  <header><div class="brand"><span class="mark">＋</span><div><strong>应用构建</strong><span class="muted">把想法变成自己的 App</span></div></div><button id="refresh" class="secondary">刷新</button></header>
-  <div id="notice" role="status" hidden></div>
-  <section class="intro"><span class="eyebrow">从一个想法开始</span><h1>你想创建什么？</h1><p>写下需求，在会话里一起完成创建、预览和迭代。</p></section>
-  <section class="compose"><form id="create"><label for="requirements">描述你的 App</label><textarea id="requirements" rows="4" placeholder="例如：一个记录读书笔记、按主题整理摘录的小工具…" required></textarea><details><summary>从已有 Skill 创建</summary><label for="skill">Skill 源目录</label><input id="skill" placeholder="填写源目录路径"><p class="muted">会话会分析源文件和依赖，再验证转换后的功能。</p></details><div class="compose-bottom"><span class="muted">提交后进入普通 Agent 会话</span><button id="submit" type="submit">开始创建 <span aria-hidden="true">↗</span></button></div></form></section>
-  <section><div class="section-title"><h2>继续项目</h2><span id="project-count" class="muted"></span></div><div id="projects" class="cards"><p class="muted">正在加载项目…</p></div></section>
-  <section><div class="section-title"><h2>迭代已有 App</h2><span class="muted">选择 App，带着需求进入会话</span></div><div id="apps" class="cards"><p class="muted">正在加载 App…</p></div></section>
-</main><script type="module" src="main.mjs"></script></body></html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>应用构建</title><link rel="stylesheet" href="theme.css"><link rel="stylesheet" href="style.css"></head>
+<body class="app-shell">
+  <header class="page-header"><span class="brand"><span data-icon="blocks"></span>应用构建</span><button id="refresh" type="button" class="ghost"><span data-icon="refresh"></span>刷新</button></header>
+  <main>
+    <section class="intro"><h1>你想创建什么 App？</h1><p>描述你的想法，或选择技能和助手，把已有能力变成 App。</p></section>
+    <form id="create" class="compose">
+      <label for="requirements" class="sr-only">描述你的 App</label>
+      <div class="input-area">
+        <textarea id="requirements" rows="5" maxlength="4000" placeholder="描述你想创建的 App，使用 @ 添加技能或助手" aria-autocomplete="list" aria-controls="mention-results" aria-expanded="false"></textarea>
+        <div id="mentions" class="mentions" hidden>
+          <div class="tabs" role="tablist" aria-label="引用资源类型"><button type="button" role="tab" data-mention-tab="skill">技能</button><button type="button" role="tab" data-mention-tab="assistant">助手</button></div>
+          <div id="mention-results" class="resource-list" role="listbox" aria-label="技能和助手"></div>
+          <div class="mention-hint">↑ ↓ 选择 · Enter 添加 · Tab 切换 · Esc 关闭</div>
+        </div>
+      </div>
+      <div id="selected-resources" class="selected-resources" aria-label="已选资源" hidden></div>
+      <div class="compose-bottom"><button id="choose-resources" type="button" class="resource-trigger"><span data-icon="filter"></span>选择资源<span id="selection-count" class="count" hidden></span></button><button id="submit" type="submit" class="primary">开始创建<span data-icon="arrow"></span></button></div>
+    </form>
+    <p class="compose-hint">技能可多选，助手可选一个。创建后，在会话中继续完善。</p>
+    <div id="notice" role="status" hidden></div>
+    <section class="projects-section"><div class="section-title"><h2>继续项目</h2><span id="project-count" class="muted"></span></div><div id="projects" class="projects"><p class="empty muted">正在加载项目…</p></div></section>
+  </main>
+  <dialog id="resource-picker" aria-labelledby="picker-title" aria-describedby="picker-description">
+    <div class="picker-header"><span class="picker-icon" data-icon="filter"></span><div><h2 id="picker-title">选择资源</h2><p id="picker-description">选择创建 App 所需的技能和助手</p></div><button id="close-picker" type="button" class="icon-button" aria-label="关闭"><span data-icon="close"></span></button></div>
+    <div class="search-field"><span data-icon="search"></span><input id="resource-search" type="search" placeholder="搜索已安装技能" aria-label="搜索资源" autocomplete="off"></div>
+    <div class="tabs" role="tablist" aria-label="资源类型"><button id="tab-skill" type="button" role="tab" data-resource-tab="skill" aria-controls="resource-results"><span data-icon="skill"></span>技能</button><button id="tab-assistant" type="button" role="tab" data-resource-tab="assistant" aria-controls="resource-results"><span data-icon="assistant"></span>助手</button></div>
+    <div id="resource-results" class="resource-list" role="tabpanel"></div>
+    <footer class="picker-footer"><span id="resource-total" class="muted"></span><button id="confirm-resources" type="button" class="primary">确定</button></footer>
+  </dialog>
+  <script type="module" src="main.mjs"></script>
+</body></html>

@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "runId": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

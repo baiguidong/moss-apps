@@ -30,92 +30,16 @@ try {
   await runtime.initialize()
   await installAppArchive(runtime, join(repo, 'artifacts/moss.mcp', manifest.version, `moss.mcp-${manifest.version}.zip`))
   const instance = (await runtime.listInstances('moss.mcp'))[0]
-  // Persistent Backend initialization must provide the service before any UI action.
-  const builtin = host.enabledServers()['playwright-cdp']
-  assert.ok(builtin, 'built-in must register during installation/startup')
-  assert.equal(builtin.command, process.execPath)
-  assert.ok(builtin.args[0].endsWith('/playwright-cdp/cli.cjs') || builtin.args[0].endsWith('\\playwright-cdp\\cli.cjs'))
-  const versions = JSON.parse(await readFile(join(dirname(builtin.args[0]), 'versions.json'), 'utf8'))
-  assert.equal(versions['@playwright/mcp'], '0.0.83')
-  assert.equal(builtin.args.at(-1), join(homedir(), '.moss/artifacts/playwright'))
+  await host.refresh()
+  assert.equal(host.enabledServers()['playwright-cdp'], undefined)
   const invoke = async (method, input = {}) => {
     const result = await runtime.invoke('moss.mcp', instance.id, method, input, { timeoutMs: 65_000 })
     assert.equal(result.ok, true, result.error?.message)
     return result.data
   }
   let catalog = await invoke('servers.list')
-  assert.equal(catalog.servers.length, 4); assert.deepEqual(legacy.servers, {})
+  assert.equal(catalog.servers.length, 3); assert.deepEqual(legacy.servers, {})
   assert.equal(catalog.servers[0].config.headers.Authorization, '')
-  const browserService = catalog.servers.find(server => server.name === 'playwright-cdp')
-  assert.equal(browserService.builtin, true)
-  assert.equal(browserService.config.args.at(-1), '~/.moss/artifacts/playwright')
-  const inspectedBuiltin = await invoke('servers.inspect', { name: 'playwright-cdp' })
-  const builtinCheck = inspectedBuiltin.servers.find(server => server.name === 'playwright-cdp').check
-  assert.equal(builtinCheck.state, 'connected', builtinCheck.error)
-  assert.ok(builtinCheck.tools.some(tool => tool.name === 'browser_click'))
-  let cdpSmoke
-  if (process.env.MOSS_TEST_CDP_ENDPOINT) {
-    const { Client } = await fromCore('node_modules/@modelcontextprotocol/sdk/dist/esm/client/index.js')
-    const { StdioClientTransport } = await fromCore('node_modules/@modelcontextprotocol/sdk/dist/esm/client/stdio.js')
-    const config = structuredClone(builtin)
-    const outputDir = config.args.at(-1)
-    // Exercise App-local expansion too, so the packaged service works with older Hosts.
-    config.args[config.args.length - 1] = browserService.config.args.at(-1)
-    config.args[config.args.indexOf('--cdp-endpoint') + 1] = process.env.MOSS_TEST_CDP_ENDPOINT
-    const client = new Client({ name: 'moss-built-in-verification', version: manifest.version })
-    const guard = join(temporary, 'offline-guard.cjs')
-    await writeFile(guard, `const net = require('node:net');
-const connect = net.Socket.prototype.connect;
-net.Socket.prototype.connect = function (...args) {
-  const params = Array.isArray(args[0]) ? args[0] : args;
-  const options = typeof params[0] === 'object' ? params[0] : { port: params[0], host: typeof params[1] === 'string' ? params[1] : 'localhost' };
-  if (options?.port && !['localhost', '127.0.0.1', '::1'].includes(options.host || 'localhost')) throw new Error('Offline test blocked: ' + options.host);
-  return connect.apply(this, args);
-};
-`)
-    const transport = new StdioClientTransport({ ...config, env: { ...process.env, PATH: '', npm_config_offline: 'true', npm_config_cache: join(temporary, 'empty-npm-cache'), NODE_OPTIONS: '--require=' + JSON.stringify(guard) }, stderr: 'pipe' })
-    let opened = false
-    const call = async (name, args) => {
-      const result = await client.callTool({ name, arguments: args })
-      assert.ok(!result.isError, JSON.stringify(result))
-      return result
-    }
-    const snapshotText = async result => {
-      const text = result.content.filter(item => item.type === 'text').map(item => item.text).join('\n')
-      const snapshotPath = text.match(/\[Snapshot\]\(([^)]+)\)/)?.[1]
-      return snapshotPath ? readFile(join(outputDir, basename(snapshotPath)), 'utf8') : text
-    }
-    try {
-      await client.connect(transport)
-      const { tools } = await client.listTools()
-      assert.ok(tools.some(tool => tool.name === 'browser_click'))
-      await call('browser_tabs', { action: 'new' }); opened = true
-      const navigated = await call('browser_navigate', { url: `${fixture.url}/browser` })
-      const snapshot = await snapshotText(navigated)
-      const inputRef = snapshot.match(/textbox \"Name\" \[ref=([^\]]+)\]/)?.[1]
-      const buttonRef = snapshot.match(/button \"Save\" \[ref=([^\]]+)\]/)?.[1]
-      assert.ok(inputRef && buttonRef, snapshot)
-      await call('browser_type', { target: inputRef, text: 'Moss', element: 'Name' })
-      const filled = await call('browser_click', { target: buttonRef, element: 'Save' })
-      assert.ok((await snapshotText(filled)).includes('Saved Moss'))
-      const filename = `mcp-built-in-${Date.now()}.png`
-      const screenshot = join(outputDir, filename)
-      await call('browser_take_screenshot', { filename: screenshot, type: 'png', scale: 'css' })
-      assert.ok((await readFile(screenshot)).length > 100)
-      cdpSmoke = { offlineRuntime: true, emptyPathAndNpmCache: true, externalConnectionsBlocked: true, bundledVersions: versions, endpoint: process.env.MOSS_TEST_CDP_ENDPOINT, toolCount: tools.length, formResult: 'Saved Moss', screenshot }
-      console.log(`PASS offline bundled Playwright CDP: ${tools.length} tools, real Chrome form and screenshot in expanded home directory`)
-    } finally {
-      if (opened) await call('browser_tabs', { action: 'close' }).catch(() => {})
-      await client.close(); await transport.close()
-    }
-  }
-  const occupiedConfig = structuredClone(browserService.config)
-  occupiedConfig.args[occupiedConfig.args.indexOf('--cdp-endpoint') + 1] = fixture.url
-  await invoke('servers.save', { name: 'playwright-cdp', previousName: 'playwright-cdp', enabled: false, config: occupiedConfig })
-  const occupiedCheck = await invoke('servers.inspect', { name: 'playwright-cdp' })
-  assert.match(occupiedCheck.servers.find(server => server.name === 'playwright-cdp').check.error, /端口.*占用/)
-  const custom = { ...browserService.config, args: [...browserService.config.args, '--timeout-action', '7000'] }
-  await invoke('servers.save', { name: 'playwright-cdp', previousName: 'playwright-cdp', enabled: false, config: custom })
   for (const name of ['test-http', 'test-local', 'test-sse']) {
     catalog = await invoke('servers.inspect', { name })
     const checked = catalog.servers.find(server => server.name === name)
@@ -136,15 +60,11 @@ net.Socket.prototype.connect = function (...args) {
   await host.refresh()
   assert.deepEqual(Object.keys(host.enabledServers()), ['test-local'])
   catalog = await invoke('servers.list')
-  const preserved = catalog.servers.filter(server => server.name === 'playwright-cdp')
-  assert.equal(preserved.length, 1)
-  assert.equal(preserved[0].enabled, false)
-  assert.deepEqual(preserved[0].config, custom)
   await invoke('servers.remove', { name: 'test-local' })
   assert.deepEqual(host.enabledServers(), {})
   const vault = await readFile(join(process.env.MOSS_HOME, 'credentials/app-secrets.json'), 'utf8')
   assert.ok(!vault.includes('http-test-secret') && !vault.includes('local-test-secret'))
-  const report = { passed: true, transports: ['http', 'stdio', 'sse'], checks: ['archive installation', 'built-in registration before UI', 'portable home paths', 'preserved built-in configuration and disabled state after restart', 'real backend to Host IPC', 'legacy migration', 'masked and encrypted credentials', 'paginated tool discovery', 'connection failure status', 'service and App lifecycle'], cdpSmoke, reloads }
+  const report = { passed: true, transports: ['http', 'stdio', 'sse'], checks: ['archive installation', 'no built-in browser registration', 'real backend to Host IPC', 'legacy migration', 'masked and encrypted credentials', 'paginated tool discovery', 'connection failure status', 'service and App lifecycle'], reloads }
   const reportDir = join(repo, 'artifacts/moss.mcp/verification', manifest.version)
   await mkdir(reportDir, { recursive: true }); await writeFile(join(reportDir, 'host.json'), JSON.stringify(report, null, 2))
   console.log('PASS real Core runtime: package, migration, secret storage, service/App lifecycle')

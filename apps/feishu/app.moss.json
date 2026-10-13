@@ -1,11 +1,19 @@
 {
   "schemaVersion": 2,
   "id": "moss.feishu",
-  "version": "0.4.12",
+  "version": "0.4.13",
   "displayName": "飞书",
+  "category": "communication",
+  "keywords": [
+    "飞书",
+    "机器人",
+    "消息",
+    "Agent",
+    "移动端"
+  ],
   "description": "通过飞书私聊连接一个固定 Moss 会话并自动回复。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.0.0",
+  "hostApi": "^3.4.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -64,7 +72,8 @@
         "id": "configuration",
         "title": "飞书设置",
         "viewId": "settings",
-        "order": 200
+        "order": 200,
+        "group": "integrations"
       }
     ]
   },
@@ -72,5 +81,9 @@
     "protocols": [
       "moss.agent/v1"
     ]
+  },
+  "navigation": {
+    "location": "settings",
+    "viewId": "settings"
   }
 }

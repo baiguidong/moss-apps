@@ -3,15 +3,6 @@
   "appId": "moss.audit",
   "summary": "审计本地会话与工具调用，管理风险规则、发现项和操作历史。",
   "description": "审计本地会话与工具调用，管理风险规则、发现项和操作历史。",
-  "categories": [
-    "开发工具"
-  ],
-  "keywords": [
-    "审计",
-    "工具调用",
-    "风险",
-    "规则"
-  ],
   "platforms": [
     "darwin-arm64",
     "darwin-x64",

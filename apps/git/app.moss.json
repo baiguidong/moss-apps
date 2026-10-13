@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.git",
+  "version": "0.1.1",
+  "displayName": "Git 仓库",
+  "category": "development",
+  "keywords": [
+    "Git 仓库",
+    "Git",
+    "MCP"
+  ],
+  "description": "默认在会话工作目录中查看 Git 改动、提交和管理分支，也可添加公共仓库。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.6.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1120,
+      "height": 780,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "actions": [
+      {
+        "name": "servers.list",
+        "inputSchema": "schemas/servers.list.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "servers.save",
+        "inputSchema": "schemas/servers.save.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "servers.inspect",
+        "inputSchema": "schemas/servers.inspect.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      }
+    ]
+  },
+  "permissions": [
+    "mcp:read",
+    "mcp:manage",
+    "mcp:connect"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "git",
+        "title": "Git 仓库",
+        "route": "#/",
+        "icon": "git-branch",
+        "order": 216
+      },
+      {
+        "id": "moss-settings",
+        "title": "通用设置",
+        "route": "#/moss-settings",
+        "icon": "settings",
+        "order": -1000
+      }
+    ],
+    "settings": [
+      {
+        "id": "manage",
+        "title": "Git 仓库设置",
+        "viewId": "git",
+        "group": "tools"
+      },
+      {
+        "id": "shared-settings",
+        "title": "通用设置",
+        "viewId": "moss-settings",
+        "group": "apps",
+        "order": -1000
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.mcp/v1",
+      "moss.host/v1"
+    ]
+  },
+  "navigation": {
+    "location": "settings",
+    "viewId": "git"
+  }
+}

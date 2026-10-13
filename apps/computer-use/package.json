@@ -1,0 +1,26 @@
+{
+  "name": "@moss/computer-use-app",
+  "version": "0.2.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "tsc --noEmit && node scripts/check-contract.mjs",
+    "test": "bun test src && node --test tests/*.node.mjs",
+    "generate": "bun scripts/generate-contract.ts"
+  },
+  "dependencies": {
+    "@moss/app-sdk": "workspace:*",
+    "@trycua/cua-driver": "0.34.0",
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "zod": "4.1.13",
+    "@moss/app-settings": "workspace:*"
+  },
+  "devDependencies": {
+    "@moss/app-runtime": "workspace:*",
+    "bun-types": "latest",
+    "typescript": "5.9.3",
+    "vite": "7.1.10",
+    "ajv": "^8.18.0"
+  }
+}

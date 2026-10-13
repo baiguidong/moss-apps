@@ -1,11 +1,18 @@
 {
   "schemaVersion": 2,
   "id": "moss.audit",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "displayName": "审计中心",
+  "category": "diagnostics",
+  "keywords": [
+    "审计",
+    "工具调用",
+    "风险",
+    "规则"
+  ],
   "description": "审计本地会话与工具调用，管理风险规则、发现项和操作历史。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.0.0",
+  "hostApi": "^3.4.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -95,5 +102,9 @@
     "protocols": [
       "moss.audit/v1"
     ]
+  },
+  "navigation": {
+    "location": "more",
+    "viewId": "audit"
   }
 }

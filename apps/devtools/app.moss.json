@@ -1,11 +1,23 @@
 {
   "schemaVersion": 2,
   "id": "moss.devtools",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "displayName": "开发工具",
+  "category": "development",
+  "keywords": [
+    "时间戳",
+    "Base64",
+    "AES",
+    "JSON",
+    "格式化",
+    "本地工具",
+    "HTTP",
+    "API",
+    "接口调试"
+  ],
   "description": "时间戳、Base64、AES、JSON 与 HTTP 调试，常用开发工具集中使用。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.0.0",
+  "hostApi": "^3.4.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -67,5 +79,9 @@
         "order": 220
       }
     ]
+  },
+  "navigation": {
+    "location": "more",
+    "viewId": "tools"
   }
 }

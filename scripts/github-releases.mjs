@@ -10,7 +10,7 @@ export async function fetchGitHubReleaseRecords(repository, { fetchImpl = fetch,
     if (!response.ok) throw new Error(`Unable to list GitHub releases: HTTP ${response.status}`)
     const releases = await response.json()
     for (const release of releases) {
-      if (release.draft) continue
+      if (release.draft || release.prerelease) continue
       let assets = release.assets || []
       // Newly published releases can omit assets in the embedded release listing.
       if (!assets.some((asset) => asset.name.endsWith('.release.json'))) {

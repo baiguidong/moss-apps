@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.memory",
+  "version": "0.2.1",
+  "displayName": "记忆",
+  "category": "ai",
+  "keywords": [
+    "记忆",
+    "Memory",
+    "知识图谱",
+    "MCP"
+  ],
+  "description": "在对话中保存和查找人物、项目与偏好，持续积累本地记忆。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.6.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1120,
+      "height": 780,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "actions": [
+      {
+        "name": "servers.list",
+        "inputSchema": "schemas/servers.list.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "servers.save",
+        "inputSchema": "schemas/servers.save.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "servers.inspect",
+        "inputSchema": "schemas/servers.inspect.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "graph.read",
+        "inputSchema": "schemas/graph.read.input.json",
+        "outputSchema": "schemas/graph.read.result.json",
+        "timeoutMs": 15000
+      }
+    ]
+  },
+  "permissions": [
+    "mcp:read",
+    "mcp:manage",
+    "mcp:connect"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "memory",
+        "title": "记忆",
+        "route": "#/",
+        "icon": "brain",
+        "order": 212
+      },
+      {
+        "id": "moss-settings",
+        "title": "通用设置",
+        "route": "#/moss-settings",
+        "icon": "settings",
+        "order": -1000
+      }
+    ],
+    "settings": [
+      {
+        "id": "manage",
+        "title": "记忆设置",
+        "viewId": "memory",
+        "group": "tools"
+      },
+      {
+        "id": "shared-settings",
+        "title": "通用设置",
+        "viewId": "moss-settings",
+        "group": "apps",
+        "order": -1000
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.mcp/v1",
+      "moss.host/v1"
+    ]
+  },
+  "navigation": {
+    "location": "settings",
+    "viewId": "memory"
+  }
+}

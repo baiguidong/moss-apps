@@ -1,11 +1,21 @@
 {
   "schemaVersion": 2,
   "id": "moss.drive",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "displayName": "网盘",
+  "category": "knowledge",
+  "keywords": [
+    "网盘",
+    "文件",
+    "云端存储",
+    "上传",
+    "下载",
+    "文件分享",
+    "分享码"
+  ],
   "description": "管理个人云端文件，上传、下载和分享。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.0.0",
+  "hostApi": "^3.4.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -143,5 +153,9 @@
     "protocols": [
       "moss.cloud-storage/v1"
     ]
+  },
+  "navigation": {
+    "location": "more",
+    "viewId": "files"
   }
 }

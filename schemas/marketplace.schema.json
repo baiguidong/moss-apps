@@ -4,19 +4,23 @@
   "title": "Moss App marketplace metadata",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "appId", "summary", "categories", "platforms"],
+  "required": ["schemaVersion", "appId", "summary", "platforms"],
   "properties": {
     "schemaVersion": { "const": 1 },
     "appId": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,78}[a-z0-9])?$" },
     "summary": { "type": "string", "minLength": 1, "maxLength": 160 },
     "description": { "type": "string", "maxLength": 8000 },
     "categories": {
+      "description": "Deprecated in source metadata. Generated from app.moss.json category; if present, must match its single display label.",
+      "deprecated": true,
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
       "items": { "type": "string", "minLength": 1, "maxLength": 40 }
     },
     "keywords": {
+      "description": "Deprecated in source metadata. Generated from app.moss.json keywords; if present, must match.",
+      "deprecated": true,
       "type": "array",
       "uniqueItems": true,
       "items": { "type": "string", "minLength": 1, "maxLength": 40 }

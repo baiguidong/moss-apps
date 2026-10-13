@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "entityType": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

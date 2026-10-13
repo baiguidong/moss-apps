@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.sequential-thinking",
+  "summary": "为复杂任务提供可修正、可分支的步骤记录工具。",
+  "description": "启用后自动提供 Sequential Thinking MCP 工具，各会话均可按需使用。支持步骤、修正与分支；在设置 → Apps → 分步思考中查看连接状态、工具目录并重新连接。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/sequential-thinking",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

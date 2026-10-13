@@ -5,6 +5,14 @@ const MAX_MIRROR_BYTES = 90 * 1024 * 1024
 
 // Preserve the signed release bytes; only the catalog delivery URL changes.
 export async function mirrorCatalogArtifact(appId, version, { siteRoot, artifactsRoot, catalogBaseUrl, fetchImpl = fetch }) {
+  if (version.artifacts) {
+    const artifacts = {}
+    for (const [platform, artifact] of Object.entries(version.artifacts)) {
+      const { artifacts: ignored, ...base } = version
+      artifacts[platform] = (await mirrorCatalogArtifact(appId, { ...base, artifact }, { siteRoot, artifactsRoot, catalogBaseUrl, fetchImpl })).artifact
+    }
+    return { ...version, artifacts }
+  }
   const artifact = version.artifact
   if (!artifact?.signed) throw new Error(`Refusing to mirror an unsigned App: ${appId}`)
   for (const segment of [appId, version.version, artifact.fileName]) {

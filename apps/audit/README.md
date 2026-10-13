@@ -43,3 +43,5 @@ bun run --cwd apps/audit test:browser
 ```
 
 集成验证默认使用固定在 `vendor/moss-core` 的真实 Host 与实际 ZIP，可通过 `MOSS_CORE_ROOT` 指定其他 Core 检出。浏览器验证使用真实 SQLite 服务，覆盖主要页面与交互。验证用临时目录，不读写用户会话。ZIP 位于 `artifacts/moss.audit/0.1.1/`。正式版本由 `moss.audit-v0.1.1` 标签触发签名发布，签名后的 ZIP 也必须通过集成验证才能上传。
+
+本版本要求 Moss Host API >=3.4.0，展示入口为“更多” → 审计中心。位置由 Manifest 声明；旧安装需要更新后生效。

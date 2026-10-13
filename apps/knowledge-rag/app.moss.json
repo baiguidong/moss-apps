@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.knowledge-rag",
+  "version": "0.1.1",
+  "displayName": "语义知识库",
+  "category": "knowledge",
+  "keywords": [
+    "知识库",
+    "RAG",
+    "语义搜索",
+    "MCP"
+  ],
+  "description": "用自然语言检索本地资料，支持多语言语义检索与关键词混合搜索。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.6.0",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1160,
+      "height": 780,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "actions": [
+      {
+        "name": "engine.status",
+        "inputSchema": "schemas/engine.status.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "engine.prepare",
+        "inputSchema": "schemas/engine.prepare.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "engine.start",
+        "inputSchema": "schemas/engine.start.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "files.pick",
+        "inputSchema": "schemas/files.pick.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "index.rebuild",
+        "inputSchema": "schemas/index.rebuild.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.list",
+        "inputSchema": "schemas/documents.list.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.search",
+        "inputSchema": "schemas/documents.search.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.read",
+        "inputSchema": "schemas/documents.read.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "files.import",
+        "inputSchema": "schemas/files.import.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "engine.cancel",
+        "inputSchema": "schemas/engine.cancel.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 30000
+      }
+    ],
+    "configuration": {
+      "secrets": "schemas/secrets.json"
+    }
+  },
+  "permissions": [
+    "mcp:read",
+    "mcp:manage",
+    "mcp:connect",
+    "local-files:pick"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "knowledge",
+        "title": "语义知识库",
+        "route": "#/",
+        "icon": "book-open",
+        "order": 225
+      },
+      {
+        "id": "moss-settings",
+        "title": "通用设置",
+        "route": "#/moss-settings",
+        "icon": "settings",
+        "order": -1000
+      },
+      {
+        "id": "engine-settings",
+        "title": "检索引擎",
+        "route": "#/engine-settings"
+      }
+    ],
+    "settings": [
+      {
+        "id": "shared-settings",
+        "title": "通用设置",
+        "viewId": "moss-settings",
+        "group": "apps",
+        "order": -1000
+      },
+      {
+        "id": "engine",
+        "title": "检索引擎",
+        "viewId": "engine-settings",
+        "group": "apps"
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.host/v1",
+      "moss.mcp/v1",
+      "moss.runtimes/v1",
+      "moss.local-files/v1"
+    ]
+  },
+  "navigation": {
+    "location": "more",
+    "viewId": "knowledge"
+  }
+}

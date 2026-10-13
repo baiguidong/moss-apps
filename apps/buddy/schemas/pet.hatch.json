@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "maxLength": 30
+    },
+    "skin": {
+      "enum": [
+        "moss",
+        "robot",
+        "orb"
+      ]
+    },
+    "personality": {
+      "type": "string",
+      "maxLength": 500
+    }
+  },
+  "required": []
+}

@@ -5,6 +5,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import semver from 'semver'
 import { loadJsonSchema, validateAppManifest, validateAppToolInputSchema } from '@moss/app-sdk'
+import { getAppCategory } from '@moss/app-sdk/categories'
+import { createMcpAppManifest } from '../vendor/moss-core/packages/app-runtime/src/packages/generate-mcp-app.mjs'
 
 export const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 export const appsRoot = path.join(repoRoot, 'apps')
@@ -31,7 +33,15 @@ export function validateRepositoryAppManifest(rawManifest) {
   // Installation/marketplace validation still checks the actual Host version.
   const target = semver.validRange(rawManifest?.hostApi || '')
     ? semver.minVersion(rawManifest.hostApi)?.version : undefined
-  return validateAppManifest(rawManifest, { hostApiVersion: target })
+  const manifest = validateAppManifest(rawManifest, { hostApiVersion: target, requireNavigation: Boolean(target && semver.gte(target, '3.4.0')) })
+  if (JSON.stringify(manifest.navigation) !== JSON.stringify(rawManifest.navigation)
+      || JSON.stringify((manifest.contributes?.settings || []).map(item => item.group)) !== JSON.stringify((rawManifest.contributes?.settings || []).map(item => item.group))) {
+    throw new Error('The pinned SDK must preserve navigation and settings groups; upgrade the Core SDK before building')
+  }
+  if (rawManifest.category !== undefined && manifest.category !== rawManifest.category) {
+    throw new Error('The pinned SDK must preserve App category; upgrade the Core SDK before building')
+  }
+  return manifest
 }
 
 export function validateRepositoryAppToolSchemas(packageRoot, manifest) {
@@ -72,10 +82,19 @@ export function validateMarketplaceMetadata(raw, manifest, sourcePath) {
   if (!String(raw.summary || '').trim() || String(raw.summary).length > 160) {
     throw new Error(`marketplace.summary must contain 1-160 characters: ${sourcePath}`)
   }
-  for (const field of ['categories', 'platforms']) {
+  for (const field of ['platforms']) {
     if (!Array.isArray(raw[field]) || raw[field].length === 0 || raw[field].some((item) => !String(item || '').trim())) {
       throw new Error(`marketplace.${field} must be a non-empty string array: ${sourcePath}`)
     }
+  }
+  const category = getAppCategory(manifest.category)
+  const keywords = manifest.keywords || []
+  // Legacy source metadata may remain only when it agrees with the Manifest.
+  if (raw.categories !== undefined && JSON.stringify(raw.categories) !== JSON.stringify([category.label])) {
+    throw new Error(`marketplace.categories is generated from app.moss.json category: ${sourcePath}`)
+  }
+  if (raw.keywords !== undefined && JSON.stringify(raw.keywords) !== JSON.stringify(keywords)) {
+    throw new Error(`marketplace.keywords is generated from app.moss.json keywords: ${sourcePath}`)
   }
   const supportedPlatforms = new Set([
     'darwin-arm64', 'darwin-x64', 'win32-x64', 'win32-arm64', 'linux-x64', 'linux-arm64',
@@ -95,8 +114,9 @@ export function validateMarketplaceMetadata(raw, manifest, sourcePath) {
     appId: manifest.id,
     summary: String(raw.summary).trim(),
     description: String(raw.description || manifest.description || '').trim(),
-    categories: [...new Set(raw.categories.map((item) => String(item).trim()))],
-    keywords: [...new Set((raw.keywords || []).map((item) => String(item).trim()).filter(Boolean))],
+    category: category.id,
+    categories: [category.label],
+    keywords,
     platforms: [...new Set(raw.platforms)],
     homepage: raw.homepage || '',
     repository: raw.repository || '',
@@ -109,32 +129,59 @@ export function validateMarketplaceMetadata(raw, manifest, sourcePath) {
   })
 }
 
-export function listApps() {
-  if (!fs.existsSync(appsRoot)) return []
-  return fs.readdirSync(appsRoot, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => {
-      const root = path.join(appsRoot, entry.name)
-      const manifestPath = path.join(root, 'app.moss.json')
+export function listApps({ root: repositoryRoot = repoRoot, onError } = {}) {
+  const apps = []
+  const ids = new Set()
+  for (const [folder, kind, manifestName] of [['apps', 'app', 'app.moss.json'], ['mcp-apps', 'mcp', 'app.json']]) {
+    const directory = path.join(repositoryRoot, folder)
+    if (!fs.existsSync(directory)) continue
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .sort((a, b) => a.name.localeCompare(b.name))) {
+      const root = path.join(directory, entry.name)
+      const manifestPath = path.join(root, manifestName)
       const marketplacePath = path.join(root, 'marketplace.json')
-      if (!fs.existsSync(manifestPath)) return null
-      const manifest = validateRepositoryAppManifest(readJson(manifestPath))
-      validateRepositoryAppToolSchemas(root, manifest)
-      if (!fs.existsSync(marketplacePath)) throw new Error(`Missing marketplace.json for ${manifest.id}`)
-      const marketplace = validateMarketplaceMetadata(readJson(marketplacePath), manifest, marketplacePath)
-      return { directoryName: entry.name, root, manifest, marketplace, manifestPath, marketplacePath }
-    })
-    .filter(Boolean)
-    .sort((left, right) => left.manifest.id.localeCompare(right.manifest.id))
+      if (!fs.existsSync(manifestPath)) continue
+      // Duplicate IDs remain fatal, even when one definition has other errors.
+      let input
+      try { input = readJson(manifestPath) } catch (error) {
+        if (!onError) throw error
+        onError({ path: manifestPath, error: error.message }); continue
+      }
+      const appId = typeof input?.id === 'string' ? input.id : undefined
+      if (appId) {
+        if (ids.has(appId)) throw new Error(`Duplicate App id: ${appId}`)
+        ids.add(appId)
+      }
+      try {
+        const rawManifest = kind === 'mcp' ? createMcpAppManifest(input) : input
+        if (!rawManifest.category) throw new Error(`App must declare category in ${manifestPath}`)
+        if (!rawManifest.navigation) throw new Error(`App must declare navigation by intended use in ${manifestPath}`)
+        const manifest = validateRepositoryAppManifest(rawManifest)
+        const resourceRoot = kind === 'mcp' ? path.join(root, 'resources') : root
+        if (manifest.icon && !fs.existsSync(path.join(resourceRoot, manifest.icon))) throw new Error(`Missing App icon: ${manifest.icon}`)
+        validateRepositoryAppToolSchemas(resourceRoot, manifest)
+        if (!fs.existsSync(marketplacePath)) throw new Error(`Missing marketplace.json for ${manifest.id}`)
+        const marketplace = validateMarketplaceMetadata(readJson(marketplacePath), manifest, marketplacePath)
+        apps.push({ kind, directoryName: entry.name, root, resourceRoot, manifest, marketplace, manifestPath, marketplacePath })
+      } catch (error) {
+        if (!onError) throw error
+        onError({ appId, path: manifestPath, error: error.message })
+      }
+    }
+  }
+  return apps.sort((left, right) => left.manifest.id.localeCompare(right.manifest.id))
 }
 
 export function selectApps(argv = process.argv.slice(2)) {
   const selector = optionValue(argv, '--app') || optionValue(argv, '--app-id')
-  const apps = listApps()
+  const errors = []
+  const apps = listApps(selector ? { onError: error => errors.push(error) } : {})
   if (!selector) return apps
-  const selected = apps.find((app) => app.manifest.id === selector || app.directoryName === selector)
-  if (!selected) throw new Error(`Unknown App: ${selector}`)
-  return [selected]
+  const selected = apps.filter((app) => app.manifest.id === selector || app.directoryName === selector)
+  if (selected.length > 1) throw new Error(`Ambiguous App selector: ${selector}; use the App id`)
+  if (!selected.length) throw new Error(`Unknown or invalid App: ${selector}. ${errors.filter(e => e.appId === selector || path.basename(path.dirname(e.path)) === selector).map(e => e.error).join('; ')}`)
+  return selected
 }
 
 export async function listFiles(root, options = {}) {

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Buddy · 我的伙伴</title><link rel="stylesheet" href="./theme.css"><link rel="stylesheet" href="./style.css"></head>
+<body><main id="buddy-app">
+<div class="buddy-product app-shell" data-skin="moss">
+<header class="b-top"><strong>Buddy</strong><span class="b-preview-label">你的 Moss 伙伴</span></header>
+<nav class="b-nav" aria-label="Buddy 页面"><button type="button" data-page="pet" aria-current="page">伙伴</button><button type="button" data-page="notifications">消息<span id="unread"></span></button><button type="button" data-page="help">使用手册</button><button type="button" data-page="configuration">Moss 设置</button></nav>
+<div id="notice" role="alert" hidden></div>
+<section id="page-pet" class="b-main">
+<div class="b-unhatched">
+<div class="b-intro"><h3>认识你的新伙伴</h3><p>孵化后，就可以和它聊天了。</p></div>
+<div class="b-stage" role="img" aria-label="一颗等待孵化的宠物蛋"><div class="b-egg"></div></div>
+<form id="hatch-form"><label class="b-label">取个名字<input id="pet-name" class="b-field" value="小苔" maxlength="30" required></label>
+<label class="b-label">伙伴形象<select id="hatch-skin" class="b-field"><option value="moss">小苔团</option><option value="robot">圆润机器人</option><option value="orb">极简光球</option></select></label>
+<button class="b-primary b-hatch" type="submit">孵化我的伙伴</button></form>
+<p class="b-under">自带 Buddy 助手。聊日常、问用法、调配置。</p></div>
+<div class="b-hatched">
+<div class="b-pet-header"><div class="b-avatar"><div class="b-art" role="img" aria-label="我的宠物"><div class="b-creature"><div class="b-face"><span class="b-eye"></span><span class="b-eye"></span><span class="b-mouth"></span><span class="b-cheeks"></span></div></div></div></div><div class="b-pet-heading"><h3 id="display-name">小苔</h3><div id="pet-status" class="b-status" role="status"></div></div><button id="pet-settings-toggle" aria-controls="pet-settings" class="b-quiet-button" type="button" aria-expanded="false">伙伴设置</button></div>
+<div id="messages" class="b-chat" role="log" aria-live="polite" aria-label="宠物聊天记录"></div>
+<div id="chat-shortcuts" class="b-shortcuts"><button class="b-chip" data-prompt="今天有点累，想和你聊聊">聊聊今天</button><button class="b-chip" data-prompt="你能帮我怎么使用 Moss？">问问 Moss</button><button class="b-chip" data-prompt="帮我看看 Moss 有哪些配置可以调整">调一下配置</button></div>
+<form id="chat-form" class="b-composer"><textarea id="chat-input" class="b-field" rows="2" maxlength="20000" placeholder="跟小苔说点什么…" aria-label="给宠物发消息" required></textarea><button id="send" class="b-primary b-send" type="submit" aria-label="发送">↑</button><button id="stop" type="button" class="b-chip" hidden>停止</button></form>
+<div id="chat-errors" role="status"></div>
+<details class="b-settings" id="pet-settings"><summary>伙伴设置</summary><small id="birthday" class="b-profile-meta"></small><form id="preferences-form"><div class="b-settings-grid">
+<label class="b-setting">名字<input id="edit-name" class="b-field" maxlength="30" required></label><label class="b-setting">形象<select id="edit-skin"><option value="moss">小苔团</option><option value="robot">圆润机器人</option><option value="orb">极简光球</option></select></label>
+<label class="b-setting">回应我的助手<select id="responder"><option value="builtin">Buddy 内置助手</option></select></label><label class="b-setting">聊天口吻<select id="tone"><option value="warm">温和自然</option><option value="playful">活泼一点</option><option value="concise">简洁直接</option></select></label></div>
+<label class="b-setting">执行权限<select id="permission-mode"><option value="bypassPermissions">全部权限（默认）</option><option value="default">需要时向我确认</option><option value="acceptEdits">自动批准文件编辑</option><option value="dontAsk">只执行已授权操作</option></select></label><p class="b-setting-note">全部权限会直接执行可用工具和设置修改；可随时切回确认模式，下一轮生效。</p>
+<label class="b-label">性格<textarea id="personality" class="b-field" rows="2" maxlength="500"></textarea></label>
+<label class="b-setting-check"><input id="config-enabled" type="checkbox">允许修改 Moss 设置</label><label class="b-setting-check"><input id="notifications-enabled" type="checkbox">接收重要消息提醒</label>
+<label class="b-setting">可用能力<select id="tool-access"><option value="all">Moss 全部可用工具（默认）</option><option value="selected">只使用我选择的工具</option></select></label><div id="tool-selection" hidden><p class="b-setting-note">始终保留手册和已开启的设置工具，可再选择其他能力。</p><div id="tool-picker"></div></div>
+<p class="b-setting-note">聊天保存在这个 App 中。换外形不会清空记录；模型跟随 Moss 默认配置。选择其他 Agent 后，可用工具还受该 Agent 的范围限制。</p><button class="b-primary" type="submit">保存伙伴设置</button></form></details>
+</div></section>
+<section id="page-notifications" class="b-main" hidden><h2>重要消息</h2><div id="notifications"></div></section>
+<section id="page-help" class="b-main" hidden><h2>Moss 使用手册</h2><form id="help-form" class="b-composer"><input id="help-query" class="b-field" placeholder="搜索模型、项目、记忆、hooks…" aria-label="搜索使用手册"><button class="b-primary" type="submit">搜索</button></form><div id="articles"></div></section>
+<section id="page-configuration" class="b-main" hidden><h2>Moss 设置</h2><p class="b-setting-note">桌面、Agent、项目、应用和连接，都可以在这里管理。直接说你想做什么，伙伴会找到对应设置。</p>
+<form id="settings-ask" class="b-composer"><input id="settings-request" class="b-field" placeholder="例如：开启会话摘要，把桌面换成浅色" aria-label="想调整什么" required><button class="b-primary" type="submit">和伙伴说</button></form>
+<div class="b-settings-toolbar"><input id="settings-search" class="b-field" type="search" placeholder="搜索设置，例如：主题、记忆、权限" aria-label="搜索 Moss 设置"><button id="refresh-config" class="b-chip" type="button">刷新</button></div><div id="settings-groups" class="b-shortcuts" aria-label="按功能查找设置"></div>
+<div class="b-settings-feedback" role="status"><span id="settings-result"></span><button id="undo-config" class="b-chip" type="button" hidden>撤销上次修改</button></div><div id="settings-list"></div></section>
+</div></main><script type="module" src="./main.mjs"></script></body></html>

@@ -6,3 +6,7 @@ site/
 .previous-site/
 .secrets/
 .DS_Store
+
+.cache/
+
+release-plan.json

@@ -1,0 +1,16 @@
+{
+  "name": "@moss/app-settings",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { "./build": { "types": "./build.d.mts", "import": "./build.mjs" }, "./scope": "./src/scope-settings.tsx" },
+  "dependencies": {
+    "@moss/app-sdk": "workspace:*",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "lucide-react": "0.564.0",
+    "tailwindcss": "4.1.14"
+  },
+  "devDependencies": { "@types/react": "19.2.2", "@types/react-dom": "19.2.2", "typescript": "5.9.3" },
+  "scripts": { "check": "tsc --noEmit", "test": "node tests/browser.mjs" }
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "id": "example.operational",
+  "version": "1.0.0",
+  "displayName": "Example App",
+  "category": "other",
+  "keywords": [],
+  "hostApi": "^3.4.0",
+  "toolScope": "session",
+  "ui": {
+    "entry": "dist/ui/index.html"
+  },
+  "permissions": [],
+  "navigation": {
+    "location": "more",
+    "viewId": "home"
+  },
+  "contributes": {
+    "views": [
+      {
+        "id": "home",
+        "title": "Home",
+        "route": "#/"
+      }
+    ]
+  }
+}

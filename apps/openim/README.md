@@ -29,3 +29,5 @@ OpenIM Server 及其 Moss Server integration 属于服务端基础设施，部�
 Backend 使用 `@openim/electron-client-sdk@3.8.3-patch.10` 的平台无关核心及同一包内的原生库。旧 `@openim/node-client-sdk@1.1.0` 将 ARM 库误放在 `mac_x64`，因此不再用于 Backend。`scripts/sync-native-sdk.mjs` 仅移除 Electron IPC 包装并导出原始核心，生成的源码、MIT 许可证及脚本均随包保留；升级依赖时先审查该脚本，再重新生成。`check` 会逐字验证生成内容，原生测试会核对各平台架构并在当前平台实际构造 SDK、绑定函数及测试关闭。
 
 Linux 原生文件也随包提供，用于 CI 中验证最终包。构建时将依赖使用的 `__filename` 指向最终 Backend 文件，避免产物带入构建机临时绝对路径。
+
+本版本要求 Moss Host API >=3.4.0，展示入口为“更多” → 即时消息。位置由 Manifest 声明；旧安装需要更新后生效。

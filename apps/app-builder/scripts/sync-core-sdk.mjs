@@ -18,7 +18,7 @@ async function snapshot(root) {
       else throw new Error(`Unsupported SDK source entry: ${file}`)
     }
   }
-  for (const name of ['app-sdk', 'host-contracts']) await visit(path.join(root, 'packages', name))
+  for (const name of ['app-sdk', 'host-contracts', 'app-runtime']) await visit(path.join(root, 'packages', name))
   return hash.digest('hex')
 }
 const provenanceFile = new URL('../assets/core-sdk-provenance.json', import.meta.url)
@@ -39,11 +39,11 @@ async function sync(source, destination) {
     }
   }
 }
-for (const name of ['app-sdk', 'host-contracts']) await sync(path.join(core, 'packages', name), path.join(vendor, 'packages', name))
+for (const name of ['app-sdk', 'host-contracts', 'app-runtime']) await sync(path.join(core, 'packages', name), path.join(vendor, 'packages', name))
 const snapshotSha256 = await snapshot(core)
 if (await snapshot(vendor) !== snapshotSha256) throw new Error('The vendored SDK contains stale or extra files. Resolve them before recording the snapshot.')
 const provenance = { sourceCommit: execFileSync('git', ['rev-parse','HEAD'], { cwd: core, encoding: 'utf8' }).trim(),
-  uncommittedSdkChanges: Boolean(execFileSync('git', ['status','--porcelain','--','packages/app-sdk','packages/host-contracts'], { cwd: core, encoding: 'utf8' }).trim()),
+  uncommittedSdkChanges: Boolean(execFileSync('git', ['status','--porcelain','--','packages/app-sdk','packages/host-contracts','packages/app-runtime'], { cwd: core, encoding: 'utf8' }).trim()),
   snapshotSha256 }
 await fs.writeFile(provenanceFile, JSON.stringify(provenance, null, 2) + '\n')
 console.log(JSON.stringify(provenance))

@@ -1,0 +1,61 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "domain": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "scope": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "target": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "key": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "revision": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "requestId": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "value": {},
+          "remove": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 50
+    },
+    "preview": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "domain",
+    "revision",
+    "requestId",
+    "changes"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 2,
+  "id": "example.settings",
+  "version": "1.0.0",
+  "displayName": "Example App",
+  "category": "other",
+  "keywords": [],
+  "hostApi": "^3.4.0",
+  "toolScope": "session",
+  "ui": {
+    "entry": "dist/ui/index.html"
+  },
+  "permissions": [],
+  "navigation": {
+    "location": "settings",
+    "viewId": "configuration"
+  },
+  "contributes": {
+    "views": [
+      {
+        "id": "configuration",
+        "title": "Settings",
+        "route": "#/settings"
+      }
+    ],
+    "settings": [
+      {
+        "id": "preferences",
+        "title": "Settings",
+        "viewId": "configuration",
+        "group": "apps"
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.computer-use",
+  "summary": "读取并操作已授权的 Windows 和 Mac 应用。",
+  "description": "截图、读取辅助功能树、点击、输入和快捷键，支持原生及 Electron 应用。驱动随 App 更新，控制授权由 Moss 管理。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/computer-use",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

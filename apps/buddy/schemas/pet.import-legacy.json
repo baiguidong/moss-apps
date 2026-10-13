@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "maxLength": 30
+    },
+    "personality": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "hatchedAt": {
+      "type": "number"
+    },
+    "userId": {
+      "type": "string",
+      "maxLength": 120
+    }
+  },
+  "required": [
+    "name",
+    "hatchedAt"
+  ],
+  "additionalProperties": false
+}

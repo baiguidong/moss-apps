@@ -1,3 +1,4 @@
+import { buildAppSettings } from '@moss/app-settings/build'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { cp, rm } from 'node:fs/promises'
@@ -15,3 +16,5 @@ for (const [command, args] of [
   if (result.error) throw result.error
   if (result.status !== 0) process.exit(result.status ?? 1)
 }
+
+await buildAppSettings(fileURLToPath(new URL('..', import.meta.url)))

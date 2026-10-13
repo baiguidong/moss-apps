@@ -3,7 +3,6 @@ import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import manifest from '../app.moss.json' with { type: 'json' }
 import { installHostFixture } from './host-fixture'
-import { BUILTIN_SERVERS } from '../src/builtins'
 const screenshots = path.resolve(import.meta.dirname, '../../..', `artifacts/moss.mcp/screenshots/${manifest.version}`)
 
 test('connection management supports adding, validation, editing, toggling and deletion', async ({ page }) => {
@@ -161,61 +160,11 @@ test('short desktop window keeps the toolbar and dialog submit action visible', 
 })
 
 
-test('built-in browser service shows portable settings and can be edited and disabled', async ({ page }) => {
-  await page.goto('/')
-  await page.getByRole('navigation', { name: '服务列表' }).getByRole('button', { name: /playwright-cdp/ }).click()
-  await expect(page.getByRole('heading', { name: '服务连接', exact: true })).toBeVisible()
-  await expect(page.getByText('工具与连接', { exact: true })).toHaveCount(0)
-  await expect(page.getByText('MCP 让工具融入对话', { exact: true })).toHaveCount(0)
-  await expect(page.locator('.builtin-badge')).toHaveText('内置')
-  await expect(page.getByRole('button', { name: '删除连接', exact: true })).toHaveCount(0)
-  await page.getByRole('tab', { name: '连接配置', exact: true }).click()
-  await expect(page.getByText('~/.moss/artifacts/playwright', { exact: true })).toBeVisible()
-  await expect(page.getByText(/本机 CDP 未开启时会自动启动系统 Chrome/)).toBeVisible()
-  await page.screenshot({ path: path.join(screenshots, 'builtin-config.png'), fullPage: true })
-  for (const width of [390, 320]) {
-    await page.setViewportSize({ width, height: 844 })
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-  }
-  await page.getByRole('button', { name: '编辑连接', exact: true }).click()
-  const edit = page.getByRole('dialog', { name: '编辑连接' })
-  await expect(edit.getByLabel('服务名称')).toHaveAttribute('readonly', '')
-  await expect(edit.getByLabel('启动命令')).toHaveCount(0)
-  await expect(edit.getByText(/无需安装 Node.js、npm 或联网下载/)).toBeVisible()
-  await edit.getByLabel('启动参数').fill('--cdp-endpoint\nhttp://127.0.0.1:9444\n--output-dir\n~/Browser Artifacts')
-  await edit.getByRole('button', { name: '保存更改' }).click()
-  await expect(edit).toHaveCount(0)
-  await page.getByRole('tab', { name: '连接配置', exact: true }).click()
-  await expect(page.getByText('~/Browser Artifacts', { exact: true })).toBeVisible()
-  await page.getByRole('switch', { name: '启用 playwright-cdp' }).click()
-  await expect(page.getByRole('switch', { name: '启用 playwright-cdp' })).toHaveAttribute('aria-checked', 'false')
-  await page.getByRole('button', { name: '刷新服务列表' }).click()
-  await expect(page.getByRole('switch', { name: '启用 playwright-cdp' })).toHaveAttribute('aria-checked', 'false')
-})
-
-
-test('browser startup failure shows a useful explanation, configuration action, and retry', async ({ page }) => {
-  const fixture = await installHostFixture(page, { servers: BUILTIN_SERVERS.map(server => ({ ...server, updatedAt: Date.now() })), inspectError: '未找到系统 Chrome。请安装 Chrome，或在启动参数中通过 --executable-path 指定路径。' })
-  await page.goto('/')
-  await page.getByRole('tab', { name: '连接配置', exact: true }).click()
-  await page.getByRole('button', { name: '检查连接', exact: true }).click()
-  await expect(page.getByRole('tab', { name: '可用工具' })).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('alert')).toContainText('未找到系统 Chrome')
-  await page.screenshot({ path: path.join(screenshots, 'browser-startup-error.png'), fullPage: true })
-  await page.getByRole('button', { name: '修改浏览器配置', exact: true }).click()
-  await expect(page.getByRole('dialog', { name: '编辑连接' }).getByLabel('启动参数')).toBeVisible()
-  await page.keyboard.press('Escape')
-  fixture.recoverInspection()
-  await page.locator('.check-actions').getByRole('button', { name: '检查连接', exact: true }).click()
-  await expect(page.getByRole('alert')).toHaveCount(0)
-  await expect(page.getByRole('heading', { name: '工具目录' })).toBeVisible()
-})
-
 const browserTools = [
   { name: 'browser_navigate', description: 'Navigate to a URL', disabled: false },
   { name: 'browser_click', description: 'Click an element', disabled: false },
 ]
-const browserServers = () => BUILTIN_SERVERS.map(server => ({ ...server, updatedAt: 1 }))
+const browserServers = () => [{ name: 'playwright-cdp', enabled: true, updatedAt: 1, config: { type: 'stdio' as const, command: 'fixture' } }]
 
 test('first opening discovers tools automatically and preserves the selected tab', async ({ page }) => {
   const fixture = await installHostFixture(page, { servers: browserServers(), tools: browserTools, holdInspection: true })

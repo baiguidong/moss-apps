@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.browser-use",
+  "version": "0.1.5",
+  "displayName": "网页操控",
+  "category": "automation",
+  "keywords": [
+    "浏览器",
+    "Browser Use",
+    "Chrome",
+    "Playwright",
+    "网页操控"
+  ],
+  "description": "操作网页时打开保留登录状态的专用浏览器，或连接日常 Chrome 操作网页。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.6.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1120,
+      "height": 780,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "actions": [
+      {
+        "name": "servers.list",
+        "inputSchema": "schemas/servers.list.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "servers.save",
+        "inputSchema": "schemas/servers.save.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "servers.inspect",
+        "inputSchema": "schemas/servers.inspect.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 65000
+      }
+    ],
+    "configuration": {
+      "secrets": "schemas/secrets.json"
+    }
+  },
+  "permissions": [
+    "mcp:read",
+    "mcp:manage",
+    "mcp:connect"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "browser",
+        "title": "网页操控",
+        "route": "#/",
+        "icon": "globe",
+        "order": 210
+      },
+      {
+        "id": "moss-settings",
+        "title": "通用设置",
+        "route": "#/moss-settings",
+        "icon": "settings",
+        "order": -1000
+      }
+    ],
+    "settings": [
+      {
+        "id": "manage",
+        "title": "浏览器连接设置",
+        "viewId": "browser",
+        "group": "tools"
+      },
+      {
+        "id": "shared-settings",
+        "title": "通用设置",
+        "viewId": "moss-settings",
+        "group": "apps",
+        "order": -1000
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.mcp/v1",
+      "moss.host/v1"
+    ]
+  },
+  "navigation": {
+    "location": "settings",
+    "viewId": "browser"
+  }
+}

@@ -19,3 +19,5 @@ bun run --cwd apps/trace build
 ```
 
 发布标签 `moss.trace-v0.1.0` 触发 CI 检查、浏览器验证、签名打包及市场更新。
+
+本版本要求 Moss Host API >=3.4.0，展示入口为“更多” → 调用追踪。位置由 Manifest 声明；旧安装需要更新后生效。

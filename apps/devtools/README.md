@@ -62,3 +62,5 @@ HTTP 源测试使用 Node 测试运行器验证真实网络、TLS 和取消语�
 ZIP 输出到 `artifacts/moss.devtools/0.2.0/`。浏览器截图和桌面验证报告位于 `artifacts/moss.devtools/`。推送 `moss.devtools-v0.2.0` 标签后，现有 Release App CI 校验、测试、构建、签名并更新应用市场。
 
 开源来源见 [说明](assets/licenses/README.md)，安装包包含第三方许可证。完整检查范围见仓库中的 [验证记录](../../docs/devtools-app-verification.md)。
+
+本版本要求 Moss Host API >=3.4.0，展示入口为“更多” → 开发工具。位置由 Manifest 声明；旧安装需要更新后生效。

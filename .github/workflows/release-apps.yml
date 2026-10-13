@@ -1,0 +1,91 @@
+name: Release Changed Apps
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Only generate the release plan
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+# Serialize whole batches so an older source snapshot cannot deploy after a new one.
+concurrency:
+  group: moss-app-release-batch
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      has_changes: ${{ steps.plan.outputs.has_changes }}
+      has_errors: ${{ steps.plan.outputs.has_errors }}
+      source_sha: ${{ steps.plan.outputs.source_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.0'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+      - run: bun install --frozen-lockfile --filter moss-apps
+      - name: Test release orchestration
+        run: bun test ./scripts/automatic-release.test.ts
+      - id: plan
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/plan-releases.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-plan
+          path: release-plan.json
+  release:
+    needs: plan
+    if: needs.plan.outputs.has_changes == 'true' && inputs.dry_run != true
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    uses: ./.github/workflows/release-app.yml
+    with:
+      app_id: ${{ matrix.app_id }}
+      version: ${{ matrix.version }}
+      source_sha: ${{ matrix.source_sha }}
+    secrets: inherit
+  catalog:
+    needs: [plan, release]
+    if: always() && !cancelled() && needs.plan.result == 'success' && inputs.dry_run != true
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/publish-catalog.yml
+  result:
+    needs: [plan, release, catalog]
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report failures after successful Apps reach the marketplace
+        env:
+          PLAN_RESULT: ${{ needs.plan.result }}
+          RELEASE_RESULT: ${{ needs.release.result }}
+          CATALOG_RESULT: ${{ needs.catalog.result }}
+          SOURCE_ERRORS: ${{ needs.plan.outputs.has_errors }}
+        run: |
+          if [ "$PLAN_RESULT" = failure ] || [ "$RELEASE_RESULT" = failure ] || [ "$CATALOG_RESULT" = failure ] || [ "$SOURCE_ERRORS" = true ]; then
+            echo 'Some Apps could not be released. Inspect the release plan and failed App jobs; reruns skip published versions.' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi

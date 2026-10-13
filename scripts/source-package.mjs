@@ -53,15 +53,40 @@ export function run(command, args, cwd) {
   if (result.error || result.status !== 0) throw result.error || new Error(`${command} ${args.join(' ')} failed (${result.status})`)
 }
 
-export async function exportAppSource(app, destination, { release = false } = {}) {
+export async function exportAppSource(app, destination, { release = false, platform } = {}) {
   const rootPackage = readJson(path.join(repoRoot, 'package.json'))
   const bunVersion = execFileSync('bun', ['--version'], { encoding: 'utf8' }).trim()
   if (rootPackage.packageManager !== `bun@${bunVersion}`) throw new Error(`Expected ${rootPackage.packageManager}, found bun@${bunVersion}`)
   const appRoot = path.relative(repoRoot, app.root).split(path.sep).join('/')
   const localPaths = [appRoot, 'vendor/moss-core/packages/app-sdk', 'vendor/moss-core/packages/host-contracts']
+  const appPackage = app.kind === 'mcp' ? {
+    name: `@moss/config-${app.directoryName}`, version: app.manifest.version, private: true, type: 'module',
+    scripts: { check: 'node ../../scripts/build-mcp-app.mjs --check', build: 'node ../../scripts/build-mcp-app.mjs' },
+    devDependencies: { '@moss/app-runtime': 'workspace:*' },
+  } : readJson(path.join(app.root, 'package.json'))
+  const appDependencies = dependencies(appPackage)
+  // Shared App UI modules travel with each source package and its focused lock.
+  const shared = new Map()
+  for (const entry of await fs.readdir(path.join(repoRoot, 'packages'), { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue
+    const relative = `packages/${entry.name}`
+    const pkg = readJson(path.join(repoRoot, relative, 'package.json'))
+    shared.set(pkg.name, { relative, pkg })
+  }
+  const pending = Object.keys(appDependencies)
+  while (pending.length) {
+    const local = shared.get(pending.pop())
+    if (!local || localPaths.includes(local.relative)) continue
+    localPaths.push(local.relative)
+    pending.push(...Object.keys(dependencies(local.pkg)))
+  }
+  if (appDependencies['@moss/app-runtime']) localPaths.push('vendor/moss-core/packages/app-runtime')
   const appFiles = await sourceFileList(app.root, { filter: (name, entry) => !['node_modules', 'dist', '.git'].includes(entry.name) })
   for (const file of appFiles.filter(file => /\.[cm]?[jt]sx?$/.test(file.path))) {
-    if ((await fs.readFile(path.join(app.root, file.path), 'utf8')).includes('packages/app-runtime/')) { localPaths.push('vendor/moss-core/packages/app-runtime'); break }
+    if ((await fs.readFile(path.join(app.root, file.path), 'utf8')).includes('packages/app-runtime/')) {
+      if (!localPaths.includes('vendor/moss-core/packages/app-runtime')) localPaths.push('vendor/moss-core/packages/app-runtime')
+      break
+    }
   }
   const coreRoot = path.join(repoRoot, 'vendor/moss-core')
   const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repoRoot, encoding: 'utf8' }).trim()
@@ -71,6 +96,12 @@ export async function exportAppSource(app, destination, { release = false } = {}
   if (release && (dirty || coreDirty)) throw new Error('Signed releases require committed App source and a clean pinned Core submodule; local packages record dirty content hashes.')
   await fs.mkdir(destination, { recursive: true })
   for (const relative of localPaths) await copySourceTree(path.join(repoRoot, relative), path.join(destination, relative))
+  if (app.kind === 'mcp') {
+    await writeJson(path.join(destination, appRoot, 'package.json'), appPackage)
+    await writeJson(path.join(destination, appRoot, 'app.moss.json'), app.manifest)
+    await fs.mkdir(path.join(destination, 'scripts'), { recursive: true })
+    await fs.copyFile(path.join(repoRoot, 'scripts/build-mcp-app.mjs'), path.join(destination, 'scripts/build-mcp-app.mjs'))
+  }
   for (const name of ['LICENSE', 'LICENSE.md']) {
     try { await fs.copyFile(path.join(coreRoot, name), path.join(destination, 'vendor/moss-core', name)) }
     catch (error) { if (error.code !== 'ENOENT') throw error }
@@ -82,9 +113,14 @@ export async function exportAppSource(app, destination, { release = false } = {}
   for (const relative of localPaths) workspaces[relative] = readJson(path.join(destination, relative, 'package.json'))
   const lock = focusedLock(parseLock(await fs.readFile(path.join(repoRoot, 'bun.lock'), 'utf8')), workspaces)
   await writeJson(path.join(destination, 'bun.lock'), lock)
-  await fs.writeFile(path.join(destination, 'README.md'), `# ${app.manifest.id} source\n\nApp edit root: ${appRoot}\n\nToolchain: ${workspace.packageManager}; Node ${process.versions.node}.\n\nFrom this directory run \`bun install --frozen-lockfile\`, then in \`${appRoot}\` run \`bun run check\`, \`bun run test\`, and \`bun run build\`.\n\nDesktop/Host/browser integration scripts may require a complete Core checkout, browser binaries or explicit test configuration. Those external integrations are separate from the included business tests. Dependencies are downloaded from the pinned lockfile; no original workspace or source cache is needed.\n`)
+  const rebuildCommands = ['check', 'test', 'build'].filter(name => appPackage.scripts?.[name]).map(name => `\`bun run ${name}\``).join(', ')
+  await fs.writeFile(path.join(destination, 'README.md'), `# ${app.manifest.id} source\n\nApp edit root: ${appRoot}\n\nToolchain: ${workspace.packageManager}; Node ${process.versions.node}.\n\nFrom this directory run \`bun install --frozen-lockfile\`, then in \`${appRoot}\` run ${rebuildCommands}.\n\nDesktop/Host/browser integration scripts may require a complete Core checkout, browser binaries or explicit test configuration. Those external integrations are separate from the included business tests. Dependencies are downloaded from the pinned lockfile; no original workspace or source cache is needed.\n`)
+  if (platform) {
+    if (!app.manifest.platforms?.includes(platform)) throw new Error(`App does not declare build target ${platform}`)
+    await writeJson(path.join(destination, appRoot, 'app.moss.json'), { ...app.manifest, platforms: [platform] })
+  }
   const spec = await inspectSourceProject(destination, { appRoot })
   const sdkFiles = await sourceFileList(path.join(destination, 'vendor/moss-core'))
-  return { ...spec, origin: { kind: 'repository', repository: app.marketplace.repository, commit, appRoot, dirty },
+  return { ...spec, origin: { kind: 'repository', repository: app.marketplace.repository, commit, appRoot, dirty, ...(platform ? { platform } : {}) },
     sdk: { coreCommit, dirty: coreDirty, path: 'vendor/moss-core/packages', sha256: sha256Hex(Buffer.from(JSON.stringify(sdkFiles))) } }
 }

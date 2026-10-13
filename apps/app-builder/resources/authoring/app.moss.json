@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 2,
+  "id": "example.app",
+  "version": "1.0.0",
+  "displayName": "Example App",
+  "category": "other",
+  "keywords": [],
+  "hostApi": "^3.4.0",
+  "toolScope": "session",
+  "ui": {
+    "entry": "dist/ui/index.html"
+  },
+  "permissions": []
+}

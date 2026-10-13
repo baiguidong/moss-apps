@@ -31,7 +31,7 @@ App 只通过通用 `moss.agent/v1` Host API 创建 Turn、接收结果并确认
 
 ## Moss 配置
 
-在 `Apps -> 飞书 -> 打开` 中填写：
+在 `设置 → 连接与集成 → 飞书` 中填写：
 
 | 配置项 | 是否必填 | 说明 |
 | --- | --- | --- |
@@ -76,3 +76,5 @@ bun run build
 ```
 
 `bun run start` 只能由 Moss Host 通过 IPC 启动，不能作为独立机器人进程运行。
+
+本版本要求 Moss Host API >=3.4.0，展示入口为设置 → 连接与集成 → 飞书。位置由 Manifest 声明；旧安装需要更新后生效。

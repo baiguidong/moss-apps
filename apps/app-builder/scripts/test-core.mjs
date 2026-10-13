@@ -8,7 +8,8 @@ export async function runCoreTest(mode) {
   const core = path.resolve(process.env.MOSS_CORE_ROOT || fileURLToPath(new URL('../../../../moss', import.meta.url)))
   const require = createRequire(path.join(core, 'ui/package.json'))
   if (mode === 'agent' && !process.env.MOSS_BUILDER_AGENT_SETTINGS) throw new Error('BLOCKED: set MOSS_BUILDER_AGENT_SETTINGS to an explicitly prepared model settings JSON for the isolated ordinary-Agent test')
-  const env = { ...process.env, MOSS_BUILDER_TEST_MODE: mode, MOSS_BUILDER_PACKAGE: fileURLToPath(new URL('../../../artifacts/moss.app-builder/0.1.0/package', import.meta.url)), MOSS_TEST_NODE: process.execPath }
+  const manifest = JSON.parse(await fs.readFile(new URL('../app.moss.json', import.meta.url), 'utf8'))
+  const env = { ...process.env, MOSS_BUILDER_TEST_MODE: mode, MOSS_BUILDER_PACKAGE: process.env.MOSS_BUILDER_PACKAGE || fileURLToPath(new URL(`../../../artifacts/moss.app-builder/${manifest.version}/package`, import.meta.url)), MOSS_TEST_NODE: process.execPath }
   delete env.ELECTRON_RUN_AS_NODE
   if (process.env.MOSS_CORE_EXECUTABLE) {
     const child = spawn(process.execPath, [path.join(core, 'ui/scripts/test-installed-app-builder.mjs'), ...(mode === 'agent' ? ['--agent'] : [])], { cwd: core, env, stdio: 'inherit' })

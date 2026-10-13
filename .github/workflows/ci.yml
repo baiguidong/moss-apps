@@ -36,6 +36,8 @@ jobs:
       - run: bun run validate
       - run: bun run check
       - run: bun run test
+      - name: Verify signed configuration App release in an isolated fixture
+        run: node scripts/verify-release-smoke.mjs
       - run: bun run build
       - name: Install browser for developer tools checks
         working-directory: apps/devtools

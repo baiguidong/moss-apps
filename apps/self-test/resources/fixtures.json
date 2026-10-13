@@ -1,0 +1,9 @@
+{
+  "title": "自测样例",
+  "fixtures": [
+    {
+      "name": "self-test-note.txt",
+      "content": "Moss self-test fixture\n用于检查工作区文件与预览。\n"
+    }
+  ]
+}

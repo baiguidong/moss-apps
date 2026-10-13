@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.buddy",
+  "summary": "孵化一个能聊天、懂 Moss 的宠物伙伴。",
+  "description": "孵化自己的宠物，和它聊天，了解 Moss 用法并管理桌面、Agent 与项目配置。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/buddy",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}
