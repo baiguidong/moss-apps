@@ -5,9 +5,9 @@ import os from 'node:os';
 import { listApps, repoRoot } from './lib.mjs';
 import { exportAppSource, parseLock } from './source-package.mjs';
 
-test('every tool App declares and builds the shared settings page while retaining its own default scope', async () => {
+test('ordinary tool Apps build their shared settings page; configuration Apps use Core settings', async () => {
   const apps = listApps().filter(app => app.kind === 'app' && (app.manifest.contributes?.tools?.length || app.manifest.host?.protocols?.includes('moss.mcp/v1')));
-  expect(apps.length).toBe(13);
+  expect(apps.length).toBe(10);
   for (const app of apps) {
     const view = app.manifest.contributes.views.find(view => view.route === '#/moss-settings');
     expect(view).toBeTruthy();
@@ -19,7 +19,9 @@ test('every tool App declares and builds the shared settings page while retainin
     if (app.manifest.host.protocols.includes('moss.mcp/v1')) expect(app.manifest.permissions).toContain('mcp:read');
   }
   expect(apps.find(app => app.manifest.id === 'moss.knowledge-rag').manifest.toolScope).toBe('session');
-  expect(apps.find(app => app.manifest.id === 'moss.sequential-thinking').manifest.toolScope).toBe('global');
+  const thinking = listApps().find(app => app.manifest.id === 'moss.sequential-thinking');
+  expect(thinking.kind).toBe('mcp');
+  expect(thinking.manifest).toMatchObject({ ui: { builtin: 'mcp' }, toolScope: 'global', mcpApp: { runtime: { state: 'session' } } });
 });
 
 test('source exports carry the shared module and its pinned dependencies for independent rebuilds', async () => {

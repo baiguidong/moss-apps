@@ -17,11 +17,11 @@ let browser, server;
 const calls = [];
 const states = new Map();
 try {
-  for (const name of ['mcp', 'library', 'sequential-thinking']) {
+  for (const name of ['mcp', 'library', 'global-mcp']) {
     const target = path.join(temp, name); await fs.mkdir(target, { recursive: true });
-    const html = await buildAppSettings(path.join(repo, 'apps', name), { outputDir: target, html: '<!doctype html><meta charset="utf-8"><body><main><input aria-label="App 工作内容" value="保留内容"></main></body>' });
+    const html = await buildAppSettings(path.join(repo, 'apps', name === 'global-mcp' ? 'mcp' : name), { outputDir: target, html: '<!doctype html><meta charset="utf-8"><body><main><input aria-label="App 工作内容" value="保留内容"></main></body>' });
     await fs.writeFile(path.join(target, 'index.html'), html);
-    states.set(name, { defaultScope: name === 'sequential-thinking' ? 'global' : 'session', override: null, grants: ['mcp:read', 'mcp:connect', 'mcp:manage', 'mcp:auth'],
+    states.set(name, { defaultScope: name === 'global-mcp' ? 'global' : 'session', override: null, grants: ['mcp:read', 'mcp:connect', 'mcp:manage', 'mcp:auth'],
       servers: [{ name: 'drawio', enabled: true, updatedAt: 1000, credentialsMissing: false,
         config: { type: 'stdio', command: 'npx', args: ['-y', '@drawio/mcp'], env: { API_KEY: '' } }, check: null }] });
   }
@@ -102,7 +102,7 @@ try {
   await expect(page.getByRole('radio', { name: /跟随 App 默认/ })).toBeChecked();
   await expect(page.getByRole('heading', { name: '可用工具' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'MCP 服务设置' })).toHaveCount(0);
-  await page.goto(url('sequential-thinking') + '#/moss-settings');
+  await page.goto(url('global-mcp') + '#/moss-settings');
   await expect(page.getByText('当前默认：全局。随 App 默认设置更新。')).toBeVisible();
   assert(calls.every(call => !('appId' in call.input)), 'App-bound SDK requests must not select another App');
   assert.deepEqual(errors, []);

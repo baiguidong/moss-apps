@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.filesystem",
+  "version": "0.1.2",
+  "displayName": "文件系统",
+  "description": "默认读写会话工作目录中的文件，也可添加公共目录进行搜索和整理。",
+  "category": "knowledge",
+  "keywords": ["文件系统", "Filesystem", "MCP"],
+  "icon": "assets/icon.svg",
+  "publisher": { "id": "moss", "name": "Moss" },
+  "toolScope": "session",
+  "runtime": { "state": "stateless" },
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem@2026.8.31"],
+      "roots": { "includeWorkspace": true, "delivery": "arguments", "directories": [] }
+    }
+  },
+  "presentation": {
+    "headline": "在授权目录内读取、搜索和整理文件",
+    "examples": ["列出当前工作目录的文件，说明目录结构", "查找这些文档中关于项目进度的内容", "预览这份文件需要的修改，确认后保存"],
+    "usage": "在会话中选择文件系统后使用。当前会话目录自动加入；需要访问额外目录时，可在设置中添加公共目录。公共目录可留空，且供使用此 App 的会话共享。"
+  }
+}

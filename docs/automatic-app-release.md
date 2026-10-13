@@ -80,7 +80,7 @@ Actions → **Release Changed Apps** → **Run workflow**，默认 `dry_run=true
 - 仓库脚本回归：62 项通过；最终签名字段校验调整后，13 项发布与 MCP 专项复验通过。
 - Core MCP 安装/资源/源码安全：7 项通过；源码描述校验：1 项通过。
 - Draw.io 0.1.4：本地 ZIP 打包、解压后独立重建一致；临时干净仓库和临时 Ed25519 密钥的真实签名包也验证通过。
-- 普通 App `moss.sequential-thinking`：检查、5 项业务测试、打包、Backend 握手和 ZIP 独立重建通过。
+- 当时的普通 App `moss.sequential-thinking` 0.1.2：检查、5 项业务测试、打包、Backend 握手和 ZIP 独立重建通过。0.1.3 已转为 `mcp-apps/sequential-thinking/` 下的配置型 App，使用相同的配置包发布流程。
 - 四个相关 Actions workflow 通过 actionlint；冻结锁文件安装通过。
 - 只读扫描 GitHub 得到 20 个待发布 App，包含 Draw.io；计划保存在 `artifacts/automatic-release/plan.json`。日志保存在同目录。该记录来自首次本地验证；线上发布状态以 Actions 为准。
 

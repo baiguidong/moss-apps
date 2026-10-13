@@ -7,10 +7,10 @@ Moss 官方 App 的独立源码与发布仓库。普通 App 位于 `apps/<name>`
 | 分类 | App |
 | --- | --- |
 | 沟通协作 `communication` | [飞书](apps/feishu/README.md)、[即时消息](apps/openim/README.md) |
-| 知识与文件 `knowledge` | [知识库](apps/library/README.md)、[网盘](apps/drive/README.md)、[文件系统](apps/filesystem/README.md) |
+| 知识与文件 `knowledge` | [知识库](apps/library/README.md)、[网盘](apps/drive/README.md)、[文件系统](mcp-apps/filesystem/README.md) |
 | 自动化 `automation` | [工作流](apps/workflow/README.md)、[网页操控](apps/browser-use/README.md)、[电脑操控](apps/computer-use/README.md) |
-| AI 增强 `ai` | [记忆](apps/memory/README.md)、[分步思考](apps/sequential-thinking/README.md)、[MCP 管理](apps/mcp/README.md) |
-| 开发工具 `development` | [应用构建](apps/app-builder/README.md)、[开发工具](apps/devtools/README.md)、[Git 仓库](apps/git/README.md) |
+| AI 增强 `ai` | [记忆](apps/memory/README.md)、[分步思考](mcp-apps/sequential-thinking/README.md)、[MCP 管理](apps/mcp/README.md) |
+| 开发工具 `development` | [应用构建](apps/app-builder/README.md)、[开发工具](apps/devtools/README.md)、[Git 仓库](mcp-apps/git/README.md) |
 | 诊断与审计 `diagnostics` | [调用追踪](apps/trace/README.md)、[审计中心](apps/audit/README.md) |
 
 规划中的本地工具扩展见 [本地工具 App 选型与接入方案](docs/local-tool-apps-plan.md)，覆盖开发工具、HTTP 调试、图片和音视频处理。

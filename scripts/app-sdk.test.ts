@@ -61,7 +61,7 @@ describe('SDK 3.1 consumer contract', () => {
       `,
     ], { cwd: new URL('..', import.meta.url), encoding: 'utf8' })
     expect(JSON.parse(output)).toEqual({
-      version: '3.9.0', cloud: MOSS_CLOUD_STORAGE_PROTOCOL,
+      version: APP_HOST_API_VERSION, cloud: MOSS_CLOUD_STORAGE_PROTOCOL,
       platform: MOSS_PLATFORM_PROTOCOL, sameExports: true,
     })
   })
