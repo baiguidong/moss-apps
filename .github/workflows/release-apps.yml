@@ -1,11 +1,29 @@
-name: Diagnose Windows settings rebuild
+name: Verify cross-platform settings rebuild
 on:
   workflow_dispatch:
 permissions:
   contents: read
-  actions: read
 jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.0'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+      - run: bun install --frozen-lockfile --filter moss-apps --filter '@moss/app-builder-app'
+      - run: node scripts/package-app.mjs --app moss.app-builder
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-source-package
+          path: artifacts/**/*.zip
   rebuild:
+    needs: pack
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
@@ -22,13 +40,11 @@ jobs:
       - run: bun install --frozen-lockfile --filter moss-apps
       - uses: actions/download-artifact@v4
         with:
-          name: source-packages
+          name: linux-source-package
           path: artifacts
-          run-id: 38347616640
-          github-token: ${{ github.token }}
       - run: node scripts/verify-source-package.mjs --app moss.app-builder --rebuild
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: settings-byte-differences
           path: diagnostics
