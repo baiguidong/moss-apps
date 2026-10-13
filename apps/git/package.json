@@ -7,7 +7,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "node scripts/build.mjs",
     "check": "tsc --noEmit",
-    "test": "bun test src tests",
+    "test": "bun test src tests/backend.test.mjs && node scripts/test-runtime.mjs",
     "test:browser": "playwright test"
   },
   "dependencies": {

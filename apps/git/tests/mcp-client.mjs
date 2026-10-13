@@ -1,21 +1,8 @@
-import { execFileSync } from 'node:child_process'
-import { fileURLToPath } from 'node:url'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { ListRootsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
-const nodeExecutable = execFileSync('node', ['-p', 'process.execPath'], { encoding: 'utf8' }).trim()
-let builtServer
-async function serverEntry(entry) {
-  // Production MCP servers run under Node. Compile the same external-package
-  // entry rather than exercising Bun's Windows subprocess/stdio implementation.
-  builtServer ||= Bun.build({ entrypoints: [entry], target: 'node', format: 'esm',
-    packages: 'external', outdir: fileURLToPath(new URL('../dist/test-server/', import.meta.url)), naming: 'cli.mjs' })
-  const result = await builtServer
-  if (!result.success) throw new AggregateError(result.logs, 'MCP test server build failed')
-  return result.outputs[0].path
-}
 export async function connect(entry, args = [], options = {}) {
-  const transport = new StdioClientTransport({ command: nodeExecutable, args: [await serverEntry(entry), ...args],
+  const transport = new StdioClientTransport({ command: process.execPath, args: [entry, ...args],
     env: { ...process.env, PATH: '', MOSS_SESSION_WORKSPACE: '', npm_config_offline: 'true', ...options.env }, stderr: 'pipe', cwd: options.cwd })
   let stderr = ''
   transport.stderr?.on('data', chunk => { stderr += chunk })
