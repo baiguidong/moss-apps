@@ -46,6 +46,18 @@ export class CuaDriverHost {
       const connection = await host.start();
       if (epoch !== this.epoch) throw new Error('电脑操控启动已取消。');
       if (connection.driverVersion !== CUA_VERSION) throw new Error(`Cua driver version mismatch: ${connection.driverVersion}`);
+      let client;
+      if (process.env.MOSS_NATIVE_TEST_TRANSPORT === 'sdk') {
+        const native = sdk.CuaDriver.connect(connection.socketPath);
+        client = {
+          async callTool(request, _schema, options) {
+            const signal = AbortSignal.any([AbortSignal.timeout(options.timeout), ...(options.signal ? [options.signal] : [])]);
+            const result = await native.callTool(request.name, JSON.stringify(request.arguments), { signal });
+            return JSON.parse(result.rawJson);
+          },
+          async close() { try { await native.shutdown(); } finally { native.uniffiDestroy?.(); } },
+        };
+      } else {
       const [{ Client }, { StdioClientTransport }] = await Promise.all([
         import('@modelcontextprotocol/sdk/client/index.js'),
         import('@modelcontextprotocol/sdk/client/stdio.js'),
@@ -55,9 +67,10 @@ export class CuaDriverHost {
         env: Object.fromEntries(connection.mcp.environment.map(({ name, value }) => [name, value])),
         stderr: 'ignore',
       });
-      const client = new Client({ name: 'moss-computer-use', version: '1.0.0' }, { capabilities: {} });
+      client = new Client({ name: 'moss-computer-use', version: '1.0.0' }, { capabilities: {} });
       this.transport = transport;
       await client.connect(transport);
+      }
       if (epoch !== this.epoch) { await client.close(); throw new Error('电脑操控启动已取消。'); }
       this.client = client;
       this.connection = connection;
@@ -79,8 +92,10 @@ export class CuaDriverHost {
   }
   async call(name, args = {}, signal) {
     try {
+      const started = Date.now(); console.error('DRIVER_CALL_START', name);
       await this.start();
-      return await this.client.callTool({ name, arguments: args }, undefined, { timeout: 30000, signal });
+      const result = await this.client.callTool({ name, arguments: args }, undefined, { timeout: 30000, signal });
+      console.error('DRIVER_CALL_DONE', name, Date.now() - started); return result;
     } catch (error) {
       throw new Error(`${name}: ${error?.message || String(error)}`, { cause: error });
     }
