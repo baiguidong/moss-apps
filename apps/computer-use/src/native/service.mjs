@@ -93,7 +93,10 @@ export class ComputerUseService {
   async invoke(input, session, outerSignal) {
     this.control.assertLocal(session);
     if (!actions.has(input?.action)) throw new Error('不支持的电脑操控操作。');
-    if (input.action === 'status') return { content: [{ type: 'text', text: JSON.stringify(this.control.status()) }] };
+    if (input.action === 'status') {
+      const status = this.control.status();
+      return { structuredContent: status, content: [] };
+    }
     if (input.action === 'end_session') { await this.control.finish(session.id); return { content: [{ type: 'text', text: '控制已结束。' }] }; }
     return this.control.run(session, outerSignal, async (signal, epoch) => {
       this.owner.action = input.action;
@@ -102,7 +105,8 @@ export class ComputerUseService {
       const apps = await this.listApps(signal); this.guard(session, epoch);
       if (input.action === 'list_apps') {
         const q = String(input.query || '').toLowerCase();
-        return { content: [{ type: 'text', text: JSON.stringify({ apps: apps.filter(a => !q || `${a.name} ${a.bundleId}`.toLowerCase().includes(q)).map(a => ({ name: a.name, bundleId: a.bundleId, running: a.running })) }) }] };
+        const result = { apps: apps.filter(a => !q || `${a.name} ${a.bundleId}`.toLowerCase().includes(q)).map(a => ({ name: a.name, bundleId: a.bundleId, running: a.running })) };
+        return { structuredContent: result, content: [] };
       }
       const matches = apps.filter(a => a.bundleId === input.app || a.name === input.app);
       if (matches.length !== 1) throw new Error('应用不存在或名称不唯一，请先 list_apps，再使用准确 bundleId 应用标识。');
