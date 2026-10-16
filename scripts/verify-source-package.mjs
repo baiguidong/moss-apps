@@ -36,13 +36,15 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
       for (const value of [signature.publisherId, signature.keyId]) if (!/^[a-zA-Z0-9._-]+$/.test(value)) throw new Error('Invalid signing identity')
       trustedPublishers[signature.publisherId] = { keys: { [signature.keyId]: await fs.readFile(path.join(repoRoot, 'publishers', signature.publisherId, `${signature.keyId}.pem`), 'utf8') } }
     }
-    // This is an offline archive verifier, not an installer. Validate against
-    // the signed target so foreign-platform source can be rebuilt here.
+    // Validate the signed target on publication hosts, which may use another OS.
     const manifest = JSON.parse(await fs.readFile(path.join(root, 'app.moss.json'), 'utf8'))
     const platform = manifest.platforms?.length === 1 ? manifest.platforms[0] : undefined
     const pkg = await validateAppPackage(root, { platform, requireSource: true, requireTrustedPublisher: requireSignature, trustedPublishers })
     const source = await validateSourcePackage(root, { required: true })
-    await verifyPackageRuntime(root, { nodeExecutable: process.execPath })
+    const currentPlatform = `${process.platform}-${process.arch}`
+    const canRun = !pkg.manifest.platforms?.length || pkg.manifest.platforms.includes(currentPlatform)
+    if (rebuild && !canRun) throw new Error(`Source rebuild requires a supported platform: ${pkg.manifest.platforms.join(', ')}; current ${currentPlatform}`)
+    const runtime = canRun ? await verifyPackageRuntime(root, { nodeExecutable: process.execPath }) : { backend: 'not-run-foreign-platform', currentPlatform }
     if (rebuild) {
       const workspace = path.join(temp, 'workspace')
       await copySourceTree(source.root, workspace, { includeSdk: true })
@@ -70,7 +72,7 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
         throw new Error(`ZIP source rebuild does not match shipped runtime files: ${[...changed, ...added].slice(0, 20).join(', ')}`)
       }
     }
-    return { appId: pkg.manifest.id, version: pkg.manifest.version, sourceHash: source.descriptor.sourceHash, platforms: pkg.manifest.platforms, publisherId: signature?.publisherId, keyId: signature?.keyId, origin: source.descriptor.origin, sdk: source.descriptor.sdk, rebuild }
+    return { appId: pkg.manifest.id, version: pkg.manifest.version, sourceHash: source.descriptor.sourceHash, platforms: pkg.manifest.platforms, publisherId: signature?.publisherId, keyId: signature?.keyId, origin: source.descriptor.origin, sdk: source.descriptor.sdk, rebuild, runtime }
   } finally { await fs.rm(temp, { recursive: true, force: true }) }
 }
 

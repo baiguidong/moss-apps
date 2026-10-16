@@ -1,6 +1,6 @@
 # 六个本地 App 初始发布
 
-初始正式版：**0.1.1**。支持 **macOS Apple Silicon（darwin-arm64）**。由 GitHub Actions 从干净源码构建并签名，发布成功后自动进入 Moss 应用市场。
+初始正式版：**0.1.1**。首批验证平台为 **macOS 15+ Apple Silicon（darwin-arm64）**。由 GitHub Actions 从干净源码构建并签名，发布成功后自动进入 Moss 应用市场。
 
 | App | 正式版本入口 |
 | --- | --- |
@@ -22,3 +22,5 @@ Core 固定到 [8e399848](https://github.com/baiguidong/moss/commit/8e3998488959
 [发布任务](https://github.com/baiguidong/moss-apps/actions/workflows/release-apps.yml)负责签名、目标平台构建、最终 ZIP 断网运行、独立源码重建和 GitHub Releases 上传；随后[市场发布任务](https://github.com/baiguidong/moss-apps/actions/workflows/publish-catalog.yml)生成市场目录。在线状态以工作流与正式版本入口为准。
 
 开发阶段的具体功能验证见[界面更新](app-ui-refinement.md)和[随包依赖与 CI](local-apps-ci-delivery.md)。其中本地 artifacts 为历史验证记录，正式下载使用上表 GitHub Releases。
+
+首次线上验证补充：Whisper 1.1.3 的 Mach-O `LC_BUILD_VERSION` 声明 `minos 15.0`，因此语音转写要求 macOS 15 或更新版本，普通 CI 与正式发布统一使用 macOS 15。发布汇总节点继续校验所有签名、校验和、源码及平台身份；原生 Backend 握手与源码重建由对应平台节点执行，Linux 汇总节点不会尝试加载 macOS 原生模块。

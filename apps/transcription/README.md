@@ -18,3 +18,5 @@ node scripts/package-app.mjs --app moss.transcription
 ```
 
 业务测试覆盖字幕格式、Unicode、时间进位和错误输入；真实模型、录音与安装包验证另见仓库交付记录。App/Whisper 绑定为 MIT；FFmpeg 的许可按实际二进制构建配置确定，不能将整个运行包称为 MIT。
+
+系统要求：macOS 15 或更新版本、Apple Silicon。随包 Whisper 原生模块的最低系统版本为 15.0。

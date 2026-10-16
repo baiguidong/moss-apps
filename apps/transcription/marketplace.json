@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "appId": "moss.transcription",
   "summary": "本地录音和视频转文字，播放、校对并导出字幕。",
-  "description": "本地录音和视频转文字，播放、校对并导出字幕。",
+  "description": "要求 macOS 15 或更新版本（Apple Silicon）。本地录音和视频转文字，播放、校对并导出字幕。",
   "platforms": [
     "darwin-arm64"
   ],
