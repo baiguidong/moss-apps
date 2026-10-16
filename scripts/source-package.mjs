@@ -44,6 +44,12 @@ export function focusedLock(original, workspaces) {
 
 export function run(command, args, cwd) {
   const env = { PATH: process.env.PATH, HOME: os.homedir(), CI: '1', TMPDIR: os.tmpdir() }
+  // A content-verified build cache is safe to share across isolated rebuilds.
+  // Runtime packages never depend on this directory.
+  if (process.env.MOSS_BUILD_DEPENDENCY_CACHE) {
+    if (!path.isAbsolute(process.env.MOSS_BUILD_DEPENDENCY_CACHE)) throw new Error('Build dependency cache must be an absolute path')
+    env.MOSS_BUILD_DEPENDENCY_CACHE = process.env.MOSS_BUILD_DEPENDENCY_CACHE
+  }
   // PowerShell/CIM and Python need these Windows system locations even in an
   // isolated build. Keep the allowlist explicit so signing keys never enter it.
   for (const key of ['SystemRoot', 'SystemDrive', 'WINDIR', 'ComSpec', 'PATHEXT', 'TEMP', 'TMP', 'USERPROFILE', 'HOMEDRIVE', 'HOMEPATH', 'APPDATA', 'LOCALAPPDATA', 'ProgramData', 'ProgramFiles', 'ProgramFiles(x86)', 'ProgramW6432', 'PSModulePath']) {

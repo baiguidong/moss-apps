@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.pdf-tools",
+  "version": "0.1.1",
+  "displayName": "PDF 工作台",
+  "category": "knowledge",
+  "keywords": [
+    "PDF",
+    "OCR",
+    "合并",
+    "拆分",
+    "扫描件"
+  ],
+  "description": "整理 PDF 页面、识别扫描件文字，在 Moss 内查看和导出。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.11.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "toolScope": "session",
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1160,
+      "height": 800,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "actions": [
+      {
+        "name": "workspace.get",
+        "inputSchema": "schemas/workspace.get.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "files.pick",
+        "inputSchema": "schemas/files.pick.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "files.import",
+        "inputSchema": "schemas/files.import.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "files.export",
+        "inputSchema": "schemas/files.export.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.cancel",
+        "inputSchema": "schemas/tasks.cancel.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "tasks.start",
+        "inputSchema": "schemas/tasks.start.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 30000
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.local-files/v1"
+    ]
+  },
+  "permissions": [
+    "local-files:pick"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "workspace",
+        "title": "PDF 工作台",
+        "route": "#/",
+        "order": 240
+      }
+    ],
+    "tools": [
+      {
+        "id": "files_import",
+        "title": "导入本地文件",
+        "description": "复制指定的本地文件到此 App，返回可用于处理的文件 ID。原文件不修改。",
+        "action": "files.import",
+        "inputSchema": "schemas/files.import.json",
+        "effect": "write"
+      },
+      {
+        "id": "workspace_get",
+        "title": "查看文件和任务",
+        "description": "查看此 App 已导入文件、处理任务与结果。",
+        "action": "workspace.get",
+        "inputSchema": "schemas/workspace.get.json",
+        "effect": "read"
+      },
+      {
+        "id": "tasks_start",
+        "title": "PDF 工作台处理任务",
+        "description": "整理 PDF 页面、识别扫描件文字，在 Moss 内查看和导出。 返回任务 ID；通过 workspace_get 查看进度与结果。",
+        "action": "tasks.start",
+        "inputSchema": "schemas/tasks.start.json",
+        "effect": "write"
+      }
+    ]
+  },
+  "navigation": {
+    "location": "more",
+    "viewId": "workspace"
+  },
+  "platforms": [
+    "darwin-arm64"
+  ]
+}

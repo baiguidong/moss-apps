@@ -2,18 +2,28 @@
 
 Moss 官方 App 的独立源码与发布仓库。普通 App 位于 `apps/<name>`；配置型 MCP App 位于 `mcp-apps/<name>`，只维护定义和资源，由 Moss Core 提供公共 UI 与运行能力。两者共用自动发布与应用市场。
 
-当前 16 个 App 按主要用途分组：
+App 按主要用途分组：
 
 | 分类 | App |
 | --- | --- |
 | 沟通协作 `communication` | [飞书](apps/feishu/README.md)、[即时消息](apps/openim/README.md) |
-| 知识与文件 `knowledge` | [知识库](apps/library/README.md)、[网盘](apps/drive/README.md)、[文件系统](mcp-apps/filesystem/README.md) |
+| 知识与文件 `knowledge` | [知识库](apps/library/README.md)、[网盘](apps/drive/README.md)、[文件系统](mcp-apps/filesystem/README.md)、[图片工具](apps/image-tools/README.md)、[PDF 工作台](apps/pdf-tools/README.md)、[语音转写](apps/transcription/README.md)、[文件清理](apps/file-cleaner/README.md)、[文档格式转换](apps/document-converter/README.md) |
 | 自动化 `automation` | [工作流](apps/workflow/README.md)、[网页操控](apps/browser-use/README.md)、[电脑操控](apps/computer-use/README.md) |
 | AI 增强 `ai` | [记忆](apps/memory/README.md)、[分步思考](mcp-apps/sequential-thinking/README.md)、[MCP 管理](apps/mcp/README.md) |
-| 开发工具 `development` | [应用构建](apps/app-builder/README.md)、[开发工具](apps/devtools/README.md)、[Git 仓库](mcp-apps/git/README.md) |
+| 开发工具 `development` | [应用构建](apps/app-builder/README.md)、[开发工具](apps/devtools/README.md)、[Git 仓库](mcp-apps/git/README.md)、[代码地图](apps/code-map/README.md) |
 | 诊断与审计 `diagnostics` | [调用追踪](apps/trace/README.md)、[审计中心](apps/audit/README.md) |
 
 规划中的本地工具扩展见 [本地工具 App 选型与接入方案](docs/local-tool-apps-plan.md)，覆盖开发工具、HTTP 调试、图片和音视频处理。
+
+图片工具、PDF 工作台和语音转写采用自有 UI 与本地 Backend，首批交付范围、安装包和实际 Moss 页面验证见 [本地任务 App 交付记录](docs/local-task-apps-delivery.md)。
+
+文件清理、文档格式转换和代码地图使用开源 CLI / MCP 引擎、自有 UI 与薄适配层，支持传统页面操作和 Agent 共享结果，见 [CLI / MCP 引擎 App 交付记录](docs/engine-apps-delivery.md)。
+
+六个本地 App 的依赖、转写模型均进入最终发布 ZIP；打包、断网验证和市场登记状态见 [随包依赖与 CI 交付](docs/local-apps-ci-delivery.md)。
+
+六个 App 的 [0.1.1 初始发布入口](docs/initial-local-apps-release.md)。
+
+`0.1.1` 的鼠标裁剪、图片处理扩展、紧凑布局与 MCP 动态工具数量修复见 [App 界面更新](docs/app-ui-refinement.md)。
 
 ## App 创建手册
 

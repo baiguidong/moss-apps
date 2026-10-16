@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.pdf-tools",
+  "summary": "整理 PDF 页面、识别扫描件文字，在 Moss 内查看和导出。",
+  "description": "整理 PDF 页面、识别扫描件文字，在 Moss 内查看和导出。",
+  "platforms": [
+    "darwin-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/pdf-tools",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT",
+  "featured": false
+}

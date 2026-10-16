@@ -1,0 +1,40 @@
+{
+  "type": "object",
+  "properties": {
+    "fileIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      },
+      "minItems": 1,
+      "maxItems": 50
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "zh",
+            "en",
+            "ja",
+            "ko",
+            "fr",
+            "de",
+            "es"
+          ],
+          "default": "auto"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "fileIds"
+  ],
+  "additionalProperties": false
+}

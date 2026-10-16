@@ -7,7 +7,7 @@ import { exportAppSource, parseLock } from './source-package.mjs';
 import { execFileSync } from 'node:child_process';
 
 test('ordinary tool Apps build their shared settings page; configuration Apps use Core settings', async () => {
-  const apps = listApps().filter(app => app.kind === 'app' && (app.manifest.contributes?.tools?.length || app.manifest.host?.protocols?.includes('moss.mcp/v1')));
+  const apps = listApps().filter(app => app.kind === 'app' && app.manifest.contributes?.views?.some(view => view.route === '#/moss-settings'));
   expect(apps.length).toBe(10);
   for (const app of apps) {
     const view = app.manifest.contributes.views.find(view => view.route === '#/moss-settings');

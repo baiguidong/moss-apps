@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.file-cleaner",
+  "summary": "扫描重复文件、相似图片和磁盘问题，查看结果并按策略清理。",
+  "description": "扫描重复文件、相似图片和磁盘问题，查看结果并按策略清理。",
+  "platforms": [
+    "darwin-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/file-cleaner",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT",
+  "featured": false
+}

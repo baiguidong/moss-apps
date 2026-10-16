@@ -1,0 +1,11 @@
+{
+  "id": "typst",
+  "version": "0.15.1",
+  "platform": "darwin-arm64",
+  "archive": "txz",
+  "executable": "typst",
+  "member": "typst-aarch64-apple-darwin/typst",
+  "url": "https://github.com/typst/typst/releases/download/v0.15.1/typst-aarch64-apple-darwin.tar.xz",
+  "sha256": "48f62ed034aa3a7978309579ac6ca00045e2ef0da73114e8af27cfd8e74dc05a",
+  "binarySha256": "7c4a136b377f3689400afe37b4f0fe3528d50faaa55cbb1106ac8a128f86ba1a"
+}

@@ -3,7 +3,7 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { execFileSync } from 'node:child_process'
-import { exportAppSource, focusedLock, parseLock } from './source-package.mjs'
+import { exportAppSource, focusedLock, parseLock, run } from './source-package.mjs'
 import { selectApps } from './lib.mjs'
 
 test('focused lock retains exact nested resolutions and excludes unrelated Apps', () => {
@@ -25,6 +25,23 @@ test('focused lock retains exact nested resolutions and excludes unrelated Apps'
 test('missing locked dependency fails instead of resolving latest', () => {
   expect(() => focusedLock({ packages: {} }, { '': { name: 'root', dependencies: { missing: '^1' } } })).toThrow('Lockfile dependency missing')
   expect(parseLock('{"lockfileVersion":1,"packages":{},}')).toEqual({ lockfileVersion: 1, packages: {} })
+})
+
+test('isolated builds forward only the absolute dependency cache and exclude signing secrets', async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-build-env-'))
+  const keys = ['MOSS_BUILD_DEPENDENCY_CACHE', 'MOSS_APP_SIGNING_PRIVATE_KEY']
+  const previous = keys.map(key => process.env[key])
+  try {
+    process.env.MOSS_BUILD_DEPENDENCY_CACHE = root
+    process.env.MOSS_APP_SIGNING_PRIVATE_KEY = 'test-sentinel'
+    run('node', ['-e', 'require("fs").writeFileSync("result.json",JSON.stringify({cache:process.env.MOSS_BUILD_DEPENDENCY_CACHE,hasSecret:!!process.env.MOSS_APP_SIGNING_PRIVATE_KEY}))'], root)
+    expect(JSON.parse(await fs.readFile(path.join(root, 'result.json'), 'utf8'))).toEqual({cache:root, hasSecret:false})
+    process.env.MOSS_BUILD_DEPENDENCY_CACHE = 'relative-cache'
+    expect(() => run('node', ['-e', ''], root)).toThrow('absolute path')
+  } finally {
+    keys.forEach((key, index) => { if (previous[index] === undefined) delete process.env[key]; else process.env[key] = previous[index] })
+    await fs.rm(root, {recursive:true, force:true})
+  }
 })
 
 test('Builder source includes its declared Runtime build dependency and verifies the complete SDK snapshot', async () => {

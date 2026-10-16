@@ -1,0 +1,76 @@
+{
+  "type": "object",
+  "properties": {
+    "fileIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      },
+      "minItems": 1,
+      "maxItems": 50
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "arrange",
+            "split",
+            "ocr"
+          ],
+          "default": "arrange"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "chi_sim+eng",
+            "chi_sim",
+            "eng"
+          ]
+        },
+        "pages": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 500,
+          "description": "顺序即输出顺序；page 为从 0 开始的原页码。省略时处理选中文件的所有页面。",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fileId": {
+                "type": "string"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 499
+              },
+              "rotation": {
+                "type": "integer",
+                "enum": [
+                  0,
+                  90,
+                  180,
+                  270
+                ]
+              }
+            },
+            "required": [
+              "fileId",
+              "page"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "fileIds"
+  ],
+  "additionalProperties": false
+}

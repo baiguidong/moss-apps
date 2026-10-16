@@ -70,6 +70,8 @@ jobs:
           path: artifacts/**/*.zip
   source-platforms:
     needs: validate
+    env:
+      MOSS_BUILD_DEPENDENCY_CACHE: ${{ github.workspace }}/.cache/moss-build-dependencies
     strategy:
       fail-fast: false
       matrix:
@@ -104,7 +106,26 @@ jobs:
         with:
           name: source-packages
           path: artifacts
+      - name: Cache pinned CLI, MCP and model build dependencies
+        if: matrix.platform == 'darwin-arm64'
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.MOSS_BUILD_DEPENDENCY_CACHE }}
+          key: ${{ runner.os }}-${{ matrix.platform }}-bundled-engines-v1-${{ hashFiles('apps/*/resources/engine.json', 'apps/document-converter/resources/pdf-engine.json', 'apps/file-cleaner/resources/ff*.json', 'apps/transcription/resources/model.json') }}
       - name: Build native packages on their supported desktop platform
         run: node scripts/package-app.mjs --platform-packages --supported-platform ${{ matrix.platform }}
+      - name: Verify six local Apps with empty data and no external network
+        if: matrix.platform == 'darwin-arm64'
+        run: node scripts/verify-bundled-apps.mjs
+      - uses: actions/upload-artifact@v4
+        if: always() && matrix.platform == 'darwin-arm64'
+        with:
+          name: offline-local-app-checks
+          path: artifacts/offline-apps/*.json
       - name: Verify source rebuild and packaged Backend on each desktop platform
         run: node scripts/verify-source-package.mjs --rebuild --supported-platform ${{ matrix.platform }}
+      - name: Upload verified native App archives
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-packages-${{ matrix.platform }}
+          path: artifacts/**/*-${{ matrix.platform }}.zip

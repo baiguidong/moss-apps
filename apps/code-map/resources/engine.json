@@ -1,0 +1,11 @@
+{
+  "id": "codebase-memory-mcp",
+  "version": "v0.12.0",
+  "platform": "darwin-arm64",
+  "url": "https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.12.0/codebase-memory-mcp-darwin-arm64.tar.gz",
+  "sha256": "1be41a9dd6902e3633eb0b280189117dc3db3be623bdd3dd4c6ea74372b5a50b",
+  "archive": "tar.gz",
+  "executable": "codebase-memory-mcp",
+  "member": "codebase-memory-mcp",
+  "binarySha256": "d26ba94b11b79f727923eaadb811e044a52618ae6d303670df5467f1e6c25015"
+}

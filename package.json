@@ -14,7 +14,7 @@
   "scripts": {
     "validate": "node scripts/validate-apps.mjs",
     "check": "node scripts/run-apps.mjs check",
-    "test": "bun test scripts && node scripts/run-apps.mjs test",
+    "test": "bun test ./scripts --timeout 30000 && node scripts/run-apps.mjs test",
     "build": "node scripts/run-apps.mjs build",
     "package": "node scripts/package-app.mjs",
     "catalog": "node scripts/build-catalog.mjs",

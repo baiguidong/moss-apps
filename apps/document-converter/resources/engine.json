@@ -1,0 +1,11 @@
+{
+  "id": "pandoc",
+  "version": "3.12.1",
+  "platform": "darwin-arm64",
+  "url": "https://github.com/jgm/pandoc/releases/download/3.12.1/pandoc-3.12.1-arm64-macOS.zip",
+  "sha256": "c2146cf33a583f3ac93eccddf1bb662371d5cfcce1aad1c87ad860cca1435d46",
+  "archive": "zip",
+  "executable": "pandoc",
+  "binarySha256": "18bbba00842f0fb2868f36d7aab2317fab60b0a33e06b8fa5ea5dcb27ce57b00",
+  "member": "pandoc-3.12.1-arm64/bin/pandoc"
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@moss/engine-apps",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./runtime": "./src/runtime.mjs",
+    "./backend": "./src/backend.mjs",
+    "./cli": "./src/cli.mjs",
+    "./ui": "./src/ui.tsx",
+    "./styles.css": "./src/styles.css",
+    "./build": "./build.mjs",
+    "./download": "./src/download.mjs",
+    "./bundled": "./src/bundled.mjs",
+    "./bundle-build": "./src/bundle-build.mjs"
+  },
+  "dependencies": {
+    "@moss/app-sdk": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "react": "19.2.0",
+    "lucide-react": "0.564.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2"
+  }
+}

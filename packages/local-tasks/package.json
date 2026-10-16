@@ -1,0 +1,19 @@
+{
+  "name": "@moss/local-tasks",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./backend": "./src/backend.mjs",
+    "./worker": "./src/worker.mjs",
+    "./ui": "./src/ui.tsx",
+    "./styles.css": "./src/styles.css",
+    "./build": "./build.mjs"
+  },
+  "devDependencies": { "@types/react": "19.2.2" },
+  "dependencies": {
+    "@moss/app-sdk": "workspace:*",
+    "react": "19.2.0",
+    "lucide-react": "0.564.0"
+  }
+}
