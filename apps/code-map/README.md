@@ -2,7 +2,7 @@
 
 0.1.2 新增 Linux AMD64 独立包。原生依赖随对应平台包交付；Linux 在 Ubuntu 24.04 验证。浏览器内 App 页面仍依赖 Moss Web Host 的独立适配。
 
-`moss.code-map@0.1.1`，Moss Desktop Host API >=3.14，首版平台 macOS Apple Silicon。使用 codebase-memory-mcp v0.12.0 的上游 MCP 服务进行索引和查询。
+`moss.code-map@0.1.2`，Moss Desktop Host API >=3.14，平台为 macOS Apple Silicon 和 Linux AMD64。使用 codebase-memory-mcp v0.12.0 的上游 MCP 服务进行索引和查询。
 
 在“更多 → 代码地图”选择本地仓库、建立索引，再搜索符号。点击符号读取源码与直接调用关系；架构入口提供仓库文件树。全部 17 个上游 MCP 工具另有按 input schema 生成的表单和 JSON 参数编辑入口。
 

@@ -2,7 +2,7 @@
 
 0.1.2 新增 Linux AMD64 独立包。原生依赖随对应平台包交付；Linux 在 Ubuntu 24.04 验证。浏览器内 App 页面仍依赖 Moss Web Host 的独立适配。
 
-普通 Moss App `moss.pdf-tools@0.1.1`，包含 React UI、Node Backend、pdf-lib 1.17.1、PDF.js 5.4.624 和 Tesseract.js 6.0.1。需要 Moss Host API >=3.11；首版验证 macOS Apple Silicon。
+普通 Moss App `moss.pdf-tools@0.1.2`，包含 React UI、Node Backend、pdf-lib 1.17.1、PDF.js 5.4.624 和 Tesseract.js 6.0.1。需要 Moss Host API >=3.11；首版验证 macOS Apple Silicon。
 
 在“更多 → PDF 工作台”导入 PDF，通过缩略图选择、旋转和排序页面，生成合并文档或逐页拆分。结果直接在 Moss 内翻页、缩放、搜索和导出，不依赖系统 PDF 阅读器。
 

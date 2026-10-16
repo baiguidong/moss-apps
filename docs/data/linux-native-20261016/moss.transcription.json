@@ -1,0 +1,18 @@
+{
+  "appId": "moss.transcription",
+  "version": "0.1.2",
+  "platform": "linux-x64",
+  "network": "OS sandbox denies external IP connections",
+  "emptyUserData": true,
+  "archiveSha256": "df7f858614a03299ab0846b2f5e073d1b62328dbd226e0c0f6d909fb4eaaaf85",
+  "dependencies": [
+    "ffmpeg",
+    "whisper-base"
+  ],
+  "checks": [
+    "Packaged FFmpeg, Whisper native module and bundled base model complete inference"
+  ],
+  "checkedAt": "2026-10-16T09:53:07.085Z",
+  "workflow": "https://github.com/baiguidong/moss-apps/actions/runs/38883322252",
+  "sourceCommit": "4e22204"
+}

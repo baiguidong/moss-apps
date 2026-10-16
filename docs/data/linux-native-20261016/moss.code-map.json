@@ -1,0 +1,17 @@
+{
+  "appId": "moss.code-map",
+  "version": "0.1.2",
+  "platform": "linux-x64",
+  "network": "OS sandbox denies external IP connections",
+  "emptyUserData": true,
+  "archiveSha256": "b1efc2dcc85f0659e37e150c3c65f3afde6a44ea7f8a38a9c689a0b8cb08216a",
+  "dependencies": [
+    "codebase-memory-mcp"
+  ],
+  "checks": [
+    "Packaged MCP server exposes 17 tools, indexes source and queries symbols"
+  ],
+  "checkedAt": "2026-10-16T09:52:49.138Z",
+  "workflow": "https://github.com/baiguidong/moss-apps/actions/runs/38883322252",
+  "sourceCommit": "4e22204"
+}

@@ -2,7 +2,7 @@
 
 0.1.2 新增 Linux AMD64 独立包。原生依赖随对应平台包交付；Linux 在 Ubuntu 24.04 验证。浏览器内 App 页面仍依赖 Moss Web Host 的独立适配。
 
-`moss.document-converter@0.1.1`，Moss Desktop Host API >=3.14，首版平台 macOS Apple Silicon。使用 Pandoc 3.12.1，转换功能全部由上游提供。
+`moss.document-converter@0.1.2`，Moss Desktop Host API >=3.14，平台为 macOS Apple Silicon 和 Linux AMD64。使用 Pandoc 3.12.1，转换功能全部由上游提供。
 
 在“更多 → 文档格式转换”选择本地文件，选择输入/输出格式。多个文件可逐个转换，也可按顺序合并。提供结构、样式、模板、引用、数学、电子书、幻灯片与其他参数表单；格式和参数目录从固定版本 CLI 实际输出生成。格式、默认模板和语法信息可在页面查询，无需输入文件。
 

@@ -5,11 +5,11 @@ import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { execFileSync } from 'node:child_process'
+import { prepareBinary } from '../packages/engine-apps/src/download.mjs'
 const repo = fileURLToPath(new URL('..', import.meta.url))
 const core = process.env.MOSS_CORE_ROOT || path.resolve(repo, '../moss')
 const appRequire = createRequire(path.join(repo, 'apps/pdf-tools/package.json'))
 const imageRequire = createRequire(path.join(repo, 'apps/image-tools/package.json'))
-const transcribeRequire = createRequire(path.join(repo, 'apps/transcription/package.json'))
 const { _electron: electron, expect } = appRequire('@playwright/test')
 const { build } = appRequire('vite'), { default: react } = appRequire('@vitejs/plugin-react')
 const requireCore = createRequire(path.join(core, 'ui/package.json'))
@@ -39,7 +39,7 @@ const scan = await sharp(Buffer.from('<svg width="1000" height="1400" xmlns="htt
 const png = await pdf.embedPng(scan); pdf.addPage([500,700]).drawImage(png, { x:0,y:0,width:500,height:700 }); await fs.writeFile(pdfFile, await pdf.save())
 const audioFile = process.env.MOSS_TEST_AUDIO || '/opt/homebrew/Cellar/whisper-cpp/1.9.1/share/whisper-cpp/jfk.wav'
 const videoFile = path.join(fixtures, '演讲片段.mp4')
-const ffmpeg = path.join(path.dirname(transcribeRequire.resolve('@drbearzay/ffmpeg-darwin-arm64/package.json')), 'ffmpeg')
+const ffmpeg = await prepareBinary(JSON.parse(await fs.readFile(path.join(repo, 'apps/transcription/resources/ffmpeg.json'), 'utf8')), path.join(report, 'engine-cache'))
 await fs.chmod(ffmpeg, 0o755)
 execFileSync(ffmpeg, ['-nostdin','-loglevel','error','-f','lavfi','-i','color=c=0x243f4b:s=320x240:r=10','-i',audioFile,'-c:v','mpeg4','-c:a','aac','-shortest','-y',videoFile])
 const model = process.env.MOSS_TEST_MODEL || path.join(repo, 'artifacts/local-task-apps/transcription-data/models/ggml-base.bin')
@@ -47,10 +47,11 @@ const names = process.argv.includes('--app') ? [process.argv[process.argv.indexO
 process.env.PW_CHROMIUM_ATTACH_TO_OTHER = '1'
 for (const name of names) {
   const appId = `moss.${name}`, checks = [], errors = [], output = path.join(report, name)
+  const version = JSON.parse(await fs.readFile(path.join(repo, 'apps', name, 'app.moss.json'), 'utf8')).version
   await fs.mkdir(output, { recursive: true })
   const desktop = await electron.launch({ executablePath: path.join(core, 'ui/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'), args: [path.join(repo, 'scripts/local-tasks-verify/desktop.cjs')],
-    env: { ...process.env, MOSS_CORE_ROOT: core, MOSS_TEST_APP: appId, MOSS_TEST_VERSION: '0.1.1', MOSS_TEST_NODE: process.execPath, MOSS_TEST_SHELL: shell, MOSS_TEST_MODEL: model,
-      MOSS_TEST_ARCHIVE: path.join(repo, 'artifacts', appId, '0.1.1', `${appId}-0.1.1-darwin-arm64.zip`) }, timeout: 60000 })
+    env: { ...process.env, MOSS_CORE_ROOT: core, MOSS_TEST_APP: appId, MOSS_TEST_VERSION: version, MOSS_TEST_NODE: process.execPath, MOSS_TEST_SHELL: shell, MOSS_TEST_MODEL: model,
+      MOSS_TEST_ARCHIVE: path.join(repo, 'artifacts', appId, version, `${appId}-${version}-darwin-arm64.zip`) }, timeout: 60000 })
   let directory, page
   const passed = message => { checks.push(message); console.log(`PASS ${name}: ${message}`) }
   try {

@@ -1,0 +1,15 @@
+{
+  "appId": "moss.pdf-tools",
+  "version": "0.1.2",
+  "platform": "linux-x64",
+  "network": "OS sandbox denies external IP connections",
+  "emptyUserData": true,
+  "archiveSha256": "2d6e28e22a59fc5cb060c8be92f67f7115725ca65535710a5ad014f94c9dda01",
+  "dependencies": [],
+  "checks": [
+    "Packaged PDF.js/Canvas/Tesseract and language data produce searchable OCR"
+  ],
+  "checkedAt": "2026-10-16T09:52:38.941Z",
+  "workflow": "https://github.com/baiguidong/moss-apps/actions/runs/38883322252",
+  "sourceCommit": "4e22204"
+}

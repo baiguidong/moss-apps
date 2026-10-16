@@ -1,0 +1,19 @@
+{
+  "appId": "moss.file-cleaner",
+  "version": "0.1.2",
+  "platform": "linux-x64",
+  "network": "OS sandbox denies external IP connections",
+  "emptyUserData": true,
+  "archiveSha256": "f4cd5dcc554502cd1bff19391835a679499ae622e114b49e180c4b054e00a807",
+  "dependencies": [
+    "czkawka",
+    "ffmpeg",
+    "ffprobe"
+  ],
+  "checks": [
+    "Packaged Czkawka and FFmpeg/ffprobe run duplicate and video scans"
+  ],
+  "checkedAt": "2026-10-16T09:52:32.430Z",
+  "workflow": "https://github.com/baiguidong/moss-apps/actions/runs/38883322252",
+  "sourceCommit": "4e22204"
+}

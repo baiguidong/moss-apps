@@ -1,0 +1,18 @@
+{
+  "appId": "moss.document-converter",
+  "version": "0.1.2",
+  "platform": "linux-x64",
+  "network": "OS sandbox denies external IP connections",
+  "emptyUserData": true,
+  "archiveSha256": "f2670a37c409ebf2330d7ebe3b03ec5c3b8c32f277624859a21b7d9909c95c0f",
+  "dependencies": [
+    "pandoc",
+    "typst"
+  ],
+  "checks": [
+    "Packaged Pandoc creates DOCX with preview; bundled Typst creates PDF"
+  ],
+  "checkedAt": "2026-10-16T09:52:38.979Z",
+  "workflow": "https://github.com/baiguidong/moss-apps/actions/runs/38883322252",
+  "sourceCommit": "4e22204"
+}

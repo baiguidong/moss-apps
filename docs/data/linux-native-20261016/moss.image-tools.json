@@ -1,0 +1,15 @@
+{
+  "appId": "moss.image-tools",
+  "version": "0.1.2",
+  "platform": "linux-x64",
+  "network": "OS sandbox denies external IP connections",
+  "emptyUserData": true,
+  "archiveSha256": "f016a17f24c6b5a3b81914b9dd211432ec6b815cf4c7c66edb9c81422b63dd2d",
+  "dependencies": [],
+  "checks": [
+    "Packaged sharp/native libvips converts a real image"
+  ],
+  "checkedAt": "2026-10-16T09:52:18.108Z",
+  "workflow": "https://github.com/baiguidong/moss-apps/actions/runs/38883322252",
+  "sourceCommit": "4e22204"
+}
