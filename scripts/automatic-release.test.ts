@@ -5,12 +5,24 @@ import path from 'node:path'
 import { planReleases } from './plan-releases.mjs'
 import { githubClient, tagCommit } from './release-api.mjs'
 import { publishRelease, collectReleaseAssets } from './publish-release.mjs'
-import { sha256Hex } from './lib.mjs'
+import { repoRoot, sha256Hex } from './lib.mjs'
 
 const sha = 'a'.repeat(40), other = 'b'.repeat(40)
 const app = (version = '1.0.0', id = 'moss.example') => ({ kind: 'mcp', manifest: { id, version } })
 const release = (version: string, extra = {}) => ({ tag_name: `moss.example-v${version}`, draft: false, ...extra })
 const planned = (version: string, releases: any[]) => planReleases([app(version)], releases, sha).entries[0]
+
+test('workflow App working directories still exist after App migrations', async () => {
+  const directory = path.join(repoRoot, '.github/workflows')
+  for (const name of await fs.readdir(directory)) {
+    if (!/\.ya?ml$/.test(name)) continue
+    const workflow = await fs.readFile(path.join(directory, name), 'utf8')
+    for (const match of workflow.matchAll(/^\s*working-directory:\s*["']?(apps\/[a-zA-Z0-9._/-]+)["']?\s*$/gm)) {
+      const exists = await fs.stat(path.join(repoRoot, match[1])).then(stat => stat.isDirectory(), () => false)
+      expect(exists, `${name} uses a missing App directory: ${match[1]}`).toBe(true)
+    }
+  }
+})
 
 test('plans new Apps, greater versions and drafts while preserving published versions', () => {
   expect(planned('1.0.0', []).reason).toBe('new-app')
