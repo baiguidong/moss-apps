@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+- 新增 Linux AMD64 支持，沿用 Host 管理的跨平台 MCP 运行环境。
+
 ## 0.1.2
 
 - 转为 Core 托管的配置型 App，移除独立 UI、Backend、启动包装和依赖复制构建代码。

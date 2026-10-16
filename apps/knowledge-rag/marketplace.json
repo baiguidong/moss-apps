@@ -4,7 +4,8 @@
   "summary": "在本地通过多语言语义检索查阅资料。",
   "description": "用自然语言检索本地资料，支持多语言语义检索与关键词混合搜索。",
   "platforms": [
-    "darwin-arm64"
+    "darwin-arm64",
+    "linux-x64"
   ],
   "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/knowledge-rag",
   "repository": "https://github.com/baiguidong/moss-apps",

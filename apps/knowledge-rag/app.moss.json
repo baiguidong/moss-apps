@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.knowledge-rag",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "displayName": "语义知识库",
   "category": "knowledge",
   "keywords": [

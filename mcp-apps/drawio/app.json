@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "moss.drawio",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "displayName": "Draw.io",
   "description": "在对话中创建和编辑 Draw.io 图表，支持 XML、CSV 与 Mermaid。",
   "category": "development",

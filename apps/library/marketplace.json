@@ -5,7 +5,8 @@
   "description": "资料集、文件与目录导入、全文检索、笔记编辑、索引任务。数据保存在本地，查询默认覆盖全部资料集。",
   "platforms": [
     "darwin-arm64",
-    "win32-x64"
+    "win32-x64",
+    "linux-x64"
   ],
   "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/library",
   "repository": "https://github.com/baiguidong/moss-apps",

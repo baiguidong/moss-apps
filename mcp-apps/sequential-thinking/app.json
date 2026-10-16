@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "moss.sequential-thinking",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "displayName": "分步思考",
   "description": "按需为复杂分析提供步骤记录、修正和分支工具。",
   "category": "ai",

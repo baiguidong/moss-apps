@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.openim",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "displayName": "即时消息",
   "category": "communication",
   "keywords": [
@@ -95,5 +95,11 @@
   "navigation": {
     "location": "more",
     "viewId": "messages"
-  }
+  },
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "linux-x64"
+  ]
 }

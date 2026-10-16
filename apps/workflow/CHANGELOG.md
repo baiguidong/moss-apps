@@ -1,3 +1,9 @@
+# Changelog
+
+## 0.1.17
+
+- 新增 Linux AMD64 支持；由 Linux CI 执行检查、测试、构建、源码独立重建及 Backend 验证。
+
 # 更新日志
 
 ## 0.1.15

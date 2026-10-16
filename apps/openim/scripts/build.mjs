@@ -8,6 +8,7 @@ const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const backendFile = path.join(appRoot, 'dist', 'backend', 'main.mjs')
 const backendRoot = path.dirname(backendFile)
 const marketplace = JSON.parse(fs.readFileSync(path.join(appRoot, 'marketplace.json'), 'utf8'))
+const manifest = JSON.parse(fs.readFileSync(path.join(appRoot, 'app.moss.json'), 'utf8'))
 const nativePlatforms = Object.freeze({
   'darwin-arm64': { openim: 'mac_arm64', koffi: 'darwin_arm64' },
   'darwin-x64': { openim: 'mac_x64', koffi: 'darwin_x64' },
@@ -49,8 +50,8 @@ fs.mkdirSync(packagedKoffiRoot, { recursive: true })
 for (const name of ['package.json', 'index.js', 'indirect.js']) {
   fs.copyFileSync(path.join(koffiRoot, name), path.join(packagedKoffiRoot, name))
 }
-// Include the CI/server runtime too so the published Backend can be smoke-tested on Linux.
-for (const platform of new Set([...(marketplace.platforms || []), 'linux-x64'])) {
+// Source export binds a signed variant to exactly one target platform.
+for (const platform of manifest.platforms || marketplace.platforms) {
   const directories = nativePlatforms[platform]
   if (!directories) throw new Error(`OpenIM build does not define native assets for ${platform}`)
   const openIMSource = path.join(sdkRoot, 'assets', directories.openim)

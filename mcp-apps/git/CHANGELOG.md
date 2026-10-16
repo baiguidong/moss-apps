@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+- 新增 Linux AMD64 支持，沿用 Host 管理的跨平台 MCP 运行环境。
+
 ## 0.1.2
 
 - 转为配置型 App，删除独立 UI、Backend 和 Node Git MCP 实现，固定使用官方 Python 服务 2026.8.18。

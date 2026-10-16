@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "moss.filesystem",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "displayName": "文件系统",
   "description": "默认读写会话工作目录中的文件，也可添加公共目录进行搜索和整理。",
   "category": "knowledge",

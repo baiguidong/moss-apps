@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.14
+
+- 新增 Linux AMD64 支持；由 Linux CI 执行检查、测试、构建、源码独立重建及 Backend 验证。
+
 ## 0.4.12
 
 - 修复 Windows Node 定位及 SDK 构建路径泄露；携带完整源码并通过解包独立重建。
