@@ -4,7 +4,8 @@
   "summary": "通过 Pandoc 转换文档格式、设置排版与引用，在 Moss 查看和导出结果。",
   "description": "通过 Pandoc 转换文档格式、设置排版与引用，在 Moss 查看和导出结果。",
   "platforms": [
-    "darwin-arm64"
+    "darwin-arm64",
+    "linux-x64"
   ],
   "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/document-converter",
   "repository": "https://github.com/baiguidong/moss-apps",

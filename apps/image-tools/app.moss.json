@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.image-tools",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "displayName": "图片工具",
   "category": "knowledge",
   "keywords": [
@@ -136,6 +136,7 @@
     "viewId": "workspace"
   },
   "platforms": [
-    "darwin-arm64"
+    "darwin-arm64",
+    "linux-x64"
   ]
 }

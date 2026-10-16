@@ -7,5 +7,18 @@
   "archive": "zip",
   "executable": "pandoc",
   "binarySha256": "18bbba00842f0fb2868f36d7aab2317fab60b0a33e06b8fa5ea5dcb27ce57b00",
-  "member": "pandoc-3.12.1-arm64/bin/pandoc"
+  "member": "pandoc-3.12.1-arm64/bin/pandoc",
+  "targets": {
+    "linux-x64": {
+      "id": "pandoc",
+      "version": "3.12.1",
+      "platform": "linux-x64",
+      "url": "https://github.com/jgm/pandoc/releases/download/3.12.1/pandoc-3.12.1-linux-amd64.tar.gz",
+      "archive": "tar.gz",
+      "executable": "pandoc",
+      "sha256": "d0c90410e90204c9ca83b8539fac5c7aed01fd537207e4585849f8abc5df20b8",
+      "member": "pandoc-3.12.1/bin/pandoc",
+      "binarySha256": "10a980df73e7fea52904375d4de731c4ed61fd1c45fa0900facd2a5972ff0ee1"
+    }
+  }
 }

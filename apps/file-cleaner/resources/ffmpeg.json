@@ -7,5 +7,18 @@
   "archive": "tar.gz",
   "executable": "ffmpeg",
   "member": "package/ffmpeg",
-  "binarySha256": "77d2c853f431318d55ec02676d9b2f185ebfdddb9f7677a251fbe453affe025a"
+  "binarySha256": "77d2c853f431318d55ec02676d9b2f185ebfdddb9f7677a251fbe453affe025a",
+  "targets": {
+    "linux-x64": {
+      "id": "ffmpeg",
+      "version": "8.0.0",
+      "platform": "linux-x64",
+      "url": "https://registry.npmjs.org/@drbearzay/ffmpeg-linux-x64/-/ffmpeg-linux-x64-8.0.0.tgz",
+      "archive": "tar.gz",
+      "executable": "ffmpeg",
+      "sha256": "f0bdf088479b7866369c93fe3c032b4a0880c13416ea58eae0439a08f7fa0fe5",
+      "member": "package/ffmpeg",
+      "binarySha256": "aa3096f1689618befd192ee65892235777aa4123c95055cb06023e6e55208d7a"
+    }
+  }
 }

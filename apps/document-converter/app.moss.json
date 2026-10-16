@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.document-converter",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "displayName": "文档格式转换",
   "category": "knowledge",
   "keywords": [
@@ -119,6 +119,7 @@
     ]
   },
   "platforms": [
-    "darwin-arm64"
+    "darwin-arm64",
+    "linux-x64"
   ]
 }

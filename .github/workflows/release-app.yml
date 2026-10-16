@@ -91,7 +91,7 @@ jobs:
           "$RUNNER_TEMP/rag-linux/bin/pip" install --require-hashes -r apps/knowledge-rag/resources/requirements.lock
           "$RUNNER_TEMP/rag-linux/bin/python" -c "import chromadb, fastembed, onnxruntime; c=chromadb.EphemeralClient(); s=c.create_collection('linux-smoke'); s.add(ids=['a'], embeddings=[[1.0,0.0]], documents=['Linux']); assert s.query(query_embeddings=[[1.0,0.0]], n_results=1)['ids']==[['a']]; assert 'CPUExecutionProvider' in onnxruntime.get_available_providers(); print('Linux Chroma/ONNX/FastEmbed native imports and vector query passed')"
       - name: Cache pinned CLI, MCP and model build dependencies
-        if: matrix.platform == 'darwin-arm64'
+        if: matrix.platform == 'darwin-arm64' || matrix.platform == 'linux-x64'
         uses: actions/cache@v4
         with:
           path: ${{ env.MOSS_BUILD_DEPENDENCY_CACHE }}
@@ -106,7 +106,7 @@ jobs:
           MOSS_APP_SIGNING_KEY_ID: release-1
         run: node scripts/package-app.mjs --app "${{ inputs.app_id }}" --platform ${{ matrix.platform }} --require-signature
       - name: Verify bundled dependencies without external network
-        if: contains(fromJSON('["moss.image-tools","moss.pdf-tools","moss.transcription","moss.file-cleaner","moss.document-converter","moss.code-map"]'), inputs.app_id) && matrix.platform == 'darwin-arm64'
+        if: contains(fromJSON('["moss.image-tools","moss.pdf-tools","moss.transcription","moss.file-cleaner","moss.document-converter","moss.code-map"]'), inputs.app_id) && (matrix.platform == 'darwin-arm64' || matrix.platform == 'linux-x64')
         run: node scripts/verify-bundled-apps.mjs --app "${{ inputs.app_id }}"
       - uses: actions/upload-artifact@v4
         if: always() && contains(fromJSON('["moss.image-tools","moss.pdf-tools","moss.transcription","moss.file-cleaner","moss.document-converter","moss.code-map"]'), inputs.app_id)

@@ -14,7 +14,7 @@
     },
     "apps/app-builder": {
       "name": "@moss/app-builder",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -25,7 +25,7 @@
     },
     "apps/audit": {
       "name": "@moss/audit-app",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@radix-ui/react-scroll-area": "1.2.10",
@@ -52,7 +52,7 @@
     },
     "apps/browser-use": {
       "name": "@moss/browser-use-app",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -73,7 +73,7 @@
     },
     "apps/buddy": {
       "name": "@moss/buddy",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -81,7 +81,7 @@
     },
     "apps/code-map": {
       "name": "@moss/code-map-app",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "@moss/app-sdk": "workspace:*",
@@ -140,7 +140,7 @@
     },
     "apps/document-converter": {
       "name": "@moss/document-converter-app",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "@moss/app-sdk": "workspace:*",
@@ -161,7 +161,7 @@
     },
     "apps/drive": {
       "name": "@moss/drive-app",
-      "version": "0.3.5",
+      "version": "0.3.6",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "lucide-react": "0.564.0",
@@ -180,7 +180,7 @@
     },
     "apps/feishu": {
       "name": "@moss/feishu-app",
-      "version": "0.4.13",
+      "version": "0.4.14",
       "dependencies": {
         "@larksuiteoapi/node-sdk": "^1.60.0",
         "@moss/app-sdk": "workspace:*",
@@ -192,7 +192,7 @@
     },
     "apps/file-cleaner": {
       "name": "@moss/file-cleaner-app",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "@moss/app-sdk": "workspace:*",
@@ -213,7 +213,7 @@
     },
     "apps/image-tools": {
       "name": "@moss/image-tools-app",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/local-tasks": "workspace:*",
@@ -234,7 +234,7 @@
     },
     "apps/knowledge-rag": {
       "name": "@moss/knowledge-rag-app",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "@moss/app-sdk": "workspace:*",
@@ -255,7 +255,7 @@
     },
     "apps/library": {
       "name": "@moss/library-app",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -276,7 +276,7 @@
     },
     "apps/mcp": {
       "name": "@moss/mcp-app",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -296,7 +296,7 @@
     },
     "apps/memory": {
       "name": "@moss/memory-app",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "dependencies": {
         "@antv/g6": "5.1.1",
         "@modelcontextprotocol/server-memory": "2026.8.31",
@@ -320,7 +320,7 @@
     },
     "apps/openim": {
       "name": "@moss/openim-app",
-      "version": "0.2.13",
+      "version": "0.2.14",
       "dependencies": {
         "@livekit/components-react": "2.6.9",
         "@livekit/components-styles": "1.1.6",
@@ -353,7 +353,7 @@
     },
     "apps/pdf-tools": {
       "name": "@moss/pdf-tools-app",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/local-tasks": "workspace:*",
@@ -402,7 +402,7 @@
     },
     "apps/trace": {
       "name": "@moss/trace-app",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@radix-ui/react-slot": "1.2.4",
@@ -432,9 +432,8 @@
     },
     "apps/transcription": {
       "name": "@moss/transcription-app",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
-        "@drbearzay/ffmpeg-darwin-arm64": "8.0.1",
         "@fugood/whisper.node": "1.1.3",
         "@moss/app-sdk": "workspace:*",
         "@moss/local-tasks": "workspace:*",
@@ -455,7 +454,7 @@
     },
     "apps/workflow": {
       "name": "@moss/workflow-app",
-      "version": "0.1.16",
+      "version": "0.1.17",
       "dependencies": {
         "@dagrejs/dagre": "^3.1.1",
         "@moss/app-sdk": "workspace:*",
@@ -630,8 +629,6 @@
     "@dagrejs/dagre": ["@dagrejs/dagre@3.1.1", "https://registry.npmmirror.com/@dagrejs/dagre/-/dagre-3.1.1.tgz", { "dependencies": { "@dagrejs/graphlib": "4.0.5" } }, "sha512-zroZB1dFOFiGgv4Xcrn1DckB1o4aOikPqD2NDQPV0WM//CXGcS6xiD0rNkqHmw6FEg4tabt4nxPLwgCWT+Vb2A=="],
 
     "@dagrejs/graphlib": ["@dagrejs/graphlib@4.0.5", "https://registry.npmmirror.com/@dagrejs/graphlib/-/graphlib-4.0.5.tgz", {}, "sha512-7xrBTqIts3o+PMUZX97wSc+7TUbW+/rULzGNCTP6yooNVDXbzw4Wutg/H/xOutTB/c/k0YqOAavgPh4/Zk9PFA=="],
-
-    "@drbearzay/ffmpeg-darwin-arm64": ["@drbearzay/ffmpeg-darwin-arm64@8.0.1", "https://registry.npmmirror.com/@drbearzay/ffmpeg-darwin-arm64/-/ffmpeg-darwin-arm64-8.0.1.tgz", { "os": "darwin" }, "sha512-ojADmrsnyZnDcDPQBkTzxLHCi3LLOTGAdWHXtrolleBUx73r4iW0Meu2Dg9zLiazn86TW6EIHxiUturR6jPR7Q=="],
 
     "@electron-internal/extract-zip": ["@electron-internal/extract-zip@1.0.5", "https://registry.npmmirror.com/@electron-internal/extract-zip/-/extract-zip-1.0.5.tgz", {}, "sha512-+bqFCP98pLI0Tt0XQo1TmlXtwjWchISndDOxCkEcIuUgXWpBnLyRI+2DU+mesvnMMX6L1XDqYNA0lXNDHd/yiA=="],
 

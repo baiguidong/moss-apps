@@ -4,7 +4,8 @@
   "summary": "索引本地仓库，浏览源码、调用关系与架构，使用同一 MCP 服务连接 Agent。",
   "description": "索引本地仓库，浏览源码、调用关系与架构，使用同一 MCP 服务连接 Agent。",
   "platforms": [
-    "darwin-arm64"
+    "darwin-arm64",
+    "linux-x64"
   ],
   "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/code-map",
   "repository": "https://github.com/baiguidong/moss-apps",

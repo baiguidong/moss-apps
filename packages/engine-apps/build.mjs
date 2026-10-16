@@ -4,6 +4,7 @@ import os from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { prepareBinary } from './src/download.mjs'
 import { bundleAsset } from './src/bundle-build.mjs'
+import { platformAsset } from './src/platform.mjs'
 export async function buildApp(root) {
   const run=(cmd,args)=>{const r=spawnSync(cmd,args,{cwd:root,stdio:'inherit'});if(r.error||r.status)throw r.error||new Error(`${cmd} failed`)}
   fs.rmSync(path.join(root,'dist'),{recursive:true,force:true}); run('vite',['build'])
@@ -12,7 +13,7 @@ export async function buildApp(root) {
   for (const name of ['engine', 'ffmpeg', 'ffprobe', 'pdf-engine']) {
     const file = path.join(root, 'resources', name + '.json')
     if (!fs.existsSync(file)) continue
-    const spec = JSON.parse(fs.readFileSync(file, 'utf8'))
+    const spec = platformAsset(JSON.parse(fs.readFileSync(file, 'utf8')))
     const binary = await prepareBinary(spec, cache)
     const target = path.join(root, 'dist/engines', spec.id, spec.version, spec.executable)
     await bundleAsset(binary, target, spec.binarySha256)

@@ -8,7 +8,9 @@ export function buildApp(root, external = []) {
   fs.rmSync(path.join(root, 'dist'), { recursive: true, force: true })
   run('vite', ['build'])
   for (const name of ['main', 'worker']) run('bun', ['build', `src/backend/${name}.mjs`, '--target=node', '--format=esm', ...external.map(name => `--external=${name}`), `--outfile=dist/backend/${name}.mjs`])
-  const visited = new Map(), target = path.join(root, 'dist/backend/node_modules'), platforms = JSON.parse(fs.readFileSync(path.join(root, 'marketplace.json'))).platforms
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, 'app.moss.json')))
+  const platforms = manifest.platforms || JSON.parse(fs.readFileSync(path.join(root, 'marketplace.json'))).platforms
+  const visited = new Map(), target = path.join(root, 'dist/backend/node_modules')
   function copy(name, require, optional = false) {
     let entry
     try { entry = require.resolve(`${name}/package.json`) }
@@ -17,7 +19,7 @@ export function buildApp(root, external = []) {
       if (!entry) { if (optional) return; throw new Error(`Missing runtime dependency: ${name}`) }
     }
     const source = path.dirname(fs.realpathSync(entry)), pkg = JSON.parse(fs.readFileSync(path.join(source, 'package.json')))
-    if (optional && (name === '@fugood/node-whisper-wasm' || !platforms.some(platform => { const [os, cpu] = platform.split('-'); return (!pkg.os || pkg.os.includes(os)) && (!pkg.cpu || pkg.cpu.includes(cpu)) }))) return
+    if (optional && (name === '@fugood/node-whisper-wasm' || /^@fugood\/node-whisper-.*-(cuda|vulkan)$/.test(name) || !platforms.some(platform => { const [os, cpu] = platform.split('-'); return (!pkg.os || pkg.os.includes(os)) && (!pkg.cpu || pkg.cpu.includes(cpu)) }))) return
     if (visited.has(name)) {
       if (visited.get(name) !== pkg.version) throw new Error(`Conflicting runtime versions for ${name}: ${visited.get(name)} and ${pkg.version}. Align the dependency versions before packaging.`)
       return

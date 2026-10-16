@@ -11,13 +11,18 @@ import {selectApps,repoRoot,optionValue} from './lib.mjs'
 import {unzipSync} from 'fflate'
 import {sourcePath} from '../vendor/moss-core/packages/app-runtime/src/packages/source.mjs'
 import {hash} from '../packages/engine-apps/src/runtime.mjs'
+import {platformAsset} from '../packages/engine-apps/src/platform.mjs'
+import {restoreBundledAsset} from '../packages/engine-apps/src/bundled.mjs'
 const execute=promisify(execFile)
 export const LOCAL_APPS=['moss.image-tools','moss.pdf-tools','moss.transcription','moss.file-cleaner','moss.document-converter','moss.code-map']
 const args=process.argv.slice(2)
-if(process.platform!=='darwin'||process.arch!=='arm64')throw new Error('Bundled native verification requires macOS ARM64')
+const platform = `${process.platform}-${process.arch}`
+if(!['darwin-arm64','linux-x64'].includes(platform))throw new Error(`Bundled native verification is unavailable on ${platform}`)
 if(!args.includes('--sandboxed')){
  const profile='(version 1)(allow default)(deny network-outbound (remote ip "*:*"))(allow network-outbound (remote ip "localhost:*"))'
- const child=spawn('/usr/bin/sandbox-exec',['-p',profile,process.execPath,fileURLToPath(import.meta.url),...args,'--sandboxed'],{stdio:'inherit',env:process.env})
+ const command = process.platform === 'linux' ? 'sudo' : '/usr/bin/sandbox-exec'
+ const prefix = process.platform === 'linux' ? ['-n','unshare','--net','--','sh','-c','ip link set lo up; exec "$@"','moss-offline-check'] : ['-p',profile]
+ const child=spawn(command,[...prefix,process.execPath,fileURLToPath(import.meta.url),...args,'--sandboxed'],{stdio:'inherit',env:process.env})
  child.once('error',error=>{console.error(error);process.exitCode=1})
  child.once('exit',code=>{process.exitCode=code??1})
 }else{
@@ -28,7 +33,7 @@ if(!args.includes('--sandboxed')){
 async function verify(app){
  const name=app.directoryName,id=app.manifest.id
  const temporary=await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'moss-bundled-offline-')))
- const archive=path.join(repoRoot,'artifacts',id,app.manifest.version,`${id}-${app.manifest.version}-darwin-arm64.zip`)
+ const archive=path.join(repoRoot,'artifacts',id,app.manifest.version,`${id}-${app.manifest.version}-${platform}.zip`)
  const pkg=path.resolve(optionValue(args,'--package')||path.join(temporary,'package'))
  if(!optionValue(args,'--package')) {
   let total=0
@@ -43,13 +48,14 @@ async function verify(app){
   }
  }
  const manifest=JSON.parse(await fs.readFile(path.join(pkg,'app.moss.json')))
- assert.deepEqual(manifest.platforms,['darwin-arm64'])
+ assert.deepEqual(manifest.platforms,[platform])
  const dataDir=path.join(temporary,'empty-data'),outputDir=path.join(temporary,'outputs');await fs.mkdir(dataDir);await fs.mkdir(outputDir)
  const checks=[],dependencies=[]
  const require=createRequire(path.join(pkg,'dist/backend/main.mjs'))
  try{
   for(const name of ['engine','ffmpeg','ffprobe','pdf-engine','model']){
-   const spec=await fs.readFile(path.join(pkg,'resources',name+'.json')).then(JSON.parse).catch(()=>null);if(!spec)continue
+   const raw=await fs.readFile(path.join(pkg,'resources',name+'.json')).then(JSON.parse).catch(()=>null);if(!raw)continue
+   const spec=platformAsset(raw)
    const file=name==='model'?path.join(pkg,'dist/models',spec.executable):path.join(pkg,'dist/engines',spec.id,spec.version,spec.executable)
    if(await fs.stat(file).catch(()=>null))assert.equal(await hash(file),spec.binarySha256,`${spec.id} must be shipped and verified`)
    else {
@@ -88,7 +94,8 @@ async function verify(app){
   }else if(name==='file-cleaner'){
    const scans=path.join(temporary,"扫描 中文 '[]$;&");await fs.mkdir(scans);await fs.writeFile(path.join(scans,'a.txt'),'duplicate'.repeat(2000));await fs.copyFile(path.join(scans,'a.txt'),path.join(scans,'b.txt'))
    assert.equal((await cli({command:'dup',paths:[scans],options:{'minimal-file-size':'1'}})).result.fileCount,2)
-   const ffmpeg=JSON.parse(await fs.readFile(path.join(pkg,'resources/ffmpeg.json')));const binary=path.join(pkg,'dist/engines',ffmpeg.id,ffmpeg.version,ffmpeg.executable);await fs.chmod(binary,0o755)
+   const ffmpeg=platformAsset(JSON.parse(await fs.readFile(path.join(pkg,'resources/ffmpeg.json'))))
+   const binary=await restoreBundledAsset(path.join(pkg,'dist/engines',ffmpeg.id,ffmpeg.version,ffmpeg.executable),path.join(temporary,'ffmpeg'),ffmpeg.binarySha256);await fs.chmod(binary,0o755)
    await execute(binary,['-nostdin','-loglevel','error','-y','-f','lavfi','-i','color=c=blue:s=160x90:r=10:d=1','-c:v','libx264',path.join(scans,'clip.mp4')])
    await cli({command:'video-optimizer',paths:[scans],options:{},subcommand:'transcode',suboptions:{}});checks.push('Packaged Czkawka and FFmpeg/ffprobe run duplicate and video scans')
   }else if(name==='document-converter'){
@@ -105,7 +112,7 @@ async function verify(app){
     const result=await client.callTool({name:'search_graph',arguments:{project:value.project,name_pattern:'add',format:'json'}});assert(!result.isError);assert(JSON.stringify(result).includes('add'));checks.push('Packaged MCP server exposes 17 tools, indexes source and queries symbols')
    }finally{await client.close()}
   }
-  const report={appId:id,version:app.manifest.version,platform:'darwin-arm64',network:'OS sandbox denies external IP connections',emptyUserData:true,archiveSha256:optionValue(args,'--package')?null:await hash(archive),dependencies,checks,checkedAt:new Date().toISOString()}
+  const report={appId:id,version:app.manifest.version,platform,network:'OS sandbox denies external IP connections',emptyUserData:true,archiveSha256:optionValue(args,'--package')?null:await hash(archive),dependencies,checks,checkedAt:new Date().toISOString()}
   const output=path.join(repoRoot,'artifacts/offline-apps');await fs.mkdir(output,{recursive:true});await fs.writeFile(path.join(output,id+'.json'),JSON.stringify(report,null,2)+'\n');console.log(`PASS offline ${id}: ${checks.join('; ')}`)
  }finally{await fs.rm(temporary,{recursive:true,force:true})}
 }

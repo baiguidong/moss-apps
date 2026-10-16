@@ -6,5 +6,17 @@
   "sha256": "3362df5776b209b6365482768bc960e5a853f1b554787954c4a4c64e90bc2c75",
   "archive": "binary",
   "executable": "czkawka_cli",
-  "binarySha256": "3362df5776b209b6365482768bc960e5a853f1b554787954c4a4c64e90bc2c75"
+  "binarySha256": "3362df5776b209b6365482768bc960e5a853f1b554787954c4a4c64e90bc2c75",
+  "targets": {
+    "linux-x64": {
+      "id": "czkawka",
+      "version": "12.0.2",
+      "platform": "linux-x64",
+      "url": "https://github.com/qarmin/czkawka/releases/download/12.0.2/linux_czkawka_cli_musl",
+      "archive": "binary",
+      "executable": "czkawka_cli",
+      "sha256": "e90381d8c38479a97f9e98335523208ac285b6e4bcac10f41db791d04a51b14a",
+      "binarySha256": "e90381d8c38479a97f9e98335523208ac285b6e4bcac10f41db791d04a51b14a"
+    }
+  }
 }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.code-map",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "displayName": "代码地图",
   "category": "development",
   "keywords": [
@@ -114,6 +114,7 @@
     ]
   },
   "platforms": [
-    "darwin-arm64"
+    "darwin-arm64",
+    "linux-x64"
   ]
 }

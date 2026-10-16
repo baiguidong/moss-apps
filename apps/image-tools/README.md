@@ -1,5 +1,7 @@
 # 图片工具
 
+0.1.2 新增 Linux AMD64 独立包。原生依赖随对应平台包交付；Linux 在 Ubuntu 24.04 验证。浏览器内 App 页面仍依赖 Moss Web Host 的独立适配。
+
 普通 Moss App `moss.image-tools@0.1.1`，包含独立 React UI、Node Backend 和随包提供的 sharp 0.34.5。需要 Moss Host API >=3.11。首版声明并验证 macOS Apple Silicon。
 
 在“更多 → 图片工具”导入本地图片，按功能分组配置，可以组合后批量处理：

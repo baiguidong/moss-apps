@@ -6,10 +6,11 @@ import {randomUUID} from 'node:crypto'
 import {spawn} from 'node:child_process'
 import {pipeline} from 'node:stream/promises'
 import {hash} from './runtime.mjs'
+import {platformAsset} from './platform.mjs'
 
 const preparing = new Map()
 export async function prepareBinary(spec, dataDir, signal) {
-  if (`${process.platform}-${process.arch}` !== spec.platform) throw new Error(`当前发行版支持 ${spec.platform}`)
+  spec = platformAsset(spec)
   const directory = path.join(dataDir, 'engines', spec.id, spec.version)
   const binary = path.join(directory, spec.executable)
   if (await fs.stat(binary).catch(() => null)) {

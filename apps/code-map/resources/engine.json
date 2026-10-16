@@ -7,5 +7,18 @@
   "archive": "tar.gz",
   "executable": "codebase-memory-mcp",
   "member": "codebase-memory-mcp",
-  "binarySha256": "d26ba94b11b79f727923eaadb811e044a52618ae6d303670df5467f1e6c25015"
+  "binarySha256": "d26ba94b11b79f727923eaadb811e044a52618ae6d303670df5467f1e6c25015",
+  "targets": {
+    "linux-x64": {
+      "id": "codebase-memory-mcp",
+      "version": "v0.12.0",
+      "platform": "linux-x64",
+      "url": "https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.12.0/codebase-memory-mcp-linux-amd64-portable.tar.gz",
+      "archive": "tar.gz",
+      "executable": "codebase-memory-mcp",
+      "sha256": "7024e585132760f383e3e25237e2b2ac6f5185f7e466f8dc66a085bb25f8d0be",
+      "member": "codebase-memory-mcp",
+      "binarySha256": "36bc515ee72b90a209c12518696d886b83e64f66aa7366079cf705f233838bad"
+    }
+  }
 }

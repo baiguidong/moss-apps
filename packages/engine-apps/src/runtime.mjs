@@ -5,6 +5,7 @@ import { randomUUID, createHash } from 'node:crypto'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { restoreBundledAsset } from './bundled.mjs'
+import { platformAsset } from './platform.mjs'
 
 export async function atomic(file, value) {
   await fs.mkdir(path.dirname(file), { recursive: true, mode: 0o700 })
@@ -45,7 +46,7 @@ export function run(executable, args, { cwd, env, signal, log, maxBytes = 16 * 1
 
 export async function ensureBinary(spec, dataDir, signal) {
   signal?.throwIfAborted()
-  if (`${process.platform}-${process.arch}` !== spec.platform) throw new Error(`当前发行版支持 ${spec.platform}`)
+  spec = platformAsset(spec)
   const bundled = fileURLToPath(new URL(`../engines/${spec.id}/${spec.version}/${spec.executable}`, import.meta.url))
   const cached = path.join(dataDir, 'engines', spec.id, spec.version, spec.executable)
   const binary = await restoreBundledAsset(bundled, cached, spec.binarySha256, signal)

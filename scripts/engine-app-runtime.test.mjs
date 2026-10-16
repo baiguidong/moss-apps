@@ -10,6 +10,15 @@ import {bundleAsset} from '../packages/engine-apps/src/bundle-build.mjs'
 import {restoreBundledAsset} from '../packages/engine-apps/src/bundled.mjs'
 import {prepareBinary} from '../packages/engine-apps/src/download.mjs'
 import {ensureBinary,hash,run,TaskStore,executeTask} from '../packages/engine-apps/src/runtime.mjs'
+import {platformAsset} from '../packages/engine-apps/src/platform.mjs'
+
+test('native assets select their pinned OS and architecture without foreign fallback', () => {
+ const spec={id:'engine',platform:'darwin-arm64',version:'1',sha256:'mac',url:'https://example.com/mac',targets:{'linux-x64':{version:'2',sha256:'linux',url:'https://example.com/linux'}}}
+ assert.equal(platformAsset(spec,'darwin-arm64').sha256,'mac')
+ assert.deepEqual(platformAsset(spec,'linux-x64'),{id:'engine',platform:'linux-x64',version:'2',sha256:'linux',url:'https://example.com/linux'})
+ assert.throws(()=>platformAsset(spec,'linux-arm64'),/不支持/)
+ assert.equal(spec.platform,'darwin-arm64')
+})
 
 test('build-only download, ZIP/TGZ/TXZ extraction, pinned hashes and corruption handling',async()=>{
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'moss-engine-download-'))

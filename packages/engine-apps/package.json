@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./runtime": "./src/runtime.mjs",
+    "./platform": "./src/platform.mjs",
     "./backend": "./src/backend.mjs",
     "./cli": "./src/cli.mjs",
     "./ui": "./src/ui.tsx",

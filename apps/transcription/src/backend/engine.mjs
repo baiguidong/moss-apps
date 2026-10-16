@@ -1,14 +1,14 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { createRequire } from 'node:module'
 import { randomUUID } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 import model from '../../resources/model.json' with {type:'json'}
+import ffmpegSpec from '../../resources/ffmpeg.json' with {type:'json'}
+import { ensureBinary } from '@moss/engine-apps/runtime'
 import { restoreBundledAsset } from '@moss/engine-apps/bundled'
 import { runProcess } from '@moss/local-tasks/worker'
 import { atomicJson } from '@moss/local-tasks/backend'
 
-const require = createRequire(import.meta.url)
 export const MODEL = { name:model.executable, size:model.size, sha256:model.binarySha256, revision:model.version }
 const FORMATS = new Set(['wav', 'mp3', 'm4a', 'mp4', 'mov', 'webm', 'ogg', 'flac', 'aac', 'mkv', 'aiff', 'aif', 'opus'])
 export async function inspect(file) {
@@ -48,11 +48,7 @@ async function writeTranscript(dir, transcript) {
 export async function execute({ input, files, outputDir, dataDir, signal, progress }) {
   const file = files.find(f => f.id === input.fileIds[0]), model = await ensureModel(dataDir, signal, progress)
   progress(21, '准备音频')
-  const ffmpeg = path.join(path.dirname(require.resolve('@drbearzay/ffmpeg-darwin-arm64/package.json')), 'ffmpeg')
-  const executable = path.join(dataDir, 'runtime', 'ffmpeg')
-  await fs.mkdir(path.dirname(executable), { recursive: true })
-  // ZIP extraction may remove executable mode. Execute a private runtime copy.
-  await fs.copyFile(ffmpeg, executable); await fs.chmod(executable, 0o700)
+  const executable = await ensureBinary(ffmpegSpec, dataDir, signal)
   const audioPath = path.join(outputDir, '播放音频.wav')
   await runProcess(executable, ['-nostdin', '-hide_banner', '-loglevel', 'error', '-i', file.path, '-vn', '-t', '7201', '-ac', '1', '-ar', '16000', '-c:a', 'pcm_s16le', '-y', audioPath], { signal })
   const audio = await fs.readFile(audioPath)
@@ -63,7 +59,7 @@ export async function execute({ input, files, outputDir, dataDir, signal, progre
   if (duration > 7200) throw new Error('首版支持最长 2 小时的录音，请先拆分文件')
   progress(25, '正在加载本地识别模型')
   const { initWhisper } = await import('@fugood/whisper.node')
-  const context = await initWhisper({ filePath: model, useGpu: true })
+  const context = await initWhisper({ filePath: model, useGpu: process.platform === 'darwin' })
   const job = context.transcribeFile(audioPath, { language: input.options.language, temperature: 0, maxThreads: 4, onProgress: n => progress(25 + n * 0.73, `语音转写 ${Math.round(n)}%`) })
   const stop = () => { void job.stop() }; signal.addEventListener('abort', stop, { once: true })
   let recognized
