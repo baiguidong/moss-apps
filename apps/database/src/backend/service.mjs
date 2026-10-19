@@ -103,8 +103,10 @@ export class DatabaseService {
       if (model.kind === 'sqlite') {
         model.file = expandHome(model.file)
         await existingSqlite(model.file)
-        // DBHub expects a filesystem path, not a percent-encoded file URL.
-        dsn = `sqlite://${model.file}`
+        // DBHub expects forward slashes and a leading slash before a Windows drive.
+        // Keep path characters literal: its SQLite DSN parser does not URL-decode them.
+        const sqlitePath = process.platform === 'win32' ? model.file.replaceAll('\\', '/') : model.file
+        dsn = `sqlite://${sqlitePath.startsWith('/') ? '' : '/'}${sqlitePath}`
       } else if (model.kind === 'dsn') {
         const value = String(input.dsn || '').trim()
         if (!value && !(previous?.config.env && Object.hasOwn(previous.config.env, 'MOSS_DATABASE_DSN'))) throw new Error('请填写数据库连接地址。')

@@ -2,7 +2,7 @@
 
 ## 0.2.2
 
-- 数据库查询包支持 macOS、Windows 和 Linux；Windows 使用 `cmd /c npx` 启动 DBHub。
+- 数据库查询包支持 macOS、Windows 和 Linux；Windows 使用 `cmd /c npx` 启动 DBHub，并将 SQLite 路径规范化为 DBHub 可识别的格式。
 
 ## 0.2.1
 
