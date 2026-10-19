@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.mzl-trademark",
+  "version": "0.1.0",
+  "displayName": "摩知轮商标查询",
+  "description": "用自然语言检索商标：按名称、申请人、申请号、注册号、尼斯类别、法律状态、日期范围查询，覆盖中国及 110+ 海外国家/地区商标局；并支持以图搜图的图形近似检索。",
+  "category": "other",
+  "discovery": {
+    "group": "online"
+  },
+  "connectorApp": {
+    "id": "mzl-trademark",
+    "capabilities": [
+      "mcp",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "mzl-trademark",
+    "Trademark Search",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

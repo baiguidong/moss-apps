@@ -3,7 +3,11 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { setTimeout as delay } from 'node:timers/promises'
+import { createHash } from 'node:crypto'
 import { createSelfTestService } from './service.mjs'
+import { disabledBrowserTools } from './browser-policy.mjs'
+import { prepareTestTarget } from './target-preparation.mjs'
+import { createRecipeRunner } from './recipe-runner.mjs'
 
 const protocol = 'moss.testing/v1'
 export function createSelfTestBackend(options = {}) {
@@ -31,44 +35,27 @@ export function createSelfTestBackend(options = {}) {
       service = createSelfTestService({
         directory: path.join(dataDir, 'runs'), instanceHome: path.join(dataDir, 'target/home'),
         catalogDirectory: path.join(packageRoot, 'resources/self-tests'), appVersion: manifest.version, getSettings: settings,
+        executeRecipe: createRecipeRunner(packageRoot),
         prepareBrowser: async () => {
           const versions = JSON.parse(await fs.readFile(path.join(packageRoot, 'dist/playwright-cdp/versions.json'), 'utf8'))
-          return { version: versions['@playwright/mcp'], config: () => ({
-            engineEntry: 'dist/playwright-cdp/node_modules/@playwright/mcp/cli.js',
-            disabledTools: ['browser_navigate', 'browser_close', 'browser_install'],
+          const packageHash = createHash('sha256').update(await fs.readFile(path.join(packageRoot, 'checksums.json'))).digest('hex')
+          return { version: versions['@playwright/mcp'], packageHash, config: () => ({
+            engineEntry: 'dist/backend/browser-proxy.mjs',
+            disabledTools: disabledBrowserTools,
           }) }
         },
         launchInstance: async ({ run, signal, onProgress }) => {
-          const initial = await host('target.status', {}, signal)
-          if (!['open', 'sync', 'reset'].includes(initial.operation)) await host('target.open', fixtures, signal)
-          try {
-            for (;;) {
-              signal.throwIfAborted()
-              const state = await host('target.status', {}, signal)
-              await onProgress(state.progress || { stage: 'launch', label: state.message })
-              if (!state.operation) {
-                if (state.operationError) throw new Error(state.operationError)
-                if (state.phase !== 'open') throw new Error('测试实例未打开。')
-                break
-              }
-              await delay(250, undefined, { signal })
-            }
-          } catch (error) {
-            // Cancel preparation, while a successfully opened target remains available.
-            const state = await host('target.status').catch(() => null)
-            if (state?.operation) await host('target.close').catch(() => {})
-            throw error
-          }
+          await prepareTestTarget({ host, fixtures, resetData: run.resetData, signal, onProgress })
           const target = await host('target.attach', { runId: run.id }, signal)
           targetAlive = true
           Object.assign(run, target)
           return { endpoint: target.endpoint, exited: new Promise(() => {}), isAlive: () => targetAlive }
         },
         createController: async (run, config) => (await host('controller.create', {
-          runId: run.id, title: `Moss 自测 · ${new Date(run.startedAt).toLocaleString()}`, ...config,
+          runId: run.id, title: `Moss 自测 ${run.id.slice(0, 8)} · 核对 ${(run.controllerSessions?.length || 0) + 1}`, ...config,
         })).sessionId,
-        executeController: async (sessionId, prompt, signal) => {
-          await host('controller.turn.start', { sessionId, prompt }, signal)
+        executeController: async (sessionId, prompt, signal, { evidence } = {}) => {
+          await host('controller.turn.start', { sessionId, prompt, ...(evidence ? { evidence } : {}) }, signal)
           for (;;) {
             signal.throwIfAborted()
             const turn = await host('controller.turn.status', { sessionId }, signal)
@@ -81,6 +68,7 @@ export function createSelfTestBackend(options = {}) {
           }
         },
         interruptController: sessionId => host('controller.turn.abort', { sessionId }),
+        finishController: sessionId => host('controller.turn.finish', { sessionId }),
         stopController: sessionId => host('controller.dispose', { sessionId }),
         notify: state => backend.emit('self-test.changed', state),
         openReportWindow: file => closed ? Promise.resolve() : fileAction('preview', file),
@@ -93,7 +81,7 @@ export function createSelfTestBackend(options = {}) {
   })
   backend.registerAction('catalog', () => service.getCatalog())
   backend.registerAction('status', async input => ({ ...await service.getStatus(input.runId), disabled: (await host('environment')).disabled }))
-  backend.registerAction('run.start', input => service.start(input.caseIds))
+  backend.registerAction('run.start', input => service.start(input.caseIds, { resetData: input.resetData }))
   backend.registerAction('run.stop', input => service.stop(input.runId))
   backend.registerAction('report.open', input => service.openReport(input.runId))
   backend.registerAction('report.reveal', async input => fileAction('reveal', (await service.getStatus(input.runId)).reportPath))
@@ -108,7 +96,7 @@ export function createSelfTestBackend(options = {}) {
     return { ...state, phase: state.operation && state.operation !== 'close' ? 'starting' : state.phase }
   })
   backend.registerAction('self-test', async input => {
-    const caller = ['start', 'record'].includes(input.action) ? await host('controller.caller') : { sessionId: null }
+    const caller = ['start', 'record', 'review', 'inspect'].includes(input.action) ? await host('controller.caller') : { sessionId: null }
     return service.handle(input, caller.sessionId)
   })
   return backend

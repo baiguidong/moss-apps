@@ -1,0 +1,106 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "theme": "dark",
+      "width": 1080,
+      "height": 820,
+      "footerTop": 708.78125,
+      "footerBottom": 776.78125,
+      "inputsBottom": 688.78125,
+      "unobscured": true,
+      "horizontalOverflow": false
+    },
+    {
+      "theme": "dark",
+      "width": 900,
+      "height": 560,
+      "footerTop": 483,
+      "footerBottom": 543,
+      "inputsBottom": 463.5625,
+      "unobscured": true,
+      "horizontalOverflow": false
+    },
+    {
+      "theme": "dark",
+      "width": 560,
+      "height": 440,
+      "footerTop": 363,
+      "footerBottom": 423,
+      "inputsBottom": 343.5625,
+      "unobscured": true,
+      "horizontalOverflow": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "height": 568,
+      "footerTop": 491,
+      "footerBottom": 551,
+      "inputsBottom": 471.5625,
+      "unobscured": true,
+      "horizontalOverflow": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "height": 480,
+      "footerTop": 403,
+      "footerBottom": 463,
+      "inputsBottom": 383.75,
+      "unobscured": true,
+      "horizontalOverflow": false
+    },
+    {
+      "theme": "light",
+      "width": 1080,
+      "height": 820,
+      "footerTop": 708.78125,
+      "footerBottom": 776.78125,
+      "inputsBottom": 688.78125,
+      "unobscured": true,
+      "horizontalOverflow": false
+    },
+    {
+      "theme": "light",
+      "width": 900,
+      "height": 560,
+      "footerTop": 483,
+      "footerBottom": 543,
+      "inputsBottom": 463.5625,
+      "unobscured": true,
+      "horizontalOverflow": false
+    },
+    {
+      "theme": "light",
+      "width": 560,
+      "height": 440,
+      "footerTop": 363,
+      "footerBottom": 423,
+      "inputsBottom": 343.5625,
+      "unobscured": true,
+      "horizontalOverflow": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "height": 568,
+      "footerTop": 491,
+      "footerBottom": 551,
+      "inputsBottom": 471.5625,
+      "unobscured": true,
+      "horizontalOverflow": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "height": 480,
+      "footerTop": 403,
+      "footerBottom": 463,
+      "inputsBottom": 383.75,
+      "unobscured": true,
+      "horizontalOverflow": false
+    }
+  ],
+  "errors": []
+}

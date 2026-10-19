@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Braces, Clock3, Binary, KeyRound, Wrench, Globe2 } from 'lucide-react'
+import { Braces, Clock3, Binary, KeyRound, Globe2 } from 'lucide-react'
 import { runtimeStatus } from './lib/host'
 import { TimestampTool } from './components/TimestampTool'
 import { Base64Tool } from './components/Base64Tool'
@@ -25,5 +25,5 @@ export function App() {
     void refresh(); window.addEventListener('focus', refresh); window.addEventListener('devtools-operation', refresh)
     return () => { disposed = true; off?.(); window.removeEventListener('focus', refresh); window.removeEventListener('devtools-operation', refresh) }
   }, [])
-  return <div className="app-shell"><aside className="sidebar"><div className="brand"><Wrench size={19} /><span>开发工具</span></div><nav aria-label="开发工具分类">{tools.map(({ id, title, icon: Icon }) => <a key={id} href={`#/${id}`} aria-current={active === id ? 'page' : undefined}><Icon size={17} /><span>{title}</span></a>)}</nav><div className="sidebar-note">常用转换与接口调试。</div></aside><div className="main-column"><main>{tools.map(({ id, component: Panel }) => <section key={id} aria-label={tools.find(t => t.id === id)!.title + '工作区'} hidden={active !== id}><Panel /></section>)}</main><footer className="app-footer"><span>{active === 'http' && !window.mossApp ? '浏览器预览 · 在 Moss 中发送请求' : status}</span><span>{active === 'http' ? '本机发送 · 响应上限 1 MiB' : '本地处理 · 不保存输入与密钥'}</span></footer></div></div>
+  return <div className="app-shell"><aside className="sidebar"><nav aria-label="开发工具分类">{tools.map(({ id, title, icon: Icon }) => <a key={id} href={`#/${id}`} aria-current={active === id ? 'page' : undefined}><Icon size={17} /><span>{title}</span></a>)}</nav><div className="sidebar-note">常用转换与接口调试。</div></aside><div className="main-column"><main>{tools.map(({ id, component: Panel }) => <section key={id} aria-label={tools.find(t => t.id === id)!.title + '工作区'} hidden={active !== id}><Panel /></section>)}</main><footer className="app-footer"><span>{active === 'http' && !window.mossApp ? '浏览器预览 · 在 Moss 中发送请求' : status}</span><span>{active === 'http' ? '本机发送 · 响应上限 1 MiB' : '本地处理 · 不保存输入与密钥'}</span></footer></div></div>
 }

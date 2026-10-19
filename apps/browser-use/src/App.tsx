@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Check, ChevronDown, CircleAlert, Globe2, Loader2, Monitor, RefreshCw, Search, Settings2, Wrench } from 'lucide-react'
+import { Check, ChevronDown, CircleAlert, Loader2, Monitor, RefreshCw, Search, Settings2, Wrench } from 'lucide-react'
 import { EXTENSION_URL, PLAYWRIGHT_CDP, PLAYWRIGHT_VERSION, browserFields, connectionTarget } from './browser-config'
 import type { Catalog, SaveInput } from './contracts'
 import { request } from './lib/api'
@@ -58,12 +58,10 @@ export function App() {
   }
   const tools = (server?.check?.tools || []).filter(tool => `${tool.name} ${tool.description}`.toLowerCase().includes(query.toLowerCase()))
   const fields = server && browserFields(server.config)
-  return <main className="app-shell"><div className="browser-workspace">
-    <header className="browser-header"><div className="browser-brand"><span className="browser-mark"><Globe2 size={24} strokeWidth={1.6} /></span><div><h1>网页操控</h1><p>Browser Use <span className="official-tag">官方</span></p></div></div><button className="button" onClick={() => setEditor(true)} disabled={!server || busy || unavailable}><Settings2 size={15} />连接设置</button></header>
+  return <main className="app-shell" aria-label="网页操控"><div className="browser-workspace">
     {!window.mossApp && <div className="demo-note">演示模式 · 仅展示界面，操作不会连接真实浏览器</div>}
     <section className="browser-card connection-card" aria-label="浏览器状态" aria-busy={connecting}>
-      <div className="connection-top"><span className={`browser-status ${failed || unavailable ? 'failure' : checked ? 'ready' : ''}`} role="status">{connecting || (!catalog && !error) ? <Loader2 size={16} className="spin" /> : failed || unavailable ? <CircleAlert size={16} /> : <Check size={16} />}{!catalog && !error ? '正在读取状态' : label}</span><button className="button primary" onClick={() => void reconnect()} disabled={busy || connecting || unavailable}><RefreshCw size={15} className={busy ? 'spin' : ''} />重新连接</button></div>
-      <h2>让 Moss 帮你操作网页</h2><p className="browser-lead">在对话中描述任务，Moss 就能浏览页面、读取内容和填写表单。</p>
+      <div className="connection-top"><span className={`browser-status ${failed || unavailable ? 'failure' : checked ? 'ready' : ''}`} role="status">{connecting || (!catalog && !error) ? <Loader2 size={16} className="spin" /> : failed || unavailable ? <CircleAlert size={16} /> : <Check size={16} />}{!catalog && !error ? '正在读取状态' : label}</span><div className="connection-actions"><button className="button" onClick={() => setEditor(true)} disabled={!server || busy || unavailable}><Settings2 size={15} />连接设置</button><button className="button primary" onClick={() => void reconnect()} disabled={busy || connecting || unavailable}><RefreshCw size={15} className={busy ? 'spin' : ''} />重新连接</button></div></div>
       {unavailable && <p className="browser-error" role="alert">请在 Moss 应用管理中启用网页操控并检查权限。</p>}
       {failed && <p className="browser-error" role="alert">{failed}</p>}
       <div className="browser-target"><Monitor size={18} /><div><strong>Chrome 浏览器</strong><span>{server ? connectionTarget(server.config) : '正在读取连接配置'}</span></div>{checked && server?.check && <small>最近检查 {date(server.check.checkedAt)}</small>}</div>

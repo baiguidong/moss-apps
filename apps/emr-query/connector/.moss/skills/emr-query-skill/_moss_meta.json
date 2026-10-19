@@ -1,0 +1,10 @@
+{
+  "name": "emr-query-skill",
+  "display_name": "弹性MapReduce",
+  "description": "通过CLI实现弹性 MapReduce 集群、节点、服务、作业、监控、YARN 调度、自动扩缩容、用户与配置等查询。",
+  "source_type": "connector",
+  "connector_id": "emr-query",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

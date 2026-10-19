@@ -1,0 +1,10 @@
+{
+  "name": "ezjoin-meeting-skill",
+  "display_name": "EzyJoin智慧会议",
+  "description": "用自然语言管理 EzyJoin 智慧会议：预约会议室、创建/取消会议、查询会议日程与 AI 纪要。",
+  "source_type": "connector",
+  "connector_id": "ezjoin-meeting",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

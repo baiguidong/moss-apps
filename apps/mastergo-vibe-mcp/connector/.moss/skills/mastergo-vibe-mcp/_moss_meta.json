@@ -1,0 +1,10 @@
+{
+  "name": "mastergo-vibe-mcp",
+  "display_name": "MasterGo 莫高设计",
+  "description": "连接 MasterGo 画布，让 AI 进行设计、修改、同步和获取 D2C 代码。",
+  "source_type": "connector",
+  "connector_id": "mastergo-vibe-mcp",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

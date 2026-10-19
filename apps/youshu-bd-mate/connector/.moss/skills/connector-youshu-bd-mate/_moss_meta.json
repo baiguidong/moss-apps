@@ -1,0 +1,10 @@
+{
+  "name": "connector-youshu-bd-mate",
+  "display_name": "智客AI · 对公(To B)营销助手",
+  "description": "对公营销助手是基于企业全维数据构建的对公营销智能助手，提供从生成访前一页纸、访前客情报告、产品找客、关键人画像、营销话术及按企荐品的完整展业闭环能力。",
+  "source_type": "connector",
+  "connector_id": "youshu-bd-mate",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

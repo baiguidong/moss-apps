@@ -1,0 +1,10 @@
+{
+  "name": "shareone",
+  "display_name": "ShareOne",
+  "description": "将 HTML、Markdown、PDF、Word 和 PPT 发布为可分享链接，并支持更新原链接、密码、水印和评论协作。",
+  "source_type": "connector",
+  "connector_id": "shareone",
+  "connector_type": "unknown",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -10,6 +10,8 @@ mkdirSync(new URL('../dist/backend/', import.meta.url), { recursive: true })
 for (const [command, args] of [
   ['vite', ['build']],
   ['bun', ['build', 'src/backend/main.mjs', '--target=node', '--format=esm', '--outfile=dist/backend/main.mjs']],
+  ['bun', ['build', 'src/backend/recipe-worker.mjs', '--target=node', '--format=esm', '--outfile=dist/backend/recipe-worker.mjs']],
+  ['bun', ['build', 'src/backend/browser-proxy.mjs', '--target=node', '--format=esm', '--outfile=dist/backend/browser-proxy.mjs']],
 ]) {
   const result = spawnSync(command, args, { cwd, stdio: 'inherit' })
   if (result.error) throw result.error

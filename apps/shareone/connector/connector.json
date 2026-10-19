@@ -1,0 +1,71 @@
+{
+  "id": "shareone",
+  "source": "shareone",
+  "name": "ShareOne",
+  "nameEn": "ShareOne",
+  "description": "将 HTML、Markdown、PDF、Word 和 PPT 发布为可分享链接，并支持更新原链接、密码、水印和评论协作。",
+  "descriptionEn": "Publish HTML, Markdown, PDF, Word, and PowerPoint files as shareable links with same-link updates, passwords, watermarks, and review comments.",
+  "type": "unknown",
+  "authMode": "api-key",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "",
+  "visibleIn": [
+    "external",
+    "cloudhosted",
+    "selfhosted"
+  ],
+  "examples": [
+    "把这个 HTML 页面发布成分享链接",
+    "发布这份 PDF，设置访问密码并返回链接",
+    "更新刚才的 ShareOne 链接，不要创建新链接",
+    "拉取这个页面的未解决评论并帮我处理"
+  ],
+  "hasMcp": false,
+  "hasCli": false,
+  "hasSkills": true,
+  "hasCredentialSchema": true,
+  "icon": "data:image/png;base64,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",
+  "enabled": true,
+  "credentialSchema": {
+    "title": "连接 ShareOne",
+    "titleEn": "Connect ShareOne",
+    "description": "可以自动创建无需绑定账号的访客 API Key，也可以填写已有 API Key。凭据由 Moss 加密保存。",
+    "descriptionEn": "Create a guest API key without binding an account, or enter an existing API key. Moss stores the credential encrypted.",
+    "docUrl": "https://shareone.app/docs/ai-agent-publish",
+    "docLabel": "查看 ShareOne 使用说明",
+    "docLabelEn": "View ShareOne documentation",
+    "fields": [
+      {
+        "key": "SHAREONE_API_KEY",
+        "label": "API Key",
+        "labelEn": "API Key",
+        "placeholder": "已有 API Key 时可直接填写",
+        "placeholderEn": "Enter an existing API key",
+        "description": "无需 OAuth。访客 API Key 可直接使用，绑定账号是可选操作。",
+        "descriptionEn": "OAuth is not required. Guest API keys work immediately; account binding is optional.",
+        "type": "password",
+        "required": true
+      }
+    ],
+    "provision": {
+      "url": "https://shareone.vip/api/v1/agent-guest-key",
+      "targetField": "SHAREONE_API_KEY",
+      "responseField": "api_key",
+      "label": "自动创建访客 API Key",
+      "labelEn": "Create guest API key",
+      "validation": {
+        "url": "https://shareone.vip/api/v1/me",
+        "headers": {
+          "X-API-Key": "${SHAREONE_API_KEY}"
+        }
+      }
+    }
+  },
+  "requiresCliSetup": false,
+  "mcpServerNames": [],
+  "skillName": "shareone",
+  "skillNames": [
+    "shareone"
+  ]
+}

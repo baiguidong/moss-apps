@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.tencent-health-nges",
+  "summary": "腾讯健康NGES MCP服务，支持智能问数和合规审核等功能",
+  "description": "腾讯健康NGES MCP服务，支持智能问数和合规审核等功能",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/tencent-health-nges",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

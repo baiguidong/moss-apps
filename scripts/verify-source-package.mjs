@@ -58,7 +58,7 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
       if (manifest.mcpApp) {
         await fs.cp(path.join(app, 'dist'), output, { recursive: true })
       } else {
-        for (const name of ['dist', 'schemas', 'assets', 'resources', 'README.md', 'LICENSE', 'LICENSE.md']) {
+        for (const name of ['dist', 'schemas', 'assets', 'resources', 'README.md', 'LICENSE', 'LICENSE.md', ...(manifest.connectorApp ? ['connector'] : [])]) {
           try { await fs.cp(path.join(app, name), path.join(output, name), { recursive: true }) }
           catch (error) { if (error.code !== 'ENOENT') throw error }
         }

@@ -7,7 +7,12 @@ import { createResultTransport } from '../src/backend/backend'
 test('real App reader drives list, full prompt, filters, refresh, theme and deletion', async ({ page }) => {
   const f = await fixture(); const transfer = createResultTransport()
   try {
-    await f.append(call({ status: 'error', error: { name: 'NetworkError', message: 'fixture network error' } })); await f.metadata()
+    await f.append(call({ status: 'error', error: { name: 'NetworkError', message: 'fixture network error' },
+      metadata: { promptDiagnostics: { version: 1, metric: 'utf8-content-bytes', unmeasuredBlocks: 1, rows: [
+        { location: 'system[0].text', kind: 'system', characters: 120, bytes: 240 },
+        { location: 'messages[0].content', kind: 'message', characters: 120, bytes: 240, duplicateOf: 'system[0].text' },
+      ] } },
+    })); await f.metadata()
     const store = createTraceStore(f.directory); const invoked: string[] = []
     await page.exposeFunction('traceAction', async (name: string, input: any) => {
       invoked.push(name)
@@ -34,6 +39,13 @@ test('real App reader drives list, full prompt, filters, refresh, theme and dele
     await page.getByRole('button', { name: /系统提示词/ }).click()
     await expect(page.getByText('系统提示词末尾标记', { exact: true })).toBeVisible()
     expect(invoked).toContain('traces.call')
+    await page.getByRole('button', { name: '提示词组成诊断' }).click()
+    await expect(page.getByTestId('prompt-diagnostics')).toContainText('完全重复')
+    await expect(page.getByTestId('prompt-diagnostics')).toContainText('统计不完整')
+    await page.setViewportSize({ width: 480, height: 800 })
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    await page.getByTestId('prompt-diagnostics').locator('table').scrollIntoViewIfNeeded()
+    await page.screenshot({ path: '../../artifacts/moss.trace/prompt-diagnostics-narrow.png', fullPage: true })
     await page.getByTestId('trace-back').click()
     await f.metadata('更新后标题')
     await page.getByRole('button', { name: '刷新 Trace' }).click()

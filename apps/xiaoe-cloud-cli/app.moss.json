@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.xiaoe-cloud-cli",
+  "version": "0.1.0",
+  "displayName": "小鹅通",
+  "description": "用自然语言管理小鹅通店铺：查询课程与学员，创建和编辑课程，查看订单，并查找或上传图片、音频、电子书和文档素材。",
+  "category": "knowledge",
+  "discovery": {
+    "group": "online"
+  },
+  "connectorApp": {
+    "id": "xiaoe-cloud-cli",
+    "capabilities": [
+      "mcp",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "xiaoe-cloud-cli",
+    "Xiaoe Cloud",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

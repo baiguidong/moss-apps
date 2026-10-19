@@ -1,0 +1,10 @@
+{
+  "name": "dcs-cloud",
+  "display_name": "DCS Cloud",
+  "description": "引导 dcs CLI（下载、自动更新、PAT 登录），之后直接执行 CLI 操作 DCS Cloud：项目、任务、工作流、计费、数据文件。用户需在云平台个人中心创建个人访问令牌(PAT)并粘贴到连接器。",
+  "source_type": "connector",
+  "connector_id": "dcs-cloud",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

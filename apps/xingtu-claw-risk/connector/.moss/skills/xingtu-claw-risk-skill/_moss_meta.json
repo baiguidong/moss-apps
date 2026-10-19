@@ -1,0 +1,10 @@
+{
+  "name": "xingtu-claw-risk-skill",
+  "display_name": "天创信用星图MCP",
+  "description": "企业风险 AI 分析助手，用自然语言识别企业所属行业、分析企业间关联方关系（股权/实控人/担保/共同投资）。",
+  "source_type": "connector",
+  "connector_id": "xingtu-claw-risk",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.ai-hive",
+  "version": "0.1.0",
+  "displayName": "AI-HIVE",
+  "description": "连接全球 100+ 顶尖 AI 模型（Seedance 2.5、H3 (MiniMax)、Happyhorse、GPT-image、Nano-Banana、Deepseek、Kimi 等），一键搞定文本、图像、视频创作。",
+  "category": "other",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "connectorApp": {
+    "id": "ai-hive",
+    "capabilities": [
+      "mcp",
+      "cli",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "ai-hive",
+    "AI-HIVE",
+    "mcp",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

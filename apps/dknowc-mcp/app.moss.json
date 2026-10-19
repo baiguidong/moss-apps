@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.dknowc-mcp",
+  "version": "0.1.0",
+  "displayName": "深知可信工作台",
+  "description": "深知可信工作台面向政策、法律、标准和公共服务场景，提供可信问答、权威检索、深度研究和材料整理能力。它可以帮助用户查询政策原文、办事条件、申报材料、补贴资质、法律法规和行业标准，梳理多地区、多时间范围的信息，并基于可追溯的权威来源形成清晰、可核验的结果。",
+  "category": "other",
+  "discovery": {
+    "group": "online"
+  },
+  "connectorApp": {
+    "id": "dknowc-mcp",
+    "capabilities": [
+      "mcp",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "dknowc-mcp",
+    "DKnow Trusted Workbench",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

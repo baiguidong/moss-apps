@@ -1,0 +1,10 @@
+{
+  "name": "tyc-mcp",
+  "display_name": "天眼查",
+  "description": "通过天眼查 MCP 查询多维度企业数据。支持工商登记、股东结构、司法风险、知识产权、董监高、经营数据等 160+ 项企业数据能力，用自然语言完成企业尽调与商业情报分析。",
+  "source_type": "connector",
+  "connector_id": "tyc-mcp",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -41,6 +41,9 @@ export function validateRepositoryAppManifest(rawManifest) {
   if (rawManifest.category !== undefined && manifest.category !== rawManifest.category) {
     throw new Error('The pinned SDK must preserve App category; upgrade the Core SDK before building')
   }
+  for (const field of ['discovery', 'connectorApp']) {
+    if (JSON.stringify(manifest[field]) !== JSON.stringify(rawManifest[field])) throw new Error(`The pinned SDK must preserve ${field}; upgrade the Core SDK before building`)
+  }
   return manifest
 }
 

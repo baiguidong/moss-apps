@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.pkulaw",
+  "version": "0.1.0",
+  "displayName": "北大法宝·法律智能检索",
+  "description": "检索 + 核验一体：语义（自然语言描述）与关键词双模式检索法规、法条与司法案例；并可把文本中的法条引用与案号回北大法宝库逐条比对、对齐标准名称，输出带 pkulaw.com 原文链接的可溯源结果，专治法律幻觉。",
+  "category": "other",
+  "discovery": {
+    "group": "online"
+  },
+  "connectorApp": {
+    "id": "pkulaw",
+    "capabilities": [
+      "mcp",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "pkulaw",
+    "PKULaw · Legal Search",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "tanyuan-assistant": {
+      "type": "http",
+      "url": "https://api.tanyuan.qq.com/wb/mcp"
+    }
+  }
+}

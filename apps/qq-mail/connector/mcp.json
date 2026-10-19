@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "qq-mail": {
+      "type": "http",
+      "url": "https://api.mail.qq.com/mcp",
+      "oauth": {
+        "clientName": "WorkBuddy"
+      }
+    }
+  }
+}

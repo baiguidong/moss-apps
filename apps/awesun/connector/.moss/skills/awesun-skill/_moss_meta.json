@@ -1,0 +1,10 @@
+{
+  "name": "awesun-skill",
+  "display_name": "向日葵远程控制",
+  "description": "通过命令行管理远端设备，实时监测在线状态、秒级发起远程控制、快速传输文件及远程截屏。零部署、免更新，轻松实现智能批量运维。",
+  "source_type": "connector",
+  "connector_id": "awesun",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.cloudbase",
+  "version": "0.1.0",
+  "displayName": "腾讯云 CloudBase",
+  "description": "腾讯云开发 CloudBase 全栈开发、部署、调试与排障连接器。覆盖 Web 应用、微信小程序、uni-app、原生 App HTTP API、云函数、CloudRun、NoSQL/MySQL 数据库、云存储、静态托管、身份认证、AI 大模型调用、AI Agent、资源巡检与 Spec 工作流。",
+  "category": "communication",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "connectorApp": {
+    "id": "cloudbase",
+    "capabilities": [
+      "mcp",
+      "cli",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "cloudbase",
+    "Tencent CloudBase",
+    "mcp",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

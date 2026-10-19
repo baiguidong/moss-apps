@@ -1,0 +1,10 @@
+{
+  "name": "nges-data-360",
+  "display_name": "腾讯健康NGES",
+  "description": "腾讯健康NGES MCP服务，支持智能问数和合规审核等功能",
+  "source_type": "connector",
+  "connector_id": "tencent-health-nges",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

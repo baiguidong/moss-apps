@@ -1,0 +1,10 @@
+{
+  "name": "wind-finance",
+  "display_name": "Wind 金融数据",
+  "description": "通过自然语言查询股票、基金、指数、债券、公告、财经新闻和宏观经济数据。",
+  "source_type": "connector",
+  "connector_id": "wind-finance",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

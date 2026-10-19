@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "properties": {
+    "operation": {
+      "enum": [
+        "cancel",
+        "rerun",
+        "pause",
+        "resume",
+        "input"
+      ]
+    },
+    "runId": {
+      "type": "string",
+      "pattern": "^(flow|run)_[a-f0-9-]+$"
+    },
+    "task": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 16000
+    },
+    "submissionKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 8000
+    }
+  },
+  "required": [
+    "operation",
+    "runId"
+  ],
+  "additionalProperties": false
+}

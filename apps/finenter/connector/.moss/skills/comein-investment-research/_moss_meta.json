@@ -1,0 +1,10 @@
+{
+  "name": "comein-investment-research",
+  "display_name": "进门投研",
+  "description": "进门MCP覆盖券商、上市公司及资管机构的公开路演内容，整合内外资研报、券商点评等机构级观点，并提供实时行情、财务及量化因子等数据。经Data Agent清洗与结构化处理，减少Token消耗，提升回答准确率。",
+  "source_type": "connector",
+  "connector_id": "finenter",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

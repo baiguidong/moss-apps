@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.shareone",
+  "version": "0.1.0",
+  "displayName": "ShareOne",
+  "description": "将 HTML、Markdown、PDF、Word 和 PPT 发布为可分享链接，并支持更新原链接、密码、水印和评论协作。",
+  "category": "knowledge",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "connectorApp": {
+    "id": "shareone",
+    "capabilities": [
+      "skills"
+    ]
+  },
+  "keywords": [
+    "shareone",
+    "ShareOne",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

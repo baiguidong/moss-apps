@@ -1,0 +1,39 @@
+{
+  "id": "dknowc-mcp",
+  "source": "dknowc-mcp",
+  "name": "深知可信工作台",
+  "nameEn": "DKnow Trusted Workbench",
+  "description": "深知可信工作台面向政策、法律、标准和公共服务场景，提供可信问答、权威检索、深度研究和材料整理能力。它可以帮助用户查询政策原文、办事条件、申报材料、补贴资质、法律法规和行业标准，梳理多地区、多时间范围的信息，并基于可追溯的权威来源形成清晰、可核验的结果。",
+  "descriptionEn": "DKnow Trusted Workbench helps with policy, legal, standards, and public-service work. It provides trusted Q&A, authoritative search, deep research, and evidence-based material organization, helping users find official sources, eligibility requirements, application materials, subsidies, regulations, and standards across regions and time periods.",
+  "type": "mcp",
+  "authMode": "",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "",
+  "visibleIn": [
+    "internal",
+    "iOA",
+    "cloudhosted",
+    "selfhosted"
+  ],
+  "examples": [
+    "请使用深知可信工作台查询：深圳公积金租房提取需要哪些材料？请给出权威依据、办理条件和溯源链接。",
+    "请使用深知可信工作台搜索重庆市智能化改造技改补贴政策，返回政策原文、申报条件和权威来源链接。",
+    "请使用深知可信工作台深度对比北京、上海、深圳三地人才引进政策的类型、适用人群和核心条件，附权威政策依据。"
+  ],
+  "hasMcp": true,
+  "hasCli": false,
+  "hasSkills": true,
+  "hasCredentialSchema": false,
+  "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAANlBMVEVKDHdKC3ZVAFVLC3hMDHlLDHf///9BAXBICHXr5PDNu9lVGX/f0+f59vutkMFkLoqWcbB7TZsCpwz9AAAABXRSTlP3VQHHuIRvZWwAAAGJSURBVFjD7ZfrbsMgDIUhKdhcAub9X3Y2NNq6dp0MfzYpR1WUtuILHIMdm22zNzOpm902s1njHH/0Ms4YuxnrlmTNvgbg5a8BVsdfgAvwpwHwJBUAU3xUoYqgAhz+uyI5UACC98enBiI30ABC/aJWsiAINAAEZPULsoct+8MXUABGLNwZA3CFCS/m8AYAVAiplEJNDAQhPPvwDhB9gDwMpEHw2ekAGeI9ClH+CC+M/AXgkkSBeGRkPxpPAZUACQRAyuPZDKqgA9zPRj3kXlygKUAf2kDWUCYBTZ6NtXsxBaiyD5GvkwBcBawvYdHE85eJMI7jnGIfiVm/kRKrEg+MOLWVIYYQjn6YsE9AeZjO4xwIsTsQNMdZkklPKKUlSQekTSiPKQ3L66T4MwChEY3vANiiNqnWxEkgjCg0iuJE0aT1UVJGShuVJWgKy1naAsT7XaakKW0xD0Uoco2S2FFT3vGUG4VJWd6vd6QL8C8By23fYuO5L7a+xnLzvdQ6c/e+2X3SB7Nz+/8BnQBZpzWVob0AAAAASUVORK5CYII=",
+  "enabled": true,
+  "credentialSchema": null,
+  "requiresCliSetup": false,
+  "mcpServerNames": [
+    "dknowc-mcp"
+  ],
+  "skillName": "dknowc-mcp",
+  "skillNames": [
+    "dknowc-mcp"
+  ]
+}

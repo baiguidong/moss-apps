@@ -1,0 +1,10 @@
+{
+  "name": "camscanner-mcp",
+  "display_name": "扫描全能王",
+  "description": "智能文档转换与处理平台。支持图片/PDF格式转换（Word、Excel、Markdown、PDF）、图片增强（去阴影、锐化、高清化、老照片修复）、OCR文字识别、图片翻译、公式提取、水印处理、多图合并、文档云端保存等。",
+  "source_type": "connector",
+  "connector_id": "camscanner-mcp",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

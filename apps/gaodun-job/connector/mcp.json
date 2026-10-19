@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "gaodun-job": {
+      "type": "http",
+      "url": "https://apigateway.gaodun.com/dyson/mcp"
+    }
+  }
+}

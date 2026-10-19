@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.textin-xparse-ai",
+  "version": "0.1.0",
+  "displayName": "TextIn xParse·智能文档解析",
+  "description": "通过命令行将文件（PDF、图片、Word、Excel、PPT、扫描件等）解析为 Markdown 或结构化 JSON，可还原文档目录结构和复杂表格结构，适用于高精度高性能要求的文档处理任务，每日免费1000页。",
+  "category": "knowledge",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "connectorApp": {
+    "id": "textin-xparse-ai",
+    "capabilities": [
+      "cli",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "textin-xparse-ai",
+    "TextIn xParse · Intelligent Document Par",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

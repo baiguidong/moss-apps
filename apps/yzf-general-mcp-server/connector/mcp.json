@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "yzf-general-mcp-server": {
+      "type": "http",
+      "url": "https://super-ai-app.yunzhangfang.com/api/mcp/general/stream"
+    }
+  }
+}

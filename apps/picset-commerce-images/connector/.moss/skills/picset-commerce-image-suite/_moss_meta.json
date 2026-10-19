@@ -1,0 +1,10 @@
+{
+  "name": "picset-commerce-image-suite",
+  "display_name": "Picset AI 电商图片",
+  "description": "Picset AI 面向电商卖家、设计师和品牌团队，提供设计并制作电商套图、商品主图和商品详情图等。适用于设计制作电商套图、商品套图、主图、详情图、电商图、Listing 图、上架图、卖点图、功能图、场景图、详情长图或长详情页等商品图片需求时使用。适配 Amazon、淘宝、天猫、1688、Temu、TikTok Shop、拼多多、抖音电商、OZON、独立站、Shopify、Shopee、阿里巴巴国际站、Alibaba.com、速卖通、AliExpress、SHEIN、京东等国内国际主流电商平台",
+  "source_type": "connector",
+  "connector_id": "picset-commerce-images",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

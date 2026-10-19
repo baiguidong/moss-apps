@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "mx-ds-mcp": {
+      "type": "http",
+      "url": "https://mxapi.eastmoney.com/mxds/v2/mcp",
+      "oauth": {
+        "clientName": "WorkBuddy"
+      }
+    }
+  }
+}

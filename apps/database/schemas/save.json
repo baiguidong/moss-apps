@@ -1,0 +1,72 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "type": "string",
+      "maxLength": 2048
+    },
+    "host": {
+      "type": "string",
+      "maxLength": 2048
+    },
+    "database": {
+      "type": "string",
+      "maxLength": 2048
+    },
+    "username": {
+      "type": "string",
+      "maxLength": 2048
+    },
+    "file": {
+      "type": "string",
+      "maxLength": 2048
+    },
+    "password": {
+      "type": "string",
+      "maxLength": 2048
+    },
+    "dsn": {
+      "type": "string",
+      "maxLength": 2048
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{1,64}$"
+    },
+    "kind": {
+      "enum": [
+        "postgres",
+        "mysql",
+        "mariadb",
+        "sqlite",
+        "dsn"
+      ]
+    },
+    "port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+    },
+    "maxRows": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000
+    },
+    "timeout": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 300
+    },
+    "readonly": {
+      "type": "boolean"
+    },
+    "clearPassword": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "title",
+    "kind"
+  ]
+}

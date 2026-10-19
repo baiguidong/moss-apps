@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.yuandian-mcp",
+  "version": "0.1.0",
+  "displayName": "华宇元典法律数据",
+  "description": "华宇元典法律数据为智能体提供法律法规、案例文书、企业信息 MCP 工具能力。",
+  "category": "other",
+  "discovery": {
+    "group": "online"
+  },
+  "connectorApp": {
+    "id": "yuandian-mcp",
+    "capabilities": [
+      "mcp"
+    ]
+  },
+  "keywords": [
+    "yuandian-mcp",
+    "Huayu Yuandian Legal Data",
+    "mcp"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

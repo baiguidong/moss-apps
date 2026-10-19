@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "yingmi-mcp": {
+      "type": "http",
+      "url": "https://stargate.yingmi.com/mcp/v2?apiKey=${YINGMI_API_KEY}"
+    }
+  }
+}

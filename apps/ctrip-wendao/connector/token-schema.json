@@ -1,0 +1,22 @@
+{
+  "title": "携程问道授权",
+  "titleEn": "Ctrip Wendao Authorization",
+  "description": "输入携程问道 API Token（从携程问道开放平台申请）",
+  "descriptionEn": "Enter your Ctrip Wendao API Token (obtained from Ctrip Wendao Open Platform)",
+  "docUrl": "https://www.ctrip.com/wendao/openclaw",
+  "docLabel": "去携程问道开放平台申请 Token",
+  "docLabelEn": "Apply for Token on Ctrip Wendao Open Platform",
+  "fields": [
+    {
+      "key": "WENDAO_API_KEY",
+      "label": "API Token",
+      "labelEn": "API Token",
+      "placeholder": "输入从携程问道开放平台获取的 API Token",
+      "placeholderEn": "Enter the API Token from Ctrip Wendao Open Platform",
+      "description": "在携程问道开放平台 (ctrip.com/wendao/openclaw) 申请并复制的 API Token",
+      "descriptionEn": "API Token applied and copied from Ctrip Wendao Open Platform (ctrip.com/wendao/openclaw)",
+      "type": "password",
+      "required": true
+    }
+  ]
+}

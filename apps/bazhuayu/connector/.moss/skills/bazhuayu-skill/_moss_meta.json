@@ -1,0 +1,10 @@
+{
+  "name": "bazhuayu-skill",
+  "display_name": "八爪鱼",
+  "description": "用自然语言驱动八爪鱼云采集：搜索模板、启动任务、查询进度、导出结构化数据，并管理已有任务。",
+  "source_type": "connector",
+  "connector_id": "bazhuayu",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

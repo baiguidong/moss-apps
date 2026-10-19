@@ -1,0 +1,10 @@
+{
+  "name": "gangtise-mcp",
+  "display_name": "Gangtise投研",
+  "description": "Gangtise MCP汇聚机构级观点，研报，日程等另类数据，提供投研AI Agent预生成数据及全球行情/财务/估值/宏观行业等结构化数据。",
+  "source_type": "connector",
+  "connector_id": "gangtise-mcp",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.edgeone-pages",
+  "summary": "将项目部署到 EdgeOne Makers 并返回线上访问地址，支持全栈、云函数、AI Agent 等开发场景。",
+  "description": "将项目部署到 EdgeOne Makers 并返回线上访问地址，支持全栈、云函数、AI Agent 等开发场景。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/edgeone-pages",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

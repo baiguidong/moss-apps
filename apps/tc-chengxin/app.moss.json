@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.tc-chengxin",
+  "version": "0.1.0",
+  "displayName": "同程程心",
+  "description": "同程程心可通过自然语言查询机票、火车票、酒店、景点、度假产品等旅行资源，支持火空联程、智能交通推荐、特价机票搜索、景区门票预订，以及完整行程规划，显著提升出行效率。",
+  "category": "other",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "connectorApp": {
+    "id": "tc-chengxin",
+    "capabilities": [
+      "cli",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "tc-chengxin",
+    "Tongcheng Chengxin",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

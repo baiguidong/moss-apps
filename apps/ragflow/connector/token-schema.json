@@ -1,0 +1,105 @@
+{
+  "title": "连接 RAGFlow 企业知识库",
+  "titleEn": "Connect RAGFlow Knowledge Base",
+  "description": "选择使用当前 Moss Server 登录态，或直接使用 RAGFlow API Key。保存后会立即验证 MCP 连接。",
+  "descriptionEn": "Choose the current Moss Server session or a direct RAGFlow API key. Moss validates the MCP connection after saving.",
+  "docUrl": "",
+  "docLabel": "",
+  "docLabelEn": "",
+  "fields": [
+    {
+      "key": "RAGFLOW_AUTH_MODE",
+      "label": "认证方式",
+      "labelEn": "Authentication method",
+      "placeholder": "",
+      "placeholderEn": "",
+      "description": "",
+      "descriptionEn": "",
+      "type": "select",
+      "required": true,
+      "options": [
+        {
+          "value": "moss-server",
+          "label": "Moss Server 登录态（推荐）",
+          "labelEn": "Moss Server session (recommended)"
+        },
+        {
+          "value": "api-key",
+          "label": "RAGFlow API Key",
+          "labelEn": "RAGFlow API key"
+        }
+      ],
+      "defaultValue": "moss-server"
+    },
+    {
+      "key": "MOSS_RAG_MCP_ADDRESS",
+      "label": "Moss RAG MCP 主机和端口",
+      "labelEn": "Moss RAG MCP host and port",
+      "placeholder": "ragflow.company.local:9386",
+      "placeholderEn": "ragflow.company.local:9386",
+      "description": "使用当前 Moss 登录身份，通常连接部署服务的 9386 端口。",
+      "descriptionEn": "Uses the current Moss identity, usually through port 9386 of the deployment.",
+      "type": "text",
+      "required": false,
+      "visibleWhen": {
+        "field": "RAGFLOW_AUTH_MODE",
+        "equals": [
+          "moss-server"
+        ]
+      },
+      "requiredWhen": {
+        "field": "RAGFLOW_AUTH_MODE",
+        "equals": [
+          "moss-server"
+        ]
+      }
+    },
+    {
+      "key": "RAGFLOW_MCP_ADDRESS",
+      "label": "Extended MCP 主机和端口",
+      "labelEn": "Extended MCP host and port",
+      "placeholder": "ragflow.company.local:9385",
+      "placeholderEn": "ragflow.company.local:9385",
+      "description": "只填写 host:port，不要包含 http:// 或 /mcp。",
+      "descriptionEn": "Enter host:port only, without http:// or /mcp.",
+      "type": "text",
+      "required": false,
+      "visibleWhen": {
+        "field": "RAGFLOW_AUTH_MODE",
+        "equals": [
+          "api-key"
+        ]
+      },
+      "requiredWhen": {
+        "field": "RAGFLOW_AUTH_MODE",
+        "equals": [
+          "api-key"
+        ]
+      }
+    },
+    {
+      "key": "RAGFLOW_API_KEY",
+      "label": "RAGFlow API Key",
+      "labelEn": "RAGFlow API Key",
+      "placeholder": "ragflow-...",
+      "placeholderEn": "ragflow-...",
+      "description": "作为 Authorization: Bearer 请求头发送。不要填写 Ollama 或模型供应商的密钥。",
+      "descriptionEn": "Sent as an Authorization: Bearer header. Do not enter an Ollama or model-provider key.",
+      "type": "password",
+      "required": false,
+      "visibleWhen": {
+        "field": "RAGFLOW_AUTH_MODE",
+        "equals": [
+          "api-key"
+        ]
+      },
+      "requiredWhen": {
+        "field": "RAGFLOW_AUTH_MODE",
+        "equals": [
+          "api-key"
+        ]
+      }
+    }
+  ],
+  "authenticateOnSave": true
+}

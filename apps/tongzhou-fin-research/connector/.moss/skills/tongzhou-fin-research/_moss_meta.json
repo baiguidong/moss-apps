@@ -1,0 +1,10 @@
+{
+  "name": "tongzhou-fin-research",
+  "display_name": "同舟金融研究",
+  "description": "连接公开行情、研报检索、行业图谱与同舟投研材料，为股市研究提供可复核证据。",
+  "source_type": "connector",
+  "connector_id": "tongzhou-fin-research",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -1,0 +1,10 @@
+{
+  "name": "uupt-skill",
+  "display_name": "UU跑腿",
+  "description": "通过自然语言使用 UU跑腿：同城配送与帮帮服务，支持询价、下单、查单、取消和跑男追踪",
+  "source_type": "connector",
+  "connector_id": "uupt",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

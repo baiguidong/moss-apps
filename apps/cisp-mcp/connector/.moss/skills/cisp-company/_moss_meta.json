@@ -1,0 +1,10 @@
+{
+  "name": "cisp-company",
+  "display_name": "水滴征信",
+  "description": "通过水滴征信企业信息服务平台查询工商、知识产权、舆情、财务、土地、企业关联关系、关联方等企业多维信息，并支持企业二要素/三要素核验。",
+  "source_type": "connector",
+  "connector_id": "cisp-mcp",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

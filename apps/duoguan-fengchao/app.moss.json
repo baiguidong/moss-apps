@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.duoguan-fengchao",
+  "version": "0.1.0",
+  "displayName": "夺冠蜂巢",
+  "description": "覆盖内容大脑、品牌画像、热点选题、口播与图文文案、配图、播客、配音、视频封装和多账号运营的一站式 AI 自媒体内容生产平台。",
+  "category": "other",
+  "discovery": {
+    "group": "online"
+  },
+  "connectorApp": {
+    "id": "duoguan-fengchao",
+    "capabilities": [
+      "mcp",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "duoguan-fengchao",
+    "Duoguan Fengchao",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

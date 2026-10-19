@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.shanlong-claw",
+  "summary": "商龙餐饮经营数据分析连接器，覆盖营销活动效果、发券用券核销、活动状态数量与活动列表等 CRM 活动分析",
+  "description": "商龙餐饮经营数据分析连接器，覆盖营销活动效果、发券用券核销、活动状态数量与活动列表等 CRM 活动分析",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/shanlong-claw",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

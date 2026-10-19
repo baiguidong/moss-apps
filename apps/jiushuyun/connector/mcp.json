@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "jiushuyun": {
+      "type": "http",
+      "url": "https://work.jiushuyun.com/mcp"
+    }
+  }
+}

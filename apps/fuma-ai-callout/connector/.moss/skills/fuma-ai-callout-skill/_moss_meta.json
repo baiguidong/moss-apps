@@ -1,0 +1,10 @@
+{
+  "name": "fuma-ai-callout-skill",
+  "display_name": "福马AI外呼任务",
+  "description": "通过 WorkBuddy 查询福马AI手机智能体、成员列表，并创建 AI 外呼任务。",
+  "source_type": "connector",
+  "connector_id": "fuma-ai-callout",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -1489,9 +1489,7 @@ export function OpenIMView() {
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
-      <div className="flex h-11 shrink-0 items-center gap-3 border-b border-border/70 px-4">
-        <MessageSquareText className="h-4 w-4 shrink-0 text-primary" />
-        <div className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">即时消息</div>
+      <div className="flex min-h-11 shrink-0 flex-wrap items-center justify-end gap-3 border-b border-border/70 px-4 py-2" aria-label="消息操作">
         {downloadCount > 0 ? <Button variant="ghost" size="sm" onClick={() => { for (const controller of downloads.current) controller.abort(); }}>取消下载（{downloadCount}）</Button> : null}
         {appInstance?.enabled ? <Button type="button" variant="ghost" size="sm" className="h-7 text-xs" disabled={!currentUserID} onClick={openDefaultPolicy}><Bot className="h-3.5 w-3.5" />默认 AI 策略</Button> : appInstance ? <Button type="button" variant="outline" size="sm" className="h-7 text-xs" disabled={agentBackendBusy} onClick={() => void enableAgentBackend()}>{agentBackendBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Bot className="h-3.5 w-3.5" />}启用 AI 回复</Button> : null}
         <button

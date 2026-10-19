@@ -1,0 +1,10 @@
+{
+  "name": "fyopen-lawsearch",
+  "display_name": "法研·法律法规检索",
+  "description": "法研·法律法规检索，支持自然语言获取精准、现行有效的法规条文，将高质量、海量的法规知识库，无缝接入各类AI应用与工作流中。",
+  "source_type": "connector",
+  "connector_id": "fyopen-lawsearch",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -1,0 +1,37 @@
+name: plan-review
+description: 分析任务，双路审查，再汇总建议
+max_steps: 12
+steps:
+  - name: analyze
+    description: 分析任务
+    persona: 你擅长把任务拆成清晰、可验证的步骤。
+    instruction: 分析用户任务，列出目标、实施步骤和需要验证的结果。
+    rules:
+      - condition: 分析完成
+        next: reviews
+  - name: reviews
+    description: 双路审查
+    parallel:
+      - name: feasibility
+        description: 可行性审查
+        instruction: 检查分析中的实施步骤是否可行，指出具体遗漏并给出建议。
+        rules:
+          - condition: 审查完成
+            next: COMPLETE
+      - name: verification
+        description: 验证方案审查
+        instruction: 检查分析中的验收方式是否足够明确，补充可执行的验证步骤。
+        rules:
+          - condition: 审查完成
+            next: COMPLETE
+    rules:
+      - condition: all("审查完成")
+        next: summarize
+      - condition: any("error")
+        next: ABORT
+  - name: summarize
+    description: 汇总结果
+    instruction: 汇总前面的分析和两路审查，给出简洁、可执行的最终建议。
+    rules:
+      - condition: 汇总完成
+        next: COMPLETE

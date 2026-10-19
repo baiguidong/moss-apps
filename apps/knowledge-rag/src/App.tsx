@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { BookOpen, Search, Upload, Settings, RefreshCw, FileText, ChevronRight, ArrowLeft, LoaderCircle, X, CheckCircle2, Database } from 'lucide-react'
+import { Search, Upload, Settings, RefreshCw, FileText, ChevronRight, ArrowLeft, LoaderCircle, X, CheckCircle2, Database } from 'lucide-react'
 import { client, request, type Document, type EngineStatus } from './lib/api'
 
 import { EngineSetup } from './components/engine-setup'
@@ -80,7 +80,6 @@ export default function App() {
 
   return <div className="shell app-shell">
     <aside className="sidebar">
-      <div className="brand"><div className="brand-icon"><BookOpen size={22} /></div><div><strong>语义知识库</strong><small>本地资料 · 语义检索</small></div></div>
       <nav><button className={view === 'library' ? 'active' : ''} onClick={() => { location.hash = '#/' }}><Database size={18} />我的资料<ChevronRight size={15} /></button><button className={view === 'settings' ? 'active' : ''} onClick={() => { location.hash = '#/engine-settings' }}><Settings size={18} />设置</button></nav>
       <div className="sidebar-foot"><span className={`dot ${ready ? 'online' : ''}`} />{labels[status?.state || ''] || '连接中'}<p>资料保存在本机<br />工具使用范围可在顶部设置中调整</p></div>
     </aside>

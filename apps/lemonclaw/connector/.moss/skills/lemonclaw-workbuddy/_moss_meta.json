@@ -1,0 +1,10 @@
+{
+  "name": "lemonclaw-workbuddy",
+  "display_name": "LemonClaw",
+  "description": "连接柠檬云财务、进销存、业财和发票系统，支持查账、开票、业务查询、经营分析等企业经营场景。",
+  "source_type": "connector",
+  "connector_id": "lemonclaw",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

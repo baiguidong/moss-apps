@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.patsnap-search",
+  "version": "0.1.0",
+  "displayName": "智慧芽专利&文献融合检索",
+  "description": "在智慧芽全球专利数据库和文献库中进行融合检索，支持自然语言、语义搜索、关键词检索和多维过滤，并获取专利或文献信息。",
+  "category": "development",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "connectorApp": {
+    "id": "patsnap-search",
+    "capabilities": [
+      "mcp",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "patsnap-search",
+    "Patsnap Patent & Literature Search",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

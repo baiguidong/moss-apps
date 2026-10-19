@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.edgeone-pages",
+  "version": "0.1.0",
+  "displayName": "EdgeOne Makers",
+  "description": "将项目部署到 EdgeOne Makers 并返回线上访问地址，支持全栈、云函数、AI Agent 等开发场景。",
+  "category": "development",
+  "discovery": {
+    "group": "online"
+  },
+  "connectorApp": {
+    "id": "edgeone-pages",
+    "capabilities": [
+      "mcp",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "edgeone-pages",
+    "EdgeOne Makers",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

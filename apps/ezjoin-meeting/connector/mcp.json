@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ezjoin-meeting": {
+      "type": "http",
+      "url": "https://www.ezyjoin.cn/api/mcp/message"
+    }
+  }
+}

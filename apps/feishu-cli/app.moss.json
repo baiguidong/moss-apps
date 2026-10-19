@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.feishu-cli",
+  "version": "0.1.0",
+  "displayName": "飞书工具",
+  "description": "通过命令行管理飞书/Lark 全产品能力：即时通讯、邮箱、日历、云文档、电子表格、多维表格（Base）、幻灯片、画板、知识库、云空间、妙记、视频会议、任务、审批、考勤、通讯录、OKR 等。",
+  "category": "communication",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "connectorApp": {
+    "id": "feishu",
+    "capabilities": [
+      "cli",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "feishu",
+    "Feishu",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

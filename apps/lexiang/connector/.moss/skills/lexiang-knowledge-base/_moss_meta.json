@@ -1,0 +1,10 @@
+{
+  "name": "lexiang-knowledge-base",
+  "display_name": "乐享知识库",
+  "description": "搜索、创建和管理乐享知识库中的文档。支持导入 Markdown、按标签整理内容、追踪团队文档的更新动态。",
+  "source_type": "connector",
+  "connector_id": "lexiang",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

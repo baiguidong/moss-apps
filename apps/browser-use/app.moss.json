@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.browser-use",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "displayName": "网页操控",
   "category": "automation",
   "keywords": [

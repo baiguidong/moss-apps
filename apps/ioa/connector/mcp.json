@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ioa-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@ioacloud/ioacloud-mcp@latest"
+      ]
+    }
+  }
+}

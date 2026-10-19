@@ -1,0 +1,10 @@
+{
+  "name": "morningstar-tools",
+  "display_name": "晨星 Morningstar",
+  "description": "接入晨星全球与中国基金数据，通过自然语言实现基金查询、筛选、分析与深度研究，以及组合穿透分析",
+  "source_type": "connector",
+  "connector_id": "morningstar",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

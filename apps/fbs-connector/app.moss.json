@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.fbs-connector",
+  "version": "0.1.0",
+  "displayName": "福帮手",
+  "description": "福帮手人机协同连接器：识别当前身份与专家入口，匹配可执行场景方案，记录首值与继续使用进度，并查询乐包状态或衔接后续服务。",
+  "category": "other",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "none"
+    ]
+  },
+  "connectorApp": {
+    "id": "fbs-connector",
+    "capabilities": [
+      "mcp",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "fbs-connector",
+    "Fbsir",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

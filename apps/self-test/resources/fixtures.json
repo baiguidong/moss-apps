@@ -4,6 +4,34 @@
     {
       "name": "self-test-note.txt",
       "content": "Moss self-test fixture\n用于检查工作区文件与预览。\n"
+    },
+    {
+      "name": "self-test-preview.md",
+      "content": "# Moss Preview\n\n| product | total |\n| --- | --- |\n| A | 240 |\n| B | 240 |\n\n- first\n- second\n\n```js\nconsole.log(\"preview-ok\");\n```\n"
+    },
+    {
+      "name": "self-test-preview.html",
+      "content": "<!doctype html><html><meta charset=\"utf-8\"><title>Moss HTML Preview</title><body><h1>MOSS_HTML_PREVIEW</h1><p>订单总额 580</p></body></html>"
+    },
+    {
+      "name": "self-test-data.csv",
+      "content": "product,price,quantity,total\nA,120,2,240\nB,80,3,240\nC,50,2,100\n"
+    },
+    {
+      "name": "self-test-data.json",
+      "content": "{\"marker\": \"MOSS_JSON_PREVIEW\", \"total\": 580}"
+    },
+    {
+      "name": "self-test-code.js",
+      "content": "// MOSS_CODE_PREVIEW\nconst total = 120 * 2 + 80 * 3 + 50 * 2;\nconsole.log(total);\n"
+    },
+    {
+      "name": "self-test-image.svg",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"480\" height=\"240\"><rect width=\"480\" height=\"240\" fill=\"#2563eb\"/><circle cx=\"240\" cy=\"90\" r=\"50\" fill=\"#22c55e\"/><text x=\"40\" y=\"200\" fill=\"white\" font-size=\"24\">MOSS_IMAGE_PREVIEW</text></svg>"
+    },
+    {
+      "name": "self-test-preview.pdf",
+      "content": "%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>\nendobj\n4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n5 0 obj\n<< /Length 72 >>\nstream\nBT /F1 24 Tf 50 730 Td (MOSS_PDF_PREVIEW) Tj 0 -40 Td (Total 580) Tj ET\nendstream\nendobj\nxref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000241 00000 n \n0000000311 00000 n \ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n432\n%%EOF\n"
     }
   ]
 }

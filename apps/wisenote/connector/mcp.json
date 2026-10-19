@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "wisenote": {
+      "type": "http",
+      "url": "https://100wiser.com/workbuddy/wisenote/meeting/mcp"
+    }
+  }
+}

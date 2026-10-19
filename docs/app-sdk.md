@@ -1,5 +1,15 @@
 # Moss App SDK
 
+## 页面布局：Moss 提供头部，App 提供内容
+
+Moss 外框展示 App 名称、简介、迭代、AI 能力与整页刷新；内页直接从输入、列表、状态或业务操作区开始。不要重复品牌标题、Logo、简介和整页管理按钮。具体分区、对象标题以及“重新连接”“刷新项目”等业务操作保留，并放在对应内容区域。状态、数量和说明避免多处重复。
+
+SDK 不自动隐藏 `h1/header` 或匹配文字删除 DOM。页面无障碍名称使用 `main[aria-label]` 或视觉隐藏标题；独立网页需要品牌时显式选择独立布局。App Builder 的创建、迭代、Skill 转换指令及 `index.html` 模板均采用此规则。验收查看带 Moss 外框的普通、窄窗口、加载、空和错误状态。此约定无需新增 Manifest 字段或提高最低 Host API。
+
+SDK 源码规则同步维护在 [Core SDK README](../vendor/moss-core/packages/app-sdk/README.md)，创建示例见 [Builder 模板](../apps/app-builder/resources/authoring/index.html)。
+
+空间利用与 Moss 风格也是默认约定，完整规范随 SDK 提供：[布局与视觉约定](../vendor/moss-core/packages/app-sdk/ui-layout.md)。主要输入、数据和结果应优先展示并随窗口伸缩；设置、帮助、刷新放在现有工具栏或分区标题右侧，不为一个按钮单独占行。默认页面边距 12–16 px、区域间距 12–16 px，正文保持 13–14 px；采用 Moss 语义颜色、浅深主题、轻边框和线性图标，避免大介绍卡片、空占位和卡片套卡片。Builder 同步提供紧凑的 `ui.css`、`theme.css`、主题事件同步及工作区检查函数，不能仅写说明而继续使用旧的宽松模板。
+
 当前 SDK 为 3.4.0，新增 App 展示位置与设置分组；显式声明这些字段要求 Host API >=3.4.0。工具范围自 Host API 3.1.0 起支持。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用 SDK 和 host-contracts workspace，仅维护接入说明和消费端回归测试。
 
 App 可通过通用 `backend.host.request()` 使用 Desktop 提供的协议。Tasks/Execution 和 MCP 优先使用 `@moss/app-sdk/execution`、`@moss/app-sdk/mcp` 的 typed client，其类型和校验器来自同一份 host-contracts。仓库构建校验采用 Manifest 声明的最低 Host 版本；市场和安装阶段继续按实际运行的 Host 版本判断兼容性。详见 [MCP App](../apps/mcp/README.md)。

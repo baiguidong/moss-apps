@@ -1,0 +1,16 @@
+# Save this TOML text as ~/moss-database.toml.
+# Set MOSS_DATABASE_DSN in the App connection configuration's env object.
+[[sources]]
+id = "default"
+dsn = "${MOSS_DATABASE_DSN}"
+query_timeout = 10
+
+[[tools]]
+name = "search_objects"
+source = "default"
+
+[[tools]]
+name = "execute_sql"
+source = "default"
+readonly = true
+max_rows = 1000

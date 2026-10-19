@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Check, ChevronDown, CircleAlert, Brain, Loader2, FolderArchive, RefreshCw, Search, Settings2, Wrench } from 'lucide-react'
+import { Check, ChevronDown, CircleAlert, Loader2, FolderArchive, RefreshCw, Search, Settings2, Wrench } from 'lucide-react'
 import { MEMORY, MEMORY_VERSION } from './contracts'
 import type { Catalog, SaveInput } from './contracts'
 import { request } from './lib/api'
@@ -59,13 +59,11 @@ export function App() {
   }
   const tools = (server?.check?.tools || []).filter(tool => `${tool.name} ${tool.description}`.toLowerCase().includes(query.toLowerCase()))
 
-  return <main className="app-shell"><div className="memory-workspace">
-    <header className="memory-header"><div className="memory-brand"><span className="memory-mark"><Brain size={24} strokeWidth={1.6} /></span><div><h1>记忆</h1><p>Memory <span className="official-tag">官方</span></p></div></div><button className="button" onClick={() => setEditor(true)} disabled={!catalog || busy || unavailable}><Settings2 size={15} />记忆设置</button></header>
+  return <main className="app-shell" aria-label="记忆"><div className="memory-workspace">
     {!window.mossApp && <div className="demo-note">演示模式 · 仅展示界面，操作不会写入真实记忆</div>}
     <MemoryGraphView available={!unavailable} />
     <section className="memory-card connection-card" aria-label="记忆服务状态" aria-busy={connecting}>
-      <div className="connection-top"><span className={`memory-status ${failed || unavailable ? 'failure' : checked ? 'ready' : ''}`} role="status">{connecting || (!catalog && !error) ? <Loader2 size={16} className="spin" /> : failed || unavailable ? <CircleAlert size={16} /> : <Check size={16} />}{!catalog && !error ? '正在读取状态' : label}</span><button className="button primary" onClick={() => void reconnect()} disabled={busy || connecting || unavailable}><RefreshCw size={15} className={busy ? 'spin' : ''} />重新连接</button></div>
-      <h2>让 Moss 记住值得保留的信息</h2><p className="memory-lead">在对话中保存人物、项目和偏好，之后随时查找、补充和关联。</p>
+      <div className="connection-top"><span className={`memory-status ${failed || unavailable ? 'failure' : checked ? 'ready' : ''}`} role="status">{connecting || (!catalog && !error) ? <Loader2 size={16} className="spin" /> : failed || unavailable ? <CircleAlert size={16} /> : <Check size={16} />}{!catalog && !error ? '正在读取状态' : label}</span><div className="connection-actions"><button className="button" onClick={() => setEditor(true)} disabled={!catalog || busy || unavailable}><Settings2 size={15} />记忆设置</button><button className="button primary" onClick={() => void reconnect()} disabled={busy || connecting || unavailable}><RefreshCw size={15} className={busy ? 'spin' : ''} />重新连接</button></div></div>
       {unavailable && <p className="memory-error" role="alert">请在 Moss 应用管理中启用记忆并检查权限。</p>}
       {failed && <p className="memory-error" role="alert">{failed}</p>}
       <div className="memory-target"><FolderArchive size={18} /><div><strong>本地记忆文件</strong><span>{catalog?.memoryFile || '正在读取存储位置'}</span></div>{checked && server?.check && <small>最近检查 {date(server.check.checkedAt)}</small>}</div>

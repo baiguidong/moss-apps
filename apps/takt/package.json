@@ -1,0 +1,33 @@
+{
+  "name": "@moss/takt-app",
+  "version": "0.3.6",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "tsc --noEmit",
+    "test": "node scripts/test.mjs",
+    "test:host": "node scripts/verify-host.mjs",
+    "test:ui": "node scripts/verify-ui.mjs"
+  },
+  "dependencies": {
+    "@moss/app-sdk": "workspace:*",
+    "@moss/app-settings": "workspace:*",
+    "takt": "0.70.0",
+    "yaml": "2.8.2",
+    "zod": "4.3.6",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "lucide-react": "0.564.0",
+    "@xyflow/react": "12.11.6",
+    "@dagrejs/dagre": "3.1.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "typescript": "5.9.3",
+    "@types/node": "22.19.15",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@playwright/test": "1.58.2"
+  }
+}

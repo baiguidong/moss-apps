@@ -2,7 +2,6 @@
 <html lang="zh-CN">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>应用构建</title><link rel="stylesheet" href="theme.css"><link rel="stylesheet" href="style.css"></head>
 <body class="app-shell">
-  <header class="page-header"><span class="brand"><span data-icon="blocks"></span>应用构建</span><button id="refresh" type="button" class="ghost"><span data-icon="refresh"></span>刷新</button></header>
   <main>
     <section class="intro"><h1>你想创建什么 App？</h1><p>描述你的想法，或选择技能和助手，把已有能力变成 App。</p></section>
     <form id="create" class="compose">
@@ -20,7 +19,7 @@
     </form>
     <p class="compose-hint">技能可多选，助手可选一个。创建后，在会话中继续完善。</p>
     <div id="notice" role="status" hidden></div>
-    <section class="projects-section"><div class="section-title"><h2>继续项目</h2><span id="project-count" class="muted"></span></div><div id="projects" class="projects"><p class="empty muted">正在加载项目…</p></div></section>
+    <section class="projects-section"><div class="section-title"><h2>继续项目</h2><span id="project-count" class="muted"></span><button id="refresh" type="button" class="ghost"><span data-icon="refresh"></span>刷新项目</button></div><div id="projects" class="projects"><p class="empty muted">正在加载项目…</p></div></section>
   </main>
   <dialog id="resource-picker" aria-labelledby="picker-title" aria-describedby="picker-description">
     <div class="picker-header"><span class="picker-icon" data-icon="filter"></span><div><h2 id="picker-title">选择资源</h2><p id="picker-description">选择创建 App 所需的技能和助手</p></div><button id="close-picker" type="button" class="icon-button" aria-label="关闭"><span data-icon="close"></span></button></div>

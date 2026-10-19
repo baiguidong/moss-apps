@@ -1,0 +1,10 @@
+{
+  "name": "zfs-fssc-ai",
+  "display_name": "中兴新云AI智报",
+  "description": "财务云 AI 报销助手：用自然语言完成报销申请、发票查询识别、报销单查询与费用审批等操作。",
+  "source_type": "connector",
+  "connector_id": "zfs-fssc-ai",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

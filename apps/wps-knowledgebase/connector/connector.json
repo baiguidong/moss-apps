@@ -1,0 +1,39 @@
+{
+  "id": "wps-knowledgebase",
+  "source": "wps-knowledgebase",
+  "name": "WPS知识库",
+  "nameEn": "WPS Knowledge Base",
+  "description": "通过自然语言操作 WPS/zhishi 云端知识库：列出知识库、浏览文件树、智能问答、分享链接，以及文件/文件夹增删改查。",
+  "descriptionEn": "Operate WPS/zhishi cloud knowledge bases with natural language: list spaces, browse file trees, ask questions, share links, and manage files.",
+  "type": "cli",
+  "authMode": "",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "4.22.0",
+  "visibleIn": [
+    "internal",
+    "iOA",
+    "cloudhosted",
+    "selfhosted"
+  ],
+  "examples": [
+    "列出我的知识库",
+    "打开个人知识库看文件树",
+    "在知识库里问：上周项目进度总结",
+    "给这个知识库文件生成分享链接",
+    "在知识库里新建一个文件夹叫会议纪要"
+  ],
+  "hasMcp": false,
+  "hasCli": true,
+  "hasSkills": true,
+  "hasCredentialSchema": false,
+  "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzUyMTNfMTM5NzMpIj4KPHBhdGggZD0iTTI0LjQxOTggMTEuMTcxMUMyNC40MTk4IDkuMDkwNTcgMjMuNjgxNyA3LjE0MTYyIDIyLjMwNSA1LjcyMDRDMjAuOTQyMSA0LjMxMzQ2IDE4Ljg2NDkgMy4zMzI0NSAxNi4wMDI1IDMuMzMyNDRDMTEuMzE0MSAzLjMzMjQ0IDcuNzUwODYgNy40MTUzNyA3Ljc1MjU1IDExLjkzNjJWMTEuOTM2N0w3Ljc1MzUxIDEyLjA2QzcuNzkzNDUgMTQuNTU3NyA5LjA0Mjk1IDE2LjU3NjQgMTAuNDUyNSAxNy43Mzk4TDEwLjU5MTcgMTcuODUxNEwxMC41OTM4IDE3Ljg1M0wxMC42NTI2IDE3Ljg5NTVDMTAuOTU1NiAxOC4wOTc0IDExLjM4MDcgMTguMTMzNSAxMS43NjIgMTcuOTQzN0wxMS43NjM1IDE3Ljk0MjlMMTMuNDM3IDE3LjExMzFDMTUuMDM1IDE2LjMxOTcgMTYuNDQyIDE1LjYxNDcgMTcuOTc2MiAxNC44MDc0TDE4LjA5MTYgMTQuNzQzOUMxOS4yNDc4IDE0LjA3ODkgMTkuMjk5OCAxMy4xMzgyIDE5LjA3MTYgMTIuNjIzNEMxOC45NDQ3IDEyLjMzNzEgMTguNzIxMSAxMi4xMjY1IDE4LjQyMTQgMTIuMDNDMTguMTI1NyAxMS45MzQ2IDE3LjYwNTcgMTEuOTA1MSAxNi44MzQgMTIuMjc2OEwxNi44MzMyIDEyLjI3NzJDMTUuMzY1MyAxMi45ODI5IDEwLjg1NDUgMTUuMjk2MSAxMC44NTQ1IDE1LjI5NjFDMTAuMTA2OCAxMy44NDg0IDEwLjY3NjYgMTIuMDY4NyAxMi4xMjkzIDExLjMzMDhDMTMuNDEyOSAxMC42Nzg4IDE0LjgzMjggOS45NjI2NSAxNS41NTM3IDkuNjE2MDZDMTYuODY2MyA4Ljk4NDEgMTguMTczNyA4Ljg0Nzg1IDE5LjMyNzMgOS4yMTk2N0MyMC40NzcxIDkuNTkwMyAyMS4zMjUxIDEwLjQyMSAyMS43NzEgMTEuNDI2N0MyMi42ODEgMTMuNDc5NSAyMS44OTQ1IDE2LjA4MTcgMTkuMzUxNSAxNy40MjAzQzE3LjI2NzIgMTguNTE3IDE1LjQwOTggMTkuNDI5OSAxMy4wNzYxIDIwLjU4NzlDMTEuNzEyMyAyMS4yNjYxIDEwLjAyOSAyMS4xNTkzIDguNzc1NjMgMjAuMTc5NEM2LjY5ODg4IDE4LjU1OTQgNC44NTgxNSAxNS42OTAzIDQuODAxMTUgMTIuMTA3OEw0Ljc5OTgxIDExLjkzNjdDNC43OTc4NyA1Ljk5NzE1IDkuNDc4NjggMC4zNzk3IDE2LjAwMjUgMC4zNzk3QzE5LjU4MyAwLjM3OTcwNyAyMi40NTI2IDEuNjI5MDYgMjQuNDI1NyAzLjY2NTk3QzI2LjM4NTEgNS42ODg2NCAyNy4zNzI1IDguMzk3MjIgMjcuMzcyNSAxMS4xNzExQzI3LjM3MjUgMTYuNDUxMiAyMy45MjQ2IDIwLjIwMjIgMjAuMTEzMyAyMi4xMjgzQzE2LjYyMzEgMjMuODkyMiAxMy43OTMzIDI1LjIxNTMgMTAuODk1NiAyNi40ODM2QzEwLjIzOTQgMjQuOTg0NSAxMC45MDkzIDIzLjIzNjQgMTIuMzk0NCAyMi41NDkxQzE0LjMwNjIgMjEuNjY0MiAxNi44NjYyIDIwLjQ2MTEgMTguNzgxNSAxOS40OTMxQzIxLjkzNDcgMTcuODk5NiAyNC40MTk4IDE1LjAwNSAyNC40MTk4IDExLjE3MTFaIiBmaWxsPSIjRjY1QTI5Ii8+CjxwYXRoIGQ9Ik0yMS40OTY4IDIzLjM3MzhDMjIuMjI4NCAyNC44MjYgMjEuNjM0OCAyNi41OTYxIDIwLjE3NTYgMjcuMzEzNUwxMS40MTYxIDMxLjYyMDRDMTAuNzAzNSAzMC4xNTA3IDExLjMxMTkgMjguMzgxNCAxMi43Nzc3IDI3LjY2MDdMMjEuNDk2OCAyMy4zNzM4WiIgZmlsbD0iIzMzMzMzMyIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzUyMTNfMTM5NzMiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==",
+  "enabled": true,
+  "credentialSchema": null,
+  "requiresCliSetup": false,
+  "mcpServerNames": [],
+  "skillName": "wps-knowledgebase",
+  "skillNames": [
+    "wps-knowledgebase"
+  ]
+}

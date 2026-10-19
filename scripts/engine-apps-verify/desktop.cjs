@@ -3,7 +3,7 @@ const { app, BrowserWindow, ipcMain } = require('electron')
 const fs = require('node:fs/promises'), path = require('node:path'), os = require('node:os')
 const { pathToFileURL } = require('node:url')
 const core = process.env.MOSS_CORE_ROOT, appId = process.env.MOSS_TEST_APP
-let mcpHost, releaseDiscovery
+let mcpHost, releaseDiscovery, inspections = 0
 const discoveryGate = process.env.MOSS_TEST_DISCOVERY_GATE ? new Promise(resolve => { releaseDiscovery = resolve }) : Promise.resolve()
 let directory, runtime, window, guest, instance, picks = [], calls = 0
 let appearance = { themeMode: 'light', cssThemeId: 'default' }
@@ -25,10 +25,11 @@ let appearance = { themeMode: 'light', cssThemeId: 'default' }
     hostCapabilityOptions: { protocols: [createLocalFilesProtocolDefinition(), createMcpProtocolDefinition()] } })
   const handlers = createLocalAppHostHandlers({ dialog: { showOpenDialog: async () => ({ canceled: !picks.length, filePaths: picks.splice(0) }) }, shell: {}, BrowserWindow })
   for (const [method, handler] of Object.entries(handlers['moss.local-files/v1'])) runtime.registerHostHandler('moss.local-files/v1', method, handler)
-  mcpHost = new AppMcpHost({ getRuntime: () => runtime, onChanged: () => ({}), readLegacy: async () => ({}),
-    inspect: async (...args) => { await discoveryGate; return inspectDesktopMcpServer(...args) },
+  const mcpOptions = { getRuntime: () => runtime, onChanged: () => ({}), readLegacy: async () => ({}),
+    inspect: async (...args) => { inspections++; await discoveryGate; return inspectDesktopMcpServer(...args) },
     onCatalogChanged: () => { if(window && !window.isDestroyed()) window.webContents.send('local-test:apps-changed') },
-  })
+  }
+  mcpHost = new AppMcpHost(mcpOptions)
   for (const method of MCP_METHODS) runtime.registerHostHandler('moss.mcp/v1', method, (input,ctx) => mcpHost.handle(method,input,ctx))
   await runtime.initialize()
   await installAppArchive(runtime, process.env.MOSS_TEST_ARCHIVE)
@@ -60,6 +61,8 @@ let appearance = { themeMode: 'light', cssThemeId: 'default' }
     skills: selected => resolveAppSkills(runtime, selected ? [appId] : []),
     servers: async selected => { await mcpHost.refresh(); return mcpHost.enabledServers(selected ? [appId] : []) },
     catalog: () => mcpHost.toolCatalog(appId),
+    inspections: () => inspections,
+    restartCatalog: async () => { mcpHost = new AppMcpHost(mcpOptions); await mcpHost.refresh() },
     releaseDiscovery: () => { releaseDiscovery?.(); return true },
     notifyCatalog: () => window.webContents.send('local-test:apps-changed'),
     calls: () => calls,
@@ -84,7 +87,11 @@ let appearance = { themeMode: 'light', cssThemeId: 'default' }
       guest.sendInputEvent({type:'mouseUp',x:Math.round(to.x),y:Math.round(to.y),button:'left',clickCount:1})
     },
     insertText: text => { window.focus(); guest.focus(); return guest.insertText(text) },
-    theme: mode => { appearance = { ...appearance, themeMode: mode }; guest.send('app-ui:event:appearance', appearance) },
+    theme: async mode => {
+      appearance = { ...appearance, themeMode: mode }
+      guest.send('app-ui:event:appearance', appearance)
+      await window.webContents.executeJavaScript(`document.documentElement.dataset.theme = ${JSON.stringify(mode)}`)
+    },
     resize: ({ width, height }) => window.setContentSize(width, height),
     screenshot: async () => (await window.webContents.capturePage()).toPNG().toString('base64'),
     cleanup: () => runtime.shutdown(),

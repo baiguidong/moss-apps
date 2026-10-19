@@ -1,0 +1,10 @@
+{
+  "name": "wisenote",
+  "display_name": "百智WiseNote",
+  "description": "通过用户授权读取百智 WiseNote 会议列表、会议详情摘要和会议转写内容。",
+  "source_type": "connector",
+  "connector_id": "wisenote",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

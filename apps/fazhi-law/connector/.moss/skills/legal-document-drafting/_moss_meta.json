@@ -1,0 +1,10 @@
+{
+  "name": "legal-document-drafting",
+  "display_name": "同花顺法律AI助手",
+  "description": "查询中国法律法规、司法案例、裁判文书及互联网法律实务资讯，支持法条检索、类案检索、深度法律研究、法律文书起草与诉讼可视化。",
+  "source_type": "connector",
+  "connector_id": "fazhi-law",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

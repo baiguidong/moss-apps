@@ -1,0 +1,10 @@
+{
+  "name": "exam-info",
+  "display_name": "粉笔",
+  "description": "粉笔AI公考助手，帮你查专业分类、完善报考简历、智能选岗与国考模拟选岗、了解考情与报考条件，还能练易混词与成语辨析积累，提供一站式公考备考服务，让备考更精准、更高效。",
+  "source_type": "connector",
+  "connector_id": "fenbi-baokao-decision",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { ScanSearch } from 'lucide-react'
 import { useEngineApp, AppShell, Paths, Options, Advanced, RunButton, TaskHistory, TaskDetails, Artifacts, size, type Option } from '@moss/engine-apps/ui'
 const hidden=new Set(['directories','file-to-save','compact-file-to-save','pretty-file-to-save','help','ignore-error-code-on-found'])
 export default function App(){
@@ -9,7 +8,7 @@ export default function App(){
  const restore=(input:any)=>{setCommand(input.command);setPaths(input.paths||[]);setValues(input.options||{});setSubcommand(input.subcommand||'transcode');setSubvalues(input.suboptions||{});setExtra(input.extraArgs||[]);setConfirmed(false)}
  const start=()=>void state.start({command,paths:paths.filter(Boolean),options:values,subcommand:current?.subcommands?subcommand:undefined,suboptions:subvalues,extraArgs:extra.filter(Boolean),confirmChanges:confirmed})
  const result=state.task?.result
- return <AppShell state={state} title="文件清理" subtitle="检查磁盘里的重复、相似与异常文件" icon={<ScanSearch/>}><div className="workspace-layout"><nav className="mode-nav" aria-label="清理类别">{commands.map((c:any)=><button key={c.id} className={command===c.id?'active':''} onClick={()=>select(c.id)}>{c.title}</button>)}</nav><div className="workspace-body">
+ return <AppShell state={state} title="文件清理"><div className="workspace-layout"><nav className="mode-nav" aria-label="清理类别">{commands.map((c:any)=><button key={c.id} className={command===c.id?'active':''} onClick={()=>select(c.id)}>{c.title}</button>)}</nav><div className="workspace-body">
  <div className="two-column"><section className="card"><div className="section-heading"><h2>{current?.title||'正在读取功能列表'}</h2><small>Czkawka {state.catalog?.version}</small></div><Paths state={state} values={paths} onChange={setPaths} kind="directory" label="扫描目录"/><RunButton state={state} onClick={start} label={confirmed?'执行所选策略':'开始扫描'} disabled={!paths.some(Boolean)||!current}/>
  <Options options={(current?.options||[]).filter((o:Option)=>!hidden.has(o.key))} values={values} onChange={setValues}/>
  {current?.subcommands&&<><div className="format-row"><label className="field"><span>优化方式</span><select aria-label="优化方式" value={subcommand} onChange={e=>{setSubcommand(e.target.value);setSubvalues({})}}>{current.subcommands.map((c:any)=><option value={c.id} key={c.id}>{c.title}</option>)}</select></label></div><Options options={(sub?.options||[]).filter((o:Option)=>o.key!=='help')} values={subvalues} onChange={setSubvalues}/></>}

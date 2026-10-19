@@ -1,0 +1,10 @@
+{
+  "name": "seeyon-marketing-data-analysis-skill",
+  "display_name": "致远互联协同办公服务",
+  "description": "为企业提供协同办公、会议和业务协同能力，支持用户用自然语言完成会议创建与查询、协同发起与跟进、和业务数据分析。",
+  "source_type": "connector",
+  "connector_id": "seeyon-office-marketing-suite",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

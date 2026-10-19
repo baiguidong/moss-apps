@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "duoguan-fengchao": {
+      "type": "http",
+      "url": "https://fc.duoguan.com/mcp"
+    }
+  }
+}

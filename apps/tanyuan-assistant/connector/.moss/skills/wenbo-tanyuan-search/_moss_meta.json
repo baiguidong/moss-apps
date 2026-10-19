@@ -1,0 +1,10 @@
+{
+  "name": "wenbo-tanyuan-search",
+  "display_name": "TDC 文化智能体",
+  "description": "基于文化可信知识库的智能体服务，提供世界遗产、博物馆藏品、甲骨文字形释义、学术文献等可溯源检索与创作辅助。覆盖申遗文本、考古数据、陶瓷基因库、纹样库等多模态知识，支持研究考据、策展辅助、文化科普与内容创作。",
+  "source_type": "connector",
+  "connector_id": "tanyuan-assistant",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

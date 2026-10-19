@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "wind-finance": {
+      "type": "http",
+      "url": "https://mcp.wind.com.cn/vserver_workbuddy/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${WIND_API_KEY}",
+        "Accept": "application/json, text/event-stream"
+      }
+    }
+  }
+}

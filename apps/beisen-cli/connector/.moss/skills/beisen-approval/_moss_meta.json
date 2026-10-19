@@ -1,0 +1,10 @@
+{
+  "name": "beisen-approval",
+  "display_name": "北森AI · HR专家",
+  "description": "依托北森HR SaaS平台，把审批、招聘进展、员工档案、绩效履历、考勤假期、组织架构和企业制度等近百个人力场景装进Workbuddy，一句话查询人力数据、办理HR业务。",
+  "source_type": "connector",
+  "connector_id": "beisen-cli",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

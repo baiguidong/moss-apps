@@ -1,0 +1,10 @@
+{
+  "name": "miniprogram-development",
+  "display_name": "腾讯云 CloudBase",
+  "description": "腾讯云开发 CloudBase 全栈开发、部署、调试与排障连接器。覆盖 Web 应用、微信小程序、uni-app、原生 App HTTP API、云函数、CloudRun、NoSQL/MySQL 数据库、云存储、静态托管、身份认证、AI 大模型调用、AI Agent、资源巡检与 Spec 工作流。",
+  "source_type": "connector",
+  "connector_id": "cloudbase",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

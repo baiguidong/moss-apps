@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "cloudbase": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@cloudbase/cloudbase-mcp@latest"
+      ]
+    }
+  }
+}

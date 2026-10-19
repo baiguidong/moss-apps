@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "pkulaw": {
+      "type": "http",
+      "url": "https://apim-gateway.pkulaw.com/mcp-law-agg/1.0.0/mcp",
+      "oauth": {
+        "omitRegistrationScope": true
+      }
+    }
+  }
+}

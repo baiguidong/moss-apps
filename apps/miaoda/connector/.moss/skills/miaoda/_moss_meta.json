@@ -1,0 +1,10 @@
+{
+  "name": "miaoda",
+  "display_name": "秒哒应用搭建",
+  "description": "通过自然语言对话，即可完成网页、微信小程序及移动 App 的创建、预览、修改与发布上线，实现智能化、自动化、规模化的应用开发。",
+  "source_type": "connector",
+  "connector_id": "miaoda",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

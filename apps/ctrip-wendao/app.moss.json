@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.ctrip-wendao",
+  "version": "0.1.0",
+  "displayName": "携程问道",
+  "description": "通过携程问道 API 获取旅行规划与攻略。支持酒店查询、机票搜索、景点推荐、行程规划、美食住宿攻略。",
+  "category": "other",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "connectorApp": {
+    "id": "ctrip-wendao",
+    "capabilities": [
+      "skills"
+    ]
+  },
+  "keywords": [
+    "ctrip-wendao",
+    "Ctrip Wendao",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

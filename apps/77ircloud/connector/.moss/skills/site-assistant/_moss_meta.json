@@ -1,0 +1,10 @@
+{
+  "name": "site-assistant",
+  "display_name": "铱云AI供应链",
+  "description": "通过自然语言管理铱云供应链：支持订单全链路操作，以及客户、商品、仓库库存、员工组织、资金账户、数据导出、经营统计和预警明细的查询分析。",
+  "source_type": "connector",
+  "connector_id": "77ircloud",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

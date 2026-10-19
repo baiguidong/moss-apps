@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "infimind-video": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@infimind/video-mcp-cli@1.0.11"
+      ],
+      "env": {
+        "SORA_MCP_TOKEN": "${SORA_MCP_TOKEN}"
+      }
+    }
+  }
+}

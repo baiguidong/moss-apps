@@ -17,7 +17,7 @@ export function App() {
   const jump = (second: number) => { if (audio.current) { audio.current.currentTime = second; void audio.current.play().catch(() => {}) } }
   const save = async () => { if (!transcript) return; const result = await state.invoke('transcript.save', { id: transcriptId, revision: transcript.revision, segments: transcript.segments }); if (result) { setTranscript({ ...transcript, revision: result.revision }); setDirty(false); state.setNotice('校对已保存，TXT 和字幕文件已同步更新。') } }
   const exportText = async (ext: string) => { if (dirty) { state.setError('请先保存校对内容，再导出。'); return }; const file = state.workspace.files.find(f => f.taskId === result?.taskId && f.name.endsWith(`.${ext}`)); if (file) await state.exportFiles([file.id]) }
-  return <Shell title="语音转写" subtitle="让录音变成可阅读、可校对的文字。" icon={<AudioLines size={24} />} state={state}>
+  return <Shell title="语音转写" state={state}>
     {!inputs.length ? <Empty title="从一段录音开始" onImport={() => void state.pick()}>选择录音或视频，生成逐字稿和字幕。多语言模型随 App 提供，可直接离线转写。</Empty> : <>
       <div className="workbench"><section className="panel"><div className="section-title"><h2>{transcript ? '逐字稿校对' : '待转写文件'}</h2>{transcript && <div className="row"><small>{dirty ? '有未保存的修改' : '已保存'}</small><button onClick={() => void save()} disabled={!dirty || state.busy}><Save size={15} />保存校对</button></div>}</div>
         {transcript && playback ? <><div className="player"><audio ref={audio} src={playback.url} controls preload="metadata" onTimeUpdate={() => setPlayhead(audio.current?.currentTime || 0)} />

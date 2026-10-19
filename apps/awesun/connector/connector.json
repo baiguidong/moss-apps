@@ -1,0 +1,40 @@
+{
+  "id": "awesun",
+  "source": "awesun",
+  "name": "向日葵远程控制",
+  "nameEn": "AweSun",
+  "description": "通过命令行管理远端设备，实时监测在线状态、秒级发起远程控制、快速传输文件及远程截屏。零部署、免更新，轻松实现智能批量运维。",
+  "descriptionEn": "Manage remote devices via CLI: monitor online status in real time, initiate remote control instantly, transfer files quickly, and capture remote screenshots. Zero deployment, no updates, enabling smart batch operations with ease.",
+  "type": "cli",
+  "authMode": "",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "",
+  "visibleIn": [
+    "internal",
+    "iOA",
+    "cloudhosted",
+    "selfhosted"
+  ],
+  "examples": [
+    "使用向日葵帮我列出所有在线设备，按设备名称、在线状态和最后上线时间整理成表格",
+    "使用向日葵帮我把办公电脑设备上的 D:\\test.txt 下载到本地桌面",
+    "使用向日葵帮我建立办公电脑设备的CMD远程连接，运行 ipconfig 和 tasklist 检查网络和进程情况",
+    "使用向日葵帮我把办公电脑设备的 3000 端口映射到本地 18000，我要访问远程的 Web 服务",
+    "使用向日葵帮我给办公电脑屏幕截图，保存到本地桌面，看看远程桌面当前的状态",
+    "使用向日葵帮我把办公电脑重启一下，重启前先告诉我它的在线状态"
+  ],
+  "hasMcp": false,
+  "hasCli": true,
+  "hasSkills": true,
+  "hasCredentialSchema": false,
+  "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik01Ni40NTA1IDBMNjMuNTQ5NSAwQzc3LjQ0MTkgMCA4Ni43NTQ4IDIuMjg3NDkgOTQuNzg2NiA2LjU4MjkxQzEwMi44MTggMTAuODc4MyAxMDkuMTIyIDE3LjE4MTcgMTEzLjQxNyAyNS4yMTM0QzExNy43MTMgMzMuMjQ1MiAxMjAgNDIuNTU4MSAxMjAgNTYuNDUwNVY2My41NDk1QzEyMCA3Ny40NDE5IDExNy43MTMgODYuNzU0OCAxMTMuNDE3IDk0Ljc4NjZDMTA5LjEyMiAxMDIuODE4IDEwMi44MTggMTA5LjEyMiA5NC43ODY2IDExMy40MTdDODYuNzU0OCAxMTcuNzEzIDc3LjQ0MTkgMTIwIDYzLjU0OTUgMTIwSDU2LjQ1MDVDNDIuNTU4MSAxMjAgMzMuMjQ1MiAxMTcuNzEzIDI1LjIxMzQgMTEzLjQxN0MxNy4xODE3IDEwOS4xMjIgMTAuODc4MyAxMDIuODE4IDYuNTgyOTEgOTQuNzg2NkMyLjI4NzQ5IDg2Ljc1NDggMCA3Ny40NDE5IDAgNjMuNTQ5NUwwIDU2LjQ1MDVDMCA0Mi41NTgxIDIuMjg3NDkgMzMuMjQ1MiA2LjU4MjkxIDI1LjIxMzRDMTAuODc4MyAxNy4xODE3IDE3LjE4MTcgMTAuODc4MyAyNS4yMTM0IDYuNTgyOTFDMzMuMjQ1MiAyLjI4NzQ5IDQyLjU1ODEgMCA1Ni40NTA1IDBaIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMzk3M18zNjIpIi8+CjxwYXRoIGQ9Ik00OS43NjE0IDcxLjUxOTFMODkuOTY4NyA0OC4zNDg4TDg5Ljk2ODcgOTQuNjg5NUw0OS43NjE0IDcxLjUxOTFaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNzAuMjA3MyA0OC4zNDlMMzAgNzEuNTE5M0wzMCAyNS4xNzg3TDcwLjIwNzMgNDguMzQ5WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggb3BhY2l0eT0iMC43IiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTQ5Ljc2MjkgNzEuNTE5MkgzMEw3MC4yMDczIDQ4LjM0ODlIODkuOTcwMkw0OS43NjI5IDcxLjUxOTJaIiBmaWxsPSJ3aGl0ZSIvPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzM5NzNfMzYyIiB4MT0iMCIgeTE9IjAiIHgyPSIxMjAiIHkyPSIxMjAiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iI0ZGMEQ0RCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNFNDFEN0YiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjRTQxRDdGIi8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+Cg==",
+  "enabled": true,
+  "credentialSchema": null,
+  "requiresCliSetup": false,
+  "mcpServerNames": [],
+  "skillName": "awesun-skill",
+  "skillNames": [
+    "awesun-skill"
+  ]
+}

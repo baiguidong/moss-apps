@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.infimind-ecommerce-image",
+  "summary": "通过 MCP 生成 KOC 种草拼图、商品主图与电商商品详情页，并查询任务生成结果。",
+  "description": "通过 MCP 生成 KOC 种草拼图、商品主图与电商商品详情页，并查询任务生成结果。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/infimind-ecommerce-image",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

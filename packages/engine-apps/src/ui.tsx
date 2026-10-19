@@ -31,11 +31,12 @@ export function useEngineApp(){
   return {tasks,catalog,error,notice,busy,selected,setSelected,setError,setNotice,invoke,start,prepare,refresh,task:tasks.find(t=>t.id===selected)||tasks[0]}
 }
 export type EngineState=ReturnType<typeof useEngineApp>
-export function AppShell({state,title,subtitle,icon,children}:{state:EngineState;title:string;subtitle:string;icon:ReactNode;children:ReactNode}){
+// Moss owns the visible App identity; this shell starts with the work area.
+export function AppShell({state,title,children}:{state:EngineState;title:string;children:ReactNode}){
  return <div className="engine-app"><h1 className="visually-hidden">{title}</h1>
  {state.error&&<div role="alert" className="notice error"><AlertCircle size={18}/><span>{state.error}</span><button disabled={state.busy} onClick={()=>void state.prepare()}>重新检查</button><button aria-label="关闭提示" onClick={()=>state.setError('')}><X size={16}/></button></div>}
  {state.notice&&<div role="status" className="notice"><CheckCircle2 size={18}/>{state.notice}</div>}
- <main>{children}</main><footer><span>本地处理 · Agent 与页面共享结果</span><span className="engine-status"><span>{state.catalog?'已就绪':'正在准备'}{state.catalog?.version?` · ${state.catalog.version}`:''}</span><button aria-label="检查引擎" title="重新检查本地引擎" disabled={state.busy} onClick={()=>void state.prepare()}><RefreshCw size={13}/>检查</button></span></footer></div>
+ <main data-app-primary>{children}</main><footer><span>本地处理 · Agent 与页面共享结果</span><span className="engine-status"><span>{state.catalog?'已就绪':'正在准备'}{state.catalog?.version?` · ${state.catalog.version}`:''}</span><button aria-label="检查引擎" title="重新检查本地引擎" disabled={state.busy} onClick={()=>void state.prepare()}><RefreshCw size={13}/>检查</button></span></footer></div>
 }
 export function Paths({state,values,onChange,kind='file',label='输入文件'}:{state:EngineState;values:string[];onChange:(values:string[])=>void;kind?:'file'|'directory';label?:string}){
  const pick=async()=>{const result=await state.invoke('paths.pick',{kind,multiple:true});if(result?.paths)onChange([...new Set([...values.filter(Boolean),...result.paths])])}

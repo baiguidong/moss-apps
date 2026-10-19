@@ -1,0 +1,10 @@
+{
+  "name": "cnb-api",
+  "display_name": "CNB",
+  "description": "通过自然语言管理 CNB 平台：仓库、Issue、PR、流水线、制品库等操作。",
+  "source_type": "connector",
+  "connector_id": "cnb-api",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

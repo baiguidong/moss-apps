@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "workflowId": {
+      "type": "string",
+      "pattern": "^flow_[a-f0-9-]+$"
+    },
+    "archived": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "workflowId",
+    "archived"
+  ],
+  "additionalProperties": false
+}

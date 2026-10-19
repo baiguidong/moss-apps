@@ -1,0 +1,10 @@
+{
+  "name": "flow-tasks-query",
+  "display_name": "纷享销客CRM",
+  "description": "用自然语言查询客户、推进商机、写跟进记录、处理审批、建图表等，轻松搞定销售全链路工作。",
+  "source_type": "connector",
+  "connector_id": "sharecrm",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

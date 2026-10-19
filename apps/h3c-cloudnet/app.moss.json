@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.h3c-cloudnet",
+  "version": "0.1.0",
+  "displayName": "新华三Cloudnet灵犀AI助手",
+  "description": "面向网络运维场景的 AI 助手，支持网络运行状态查询、网络问题分析、设备/AP 信息查询和无线终端故障排查，帮助用户快速定位网络异常并获取处理建议。",
+  "category": "other",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "connectorApp": {
+    "id": "h3c-cloudnet",
+    "capabilities": [
+      "mcp",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "h3c-cloudnet",
+    "H3C Cloudnet LinSeer AI Assistant",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

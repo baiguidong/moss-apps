@@ -1,0 +1,10 @@
+{
+  "name": "jinshuju-skill",
+  "display_name": "金数据",
+  "description": "用自然语言在金数据（jinshuju.net）创建表单、表格、问卷、考试、报名、收款等各类场景应用：一句话生成表单与表格、批量处理数据、自动统计分析，零门槛快速搭建。",
+  "source_type": "connector",
+  "connector_id": "jinshuju",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

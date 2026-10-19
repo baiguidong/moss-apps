@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "pandadata": {
+      "type": "http",
+      "url": "https://pandadatamcp.pandaaiquant.com/mcp"
+    }
+  }
+}

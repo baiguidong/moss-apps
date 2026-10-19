@@ -1,0 +1,10 @@
+{
+  "name": "zsxq-skill",
+  "display_name": "知识星球",
+  "description": "用自然语言管理知识星球：浏览星球内容、发帖评论、搜索主题、回答问题、管理笔记、查看用户信息。",
+  "source_type": "connector",
+  "connector_id": "zsxq",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

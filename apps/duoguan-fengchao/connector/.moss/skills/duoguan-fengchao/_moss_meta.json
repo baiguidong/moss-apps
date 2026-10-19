@@ -1,0 +1,10 @@
+{
+  "name": "duoguan-fengchao",
+  "display_name": "夺冠蜂巢",
+  "description": "覆盖内容大脑、品牌画像、热点选题、口播与图文文案、配图、播客、配音、视频封装和多账号运营的一站式 AI 自媒体内容生产平台。",
+  "source_type": "connector",
+  "connector_id": "duoguan-fengchao",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

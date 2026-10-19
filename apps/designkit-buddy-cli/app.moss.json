@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.designkit-buddy-cli",
+  "version": "0.1.0",
+  "displayName": "美图设计室 AI设计 CLI",
+  "description": "一句话轻松调用美图设计室Agent Teams，从市场策略洞察，到电商套图、营销视频、社媒图文、海报及品牌等视觉物料，零门槛完成商业设计的全流程。",
+  "category": "other",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "connectorApp": {
+    "id": "designkit-buddy-cli",
+    "capabilities": [
+      "cli",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "designkit-buddy-cli",
+    "DesignKit Buddy CLI",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.transcription",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "displayName": "语音转写",
   "category": "knowledge",
   "keywords": [

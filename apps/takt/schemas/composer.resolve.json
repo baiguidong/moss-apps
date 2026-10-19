@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "properties": {
+    "intent": {
+      "enum": [
+        "create",
+        "edit",
+        "use"
+      ]
+    },
+    "ref": {
+      "type": "object",
+      "properties": {
+        "workflowId": {
+          "type": "string",
+          "pattern": "^flow_[a-f0-9-]+$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "runId": {
+          "type": "string",
+          "pattern": "^run_[a-f0-9-]+$"
+        },
+        "nodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "occurrenceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "workflowId",
+        "revision"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "intent"
+  ],
+  "additionalProperties": false
+}

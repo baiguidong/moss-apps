@@ -34,7 +34,7 @@ test('invalid source is reported separately; duplicate identities remain fatal',
     expect(() => listApps({ root, onError: () => {} })).toThrow('Duplicate App id')
   } finally { await fs.rm(root, { recursive: true, force: true }) }
 })
-test.each(['drawio', 'sequential-thinking', 'filesystem', 'git'])('%s source contains its shared generator and a focused locked workspace', async directory => {
+test.each(['drawio', 'sequential-thinking', 'filesystem', 'git', 'markitdown', 'excel'])('%s source contains its shared generator and a focused locked workspace', async directory => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-config-source-'))
   try {
     const app = selectApps(['--app', `moss.${directory}`])[0]

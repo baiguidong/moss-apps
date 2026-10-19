@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mzl-trademark": {
+      "type": "http",
+      "url": "https://www.mozlen.com/mcp"
+    }
+  }
+}

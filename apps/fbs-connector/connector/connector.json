@@ -1,0 +1,44 @@
+{
+  "id": "fbs-connector",
+  "source": "fbs-connector",
+  "name": "福帮手",
+  "nameEn": "Fbsir",
+  "description": "福帮手人机协同连接器：识别当前身份与专家入口，匹配可执行场景方案，记录首值与继续使用进度，并查询乐包状态或衔接后续服务。",
+  "descriptionEn": "FBSir for WorkBuddy: identity, scene plans, progress, reward status, and expert handoffs.",
+  "type": "mcp",
+  "authMode": "none",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "5.0.0",
+  "visibleIn": [
+    "internal",
+    "iOA",
+    "cloudhosted",
+    "selfhosted"
+  ],
+  "examples": [
+    "先确认我当前的福帮手身份和最稳妥的下一步，再继续推进。",
+    "根据我正在使用的专家和当前目标，匹配一个可执行的场景方案。",
+    "我已经完成了第一步，请帮我记录进度并安排后续。",
+    "查询我的乐包状态，并说明现在适合领取、兑换还是继续完成任务。",
+    "把这次协作归到我正在使用的福帮手专家名下。"
+  ],
+  "hasMcp": true,
+  "hasCli": false,
+  "hasSkills": true,
+  "hasCredentialSchema": false,
+  "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAClUExURUdwTA2g4A6m5Aad5Qac4CjM8wWo8QWn8Qai6g5l0AWq8wWo8gWp8wSg5yfE6QWm7wWg6A5iyQWk6yjI7Quc2wan7wWk7ijJ7wWn8Qap8wWn8Reo3Qal7inM8wWl7SnM8ijJ7wam7ijJ7ynM8ijL8Q5dxinM8ijN8ynL8g1iyg1iyxSg4A5jzA1gyAah6A5hxwWl7Qaq9Qau+w5q1gi0/ivY/gmJ3QK3knAAAAAudFJOUwAoNhcv+cPeTP76s+hBO4/zRFlQB6iBctH0mwxt6mK5l3Zh3ob+x9WieK8e0jUUpI70AAADZklEQVRYw+1X2ZaqMBCUHdlckE0B93XmYhJx/v/TbndQRx1ABp/uOTdvIlWp6q400On8X28seTx5Bz7pMe8dfBxpujxqDbfDKJZNrS3Bh0nHgm+ocjv4CKDi0NJ022tVRISKqhELY9ZrARfVaC6PwcEcZNi/roE0Ngqoblm6GGpl9flTg59HaN5CB3MBZZQoGJwOgwq4rmnDGzTGQqplBN3T6XMv/fxDMKMLFGToGpcRd8oIjsfuqXv485xbw+O7AvQmQx6OygmQ4vjgJLVUG6GyafhCj3qFDCvsVBHAundi8105VI6j8CKD+sKohoA72RdRk+QL9CoDHXjyPKwnQIpPLkI3wjsHBhYSL+R+5wUBGDnwowsnjxbm0+hSSDP3RH30kuDYxXZI6CCFXe0QZSBXjhK01wqOpz1cVDWARum1B8CFP+hYakgwsuHunoBR4DK0vCf4tGIalCrwqSmnFi8k7JzjD02vCPwTwboLeRJCHcyn3LzPYJCExrzywD0SrE9fIliQPW4edo6MVPbKzZcQrI9fpA/32hyKPUDzcCDqRsY3wXp9ygjFwavrvAcemIdpMKyfOYNT9wr/IiSjKg4ZD3qA5kXT8l9Osf0nHEUoHsKzjJpwyVNhZ5yiuRI0GXyDA5jPEJ5lfPAKtgrm5zQazpQkkBpQ+Bc4EGC/ejnmX/OSzcJZJcrs1dMAEnvFZwxKJoVwdPr51hVXSbISFxuhfnL3CMtui9oQA4iAspJXyTIQF1tl59TWMdUY+caTDAIvG3kaLJPAAfTMcaZKjQJbvYcDAc/ReHnd250qG1esrIHgUZo9LII5ClZOsLyinZmyrOjDxI9Y9rR4jtwlKC/QWAcn+Ch/6GqP6gsCfIlZuICe8r25k9I2iiaj2c/FczQ7X9DoBLWUFFHqs6xs8RxN3On5Gw1aRmUEpJyAH70FClBWjrtBJztFaE6AOYLubLcLMUgKJ9vAmTQnIMXgnPAMu5szJ0o+GhOw/rXlI54jZ3dGJ1JDAgoPort7IMMb7mTXzAJh4fPkFmZJEpSfxh8EhFlxSbcmPNMN2khJr2rwuNPXbaTMrJvcwosaEKYNf/3+eUfAIr/FG/CN4Kl1vyUgTNXbvcFzAmxd2w8QJGDVrWtCwGht614SkBateyCI3/oC/NfXX4xxsg2xTD6cAAAAAElFTkSuQmCC",
+  "enabled": true,
+  "credentialSchema": null,
+  "requiresCliSetup": false,
+  "mcpServerNames": [
+    "fbs-connector"
+  ],
+  "skillName": "fbs-connector",
+  "skillNames": [
+    "fbs-connector",
+    "fbs-connector-lebao",
+    "fbs-connector-mainline",
+    "fbs-connector-session"
+  ]
+}

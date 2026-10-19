@@ -1,0 +1,32 @@
+{
+  "variantField": "RAGFLOW_AUTH_MODE",
+  "defaultVariant": "moss-server",
+  "variants": {
+    "moss-server": {
+      "mcpServers": {
+        "ragflow": {
+          "type": "http",
+          "url": "http://${MOSS_RAG_MCP_ADDRESS}/mcp",
+          "headers": {
+            "Authorization": "Bearer ${MOSS_SERVER_AUTH_TOKEN}"
+          }
+        }
+      },
+      "authMode": "moss-session",
+      "authValidation": "tools-list"
+    },
+    "api-key": {
+      "mcpServers": {
+        "ragflow": {
+          "type": "http",
+          "url": "http://${RAGFLOW_MCP_ADDRESS}/mcp",
+          "headers": {
+            "Authorization": "Bearer ${RAGFLOW_API_KEY}"
+          }
+        }
+      },
+      "authMode": "api-key",
+      "authValidation": "tools-list"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "weiyun": {
+      "type": "http",
+      "url": "https://www.weiyun.com/api/v3/mcpserver"
+    }
+  }
+}

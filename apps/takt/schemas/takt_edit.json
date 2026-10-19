@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "workflowId": {
+      "type": "string",
+      "pattern": "^(flow|run)_[a-f0-9-]+$"
+    },
+    "baseRevision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "yaml": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80000
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    }
+  },
+  "required": [
+    "workflowId",
+    "baseRevision",
+    "yaml"
+  ],
+  "additionalProperties": false
+}

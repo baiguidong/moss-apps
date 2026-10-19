@@ -1,7 +1,7 @@
 #buddy-app .buddy-product{--b-surface:var(--background);--b-ground:var(--card);--b-text:var(--foreground);--b-muted:var(--muted-foreground);--b-line:var(--border);--b-accent:var(--primary);--b-on:var(--primary-foreground);--b-soft:var(--color-surface-hover);width:100%;margin:0;border:0;color:var(--b-text);font:400 14px/1.55 Geist,Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 #buddy-app *{box-sizing:border-box}#buddy-app [hidden]{display:none!important}
 #buddy-app button,#buddy-app input,#buddy-app textarea,#buddy-app select{font:inherit;color:inherit}#buddy-app button{cursor:pointer}#buddy-app button:disabled{opacity:.5;cursor:wait}#buddy-app button{transition:background-color .15s,color .15s,border-color .15s}#buddy-app input::placeholder,#buddy-app textarea::placeholder{color:var(--b-muted)}
-#buddy-app .b-top{display:flex;align-items:center;gap:12px;padding:12px 18px}#buddy-app .b-top strong{font-weight:500}#buddy-app .b-preview-label{font-size:12px;color:var(--b-muted)}#buddy-app .hatched .b-top{display:none}
+
 #buddy-app .b-nav{display:flex;gap:4px;height:44px;padding:6px 12px;border-bottom:1px solid var(--b-line);background:var(--b-surface);overflow-x:auto;white-space:nowrap}
 #buddy-app .b-nav button{flex-shrink:0;background:transparent;border:0;border-radius:calc(var(--radius) - 2px);padding:5px 10px;font-size:13px;color:var(--b-muted)}#buddy-app .b-nav button[aria-current=page]{background:var(--b-soft);color:var(--b-text)}
 #buddy-app .b-main{padding:16px}#buddy-app .hatched #page-pet{height:calc(100dvh - 44px);min-height:360px}
@@ -75,7 +75,7 @@
 html.buddy-mini,html.buddy-mini body{background:transparent;overflow:hidden}
 html.buddy-mini #buddy-app{width:56px;height:56px}
 #buddy-app .buddy-product.b-mini{width:56px;height:56px;background:transparent}
-#buddy-app .b-mini .b-top,#buddy-app .b-mini .b-nav,#buddy-app .b-mini .b-pet-heading,#buddy-app .b-mini #pet-settings-toggle,#buddy-app .b-mini .b-settings,#buddy-app .b-mini .b-chat,#buddy-app .b-mini .b-shortcuts,#buddy-app .b-mini .b-composer,#buddy-app .b-mini #chat-errors,#buddy-app .b-mini #notice,#buddy-app .b-mini .b-intro,#buddy-app .b-mini #hatch-form,#buddy-app .b-mini .b-under{display:none}
+#buddy-app .b-mini .b-nav,#buddy-app .b-mini .b-pet-heading,#buddy-app .b-mini #pet-settings-toggle,#buddy-app .b-mini .b-settings,#buddy-app .b-mini .b-chat,#buddy-app .b-mini .b-shortcuts,#buddy-app .b-mini .b-composer,#buddy-app .b-mini #chat-errors,#buddy-app .b-mini #notice,#buddy-app .b-mini .b-intro,#buddy-app .b-mini #hatch-form,#buddy-app .b-mini .b-under{display:none}
 #buddy-app .b-mini #page-pet{height:56px;min-height:0;padding:0}
 #buddy-app .b-mini .b-pet-header{width:56px;height:56px;margin:0}
 #buddy-app .b-mini .b-avatar{width:56px;height:56px;flex:0 0 56px}

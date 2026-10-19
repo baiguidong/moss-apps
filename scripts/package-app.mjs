@@ -99,7 +99,7 @@ async function packageApp(app, options) {
   if (app.kind === 'mcp') {
     await fsp.cp(path.join(builtApp, 'dist'), packageRoot, { recursive: true })
   } else {
-    for (const directory of ['dist', 'schemas', 'assets', 'resources']) {
+    for (const directory of ['dist', 'schemas', 'assets', 'resources', ...(manifest.connectorApp ? ['connector'] : [])]) {
       await copyIfPresent(path.join(builtApp, directory), path.join(packageRoot, directory))
     }
     for (const fileName of ['README.md', 'LICENSE', 'LICENSE.md']) {
@@ -166,6 +166,7 @@ async function packageApp(app, options) {
       description: app.marketplace.description,
       publisher: manifest.publisher,
       category: manifest.category,
+      ...(manifest.discovery ? { discovery: manifest.discovery } : {}),
       categories: app.marketplace.categories,
       keywords: app.marketplace.keywords,
       homepage: app.marketplace.homepage,

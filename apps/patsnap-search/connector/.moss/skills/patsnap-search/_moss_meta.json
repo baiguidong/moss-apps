@@ -1,0 +1,10 @@
+{
+  "name": "patsnap-search",
+  "display_name": "智慧芽专利&文献融合检索",
+  "description": "在智慧芽全球专利数据库和文献库中进行融合检索，支持自然语言、语义搜索、关键词检索和多维过滤，并获取专利或文献信息。",
+  "source_type": "connector",
+  "connector_id": "patsnap-search",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

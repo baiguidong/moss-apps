@@ -1,0 +1,10 @@
+{
+  "name": "tec-do-guide",
+  "display_name": "Tec-Do 2.0 广告与增长情报",
+  "description": "面向出海广告投放和增长团队的 AI 能力集合。",
+  "source_type": "connector",
+  "connector_id": "tec-do",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

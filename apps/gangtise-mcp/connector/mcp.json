@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "gangtise-mcp": {
+      "type": "http",
+      "url": "https://openapi.gangtise.com/application/open-mcp/",
+      "headers": {
+        "accessKey": "${GTS_ACCESS_KEY}",
+        "secretKey": "${GTS_SECRET_KEY}"
+      }
+    }
+  }
+}

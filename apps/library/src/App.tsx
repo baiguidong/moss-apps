@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { BookOpen, FileText, FolderPlus, FolderOpen, Upload, Plus, Search, Pencil, Trash2, X, RefreshCw, LoaderCircle, Library, ArrowLeft, ExternalLink } from 'lucide-react'
+import { BookOpen, FileText, FolderPlus, FolderOpen, Upload, Plus, Search, Pencil, Trash2, X, RefreshCw, LoaderCircle, ArrowLeft, ExternalLink } from 'lucide-react'
 import type { Api, Collection, Document, Job, Source } from './lib/api'
 const stateName = (value: string) => ({ ready: '已索引', completed: '已完成', failed: '失败', stale: '待更新', discovered: '待索引', running: '处理中', queued: '排队中', cancelled: '已取消', idle: '待处理' }[value] || value)
 type Modal = { kind: 'collection' | 'rename' | 'note' | 'edit' | 'delete-doc' | 'delete-collection' | 'import'; title: string; content: string; target: string; resourceId?: string; revision?: string; paths?: string[] }
@@ -69,7 +69,6 @@ export function App({ api }: { api: Api }) {
     {api.demo && <div className="demo">浏览器演示 · 修改仅保留在本次预览中</div>}
     <div className="layout">
       <aside className="sidebar">
-        <div className="brand"><Library size={21} /><strong>我的知识</strong></div>
         <button className={!selected ? 'nav selected' : 'nav'} onClick={() => { setSelected(''); setPage(0); setTab('docs') }}><BookOpen size={17} />全部资料<span>{collections.reduce((sum, c) => sum + c.resourceCount, 0)}</span></button>
         <div className="section-label">资料集<button aria-label="新建资料集" title="新建资料集" onClick={() => showModal('collection')}><Plus size={16} /></button></div>
         <nav aria-label="资料集">{collections.map(c => <button key={c.id} className={selected === c.id ? 'nav selected' : 'nav'} onClick={() => { setSelected(c.id); setPage(0); setTab('docs') }}><FolderOpen size={16} /><span className="collection-name">{c.name}</span><small>{c.resourceCount}</small></button>)}</nav>

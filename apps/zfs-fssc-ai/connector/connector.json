@@ -1,0 +1,71 @@
+{
+  "id": "zfs-fssc-ai",
+  "source": "zfs-fssc-ai",
+  "name": "中兴新云AI智报",
+  "nameEn": "ZTC AI Assistant",
+  "description": "财务云 AI 报销助手：用自然语言完成报销申请、发票查询识别、报销单查询与费用审批等操作。",
+  "descriptionEn": "ZTE FSSC AI reimbursement assistant: file reimbursements, recognize and query invoices, query expense bills and approve via natural language.",
+  "type": "mcp",
+  "authMode": "token",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "4.23.0",
+  "visibleIn": [
+    "internal",
+    "iOA",
+    "cloudhosted",
+    "selfhosted"
+  ],
+  "examples": [
+    "帮我查询本月已提交的报销单",
+    "创建一张去北京出差的差旅报销单",
+    "我有一笔餐费要报销，帮我走流程"
+  ],
+  "hasMcp": true,
+  "hasCli": false,
+  "hasSkills": true,
+  "hasCredentialSchema": true,
+  "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAADIWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDIgNzkuMTYwOTI0LCAyMDE3LzA3LzEzLTAxOjA2OjM5ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjdDNTVCNURENjkyQTExRjE5REI4REZCRkU2RTExNTY5IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjdDNTVCNURFNjkyQTExRjE5REI4REZCRkU2RTExNTY5Ij4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6N0M1NUI1REI2OTJBMTFGMTlEQjhERkJGRTZFMTE1NjkiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6N0M1NUI1REM2OTJBMTFGMTlEQjhERkJGRTZFMTE1NjkiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz501NmHAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAADNQTFRFR3BMAHPBAGi3AHzIAGe2AGi3AGi3AGi3AHjFAGe3AIbRAIbSAIjTAIbRAIfSAIbRAGi3PFt7KgAAAA90Uk5TABKyJlbT7I88da+LU9pv1i9VJgAAAo1JREFUWMO1V9u26yAIjIJ3TfL/X7tNTdOIqGnPOrx1NYwwDIjL8r8MbFxDCGu08JP7GnxK27al5H2w4jtvGw7Xynx8jCHWxvvEsI/8161vfs5GTNvQwsTfbzNLozyge3wK0dpYqF373HdTv061fpBG7PlHyrH/zv84XjiplMH3dxwCjM53en+ZxjMGJotu/vk/s1/m8s9E0xrWr/bfdzyDhYfyywHAXpkoIaRa/tuAAVkDuPO48EyA+TxVA8h8ngWI65MKHABC1wCKKWHoKz8ft08BxLj3aAoCpdL6lNUDDVsCoK+UNE4yOPwtqUFD6KAGkWhISd0gqAEFtYYlHjMVnGZigK4C8C7gk3DCyKEr6BXgU8D7GKMIogNgbwmYqu+bEGCqoPpKkQ0LiacQO9qzTSE8T4Ej1b6MVIIX0nqjgKq/plHzUr4DaAIgKcAySeGjgmKuEWMYk0hDqAEML+ZUkXWxIGwDgJ2ZaqsPVckCNVAOMjYsnBQ8mUVKSqmKJqsyHooFth/gzsJdEUB6aTGKnUq+yfZUlCEMZmkiW4ljICIzf/RO66te3RI4MS1gPiOlfI170+WulIlHWASazJ+zbSdc8hBnoeOTrYzc1Je4ZWdHChdEWVaxvmZvQ0aJjqJS3pbj6v0qiL+h/fUiSYQ0WDHdzgbw1pw5N13f7snlH0klRBvsfVdB3gjPQFLeEEWvi5kpoz6tLyDbFaagVwqtz9U42jC7rDW6vU+W7qzNN/cNH9Co3q1aWd16WkqTTTIXasefad7Zrf4zguyv+/qJvxk9l+TUXeP4yYKTIOT07SbMyP3Ru00Y/S/uJZG2/Mp9+QC27lgnX3uhkga/fPqWZkJ0zhjn0P7g/oX9Aa6UiK0H/TWQAAAAAElFTkSuQmCC",
+  "enabled": true,
+  "credentialSchema": {
+    "title": "财务云账号登录",
+    "titleEn": "FSSC Account Login",
+    "description": "连接您的财务云账号以使用 AI 智报。账号与密码仅用于向财务云登录换取会话凭证；密码不会被连接器存储，仅在服务端发起登录时使用。",
+    "descriptionEn": "Connect your ZTE FSSC account to use AI reimbursement. Your credentials are used only to log in and obtain a session; the password is not persisted by this connector.",
+    "docUrl": "",
+    "docLabel": "",
+    "docLabelEn": "",
+    "fields": [
+      {
+        "key": "ZFS_LOGIN_KEY",
+        "label": "财务云账号",
+        "labelEn": "FSSC Account",
+        "placeholder": "请输入您的账号",
+        "placeholderEn": "Pelease enter your account",
+        "description": "用于登录财务云的账号。",
+        "descriptionEn": "Account used to log in to FSSC.",
+        "type": "text",
+        "required": true
+      },
+      {
+        "key": "ZFS_PASSWORD",
+        "label": "财务云密码",
+        "labelEn": "FSSC Password",
+        "placeholder": "请输入您的财务云登录密码",
+        "placeholderEn": "Enter your FSSC login password",
+        "description": "您的财务云登录密码。仅用于登录换取会话凭证，不会被平台保存。",
+        "descriptionEn": "Your FSSC login password, used only to obtain a session and never persisted.",
+        "type": "password",
+        "required": true
+      }
+    ]
+  },
+  "requiresCliSetup": false,
+  "mcpServerNames": [
+    "zfs-fssc-ai"
+  ],
+  "skillName": "zfs-fssc-ai",
+  "skillNames": [
+    "zfs-fssc-ai"
+  ]
+}

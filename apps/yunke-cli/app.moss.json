@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.yunke-cli",
+  "version": "0.1.0",
+  "displayName": "云客AI工作手机",
+  "description": "提供真实手机的数据读取与设备控制能力。AI 自动采集通话与录音，沉淀全量沟通数据驱动销售分析；同时允许 AI 直接操控手机拨打电话、发短信、操作 APP，把实体手机变成 Agent 的硬件执行单元。",
+  "category": "other",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "connectorApp": {
+    "id": "yunke-cli",
+    "capabilities": [
+      "cli",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "yunke-cli",
+    "Yunke AI WorkPhone",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

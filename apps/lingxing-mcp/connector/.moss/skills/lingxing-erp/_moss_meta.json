@@ -1,0 +1,10 @@
+{
+  "name": "lingxing-erp",
+  "display_name": "领星ERP",
+  "description": "使用自然语言查询和管理领星ERP中的店铺、库存、Listing、销售、利润、广告和运营数据。",
+  "source_type": "connector",
+  "connector_id": "lingxing-mcp",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

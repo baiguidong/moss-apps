@@ -1,0 +1,51 @@
+{
+  "id": "ai-hive",
+  "source": "ai-hive",
+  "name": "AI-HIVE",
+  "nameEn": "AI-HIVE",
+  "description": "连接全球 100+ 顶尖 AI 模型（Seedance 2.5、H3 (MiniMax)、Happyhorse、GPT-image、Nano-Banana、Deepseek、Kimi 等），一键搞定文本、图像、视频创作。",
+  "descriptionEn": "100+ top AI models (Seedance 2.5, H3 MiniMax, Happyhorse, GPT-image, Nano-Banana, Deepseek, Kimi). One config.",
+  "type": "mcp",
+  "authMode": "",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "5.0.0",
+  "visibleIn": [
+    "internal",
+    "iOA",
+    "cloudhosted",
+    "selfhosted"
+  ],
+  "examples": [
+    "先联网搜一组宋代美学参考（服饰纹样、青绿山水、木构建筑），据此生成一张汉服少女主视觉概念图；再把这张图做成 12 秒电影感运镜视频：0-4s 缓慢推进特写衣纹、4-8s 环绕微距工艺、8-12s 横移拉远见全景，带氛围光与影视级色调，画面流畅稳定、面部五官清晰不变形、无抖动无闪烁。",
+    "帮我设计一个日漫风战斗少女 IP：银白长发、异色瞳（左金右蓝）、机甲肩甲、战斗服。先搜同类热门人设找配色参考，再用固定角色锚点『银发异色瞳少女，机甲肩甲，战斗姿态，锐利眼神』原样复用，生成正面/侧面/背面的三视图，统一画风与配色，用于盲盒手办立项。",
+    "搜一下今年新茶饮夏季营销主视觉趋势，据此做一张门店开业促销海报：主标题大字『买一送一』、暖橙色调、左侧 40% 留白、电影感侧光、3:4 竖版，适合朋友圈与小红书投放；另出一张极简冷调备选。",
+    "做一个柠檬黄泰迪熊盲盒手办系列：先出基础款 Q 版三视图（圆脸大眼、公仔比例），再连续迭代 5 款不同穿搭与配饰的衍生款（宇航员/厨师/旗袍/运动/蒸汽朋克），保持同一角色锚点与盲盒比例，统一柔光陶瓷质感。",
+    "搜一组『职场精英写实肖像』布光与构图参考，生成一张商务正装职业照：自然窗光、浅景深、干净灰渐变背景、8K、对称构图，用于简历与领英头像；再生成一张同人物的汉服写真做风格对比。",
+    "以『赛博朋克雨夜东京』为主题做一条 20 秒产品概念短片：先搜视觉参考，分三镜——0-7s 俯冲入巷（Aerial Crane Down）、7-14s 环绕产品特写（Orbit）、14-20s 手持跟随走出霓虹（Handheld Tracking）；运镜连续不跳切，原生立体声环境音+Synthwave 124BPM，画面稳定、角色不变形。"
+  ],
+  "hasMcp": true,
+  "hasCli": true,
+  "hasSkills": true,
+  "hasCredentialSchema": false,
+  "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjYiIGhlaWdodD0iMjYiIHZpZXdCb3g9IjAgMCAyNiAyNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0LjEwMjIgMS40NDg4NkMxNC4xMDIyIDAuMzM1MTQ0IDE1LjMwNzkgLTAuMzYwODY4IDE2LjI3MjQgMC4xOTYwMDVMMjIuOTk5MyA0LjA3OTgzQzIzLjQxMjcgNC4zMTg0OSAyMy40MTI3IDQuOTE1MTUgMjIuOTk5MyA1LjE1MzgxTDE4LjgxNTUgNy41Njk0MUMxOC4yNzE4IDcuODgzMzIgMTguMDg1MiA4LjU3ODcgMTguMzk5MSA5LjEyMjQxQzE4LjcxMyA5LjY2NjExIDE5LjQwODMgOS44NTIyOCAxOS45NTIxIDkuNTM4NDFMMjQuMDY5OSA3LjE2MDk2QzI0LjQ4MzMgNi45MjIzIDI1IDcuMjIwNjMgMjUgNy42OTc5NlYxNS4zNjc5QzI1IDE2LjQ3NjQgMjMuODA0NiAxNy4xNzMzIDIyLjg0MDEgMTYuNjI3TDE0LjgzNTkgMTIuMDkzNkMxNC4zODI0IDExLjgzNjcgMTQuMTAyMiAxMS4zNTU4IDE0LjEwMjIgMTAuODM0N1YxLjQ0ODg2WiIgZmlsbD0iI0ZBOUYzMCIvPgo8cGF0aCBkPSJNMTQuMTAyMiAxLjQ0ODg2QzE0LjEwMjIgMC4zMzUxNDQgMTUuMzA3OSAtMC4zNjA4NjggMTYuMjcyNCAwLjE5NjAwNUwyMi45OTkzIDQuMDc5ODNDMjMuNDEyNyA0LjMxODQ5IDIzLjQxMjcgNC45MTUxNSAyMi45OTkzIDUuMTUzODFMMTguODE1NSA3LjU2OTQxQzE4LjI3MTggNy44ODMzMiAxOC4wODUyIDguNTc4NyAxOC4zOTkxIDkuMTIyNDFDMTguNzEzIDkuNjY2MTEgMTkuNDA4MyA5Ljg1MjI4IDE5Ljk1MjEgOS41Mzg0MUwyNC4wNjk5IDcuMTYwOTZDMjQuNDgzMyA2LjkyMjMgMjUgNy4yMjA2MyAyNSA3LjY5Nzk2VjE1LjM2NzlDMjUgMTYuNDc2NCAyMy44MDQ2IDE3LjE3MzMgMjIuODQwMSAxNi42MjdMMTQuODM1OSAxMi4wOTM2QzE0LjM4MjQgMTEuODM2NyAxNC4xMDIyIDExLjM1NTggMTQuMTAyMiAxMC44MzQ3VjEuNDQ4ODZaIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfNTU3XzYxOSkiLz4KPHBhdGggZD0iTTEyLjI4NzIgMTMuOTkzOUMxMi43Mjk5IDEzLjc0MjEgMTMuMjcyMyAxMy43NDE1IDEzLjcxNTUgMTMuOTkyNUwyMS42Njg0IDE4LjQ5NjlDMjIuNjQyMSAxOS4wNDg0IDIyLjY0NzkgMjAuNDQ5MSAyMS42Nzg5IDIxLjAwODdMMTUuMDY0NCAyNC44Mjc1QzE0LjY1MSAyNS4wNjYyIDE0LjEzNDMgMjQuNzY3OCAxNC4xMzQzIDI0LjI5MDVWMTguODg4NUMxNC4xMzQyIDE4LjI2MDcgMTMuNjI1MyAxNy43NTE5IDEyLjk5NzUgMTcuNzUxOUMxMi4zNjk3IDE3Ljc1MTkgMTEuODYwOSAxOC4yNjA3IDExLjg2MDkgMTguODg4NVYyNC4yODc5QzExLjg2MDkgMjQuNzY1MiAxMS4zNDQyIDI1LjA2MzUgMTAuOTMwOCAyNC44MjQ5TDQuMzQwNTYgMjEuMDJDMy4zNzI0OCAyMC40NjEgMy4zNzY5OCAxOS4wNjIxIDQuMzQ4NjQgMTguNTA5NEwxMi4yODcyIDEzLjk5MzlaIiBmaWxsPSJ1cmwoI3BhaW50MV9saW5lYXJfNTU3XzYxOSkiLz4KPHBhdGggZD0iTTkuNzI3MzggMC4xOTU5OTFDMTAuNjkxOSAtMC4zNjA5MDEgMTEuODk3NiAwLjMzNTI3MyAxMS44OTc2IDEuNDQ5MDVWMTAuODM3OUMxMS44OTc2IDExLjM1ODEgMTEuNjE4MyAxMS44MzgyIDExLjE2NjEgMTIuMDk1NEwzLjE2MjE3IDE2LjY0ODJDMi4xOTc2NSAxNy4xOTY4IDEgMTYuNTAwMSAxIDE1LjM5MDVWOC4xNTAxMkMxIDcuNjcyNzggMS41MTY3NCA3LjM3NDQ1IDEuOTMwMTIgNy42MTMxM0w1LjcwMjE5IDkuNzkxMTFDNi4yNDU5IDEwLjEwNSA2Ljk0MTI3IDkuOTE4OCA3LjI1NTE4IDkuMzc1MUM3LjU2OTA2IDguODMxNCA3LjM4MjY2IDguMTM2MDIgNi44Mzg5OCA3LjgyMjExTDIuNTczMDYgNS4zNTkyOUMyLjE2ODAzIDUuMTI1NDUgMi4xNTgyOSA0LjU0NTI2IDIuNTU4MzUgNC4zMDMwMUM0LjkxMTA4IDIuODc4MzYgNy4zNDc5MyAxLjU2OTgyIDkuNzI3MzggMC4xOTU5OTFaIiBmaWxsPSIjRkE5RjMwIi8+CjxwYXRoIGQ9Ik05LjcyNzM4IDAuMTk1OTkxQzEwLjY5MTkgLTAuMzYwOTAxIDExLjg5NzYgMC4zMzUyNzMgMTEuODk3NiAxLjQ0OTA1VjEwLjgzNzlDMTEuODk3NiAxMS4zNTgxIDExLjYxODMgMTEuODM4MiAxMS4xNjYxIDEyLjA5NTRMMy4xNjIxNyAxNi42NDgyQzIuMTk3NjUgMTcuMTk2OCAxIDE2LjUwMDEgMSAxNS4zOTA1VjguMTUwMTJDMSA3LjY3Mjc4IDEuNTE2NzQgNy4zNzQ0NSAxLjkzMDEyIDcuNjEzMTNMNS43MDIxOSA5Ljc5MTExQzYuMjQ1OSAxMC4xMDUgNi45NDEyNyA5LjkxODggNy4yNTUxOCA5LjM3NTFDNy41NjkwNiA4LjgzMTQgNy4zODI2NiA4LjEzNjAyIDYuODM4OTggNy44MjIxMUwyLjU3MzA2IDUuMzU5MjlDMi4xNjgwMyA1LjEyNTQ1IDIuMTU4MjkgNC41NDUyNiAyLjU1ODM1IDQuMzAzMDFDNC45MTEwOCAyLjg3ODM2IDcuMzQ3OTMgMS41Njk4MiA5LjcyNzM4IDAuMTk1OTkxWiIgZmlsbD0idXJsKCNwYWludDJfbGluZWFyXzU1N182MTkpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfNTU3XzYxOSIgeDE9IjE1IiB5MT0iMTAuNjgyMiIgeDI9IjI1IiB5Mj0iNS42ODIyNCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjRkE5RjMwIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0ZBMzAzMyIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MV9saW5lYXJfNTU3XzYxOSIgeDE9IjEzLjAwOTciIHkxPSIxMy44MDQ3IiB4Mj0iMTMuMDA5NyIgeTI9IjI1LjM2NDUiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iI0ZBOUYzMCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNGQTMwMzMiLz4KPC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDJfbGluZWFyXzU1N182MTkiIHgxPSIxMiIgeTE9IjExLjE4MjIiIHgyPSIxLjUiIHkyPSI1LjY4MjI0IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiNGQTlGMzAiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjRkEzMDMzIi8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+Cg==",
+  "enabled": true,
+  "credentialSchema": null,
+  "requiresCliSetup": true,
+  "mcpServerNames": [
+    "ai-hive"
+  ],
+  "skillName": "gpt-image-expert",
+  "skillNames": [
+    "gpt-image-expert",
+    "h3-expert",
+    "happyhorse-expert",
+    "image-creator",
+    "nano-banana-expert",
+    "seedance-2-5-expert",
+    "seedance-expert",
+    "seedream-expert",
+    "text-creator",
+    "video-creator"
+  ]
+}

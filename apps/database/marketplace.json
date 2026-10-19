@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.database",
+  "summary": "在 App 中添加和管理数据库连接，测试连通性并执行只读 SQL 查询。",
+  "platforms": [
+    "darwin-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/database",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT"
+}

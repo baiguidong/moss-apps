@@ -1,0 +1,10 @@
+{
+  "name": "yingmi-mcp-skill",
+  "display_name": "盈米MCP",
+  "description": "查询基金与市场数据，完成基金研究、组合分析、财富规划及金融内容生成。",
+  "source_type": "connector",
+  "connector_id": "yingmi-mcp",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

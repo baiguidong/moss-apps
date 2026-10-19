@@ -105,13 +105,12 @@ export function TraceList({ onOpen }: { onOpen: (sessionId: string) => void }) {
   }
 
   return <div className="flex min-h-0 flex-1 flex-col bg-background" data-testid="trace-list">
-    <header className="shrink-0 border-b px-6 py-5">
+    <header className="shrink-0 border-b px-6 py-3" aria-label="追踪概览">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2"><Workflow className="size-5 text-primary" /><h1 className="text-xl font-semibold">{t('trace.list.title')}</h1>
+          <div className="flex items-center gap-2">
             {state.status === 'ready' && <Badge tone={state.data.captureStatus.enabled ? 'success' : 'neutral'}>{state.data.captureStatus.enabled ? t('trace.list.collecting') : t('trace.list.paused')}</Badge>}
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">查看模型请求、响应、工具调用和异常。</p>
         </div>
         <div className="flex items-center gap-4">
           <Button variant="outline" onClick={() => void load()}><RefreshCw className="size-3.5" />{t('trace.refresh')}</Button>

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.linear-mcp",
+  "version": "0.1.0",
+  "displayName": "Linear",
+  "description": "管理 Linear 中的 Issues、项目、文档和发布。支持创建和更新 Issue 并指派负责人与标签，评论与讨论串回复，创建项目和里程碑及进度报告，管理文档和附件，查看 Sprint 周期与团队状态，搜索和 Code Review PR 变更。",
+  "category": "knowledge",
+  "discovery": {
+    "group": "online"
+  },
+  "connectorApp": {
+    "id": "linear-mcp",
+    "capabilities": [
+      "mcp"
+    ]
+  },
+  "keywords": [
+    "linear-mcp",
+    "Linear",
+    "mcp"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "infimind-video-generation",
+  "display_name": "极睿视频",
+  "description": "通过自然语言使用极睿视频的专业视频生成和视频分析能力，支持多素材参考、任务进度查询与结构化分析结果。",
+  "source_type": "connector",
+  "connector_id": "infimind-video",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.lemonclaw",
+  "summary": "连接柠檬云财务、进销存、业财和发票系统，支持查账、开票、业务查询、经营分析等企业经营场景。",
+  "description": "连接柠檬云财务、进销存、业财和发票系统，支持查账、开票、业务查询、经营分析等企业经营场景。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/lemonclaw",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "dknowc-mcp": {
+      "type": "http",
+      "url": "https://mcp.dknowc.cn/s6/mcp"
+    }
+  }
+}

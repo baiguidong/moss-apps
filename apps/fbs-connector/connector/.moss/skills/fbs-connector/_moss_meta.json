@@ -1,0 +1,10 @@
+{
+  "name": "fbs-connector",
+  "display_name": "福帮手",
+  "description": "福帮手人机协同连接器：识别当前身份与专家入口，匹配可执行场景方案，记录首值与继续使用进度，并查询乐包状态或衔接后续服务。",
+  "source_type": "connector",
+  "connector_id": "fbs-connector",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -1,0 +1,40 @@
+{
+  "id": "yzf-invoice-mcp-server",
+  "source": "yzf-invoice-mcp-server",
+  "name": "云帐房AI开票",
+  "nameEn": "Yunzhangfang AI Invoicing",
+  "description": "通过自然语言使用云帐房 AI 开票能力，完成开票信息识别，并前往电子税局开票。",
+  "descriptionEn": "Use Yunzhangfang AI invoicing services to extract billing information and open the e-tax bureau invoicing flow.",
+  "type": "mcp",
+  "authMode": "",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "",
+  "visibleIn": [
+    "internal",
+    "iOA",
+    "cloudhosted",
+    "selfhosted"
+  ],
+  "examples": [
+    "帮我开专票给云帐房网络科技有限公司，开票项目是软件服务费，含税金额 12000 元",
+    "帮我开普票给云帐房网络科技有限公司，开票项目是信息技术服务费，含税金额 8600 元",
+    "帮我开专票给云帐房网络科技有限公司，开票项目是咨询服务费，含税金额 5300 元",
+    "帮我开普票给云帐房网络科技有限公司，开票项目是系统维护费，含税金额 2800 元"
+  ],
+  "hasMcp": true,
+  "hasCli": false,
+  "hasSkills": true,
+  "hasCredentialSchema": false,
+  "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8dGl0bGU+5LqR5biQ5oi/QUnlvIDnpaggQ29ubmVjdG9yIEljb248L3RpdGxlPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgMS4zNSkgc2NhbGUoMC45MDE0MDgpIj4KICAgIDxwYXRoIGQ9Ik02IDI2TDUxIDBMNjYgMjRMNjAgNjBIMTFDOC4yMzkgNjAgNiA1Ny43NjEgNiA1NVYyNloiIGZpbGw9IiMxN0NGQzQiLz4KICAgIDxwYXRoIGQ9Ik00MyA3LjRMNDkuMyAzLjhDNTAuMSAzLjM0IDUxLjA0IDQuMSA1MC43NSA0Ljk4TDQ5LjI1IDkuNTdDNDkuMDUgMTAuMTkgNDguMzkgMTAuNTQgNDcuNzYgMTAuMzZMNDMuMjQgOS4wN0M0Mi40MyA4Ljg0IDQyLjI3IDcuODIgNDMgNy40WiIgZmlsbD0iIzdFRjBFOCIgb3BhY2l0eT0iMC45Ii8+CiAgICA8cGF0aCBkPSJNOCAzM0g4LjVDMTEuNTM4IDMzIDE0IDMwLjUzOCAxNCAyNy41VjI1SDU3VjI3LjVDNTcgMzAuNTM4IDU5LjQ2MiAzMyA2Mi41IDMzSDYzQzY0LjY1NyAzMyA2NiAzNC4zNDMgNjYgMzZWNTdDNjYgNjAuMzE0IDYzLjMxNCA2MyA2MCA2M0gxMUM3LjY4NiA2MyA1IDYwLjMxNCA1IDU3VjM2QzUgMzQuMzQzIDYuMzQzIDMzIDggMzNaIiBmaWxsPSIjMTY2REZGIi8+CiAgICA8cGF0aCBkPSJNNSA0Mkg3LjVDMTAuNTM4IDQyIDEzIDM5LjUzOCAxMyAzNi41VjM1SDU4VjM2LjVDNTggMzkuNTM4IDYwLjQ2MiA0MiA2My41IDQySDY2VjU0SDYzLjVDNjAuNDYyIDU0IDU4IDU2LjQ2MiA1OCA1OS41VjYxSDEzVjU5LjVDMTMgNTYuNDYyIDEwLjUzOCA1NCA3LjUgNTRINVY0MloiIGZpbGw9IiMyNDc4RkYiLz4KICAgIDxwYXRoIGQ9Ik0yMCAzNkgzOSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICAgIDxwYXRoIGQ9Ik0yMyA0MUgzOCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICAgIDxwYXRoIGQ9Ik0yMyA0NkgzNSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICAgIDx0ZXh0IHg9IjIyIiB5PSI1NSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgJ01pY3Jvc29mdCBZYUhlaScsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiPuelqEFJPC90ZXh0PgogIDwvZz4KPC9zdmc+Cg==",
+  "enabled": true,
+  "credentialSchema": null,
+  "requiresCliSetup": false,
+  "mcpServerNames": [
+    "yzf-invoice-mcp-server"
+  ],
+  "skillName": "yzf-invoice-mcp-server-skill",
+  "skillNames": [
+    "yzf-invoice-mcp-server-skill"
+  ]
+}

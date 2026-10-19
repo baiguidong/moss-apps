@@ -1,0 +1,10 @@
+{
+  "name": "xiaoe-cloud-cli",
+  "display_name": "小鹅通",
+  "description": "用自然语言管理小鹅通店铺：查询课程与学员，创建和编辑课程，查看订单，并查找或上传图片、音频、电子书和文档素材。",
+  "source_type": "connector",
+  "connector_id": "xiaoe-cloud-cli",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

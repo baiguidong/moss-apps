@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.database",
+  "version": "0.1.0",
+  "displayName": "数据库查询",
+  "description": "使用 DBHub 查询 SQLite、PostgreSQL、MySQL 等数据库，查看表结构和分析数据。",
+  "category": "development",
+  "keywords": ["数据库", "DBHub", "SQL", "SQLite", "PostgreSQL", "MySQL", "MariaDB", "SQL Server", "Oracle", "MCP"],
+  "icon": "assets/icon.svg",
+  "publisher": { "id": "moss", "name": "Moss" },
+  "toolScope": "session",
+  "runtime": { "state": "stateless" },
+  "mcpServers": {
+    "database": {
+      "command": "npx",
+      "args": ["-y", "@bytebase/dbhub@1.5.0", "--transport", "stdio", "--config", "~/moss-database.toml"],
+      "env": { "MOSS_DATABASE_DSN": "" }
+    }
+  },
+  "presentation": {
+    "headline": "在对话中查看数据库结构和查询数据",
+    "examples": [
+      "列出数据库中的表，并说明各表的字段",
+      "按月份统计订单数量和销售额",
+      "查询最近十条记录，解释使用的 SQL"
+    ],
+    "usage": "首次使用先按 App README 的示例创建 ~/moss-database.toml，在设置 → 连接配置的 env.MOSS_DATABASE_DSN 中填写数据库连接地址，再检查服务。示例将 execute_sql 设为只读。可修改 --config 后的路径；没有配置文件时连接不会成功。在会话中选择此 App 后使用。"
+  }
+}

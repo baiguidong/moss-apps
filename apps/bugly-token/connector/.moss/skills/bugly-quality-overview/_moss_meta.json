@@ -1,0 +1,10 @@
+{
+  "name": "bugly-quality-overview",
+  "display_name": "Bugly 质量概览",
+  "description": "查看产品的质量概览 包括崩溃率 anr率 foom（oom）率 启动耗时",
+  "source_type": "connector",
+  "connector_id": "bugly-token",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

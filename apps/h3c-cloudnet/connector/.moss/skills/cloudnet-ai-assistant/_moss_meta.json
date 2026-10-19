@@ -1,0 +1,10 @@
+{
+  "name": "cloudnet-ai-assistant",
+  "display_name": "新华三Cloudnet灵犀AI助手",
+  "description": "面向网络运维场景的 AI 助手，支持网络运行状态查询、网络问题分析、设备/AP 信息查询和无线终端故障排查，帮助用户快速定位网络异常并获取处理建议。",
+  "source_type": "connector",
+  "connector_id": "h3c-cloudnet",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

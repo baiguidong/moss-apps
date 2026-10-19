@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "xingtu-claw-risk": {
+      "type": "sse",
+      "url": "https://claw-mcp.tcredit.com/mcp/sse",
+      "oauth": {
+        "redirectUri": "moss://moss/mcp/xingtu-claw-risk/oauth/callback"
+      }
+    }
+  }
+}

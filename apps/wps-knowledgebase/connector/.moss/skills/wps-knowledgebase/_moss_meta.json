@@ -1,0 +1,10 @@
+{
+  "name": "wps-knowledgebase",
+  "display_name": "WPS知识库",
+  "description": "通过自然语言操作 WPS/zhishi 云端知识库：列出知识库、浏览文件树、智能问答、分享链接，以及文件/文件夹增删改查。",
+  "source_type": "connector",
+  "connector_id": "wps-knowledgebase",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

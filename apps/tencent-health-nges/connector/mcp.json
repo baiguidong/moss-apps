@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "nges": {
+      "type": "http",
+      "url": "https://test.nges.qq.com/mcp/aggregate",
+      "oauth": {
+        "clientName": "WorkBuddy"
+      }
+    }
+  }
+}

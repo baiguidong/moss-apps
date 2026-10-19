@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.takt",
+  "version": "0.3.6",
+  "displayName": "TAKT 工作流",
+  "category": "automation",
+  "keywords": [
+    "TAKT",
+    "工作流",
+    "Agent",
+    "编排"
+  ],
+  "description": "在 Moss 对话中创建和运行 TAKT 工作流，查看执行图、节点结果与历史。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.11.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "toolScope": "session",
+  "navigation": {
+    "location": "more",
+    "viewId": "home"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1280,
+      "height": 850,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "actions": [
+      {
+        "name": "takt_read",
+        "inputSchema": "schemas/takt_read.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "takt_create",
+        "inputSchema": "schemas/takt_create.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "takt_edit",
+        "inputSchema": "schemas/takt_edit.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "takt_validate",
+        "inputSchema": "schemas/takt_validate.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "takt_run",
+        "inputSchema": "schemas/takt_run.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "takt_control",
+        "inputSchema": "schemas/takt_control.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "composer.list",
+        "inputSchema": "schemas/composer.list.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "composer.resolve",
+        "inputSchema": "schemas/composer.resolve.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "takt_copy",
+        "inputSchema": "schemas/takt_copy.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "takt_archive",
+        "inputSchema": "schemas/takt_archive.json",
+        "timeoutMs": 30000
+      }
+    ]
+  },
+  "permissions": [
+    "execution:read",
+    "execution:run",
+    "execution:cancel",
+    "tasks:read",
+    "tasks:write",
+    "tasks:cancel"
+  ],
+  "host": {
+    "protocols": [
+      "moss.agent-execution/v1",
+      "moss.tasks/v1",
+      "moss.host/v1"
+    ]
+  },
+  "contributes": {
+    "views": [
+      {
+        "id": "home",
+        "title": "TAKT 工作流",
+        "route": "#/",
+        "order": 241
+      },
+      {
+        "id": "moss-settings",
+        "title": "通用设置",
+        "route": "#/moss-settings",
+        "order": -1000
+      },
+      {
+        "id": "moss-conversation",
+        "title": "工作流",
+        "route": "#/conversation"
+      }
+    ],
+    "settings": [
+      {
+        "id": "shared-settings",
+        "title": "通用设置",
+        "viewId": "moss-settings",
+        "group": "apps"
+      }
+    ],
+    "tools": [
+      {
+        "id": "takt_read",
+        "title": "读取 TAKT 工作流",
+        "effect": "read",
+        "description": "读取目录、修订、运行、事件或分块结果。先 list 找 workflowId，再 get 取定义。run 查询状态与节点结果；大文本通过 resourceRef 分块读取。",
+        "action": "takt_read",
+        "inputSchema": "schemas/takt_read.json"
+      },
+      {
+        "id": "takt_create",
+        "title": "创建 TAKT 工作流",
+        "effect": "write",
+        "description": "根据用户需求生成并保存 TAKT YAML。创作格式见 instructions。不启动运行。",
+        "action": "takt_create",
+        "inputSchema": "schemas/takt_create.json",
+        "instructions": "resources/authoring.md"
+      },
+      {
+        "id": "takt_edit",
+        "title": "编辑 TAKT 工作流",
+        "effect": "write",
+        "description": "使用 baseRevision 编辑工作流，保存为新修订。先读取当前定义，不覆盖并发修改。",
+        "action": "takt_edit",
+        "inputSchema": "schemas/takt_edit.json",
+        "instructions": "resources/authoring.md"
+      },
+      {
+        "id": "takt_validate",
+        "title": "校验 TAKT 工作流",
+        "effect": "read",
+        "description": "检查 YAML、节点、路由及首版支持范围，不运行。",
+        "action": "takt_validate",
+        "inputSchema": "schemas/takt_validate.json"
+      },
+      {
+        "id": "takt_run",
+        "title": "运行 TAKT 工作流",
+        "effect": "write",
+        "description": "仅在用户要求执行时运行指定修订，返回后台 runId。Agent 复用 Moss 来源会话的模型、工具和权限。同次重试复用 submissionKey，不轮询等待整个流程完成。",
+        "action": "takt_run",
+        "inputSchema": "schemas/takt_run.json"
+      },
+      {
+        "id": "takt_control",
+        "title": "控制 TAKT 运行",
+        "effect": "write",
+        "description": "cancel 停止；pause 暂停后续 Agent 派发（在途调用完成后生效）；resume 继续本进程内暂停；input 补充要求给后续步骤；rerun 用原修订新建运行。重启中断不支持无损恢复。",
+        "action": "takt_control",
+        "inputSchema": "schemas/takt_control.json"
+      },
+      {
+        "id": "takt_copy",
+        "title": "复制 TAKT 工作流",
+        "effect": "write",
+        "description": "复制指定不可变修订，创建独立工作流。",
+        "action": "takt_copy",
+        "inputSchema": "schemas/takt_copy.json"
+      },
+      {
+        "id": "takt_archive",
+        "title": "归档或恢复 TAKT 工作流",
+        "effect": "destructive",
+        "description": "archived=true 归档，false 恢复。只按用户明确要求操作；历史运行与修订保留。",
+        "action": "takt_archive",
+        "inputSchema": "schemas/takt_archive.json"
+      }
+    ],
+    "resourceProviders": [
+      {
+        "id": "takt-workflows",
+        "title": "TAKT 工作流",
+        "schemes": [
+          "moss-takt"
+        ],
+        "listAction": "composer.list",
+        "resolveAction": "composer.resolve"
+      }
+    ]
+  }
+}

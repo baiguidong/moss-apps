@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ai-hive": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@infimind-next/ai-hive-mcp@latest"
+      ]
+    }
+  }
+}

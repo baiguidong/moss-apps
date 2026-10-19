@@ -1,0 +1,10 @@
+{
+  "name": "qq-mail",
+  "display_name": "QQ邮箱",
+  "description": "收发、搜索和整理 QQ 邮件。用自然语言读取邮件内容、汇总邮件线程、管理文件夹。",
+  "source_type": "connector",
+  "connector_id": "qq-mail",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

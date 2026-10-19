@@ -18,6 +18,7 @@ import { EmptyState } from '@/components/trace/primitives'
 import { Spinner } from '@/components/trace/primitives'
 import { Section } from './Section'
 import { MessageBlocks } from './MessageBlocks'
+import { PromptDiagnostics } from './PromptDiagnostics'
 
 const MESSAGE_FOLD_THRESHOLD = 20
 const MESSAGE_HEAD_COUNT = 2
@@ -116,6 +117,10 @@ export function LlmCallDetail({
         />
         <StopReason reason={parsed.response?.stopReason ?? protocolFinishReason(effectiveCall)} />
       </Section>
+
+      {Boolean(effectiveCall.metadata?.promptDiagnostics) && <Section sectionKey="llm.promptDiagnostics" title="提示词组成诊断">
+        <PromptDiagnostics value={effectiveCall.metadata?.promptDiagnostics} />
+      </Section>}
 
       {split.injections.length > 0 ? (
         <Section

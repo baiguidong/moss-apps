@@ -1,0 +1,10 @@
+{
+  "name": "connector-wk-workbuddy",
+  "display_name": "威科先行",
+  "description": "威科先行依托全面、准确、及时更新的法规、案例等法律数据研发的MCP服务，支持语义检索、关键词检索等场景。",
+  "source_type": "connector",
+  "connector_id": "wk-workbuddy",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

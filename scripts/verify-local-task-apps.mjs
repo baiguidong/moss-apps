@@ -5,11 +5,13 @@ import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { execFileSync } from 'node:child_process'
+import { assertAppContentLayout, assertAppWorkspaceLayout } from './app-layout-check.mjs'
 import { prepareBinary } from '../packages/engine-apps/src/download.mjs'
 const repo = fileURLToPath(new URL('..', import.meta.url))
 const core = process.env.MOSS_CORE_ROOT || path.resolve(repo, '../moss')
 const appRequire = createRequire(path.join(repo, 'apps/pdf-tools/package.json'))
 const imageRequire = createRequire(path.join(repo, 'apps/image-tools/package.json'))
+const transcribeRequire = createRequire(path.join(repo, 'apps/transcription/package.json'))
 const { _electron: electron, expect } = appRequire('@playwright/test')
 const { build } = appRequire('vite'), { default: react } = appRequire('@vitejs/plugin-react')
 const requireCore = createRequire(path.join(core, 'ui/package.json'))
@@ -19,8 +21,7 @@ await fs.mkdir(report, { recursive: true })
 const styles = path.join(report, 'shell.css'), shell = path.join(report, 'shell/index.html')
 await fs.writeFile(styles, [
   `@import ${JSON.stringify(path.join(core, 'ui/src/renderer-react/globals.css'))};`,
-  `@source ${JSON.stringify(path.join(core, 'ui/src/renderer-react/components/embedded-app-view.tsx'))};`,
-  `@source ${JSON.stringify(path.join(core, 'ui/src/renderer-react/components/ui/button.tsx'))};`,
+  `@source ${JSON.stringify(path.join(core, 'ui/src/renderer-react/components'))};`,
 ].join('\n'))
 await build({ configFile: false, root: path.join(repo, 'scripts/local-tasks-verify'), base: './', plugins: [react()], logLevel: 'warn',
   resolve: { dedupe: ['react', 'react-dom'], alias: {
@@ -39,7 +40,7 @@ const scan = await sharp(Buffer.from('<svg width="1000" height="1400" xmlns="htt
 const png = await pdf.embedPng(scan); pdf.addPage([500,700]).drawImage(png, { x:0,y:0,width:500,height:700 }); await fs.writeFile(pdfFile, await pdf.save())
 const audioFile = process.env.MOSS_TEST_AUDIO || '/opt/homebrew/Cellar/whisper-cpp/1.9.1/share/whisper-cpp/jfk.wav'
 const videoFile = path.join(fixtures, '演讲片段.mp4')
-const ffmpeg = await prepareBinary(JSON.parse(await fs.readFile(path.join(repo, 'apps/transcription/resources/ffmpeg.json'), 'utf8')), path.join(report, 'engine-cache'))
+const ffmpeg = path.join(path.dirname(transcribeRequire.resolve('@drbearzay/ffmpeg-darwin-arm64/package.json')), 'ffmpeg')
 await fs.chmod(ffmpeg, 0o755)
 execFileSync(ffmpeg, ['-nostdin','-loglevel','error','-f','lavfi','-i','color=c=0x243f4b:s=320x240:r=10','-i',audioFile,'-c:v','mpeg4','-c:a','aac','-shortest','-y',videoFile])
 const model = process.env.MOSS_TEST_MODEL || path.join(repo, 'artifacts/local-task-apps/transcription-data/models/ggml-base.bin')
@@ -47,11 +48,10 @@ const names = process.argv.includes('--app') ? [process.argv[process.argv.indexO
 process.env.PW_CHROMIUM_ATTACH_TO_OTHER = '1'
 for (const name of names) {
   const appId = `moss.${name}`, checks = [], errors = [], output = path.join(report, name)
-  const version = JSON.parse(await fs.readFile(path.join(repo, 'apps', name, 'app.moss.json'), 'utf8')).version
   await fs.mkdir(output, { recursive: true })
   const desktop = await electron.launch({ executablePath: path.join(core, 'ui/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'), args: [path.join(repo, 'scripts/local-tasks-verify/desktop.cjs')],
-    env: { ...process.env, MOSS_CORE_ROOT: core, MOSS_TEST_APP: appId, MOSS_TEST_VERSION: version, MOSS_TEST_NODE: process.execPath, MOSS_TEST_SHELL: shell, MOSS_TEST_MODEL: model,
-      MOSS_TEST_ARCHIVE: path.join(repo, 'artifacts', appId, version, `${appId}-${version}-darwin-arm64.zip`) }, timeout: 60000 })
+    env: { ...process.env, MOSS_CORE_ROOT: core, MOSS_TEST_APP: appId, MOSS_TEST_VERSION: '0.1.1', MOSS_TEST_NODE: process.execPath, MOSS_TEST_SHELL: shell, MOSS_TEST_MODEL: model,
+      MOSS_TEST_ARCHIVE: process.env.MOSS_TEST_ARCHIVE || path.join(repo, 'artifacts', appId, '0.1.1', `${appId}-0.1.1-darwin-arm64.zip`) }, timeout: 60000 })
   let directory, page
   const passed = message => { checks.push(message); console.log(`PASS ${name}: ${message}`) }
   try {
@@ -84,8 +84,11 @@ for (const name of names) {
       await expect(page.locator('.result-tile')).toHaveCount((await invoke('workspace.get')).files.filter(file => file.role === 'output').length)
       return task
     }
-    const screenshot = async suffix => { await page.evaluate(() => scrollTo(0,0)); await page.waitForTimeout(150); await fs.writeFile(path.join(output, suffix + '.png'), Buffer.from(await desktop.evaluate(() => globalThis.localTaskFixture.screenshot()), 'base64')) }
+    const screenshot = async suffix => { await shellPage.mouse.move(1,1); await page.evaluate(() => scrollTo(0,0)); await page.waitForTimeout(150); await fs.writeFile(path.join(output, suffix + '.png'), Buffer.from(await desktop.evaluate(() => globalThis.localTaskFixture.screenshot()), 'base64')) }
     await expect(page.getByRole('button', { name:'导入文件',exact:true })).toBeEnabled({ timeout:30000 })
+    const manifest = JSON.parse(await fs.readFile(path.join(repo, 'apps', name, 'app.moss.json'), 'utf8'))
+    await assertAppContentLayout(page, manifest)
+    await assertAppWorkspaceLayout(page)
     assert.equal((await desktop.evaluate(() => globalThis.localTaskFixture.tools(false))).tools.length, 0)
     assert.equal((await desktop.evaluate(() => globalThis.localTaskFixture.tools(true))).tools.length, name === 'image-tools' ? 5 : 3)
     passed('Installed ZIP starts through Core preload; session tools are visible only when selected')
@@ -214,7 +217,20 @@ for (const name of names) {
       }
     }
     await desktop.evaluate(()=>globalThis.localTaskFixture.theme('dark')); await expect(page.locator('html')).toHaveAttribute('data-theme','dark'); await screenshot('result-dark')
-    await desktop.evaluate(()=>globalThis.localTaskFixture.resize({width:420,height:860})); await page.waitForTimeout(250); await screenshot('result-narrow')
+    await desktop.evaluate(()=>globalThis.localTaskFixture.resize({width:420,height:860})); await page.waitForTimeout(250)
+    if (name === 'image-tools') {
+      const chooser = page.getByLabel('处理功能', { exact: true })
+      const selected = await chooser.inputValue()
+      await expect(chooser).toBeVisible()
+      await expect(page.locator('.image-operation-buttons')).toBeHidden()
+      await chooser.selectOption('图片信息')
+      await expect(page.locator('.image-options h2')).toHaveText('图片信息')
+      await chooser.selectOption(selected)
+      await expect(page.locator('.image-options h2')).toHaveText(selected)
+      await page.evaluate(() => scrollTo(0, 0))
+      await expect(page.locator('.image-stage')).toBeInViewport()
+    }
+    await screenshot('result-narrow')
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth), 'Narrow UI overflows horizontally')
     await desktop.evaluate(()=>globalThis.localTaskFixture.resize({width:1180,height:880}))
     const before = await invoke('workspace.get'); await desktop.evaluate(()=>globalThis.localTaskFixture.restart()); await desktop.evaluate(()=>globalThis.localTaskFixture.reload())

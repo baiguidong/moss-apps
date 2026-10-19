@@ -1,0 +1,10 @@
+{
+  "name": "flova",
+  "display_name": "Flova",
+  "description": "使用 AI 创建、修改、审阅和导出专业视频，覆盖从创意与分镜到成片交付的完整流程。",
+  "source_type": "connector",
+  "connector_id": "flova",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

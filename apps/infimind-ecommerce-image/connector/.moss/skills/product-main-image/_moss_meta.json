@@ -1,0 +1,10 @@
+{
+  "name": "product-main-image",
+  "display_name": "极睿电商生图",
+  "description": "通过 MCP 生成 KOC 种草拼图、商品主图与电商商品详情页，并查询任务生成结果。",
+  "source_type": "connector",
+  "connector_id": "infimind-ecommerce-image",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

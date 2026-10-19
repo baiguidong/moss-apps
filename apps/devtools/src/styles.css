@@ -22,8 +22,7 @@ textarea::placeholder, input::placeholder { color: var(--muted-foreground); opac
 h1, p { margin: 0; } h1 { font-size: 20px; font-weight: 650; letter-spacing: -.5px; line-height: 1.5; }
 .app-shell { display: flex; height: 100%; min-height: 100%; }
 .sidebar { width: 166px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 12px; border-right: 1px solid var(--border); background: var(--color-surface-container); }
-.brand { display: flex; gap: 9px; align-items: center; font-size: 14px; font-weight: 650; padding: 0 8px 25px; }
-.brand svg { color: var(--primary); }
+
 nav { display: flex; flex-direction: column; gap: 5px; }
 nav a { display: flex; align-items: center; gap: 10px; color: var(--color-text-secondary); text-decoration: none; padding: 11px; border-radius: calc(var(--radius) - 2px); }
 nav a:hover { background: var(--color-surface-hover); }

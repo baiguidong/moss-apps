@@ -1,0 +1,10 @@
+{
+  "name": "pkulaw",
+  "display_name": "北大法宝·法律智能检索",
+  "description": "检索 + 核验一体：语义（自然语言描述）与关键词双模式检索法规、法条与司法案例；并可把文本中的法条引用与案号回北大法宝库逐条比对、对齐标准名称，输出带 pkulaw.com 原文链接的可溯源结果，专治法律幻觉。",
+  "source_type": "connector",
+  "connector_id": "pkulaw",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

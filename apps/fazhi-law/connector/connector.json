@@ -1,0 +1,67 @@
+{
+  "id": "fazhi-law",
+  "source": "fazhi-law",
+  "name": "同花顺法律AI助手",
+  "nameEn": "RoyalFlush Legal AI Assistant",
+  "description": "查询中国法律法规、司法案例、裁判文书及互联网法律实务资讯，支持法条检索、类案检索、深度法律研究、法律文书起草与诉讼可视化。",
+  "descriptionEn": "Search Chinese laws and regulations, judicial cases, judgment documents, and internet legal practice information. Supports legal article search, similar case retrieval, deep legal research, legal document drafting, and litigation visualization.",
+  "type": "mcp",
+  "authMode": "token",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "4.23.0",
+  "visibleIn": [
+    "internal",
+    "iOA",
+    "cloudhosted",
+    "selfhosted"
+  ],
+  "examples": [
+    "民法典关于合同解除有哪些规定",
+    "帮我检索近三年民间借贷利息纠纷的典型案例",
+    "深度研究一下人工智能生成内容的著作权归属问题",
+    "根据这些事实帮我起草一份民事起诉状",
+    "把这个合同纠纷的案件事实和证据链做成可视化图表"
+  ],
+  "hasMcp": true,
+  "hasCli": false,
+  "hasSkills": true,
+  "hasCredentialSchema": true,
+  "icon": "data:image/png;base64,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",
+  "enabled": true,
+  "credentialSchema": {
+    "title": "同花顺法律AI助手 MCP 配置",
+    "titleEn": "RoyalFlush Legal AI Assistant MCP Configuration",
+    "description": "请输入从同花顺法律AI助手平台获取的 API Key。凭证仅保存在您的本机，由 WorkBuddy 在连接同花顺法律AI助手 MCP 时注入请求头；WorkBuddy 云端不存储、不接收该凭证。",
+    "descriptionEn": "Enter the API Key obtained from the RoyalFlush Legal AI Assistant platform. The credential is stored only on your device and injected into the request header when WorkBuddy connects to the RoyalFlush Legal AI Assistant MCP; the WorkBuddy cloud does not store or receive it.",
+    "docUrl": "https://open.kuaicha365.com/lawskills/",
+    "docLabel": "获取同花顺法律AI助手 API Key",
+    "docLabelEn": "Get a RoyalFlush Legal AI Assistant API Key",
+    "fields": [
+      {
+        "key": "FAZHI_API_KEY",
+        "label": "同花顺法律AI助手 API Key",
+        "labelEn": "RoyalFlush Legal AI Assistant API Key",
+        "placeholder": "请粘贴从同花顺法律AI助手平台获取的 API Key",
+        "placeholderEn": "Paste the API Key obtained from the RoyalFlush Legal AI Assistant platform",
+        "description": "用于访问同花顺法律AI助手服务。若密钥失效，请在同花顺法律AI助手平台重新生成后更新此字段。",
+        "descriptionEn": "Used to access RoyalFlush Legal AI Assistant services. If the key expires, generate a new key on the RoyalFlush Legal AI Assistant platform and update this field.",
+        "type": "password",
+        "required": true
+      }
+    ]
+  },
+  "requiresCliSetup": false,
+  "mcpServerNames": [
+    "fazhi-law"
+  ],
+  "skillName": "case-search",
+  "skillNames": [
+    "case-search",
+    "civil-litigation-visualization",
+    "legal-document-drafting",
+    "fazhi-deep-research",
+    "fazhi-law-mcp",
+    "law-search-neo"
+  ]
+}

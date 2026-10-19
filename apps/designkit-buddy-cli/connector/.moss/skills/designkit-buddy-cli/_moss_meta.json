@@ -1,0 +1,10 @@
+{
+  "name": "designkit-buddy-cli",
+  "display_name": "美图设计室 AI设计 CLI",
+  "description": "一句话轻松调用美图设计室Agent Teams，从市场策略洞察，到电商套图、营销视频、社媒图文、海报及品牌等视觉物料，零门槛完成商业设计的全流程。",
+  "source_type": "connector",
+  "connector_id": "designkit-buddy-cli",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

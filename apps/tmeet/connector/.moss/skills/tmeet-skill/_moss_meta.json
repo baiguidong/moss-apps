@@ -1,0 +1,10 @@
+{
+  "name": "tmeet-skill",
+  "display_name": "腾讯会议",
+  "description": "通过命令行创建、查询和管理腾讯会议。支持快速发起会议、查看日程安排、管理参会人员。",
+  "source_type": "connector",
+  "connector_id": "tmeet",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

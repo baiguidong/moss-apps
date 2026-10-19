@@ -1,0 +1,62 @@
+{
+  "id": "kuaicha-search",
+  "source": "kuaicha-search",
+  "name": "同花顺快查企业数据",
+  "nameEn": "Kuaicha Enterprise Search",
+  "description": "查询中国企业工商、股权投资、经营司法风险、知识产权、招投标及新闻舆情数据。",
+  "descriptionEn": "Search Chinese company profiles, ownership, risks, intellectual property, tenders, and news.",
+  "type": "mcp",
+  "authMode": "token",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "4.23.0",
+  "visibleIn": [
+    "internal",
+    "iOA",
+    "cloudhosted",
+    "selfhosted"
+  ],
+  "examples": [
+    "查询同花顺的工商基本信息",
+    "查一下腾讯的股东结构和最终受益人",
+    "恒大有没有经营异常、行政处罚或司法风险",
+    "华为有多少专利和商标",
+    "杭州最近新成立的科技公司有哪些"
+  ],
+  "hasMcp": true,
+  "hasCli": false,
+  "hasSkills": true,
+  "hasCredentialSchema": true,
+  "icon": "data:image/png;base64,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",
+  "enabled": true,
+  "credentialSchema": {
+    "title": "同花顺快查企业数据 MCP 配置",
+    "titleEn": "Kuaicha Enterprise Data MCP Configuration",
+    "description": "请输入从同花顺快查数据平台获取的 API Key。凭证仅保存在您的本机，由 WorkBuddy 在连接同花顺快查 MCP 时注入请求头；WorkBuddy 云端不存储、不接收该凭证。",
+    "descriptionEn": "Enter the API Key obtained from the Kuaicha data platform. The credential is stored only on your device and injected into the request header when WorkBuddy connects to the Kuaicha MCP; the WorkBuddy cloud does not store or receive it.",
+    "docUrl": "https://open.kuaicha365.com/mcp/",
+    "docLabel": "获取同花顺快查 API Key",
+    "docLabelEn": "Get a Kuaicha API Key",
+    "fields": [
+      {
+        "key": "KUAICHA_API_KEY",
+        "label": "同花顺快查 API Key",
+        "labelEn": "Kuaicha API Key",
+        "placeholder": "请粘贴从同花顺快查数据平台获取的 API Key",
+        "placeholderEn": "Paste the API Key obtained from the Kuaicha data platform",
+        "description": "用于访问同花顺快查企业数据服务。若密钥失效，请在同花顺快查数据平台重新生成后更新此字段。",
+        "descriptionEn": "Used to access Kuaicha enterprise data. If the key expires, generate a new key on the Kuaicha data platform and update this field.",
+        "type": "password",
+        "required": true
+      }
+    ]
+  },
+  "requiresCliSetup": false,
+  "mcpServerNames": [
+    "kuaicha-search"
+  ],
+  "skillName": "kuaicha-search",
+  "skillNames": [
+    "kuaicha-search"
+  ]
+}

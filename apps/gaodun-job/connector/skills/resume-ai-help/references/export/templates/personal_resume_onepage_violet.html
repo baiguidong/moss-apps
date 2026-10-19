@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${resumeName!}</title>
+  <style>
+    @font-face {
+      font-family: "PingFang SC";
+      src: url("/usr/share/fonts/Chinese/PingFang-Medium.otf") format("opentype");
+    }
+
+    @media print {
+      body {
+        margin: 20mm;
+        /* 其他打印样式 */
+      }
+    }
+
+      * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      font-family: PingFang SC;
+      background: #fff;
+      position: relative;
+    }
+
+    ._clearfix::before {
+      content: '';
+      display: table;
+      clear: both;
+    }
+
+    ._clearfix::after {
+      content: '';
+      display: table;
+      clear: both;
+    }
+
+    .paper-wrap {
+      width: 820px;
+      /*height: 1160px;*/
+      padding: 0px 16px 0 16px;
+      background: #FFF;
+      box-sizing: border-box;
+    }
+
+    .base-info-wrap {
+      position: relative;
+      padding: 0 20px;
+      margin-bottom: 1px;
+      height: 119px;
+    }
+
+    .base-info {
+      position: absolute;
+      top: 0;
+      right: 20px;
+      width: 660px;
+    }
+
+    .base-info-name {
+      color: rgba(0, 0, 0, 0.90);
+      font-size: 20px;
+      font-weight: bold;
+      line-height: 32px;
+      margin-bottom: 12px;
+      height: 32px;
+    }
+
+    .base-info-file {
+      font-size: 0;
+    }
+
+    .base-info-file>.single-file {
+      display: inline-block;
+      position: relative;
+      /*width: 195px;*/
+      width: 210px;
+      min-height: 32px;
+      line-height: 32px;
+      box-sizing: border-box;
+      color: rgba(0, 0, 0, 0.80);
+      margin-bottom: 4px;
+      /*padding-right: 8px;*/
+      padding-right: 4px;
+    }
+
+    .base-info-file>.single-file:nth-of-type(3n) {
+      padding-right: 0;
+    }
+
+    .base-info-file
+    > .single-file:nth-child(3n + 1):nth-last-child(-n + 3) {
+      margin-bottom: 0;
+    }
+    .base-info-file
+    > .single-file:nth-child(3n + 1):nth-last-child(-n + 3)
+    ~ .single-file {
+      margin-bottom: 0;
+    }
+
+    .base-info-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 7px;
+      vertical-align: middle;
+    }
+
+    .base-info-text {
+      vertical-align: middle;
+      color: rgba(0, 0, 0, 0.80);
+      font-family: PingFang SC;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 14px;
+    }
+
+    .base-info-icon,
+    .base-info-text:nth-of-type(3n) {
+      padding-right: 0;
+    }
+
+    .base-info-icon,
+    .base-info-text:nth-of-type(n+4) {
+      margin-bottom: 0;
+    }
+
+
+    .base-info-photo {
+      position: absolute;
+      top: 8px;
+    }
+
+    .base-info-photo>.profile {
+      width: 80px;
+      height: 108px;
+    }
+
+    .paper-module {
+      padding: 4px 20px;
+    }
+
+    .paper-module-title {
+      width: 100%;
+      height: 32px;
+      background: #F0ECFF;
+      line-height: 32px;
+      margin-bottom: 4px;
+      font-size: 0;
+    }
+
+    .left {
+      display: inline-block;
+      background-color: #fff;
+    }
+
+    .line {
+      display: inline-block;
+      width: 4px;
+      height: 32px;
+      margin-right: 4px;
+      background: #7331FF;
+      vertical-align: middle;
+    }
+
+    .title-name {
+      display: inline-block;
+      padding: 8px 10px;
+      color: #FFF;
+      font-family: PingFang SC;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: bold;
+      line-height: 16px;
+      vertical-align: middle;
+      background: #7331FF;
+    }
+
+    .paper-module-content {
+      font-size: 0;
+    }
+
+    .paper-content-item {
+      padding: 0 0 2px 0;
+    }
+
+    .paper-content-item>.paper-file {
+      float: left;
+    }
+
+    .paper-content-item>.paper-file>.file-title {
+      /*display: inline-block;*/
+      color: rgba(0, 0, 0, 0.90);
+      font-weight: bold;
+      font-size: 14px;
+      line-height: ${lineHeight!}px;
+    }
+
+    .paper-content-item>.paper-file>.file-value {
+      /*display: inline-block;*/
+      color: rgba(0, 0, 0, 0.80);
+      font-size: 14px;
+      line-height: ${lineHeight!}px;
+    }
+
+
+    .single-file {
+      width: 33.33%;
+    }
+
+    .paper-content-item>.paper-file~.single-file:nth-of-type(3n)>.file-value {
+      margin-right: 0;
+      font-size: 14px;
+    }
+
+    .paper-content-item>.paper-file~.single-file>.file-value {
+      /*margin-right: 20px;*/
+      font-size: 14px;
+    }
+
+    .paper-content-item>.paper-file~.long-file {
+      width: 100%;
+    }
+
+    .paper-content-item>.paper-file~.long-file>.file-title {
+      line-height: ${lineHeight!}px;
+    }
+
+    .paper-content-item>.paper-file~.long-file>.file-value {
+      font-size: 14px;
+      line-height: ${lineHeight!}px;
+    }
+
+    .line-break {
+      display: block !important;
+      padding: 1px 0;
+    }
+
+    .email {
+      width: 390px !important;
+    }
+
+    /** 未填写状态 新增*/
+    .placeholder {
+      color: #FF2738 !important;
+    }
+
+    .single-four {
+      width: 25%;
+    }
+
+    .row-three {
+      height: 148px !important;
+    }
+
+    .single-three:nth-child(1) {
+      width: 160px;
+      margin-right: 12px;
+    }
+
+    .single-three:nth-child(2) {
+      width: 444px;
+      margin-right: 12px;
+    }
+
+    .single-three:nth-child(3) {
+      width: 120px;
+    }
+
+    .single-four:nth-child(1) {
+      width: 160px;
+      margin-right: 12px;
+    }
+
+    .single-four:nth-child(2) {
+      width: 260px;
+      margin-right: 12px;
+    }
+
+    .single-four:nth-child(3) {
+      width: 172px;
+      margin-right: 12px;
+    }
+
+    .single-four:nth-child(4) {
+      width: 120px;
+    }
+  </style>
+</head>
+
+<body>
+<div class="paper-wrap">
+  <!-- 基础信息 -->
+  <div class="base-info-wrap _clearfix row-three">
+    <div class="base-info-photo">
+      <#if basicInfo.idPhoto?has_content>
+      <img src="${basicInfo.idPhoto!}"
+           alt="" class="profile">
+      <#else>
+      <img src="https://simg01.gaodunwangxiao.com/uploadfiles/v/Uploads/202401/18/79317_20240118131633.png"
+           alt="" class="profile">
+      </#if>
+    </div>
+    <div class="base-info">
+      <div class="base-info-name">
+        <#if basicInfo.personalName?has_content>
+        <div class="base-info-name">${basicInfo.personalName!}</div>
+        <#else>
+        <div class="base-info-name placeholder">填写姓名</div>
+        </#if>
+      </div>
+      <div class="base-info-file">
+        <#list basicInfo.basicInfoCommFieldList as ee>
+        <div class="single-file">
+          <img src="${ee.dataFieldIcon!}"
+               alt="" class="base-info-icon">
+          <#if ee.dataFieldValue?has_content>
+          <span class="base-info-text">
+            ${ee.dataFieldValue!}
+          </span>
+          <#else>
+          <span class="base-info-text placeholder">
+          ${ee.defaultValue!}
+          </span>
+          </#if>
+        </div>
+      </#list>
+      </div>
+    </div>
+  </div>
+  <!-- 模块信息 -->
+  <div class="module-wrap">
+
+    <!--模块输出-->
+    <#list moduleInfoList as e>
+    <div class="paper-module">
+      <div class="paper-module-title">
+        <div class="left">
+          <span class="line"></span>
+          <span class="line"></span>
+          <span class="title-name">${e.moduleName!}</span>
+        </div>
+      </div>
+      <div class="paper-module-content">
+        <#list e.moduleData as ee>
+        <div class="paper-content-item _clearfix">
+          <#list ee.filedList as eee>
+
+          <#if eee.dataFieldType == "n">
+          <div class="paper-file single-three">
+            <#if eee.dataFieldValue?has_content>
+            <span class="file-value">${eee.dataFieldValue!}</span>
+            <#else>
+            <span class="file-value placeholder">${eee.defaultValue!}</span>
+            </#if>
+          </div>
+          <#elseif eee.dataFieldType == "n4">
+          <div class="paper-file single-four">
+            <#if eee.dataFieldValue?has_content>
+            <span class="file-value">${eee.dataFieldValue!}</span>
+            <#else>
+            <span class="file-value placeholder">${eee.defaultValue!}</span>
+          </#if>
+          </div>
+          <#elseif eee.dataFieldType == "s">
+          <div class="paper-file long-file">
+            <span class="file-title">${eee.dataFieldName!}：</span>
+            <#if eee.dataFieldValue?has_content>
+            <span class="file-value">${eee.dataFieldValue!}</span>
+            <#else>
+            <span class="file-value placeholder">${eee.defaultValue!}</span>
+            </#if>
+          </div>
+          <#elseif eee.dataFieldType == "b">
+          <div class="paper-file long-file">
+            <div class="file-title">${eee.dataFieldName!}：</div>
+            <#if eee.dataFieldValue?has_content>
+            <div class="file-value line-break">${eee.dataFieldValue!}</div>
+            <#else>
+            <div class="file-value line-break placeholder">${eee.defaultValue!}</div>
+            </#if>
+          </div>
+          <#else>
+          <div class="paper-file long-file">
+            <#if eee.dataFieldValue?has_content>
+            <span class="file-value line-break">${eee.dataFieldValue!}</span>
+            <#else>
+            <span class="file-value line-break placeholder">${eee.defaultValue!}</span>
+            </#if>
+          </div>
+          </#if>
+          </#list>
+        </div>
+        </#list>
+      </div>
+    </div>
+    </#list>
+
+  </div>
+</div>
+</body>
+
+</html>

@@ -11,7 +11,7 @@ const invoke = <T,>(name: string, input: object = {}) => getClient().actions.inv
 export const api = {
   catalog: () => invoke<{ cases: SelfTestCase[] }>('catalog'),
   status: (runId?: string) => invoke<SelfTestStatus>('status', { runId }),
-  start: (caseIds: string[]) => invoke<SelfTestStatus>('run.start', { caseIds }),
+  start: (caseIds: string[], resetData = true) => invoke<SelfTestStatus>('run.start', { caseIds, resetData }),
   stop: (runId?: string) => invoke<SelfTestStatus>('run.stop', { runId }),
   openSession: (runId?: string) => invoke('session.open', { runId }),
   openReport: (runId?: string) => invoke('report.open', { runId }),

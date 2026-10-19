@@ -1,0 +1,10 @@
+{
+  "name": "pandadata",
+  "display_name": "PandaData 金融数据",
+  "description": "查询、整理和分析 A 股、期货、期权、港美股、基金、宏观经济及量化因子等金融数据，支持统计比较与趋势归纳。",
+  "source_type": "connector",
+  "connector_id": "pandadata",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

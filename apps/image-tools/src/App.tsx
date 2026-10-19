@@ -26,8 +26,11 @@ export function App() {
   const check=(key:keyof typeof defaults,label:string)=><label className="image-check"><input type="checkbox" checked={!!settings[key]} onChange={e=>set(key,e.target.checked)}/>{label}</label>
   const reset=()=>{setSettings({...defaults});setWatermarkOn(false);setCrop(false);setRatio(0);setResultId('')}
   const enabled=[crop?'裁剪':null,settings.width||settings.height?'调整尺寸':null,settings.rotation||settings.flip||settings.flop?'旋转/翻转':null,settings.brightness!==1||settings.saturation!==1||settings.hue||settings.lightness||settings.gamma!==1||settings.grayscale||settings.negate||settings.normalise||settings.tint?'调色':null,settings.blur||settings.sharpen||settings.median||settings.thresholdEnabled?'清晰度':null,watermarkOn?'水印':null,settings.border?'扩边':null].filter(Boolean)
-  return <Shell title="图片工具" subtitle="" icon={<Image/>} state={state}>
-    <nav className="image-operations" aria-label="图片处理功能">{groups.map(name=><button key={name} aria-pressed={group===name} onClick={()=>setGroup(name)}>{name}</button>)}</nav>
+  return <Shell title="图片工具" state={state}>
+    <nav className="image-operations" aria-label="图片处理功能">
+      <div className="image-operation-buttons">{groups.map(name=><button key={name} aria-pressed={group===name} onClick={()=>setGroup(name)}>{name}</button>)}</div>
+      <label className="image-operation-select"><span>处理功能</span><select aria-label="处理功能" value={group} onChange={event=>setGroup(event.target.value)}>{groups.map(name=><option key={name}>{name}</option>)}</select></label>
+    </nav>
     {!!inputs.length&&<div className="file-list"><button onClick={()=>{setSelected(selected.length===inputs.length?[]:inputs.map(f=>f.id));setCrop(false)}}><CheckCheck size={15}/>{selected.length===inputs.length?'取消全选':'全选'}</button>{inputs.map(f=><button className={`file-choice ${selected.includes(f.id)?'selected':''}`} key={f.id} onClick={()=>toggle(f)} aria-pressed={selected.includes(f.id)}><span>{f.name}</span><small>{bytes(f.size)}</small></button>)}</div>}
     <div className="workbench image-workbench"><section className="panel"><div className="section-title"><h2>{output?'处理结果':'原图预览'}</h2>{output&&<button onClick={()=>setResultId('')}>返回原图</button>}</div>
       {!file?<Empty title="选择图片开始处理" onImport={()=>void state.pick()}>转换、压缩、裁剪、缩放、旋转、调色、降噪和水印，可以组合后批量应用。</Empty>:<>

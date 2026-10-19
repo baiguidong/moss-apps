@@ -1,0 +1,10 @@
+{
+  "name": "ctrip-wendao",
+  "display_name": "携程问道",
+  "description": "通过携程问道 API 获取旅行规划与攻略。支持酒店查询、机票搜索、景点推荐、行程规划、美食住宿攻略。",
+  "source_type": "connector",
+  "connector_id": "ctrip-wendao",
+  "connector_type": "unknown",
+  "enabled": true,
+  "installed_at": ""
+}

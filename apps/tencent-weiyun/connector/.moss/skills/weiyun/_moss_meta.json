@@ -1,0 +1,10 @@
+{
+  "name": "weiyun",
+  "display_name": "微云",
+  "description": "查看、下载、删除微云文件，并且提供上传文件到微云、生成分享链接能力，帮你管理微云文件",
+  "source_type": "connector",
+  "connector_id": "tencent-weiyun",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

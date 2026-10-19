@@ -1,0 +1,10 @@
+{
+  "name": "mglc-video",
+  "display_name": "芒果灵创 CLI",
+  "description": "通过命令行调用芒果灵创 AI 视频创作能力：可使用 30+ 模型生成图片和视频，管理项目、剧本、美术设定与分镜故事板，跟踪任务状态和生成结果。",
+  "source_type": "connector",
+  "connector_id": "mglc",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

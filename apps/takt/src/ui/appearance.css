@@ -1,0 +1,93 @@
+/* Match Moss's semantic surfaces for the standard background presets. */
+:root {
+  --bg: oklch(0.978 0.012 126);
+  --text: oklch(0.23 0.02 145);
+  --surface: oklch(0.995 0.008 126);
+  --sidebar-surface: oklch(0.975 0.01 126);
+  --soft: oklch(0.945 0.018 145);
+  --muted: oklch(0.48 0.01 150);
+  --accent: oklch(0.62 0.16 151);
+  --on-accent: #fff;
+  --line: oklch(0.88 0.01 145);
+  --grid: color-mix(in oklab, var(--text) 8%, transparent);
+  --page-image: none;
+  --page-size: auto;
+  color: var(--text);
+  background: var(--bg);
+}
+:root[data-theme='dark'] {
+  --bg: oklch(0.18 0.012 155);
+  --text: oklch(0.95 0.006 126);
+  --surface: oklch(0.22 0.012 155);
+  --sidebar-surface: oklch(0.125 0.008 155);
+  --soft: oklch(0.28 0.012 155);
+  --muted: oklch(0.72 0.01 145);
+  --accent: oklch(0.68 0.15 151);
+  --on-accent: #fff;
+  --line: oklch(0.31 0.012 155);
+  --grid: rgb(255 255 255 / 6%);
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* TAKT 0.3.3's quiet green palette is now a selectable Moss preset. */
+:root[data-background-style='takt-theme'] {
+  --bg: #fbfcfa;
+  --text: #253f32;
+  --surface: #fff;
+  --sidebar-surface: #fff;
+  --soft: #f0f5ef;
+  --muted: #64766a;
+  --accent: #376b4d;
+  --on-accent: #fff;
+  --line: #e4eae4;
+  --grid: #dfe6df;
+}
+:root[data-background-style='takt-theme'][data-theme='dark'] {
+  --bg: #19201c;
+  --text: #e0e8de;
+  --surface: #202a23;
+  --sidebar-surface: #202a23;
+  --soft: #28372d;
+  --muted: #9eada2;
+  --accent: #8cbe99;
+  --on-accent: #19201c;
+  --line: #344239;
+  --grid: #344239;
+}
+:root[data-background-style='grid-theme'] {
+  --page-image: linear-gradient(color-mix(in oklab, var(--text) 5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--text) 5%, transparent) 1px, transparent 1px);
+  --page-size: 40px 40px;
+}
+:root[data-background-style='dot-theme'] {
+  --page-image: radial-gradient(var(--grid) 1px, transparent 1px);
+  --page-size: 20px 20px;
+}
+:root[data-background-style='gradient-theme'] {
+  --page-image: linear-gradient(135deg, var(--bg), var(--soft));
+}
+:root[data-background-style='takt-theme'] {
+  --page-image: radial-gradient(var(--grid) 1px, transparent 1px);
+  --page-size: 22px 22px;
+}
+.app-shell, .canvas {
+  background-color: var(--bg);
+  background-image: var(--page-image);
+  background-size: var(--page-size);
+}
+.sidebar { background: var(--sidebar-surface); }
+.brand-icon, .primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.primary:hover { background: color-mix(in oklab, var(--accent) 88%, var(--text)); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline-color: var(--accent); }
+.react-flow { background: transparent; --xy-attribution-background-color-default: var(--surface); }
+.react-flow__handle { background: var(--muted); }
+.react-flow__attribution a { color: var(--muted); }
+.flow-node.completed { border-color: color-mix(in oklab, var(--accent) 55%, var(--line)); }
+.flow-node.running { border-color: #b39444; }
+.event-dot, .status-dot, footer i { background: var(--accent); }
+.status-dot.running { background: #b39444; }
+.status-dot.failed { background: #b57456; }
+.badge.running, .badge.paused, .badge.pausing { background: color-mix(in oklab, #b39444 15%, var(--surface)); color: #806119; }
+.badge.failed, .badge.interrupted, .error, .run-error { background: color-mix(in oklab, #b57456 15%, var(--surface)); color: #945338; }
+:root[data-theme='dark'] .badge.running, :root[data-theme='dark'] .badge.paused, :root[data-theme='dark'] .badge.pausing { color: #e0c784; }
+:root[data-theme='dark'] .badge.failed, :root[data-theme='dark'] .badge.interrupted, :root[data-theme='dark'] .error, :root[data-theme='dark'] .run-error { color: #e4ac92; }

@@ -37,10 +37,10 @@ describe('App Backend manifest', () => {
     expect(() => validateRepositoryAppManifest({ ...source, hostApi: 'invalid' })).toThrow()
   })
   it('advertises Host API 3 and rejects old UI contracts', () => {
-    expect(APP_HOST_API_VERSION).toBe('3.14.0')
+    expect(APP_HOST_API_VERSION).toBe('3.15.0')
     expect(validateAppManifest({ ...manifest(), hostApi: '^3.0.0' }).hostApi).toBe('^3.0.0')
     expect(() => validateAppManifest({ ...manifest(), hostApi: '^2.9.0' })).toThrow(/requires Host API/)
-    expect(() => validateAppManifest({ ...manifest(), hostApi: '^3.15.0' })).toThrow(/requires Host API/)
+    expect(() => validateAppManifest({ ...manifest(), hostApi: '^3.16.0' })).toThrow(/requires Host API/)
   })
 
   it('preserves App-wide scope in repository output and excludes older Hosts', () => {

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.jiushuyun",
+  "version": "0.1.0",
+  "displayName": "九数云BI",
+  "description": "上传 Excel 或 CSV 表格，一键生成原生的可视化数据分析报告、仪表板、图表。",
+  "category": "other",
+  "discovery": {
+    "group": "online"
+  },
+  "connectorApp": {
+    "id": "jiushuyun",
+    "capabilities": [
+      "mcp"
+    ]
+  },
+  "keywords": [
+    "jiushuyun",
+    "Jiushuyun BI",
+    "mcp"
+  ],
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

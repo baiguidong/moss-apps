@@ -1,0 +1,10 @@
+{
+  "name": "neocrm-connector-skill",
+  "display_name": "销售易CRM",
+  "description": "用自然语言查客户、推商机、盘线索、领公海、写跟进，一句话打通销售工作闭环。",
+  "source_type": "connector",
+  "connector_id": "neo-crm",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -1,0 +1,10 @@
+{
+  "name": "linkfox-amazon-opportunity-search-by-metrics",
+  "display_name": "Linkfox 选品",
+  "description": "跨境电商选品一站式 AI 工具集，整合 竞品查询/ABA/Keepa/Sorftime/Jungle Scout/卖家精灵/SIF/极目/商业洞察/合规检测等 多项子能力，覆盖选品、关键词、竞品、评论、利基与趋势、合规检测。",
+  "source_type": "connector",
+  "connector_id": "linkfox-product-selection",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

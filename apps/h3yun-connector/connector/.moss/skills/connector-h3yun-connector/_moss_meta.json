@@ -1,0 +1,10 @@
+{
+  "name": "connector-h3yun-connector",
+  "display_name": "氚云",
+  "description": "通过氚云连接器，将日常业务快速构建为可配置、可协同、可追踪的数字化应用。支持快速创建应用表单、管理业务数据、以流程驱动审批与任务流转，适用于客户、项目、采购、库存、售后等多类业务管理场景。",
+  "source_type": "connector",
+  "connector_id": "h3yun-connector",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

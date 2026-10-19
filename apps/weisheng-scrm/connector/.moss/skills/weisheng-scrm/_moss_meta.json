@@ -1,0 +1,10 @@
+{
+  "name": "weisheng-scrm",
+  "display_name": "微盛企微管家SCRM",
+  "description": "查询或管理企业微信中的客户信息、客户标签、客户群、营销素材、活码、群发、跟进记录、联系人、商机、汇报、抽奖、客户日程、聊天记录等业务能力。",
+  "source_type": "connector",
+  "connector_id": "weisheng-scrm",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

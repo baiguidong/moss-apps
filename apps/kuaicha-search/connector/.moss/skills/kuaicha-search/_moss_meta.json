@@ -1,0 +1,10 @@
+{
+  "name": "kuaicha-search",
+  "display_name": "同花顺快查企业数据",
+  "description": "查询中国企业工商、股权投资、经营司法风险、知识产权、招投标及新闻舆情数据。",
+  "source_type": "connector",
+  "connector_id": "kuaicha-search",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

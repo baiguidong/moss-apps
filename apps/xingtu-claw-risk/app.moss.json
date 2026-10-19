@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.xingtu-claw-risk",
+  "version": "0.1.0",
+  "displayName": "天创信用星图MCP",
+  "description": "企业风险 AI 分析助手，用自然语言识别企业所属行业、分析企业间关联方关系（股权/实控人/担保/共同投资）。",
+  "category": "other",
+  "discovery": {
+    "group": "online"
+  },
+  "connectorApp": {
+    "id": "xingtu-claw-risk",
+    "capabilities": [
+      "mcp",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "xingtu-claw-risk",
+    "Tianchuang Credit StarGraph MCP",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

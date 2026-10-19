@@ -1,0 +1,10 @@
+{
+  "name": "ragflow",
+  "display_name": "RAGFlow 企业知识库",
+  "description": "通过 Moss Server 登录态或 RAGFlow API Key 连接企业知识库，支持检索、文档管理、上传解析、聊天助手和 Agent。",
+  "source_type": "connector",
+  "connector_id": "ragflow",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

@@ -1,0 +1,10 @@
+{
+  "name": "wecomcli-shared",
+  "display_name": "企业微信",
+  "description": "企业微信官方 CLI 套件，覆盖消息、邮件、文档、待办、日程、会议、微盘、通讯录等业务功能。支持机器人主动通知、新建与读取文档、文档搜索、新建管理日程、预约与获取会议信息、新建跟进待办、上传与获取微盘文件、邮件读取与发送等能力",
+  "source_type": "connector",
+  "connector_id": "wecom",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

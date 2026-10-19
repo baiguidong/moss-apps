@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.neo-crm",
+  "summary": "用自然语言查客户、推商机、盘线索、领公海、写跟进，一句话打通销售工作闭环。",
+  "description": "用自然语言查客户、推商机、盘线索、领公海、写跟进，一句话打通销售工作闭环。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/neo-crm",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

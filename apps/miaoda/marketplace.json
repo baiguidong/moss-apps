@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.miaoda",
+  "summary": "通过自然语言对话，即可完成网页、微信小程序及移动 App 的创建、预览、修改与发布上线，实现智能化、自动化、规模化的应用开发。",
+  "description": "通过自然语言对话，即可完成网页、微信小程序及移动 App 的创建、预览、修改与发布上线，实现智能化、自动化、规模化的应用开发。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/miaoda",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

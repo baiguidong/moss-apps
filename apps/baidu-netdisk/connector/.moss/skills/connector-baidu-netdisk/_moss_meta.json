@@ -1,0 +1,10 @@
+{
+  "name": "connector-baidu-netdisk",
+  "display_name": "百度网盘",
+  "description": "连接百度网盘，支持文件与分类浏览、关键词及语义检索、文件和文件夹管理、创建分享链接、查询容量，以及保存文本内容或通过 URL 转存文件。",
+  "source_type": "connector",
+  "connector_id": "baidu-netdisk",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

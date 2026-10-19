@@ -51,11 +51,11 @@ export function useWorkspace() {
   return { workspace, error, notice, busy, ready, invoke, pick, exportFiles, refresh, setError, setNotice }
 }
 export type WorkspaceHook = ReturnType<typeof useWorkspace>
-export function Shell({ title, subtitle, icon, children, state, actions }: { title: string; subtitle: string; icon: ReactNode; children: ReactNode; state: WorkspaceHook; actions?: ReactNode }) {
-  return <div className="task-app"><h1 className="visually-hidden">{title}</h1><header className="app-header" aria-label="文件操作"><span className="muted">{state.workspace.files.filter(f => f.role === 'input').length ? `已导入 ${state.workspace.files.filter(f => f.role === 'input').length} 个文件` : '选择本地文件开始'}</span><div className="header-actions">{actions}<button className="primary" disabled={state.busy || !state.ready} onClick={() => void state.pick()}><FolderOpen size={16} />导入文件</button></div></header>
+export function Shell({ title, children, state, actions }: { title: string; children: ReactNode; state: WorkspaceHook; actions?: ReactNode }) {
+  return <div className="task-app"><h1 className="visually-hidden">{title}</h1><header className="app-header" data-app-toolbar aria-label="文件操作"><span className="muted">{state.workspace.files.filter(f => f.role === 'input').length ? `已导入 ${state.workspace.files.filter(f => f.role === 'input').length} 个文件` : '选择本地文件开始'}</span><div className="header-actions">{actions}<button className="primary" disabled={state.busy || !state.ready} onClick={() => void state.pick()}><FolderOpen size={16} />导入文件</button></div></header>
     {state.error && <div role="alert" className="notice error">{state.error}<button aria-label="关闭错误提示" onClick={() => state.setError('')}><X size={16} /></button></div>}
     {state.notice && <div role="status" className="notice success"><Check size={16} />{state.notice}</div>}
-    <main>{children}</main><footer><span>本地处理 · 结果保存在此 App</span><span>{state.workspace.files.filter(f => f.role === 'input').length} 个输入 · {state.workspace.tasks.filter(t => t.status === 'succeeded').length} 项已完成</span></footer></div>
+    <main data-app-primary>{children}</main><footer><span>本地处理 · 结果保存在此 App</span></footer></div>
 }
 export function Empty({ title, children, onImport }: { title: string; children: ReactNode; onImport: () => void }) { return <div className="empty"><div className="empty-icon"><Files size={36} strokeWidth={1.4} /></div><h2>{title}</h2><p>{children}</p><button className="primary" onClick={onImport}><FolderOpen size={16} />选择本地文件</button></div> }
 export function History({ state, onSelect }: { state: WorkspaceHook; onSelect?: (task: LocalTask) => void }) {

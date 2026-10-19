@@ -1,0 +1,10 @@
+{
+  "name": "notion-research-documentation",
+  "display_name": "Notion",
+  "description": "创建、搜索和管理 Notion 工作区。用自然语言读取页面、查询数据库、更新内容、整理知识库。",
+  "source_type": "connector",
+  "connector_id": "notion",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

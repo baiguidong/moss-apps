@@ -1,0 +1,35 @@
+{
+  "title": "连接 ShareOne",
+  "titleEn": "Connect ShareOne",
+  "description": "可以自动创建无需绑定账号的访客 API Key，也可以填写已有 API Key。凭据由 Moss 加密保存。",
+  "descriptionEn": "Create a guest API key without binding an account, or enter an existing API key. Moss stores the credential encrypted.",
+  "docUrl": "https://shareone.app/docs/ai-agent-publish",
+  "docLabel": "查看 ShareOne 使用说明",
+  "docLabelEn": "View ShareOne documentation",
+  "fields": [
+    {
+      "key": "SHAREONE_API_KEY",
+      "label": "API Key",
+      "labelEn": "API Key",
+      "placeholder": "已有 API Key 时可直接填写",
+      "placeholderEn": "Enter an existing API key",
+      "description": "无需 OAuth。访客 API Key 可直接使用，绑定账号是可选操作。",
+      "descriptionEn": "OAuth is not required. Guest API keys work immediately; account binding is optional.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "provision": {
+    "url": "https://shareone.vip/api/v1/agent-guest-key",
+    "targetField": "SHAREONE_API_KEY",
+    "responseField": "api_key",
+    "label": "自动创建访客 API Key",
+    "labelEn": "Create guest API key",
+    "validation": {
+      "url": "https://shareone.vip/api/v1/me",
+      "headers": {
+        "X-API-Key": "${SHAREONE_API_KEY}"
+      }
+    }
+  }
+}

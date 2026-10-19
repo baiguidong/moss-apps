@@ -1,0 +1,10 @@
+{
+  "name": "proboost",
+  "display_name": "OpenBoost 跨境数据",
+  "description": "支持市场研究、选品分析、竞对监控、VOC洞察、关键词分析、listing生成等跨境电商应用场景",
+  "source_type": "connector",
+  "connector_id": "proboost",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

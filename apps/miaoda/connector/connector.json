@@ -1,0 +1,37 @@
+{
+  "id": "miaoda",
+  "source": "miaoda",
+  "name": "秒哒应用搭建",
+  "nameEn": "Miaoda App Builder",
+  "description": "通过自然语言对话，即可完成网页、微信小程序及移动 App 的创建、预览、修改与发布上线，实现智能化、自动化、规模化的应用开发。",
+  "descriptionEn": "Based on Baidu Miaoda (秒哒), users can create, preview, modify, and publish websites, WeChat Mini Programs, and mobile apps through natural-language conversations—enabling intelligent, automated, and scalable application development.",
+  "type": "cli",
+  "authMode": "",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "5.0.0",
+  "visibleIn": [
+    "internal",
+    "iOA",
+    "cloudhosted",
+    "selfhosted"
+  ],
+  "examples": [
+    "帮我创建一个待办事项管理应用",
+    "搭建一个销售数据看板",
+    "做一个杂志风格的高级个人博客网站"
+  ],
+  "hasMcp": false,
+  "hasCli": true,
+  "hasSkills": true,
+  "hasCredentialSchema": false,
+  "icon": "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjkgMTgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTE3LjYyIDBhMTEuMyAxMS4zIDAgMCAwLTkuNyA1LjVjLTEgMS42OC0xLjU4IDMuNjUtMS41OCA1Ljc1djQuOTVjMCAxLS44MSAxLjgtMS44MSAxLjhoOC42YTIuNyAyLjcgMCAwIDAgMi43MS0yLjd2LTIuMDJxLjAxLS45NS4yNi0xLjgxLjM4LS4yNi44Ny0uMjZjLjg4IDAgMS42LjczIDEuNiAxLjZ2Mi40OWEyLjcgMi43IDAgMCAwIDIuNyAyLjdoNC45OWEyLjcgMi43IDAgMCAwIDIuNzEtMi43di0zLjk2YzAtNi4yMS01LjEtMTEuMzYtMTEuMzUtMTEuMzQiIGZpbGw9InVybCgjdXVpZC1hZmI3YjIwMF9fYSkiLz48cGF0aCBkPSJNNy4xOCA1LjQ3QTcuMjcgNy4yNyAwIDAgMCAwIDEyLjc0djMuNDZjMCAxIC44MSAxLjggMS44MSAxLjhoMi43MmMxIDAgMS44LS44IDEuOC0xLjh2LTQuOTVjMC0yLjEuNTktNC4wNyAxLjYtNS43NXoiIGZpbGw9InVybCgjdXVpZC1jYjE0ZDZhMl9fYikiLz48cGF0aCBkPSJNMjguOTEgMTIuNGE2LjU2IDYuNTYgMCAwIDAtMTIuODItLjkzcS40LS4yNi44OC0uMjZjLjg4IDAgMS42LjczIDEuNiAxLjZ2Mi40OWEyLjcgMi43IDAgMCAwIDIuNyAyLjdoNC45OWEyLjcgMi43IDAgMCAwIDIuNzEtMi43di0yLjAzcTAtLjQ0LS4wNi0uODciIGZpbGw9InVybCgjdXVpZC1lYzMzM2YwMF9fYykiLz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9InV1aWQtYWZiN2IyMDBfX2EiIHgxPSIyNi43NzE1IiB5MT0iMjYuNjE3NCIgeDI9IjM0LjI4MDEiIHkyPSIzLjAzOTI3IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agc3RvcC1jb2xvcj0iIzAwRDlGRiIvPjxzdG9wIG9mZnNldD0iMC4zMSIgc3RvcC1jb2xvcj0iIzZEQTJGRiIvPjxzdG9wIG9mZnNldD0iMC41NCIgc3RvcC1jb2xvcj0iIzNGODVGRiIvPjxzdG9wIG9mZnNldD0iMC42OCIgc3RvcC1jb2xvcj0iIzFFNzBGRiIvPjxzdG9wIG9mZnNldD0iMC43OSIgc3RvcC1jb2xvcj0iIzBBNjNGRiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzc3MzNGRiIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJ1dWlkLWNiMTRkNmEyX19iIiB4MT0iMTUuNDc1NCIgeTE9IjE4LjYzODciIHgyPSIxLjgzNjY1IiB5Mj0iNC4xNzUwNCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIHN0b3AtY29sb3I9IiNGRjAwMjEiLz48c3RvcCBvZmZzZXQ9IjAuMTciIHN0b3AtY29sb3I9IiNGRkQ0ODgiLz48c3RvcCBvZmZzZXQ9IjAuNjkiIHN0b3AtY29sb3I9IiNGRjQwOUEiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNDNTY5RkYiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0idXVpZC1lYzMzM2YwMF9fYyIgeDE9IjkuNjcxMTQiIHkxPSIxNC4xODkyIiB4Mj0iMjMuMDczIiB5Mj0iMjUuOTM1IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agc3RvcC1jb2xvcj0iIzAwNTZGMiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzg3NjlGRiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjwvc3ZnPg==",
+  "enabled": true,
+  "credentialSchema": null,
+  "requiresCliSetup": false,
+  "mcpServerNames": [],
+  "skillName": "miaoda",
+  "skillNames": [
+    "miaoda"
+  ]
+}

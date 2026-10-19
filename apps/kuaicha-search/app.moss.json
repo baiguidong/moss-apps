@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.kuaicha-search",
+  "version": "0.1.0",
+  "displayName": "同花顺快查企业数据",
+  "description": "查询中国企业工商、股权投资、经营司法风险、知识产权、招投标及新闻舆情数据。",
+  "category": "other",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "connectorApp": {
+    "id": "kuaicha-search",
+    "capabilities": [
+      "mcp",
+      "skills"
+    ]
+  },
+  "keywords": [
+    "kuaicha-search",
+    "Kuaicha Enterprise Search",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "hostApi": "^3.15.0",
+  "toolScope": "session",
+  "navigation": {
+    "location": "none"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "permissions": [
+    "connector:use"
+  ]
+}

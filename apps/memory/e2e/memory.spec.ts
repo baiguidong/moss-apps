@@ -119,7 +119,7 @@ for (const theme of ['light', 'dark'] as const) test(`${theme} page and settings
 test('browser demo is visible and never suggests real data was saved', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByText('演示模式', { exact: false })).toBeVisible()
-  await expect(page.getByRole('heading', { name: '记忆', exact: true })).toBeVisible()
+  await expect(page.getByRole('main', { name: '记忆', exact: true })).toBeVisible()
   await page.getByRole('button', { name: '记忆设置' }).click()
   await expect(page.getByLabel('记忆文件')).toHaveValue(/演示数据/)
 })

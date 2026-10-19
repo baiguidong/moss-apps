@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.lovrabet-cli",
+  "summary": "连接企业系统、数据和流程，让AI完成工作，交付结果",
+  "description": "连接企业系统、数据和流程，让AI完成工作，交付结果",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/lovrabet-cli",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

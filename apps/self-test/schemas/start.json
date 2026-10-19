@@ -8,6 +8,11 @@
       },
       "minItems": 1,
       "maxItems": 100
+    },
+    "resetData": {
+      "type": "boolean",
+      "default": true,
+      "description": "开始新一轮前清理上轮测试数据，保留安装环境及历史报告。"
     }
   },
   "additionalProperties": false

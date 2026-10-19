@@ -1,0 +1,10 @@
+{
+  "name": "lovrabet",
+  "display_name": "Lovrabet CLI",
+  "description": "连接企业系统、数据和流程，让AI完成工作，交付结果",
+  "source_type": "connector",
+  "connector_id": "lovrabet-cli",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

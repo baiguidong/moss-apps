@@ -66,7 +66,11 @@ let appearance = { themeMode: 'light', cssThemeId: 'default' }
       guest.sendInputEvent({type:'mouseUp',x:Math.round(to.x),y:Math.round(to.y),button:'left',clickCount:1})
     },
     insertText: text => { window.focus(); guest.focus(); return guest.insertText(text) },
-    theme: mode => { appearance = { ...appearance, themeMode: mode }; guest.send('app-ui:event:appearance', appearance) },
+    theme: async mode => {
+      appearance = { ...appearance, themeMode: mode }
+      guest.send('app-ui:event:appearance', appearance)
+      await window.webContents.executeJavaScript(`document.documentElement.dataset.theme = ${JSON.stringify(mode)}`)
+    },
     resize: ({ width, height }) => window.setContentSize(width, height),
     screenshot: async () => (await window.webContents.capturePage()).toPNG().toString('base64'),
     cleanup: () => runtime.shutdown(),

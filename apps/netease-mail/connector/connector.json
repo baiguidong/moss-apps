@@ -1,0 +1,65 @@
+{
+  "id": "netease-mail",
+  "source": "netease-mail",
+  "name": "网易邮箱",
+  "nameEn": "NetEase Mail",
+  "description": "通过 IMAP/SMTP 连接邮箱，支持收发邮件、搜索、附件下载。支持 163、126、yeah.net 等网易邮箱及其他标准 IMAP/SMTP 邮箱。",
+  "descriptionEn": "Connect to email via IMAP/SMTP. Supports sending, receiving, searching, and downloading attachments for 163, 126, yeah.net and other standard IMAP/SMTP email providers.",
+  "type": "unknown",
+  "authMode": "token",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "4.24.0",
+  "visibleIn": [],
+  "examples": [
+    "帮我发一封邮件给 colleague@company.com，主题是周报，正文写本周完成了3个任务",
+    "查看我最近2小时的收件箱有没有新邮件",
+    "搜索最近一周主题包含「发票」的邮件",
+    "下载 UID 12345 这封邮件的附件到 Downloads 目录"
+  ],
+  "hasMcp": false,
+  "hasCli": false,
+  "hasSkills": true,
+  "hasCredentialSchema": true,
+  "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAMAAACahl6sAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABvUExURf///wEBAf79/v///Pr///z6+f/29v/6/rYmLsIjLbYvN8IrM6I0O6otNP/x8vz/+P7n6cfHx//X2qtBSP3GyUpKSrZUWvm2uaOiordmapE9RPWfpdqSlYiHh9Rsc8h9gOSDitnY2N+oq3BwcB8fHyK+McMAABbsSURBVHja7FnZkqNGECSA7kbQl4EAcxhY/v8jnVmNZma9E37w8uAHasOSLDGiso6srFaWPfbYY4899thjjz322GOPPfbYY4899thjjz322GOPPfbYY4899thjjz322GOPPfa/MJOXZRmMKcssN7CCluf4BO+XWcaXpbzkByGY9AY/MDne+ef35fImP8xCCGX5vpyf5HhV8M2sUIGWGXMfELoZeI+ctzdFAA5x/3JMHj+QvDEmx74BkmUJCGFeOPjX8pznSuX4UKmMKEOR3wiEUQpFWSCCl/OlQm7yBCU3dN2kYMIES5Fy9b1JzHFFrkrEnn+ari8Kpfi3zDq+Ouc74R2nm0xcQ2wUbygPSDmBAIRhguTeqb4kkoFBvyrvWyABYeeVmf4w/34yGt8mpYyqLm4HQtfhVxkYK5WnyiaIMjXPG0ieopt/APvm21gzrKIQPKwd1wO2jG1s275vo1bMiGEXIWk34kiVnku7F0EbhZCZ1BYFy7xMfZqlVz/9f/nttxE/Kir4eO7b0FnnavyzyeZuH732rDBzM5BCupN+KaN8RBARMxWulrgq6cMI9112rP9fSytlLtd67CwQVFXdNHiogaeuK4cn2+1tRImxUO8FkogI1RDHrRv2fdSauXhXylcwWSbNWkrrfAMktTYoUMXZvapKMFTEgCe8fjWvV1PZboyklxuBkFWvMskLfc7OVSiD3SuycCaULP2PugfxFEo4TMk0CCRZXKLyLz0vc4lB0f1cA0ZdvavKiTE7r1fl7KJBbN/R9+8C0Rp11SHxzatx86gV3lZCWPBSZQXypbRSF/uoICnTJlf8FvXRIkbjy3iZb2dUlrPTggZv+3GhrceGnmleVeMGjwAUN2akTIWNUKs4sAiQ+tquOoejhoUE80Z7wIBzcCq249jH6LUM8Czl7TMjhumK2zzFdp/2tY9A/cnA+K+dgATVdaITb81IApLhdrtFpFDStZ17nRclfdS+HyM49Oz7dRpm+7b5GMeIocAsqM95UrDwgp4sYuHpN/Kp84veeFFQ2i919Wrs7CmI7gUi3vgRBfxyruv2E2lnmHOdt0OqbylxUhA7FhREGup6T7XxRdBITArV27qpJk8eB50nJkv6gONDx45pt62+tbSuSCqNwkIXdkeLSOZaQpVrs5FsSDRVQwx8aPj8wrV110fpj08k4rI/u+pVDZ70hrZiUcoDEoQhhXocHe90O5AkY/VBRmlOwsiSIgJNtYTRNORMdq7khsmphEWdO3Sm/oEEE2RFF9QDu0NFGlt9ZHf1vfYQc55AHQmluBeIAbu2lpXbeJ/nKIM/IsVXof9sSPxwGkS6jW3bLsux9OPBt4Vc/1A/9Tryg3Jakdt6Io6/5nnCcEdP2VnsL4WO0QP+1m0ou/uAhCCjQfsN7tZzi9ln4gbn6w01FmfUACbBsPY/fKGy95BQnsRAhIg7+I2aJKkyMpnfMffcBq5bbM3w8EuqFBI7al4AcmzqNtwn44sLiGktOsFxEKq8nx2CzdpoZ+bCLuwblHmupHTaM/q4oLzg2Rw9gGQJSClAEBT0QE3WAlyxur5G+2s+0SUEiLu1Ib9P/SKaVHp6BZC6A6EarBKnJTu5M44zIulWrwy5lJAzg1a2cD9ujiSAV+oLEDItAw76W5GRcwYlXLSXxvscoRRUa1GZtr9TaVEWodc9plTlwJiZIj9uANK40/czbxiDQt1Pa6spSnpEuYOCxTP4a4qKa9QFhLKfPSJAMGXiOgw7Rnu/HOvIUbpEzHMlBCxAyjuXdjQ1mJ8eo36hSjB8O1IuYorSejWbhncnwrnzY4haFNsKQTNgWNQjJ6cAyS4gJRIBrChTjFTt/cdUTzyMHREagjrF9urGDZFEqwKBNGD2WEDLa7+y/ukKmr2pDo25v2KlmCOYFjRdNfaEYxOi2mFY/AQEa26mRyar86C/7D0Kua6nZQ2Kx6NHkLNe3bggiiwMAUWLllwwqTHPxo66DuPOxwlANvAM2lPcR7N0SMTcGhMnjMfN6KL8AoTrYaF7x7mDOZGZRHNZliZGjlthzshoBxD23H1zRICwrBHEHg2K20CL1B1awvsRo3zwAALVUdUHgbBsMCOMn6qXW3ImpMy+AAG3EUjVDKQOnsywsvylHWX7pYYAE7fFnUBSFFU/OKQERBsX4nBDSzGh1FDXnQ4otwFssHmVeQwz25oSqcH4Pi7J+ZZZ+C40Uo+iqzFJWnQIt/Zj2/YD47RfsPp2HUcvMobvvW8gcmXi8ZPxLb8fUDrZ5ND3XKhUwLggEDaws5sPhR+a+kD5o2GRmuXr7s7VGK2AQSP0XTlum/tg045rrazvDVcrjki7KKTvxowEOQwyKq4cDCIRMZcjxXdZhHZ2tuWxil7n+YRCh/9EqTkLGjt+JuQLe2AqcXQDipNVnXO9kf29kfnISVpP3qg7MxJ4UMb1O6DoRXW8pBEV+zRg8+7cAdWKNWKkoMSwwwDAWuUjas32v7I5j62ApKYmoNxs6H1a3dPqyy2ghoLR5s6dPZcTBSSkRMOjdnEviqL6iJrKKsSBN41sUuxXkIsM8HYs4zLBp1+ByPRXwZOX3nGB+2myOzkWwnbWbVhlwHWhvHEephNd+OwPkDtqueuwNmH6KSorAKEkn/Z9GiYUOQNMx6xsWZ9A3ktgmct5lWq3joK/FpkMJTDuG1UzpDMNGWVn+jLcCiTI1EL3sqqP3vsVk9317BIVEXgOlVQPBEHHiKUSLXCd1r2BZDxlJEug9PrzbBEctEO3RyQUOiUdOGJD8WhzGZN3KhTSFtpdrS6RP9QHhnaNOa7KDHvjtZJwKXnJy+u54br6CaS8gAQEO8iBENZBzCSUK7ba4FeeqmArGbCiTCevQDOpG2WjnO+TTjdwZPcDpIPCmNHSCzQiS+slXPNiPqAkrXDqJGuYG3jMlr1P6KE3DXNrTDq31HHsiHseDaiEij71DTOMJvHXdgPtlV8n/L+1MQY5qy3igeYdepIORjCEOMgKsY5UJBwvw3J08MIuMXI+YzpDoUwxv4CkQ2FthMplw4Hen6ANcVUPtgYQoTDcpJJ9006QEe9TCanu3wMiv1/AD39Sep+ep2uF0qejNIFLEYO8cRM3qzhSsrbQY4bsO/AcJb6PSfmTkfz4JWGRM7C9TuQxUqmASjhLKp7HpJMLcLcHdZXiQrghIyJTOKdR8lGnH5L0iDrqsE9laPZXM2CQQJJzA7G9pq+YjL2DkInsjLfaQgi8nJQQxcTugKAasLpwNeg70ByWk3HZ5ACY+ngkkDJTqTSz3wLC40IA4YYIDsLaCsvBW+BZDEXSL1dEnoNCxcw1MpJ+/qPyrzCdr5NK+Q2lAIZlXUbQLFDI0VG9gzuAI+4UnV1L2RgnJ4TRQNrFsvy337/+AxCON7YuKIwbCYe8gyIp4wwgCwMNKWypJvtWDqgUurfe4nXimsk8B0lch0a1dLSFnlI8CG4n0cxYMbkJLzaJFeqtRBM37CXpJ5uC3d04uMgq52Hd3+xcaXejyg7sNBbEMWazwRve/f9/46uSGrzl3Jc7cE++DHMmcQLGrdZWKomw8l1B54TvKWDrrj0hqWu9xRzdoHBF2mmK4CFMg3lUbEhWzL4MHMwXu4JuJtgBJKJ0kwnBpqBcS5W2xJUNKn4ZRZDIYGtMW/o8FFaYFietSCq4C+muxcEI01kHOqCk7VJrdxXEqSDMgpt0qtQPU//iBDFQD1IdECs9kQhOIqK2I1xlBewDpS0zOnriH9DBnxN07OS2iq+RI7j5CEiwC9LlnjSRwtXZZ58Yudj0tINGtgXRmgqiIEe3Hipr2mVBihvZsWiZclhuxiYsUBuFyTRDkbzIJ9qWt9g3qLDCLUR5LbL9AXaToU5w8xWj2SxAPxoIzxP77VCpfKkgnruhgkix2ywa4Cl2PD0UkMmuUY5sUVEOtn82W6wdNptrEJxtlzE7f6GNPbDRw0wSH1Mu90txFOTZoCAha3qYz7QLqFkxbU7tZbVqgR8vBXe/E2SiNAO8K5AmSEWQTRigPvVuFXtGkWRLNi0uHikHAfzACm4X55FLxtGIMh9Fw5ikrTHyslkccVwhYghFfUoB5worCKG4XJrRJ/PIXZAJQzdXlGvnCJc0qTGVWa58F8wMt09R6zg1xHnXueoF8QMFYcsMiKJpUisdjrANllvJefo5nbdFRaZ3nkmsvsAWHNspDNh9QjReOFeAglQTab5g85NGynMiS2UDFivsEeAoK+IvskaqETdcEJQ3ZE01IWfLQ3NsSfXSRLCoEjs6X2VZgxUtkN4n2uzE0vMYWeVrYYJYY1glUTIyYepoSSpN5/NNoUEX7sHSxsSC/kQFAdyOLWpZ6zsZ4CMcpGHYIbYQrxwv/m8W8MlYLvCbRaENDSRp7LP2pxM4ldC0COMDaFQ8L0DOOWyq2h3mlk22uyxLUGxa9IIxLulAjF95xhw1bbI8oJNISfCBgqBaW7fk2lCe4HN8m87TDXLVeqqayLbIBC2CTZJ7GwvKST7A+kPcY1GiqoCbVOVmG5oO09mqED2BZMJ+G8sdbIcKEmtgXlAjzg8WhKAVJW2CWgqQyicFe5zIbLSKChEAUbeJpYBbfrVMaARONDvSErjmoCS40nD0kKw6zKwdQjnmi0vGKIzodSKVNU/bLM8ZhmnQsdrr/KBFb6IhZ0iKJxfvnLA/Mj8icxy3acPGBrYvvQAmslMFQRC2WJ+wu1wt281xCRizJV8Ym1lbQsyrrVI9DOBQVwPII8BWMb2cJQgwGylT9TMNe6xvJAiisz1+gEIgCfaM5eEuzjzj/JL1CCLjEVClZ94hUCZF2yw0I8JlmUJnn5WVg2wrYLOPSuPPlJ5oLnHM+BUXBzIVX9qwjjgvoYYl1UJh/krU2cN8yACNMJxi4alGp6TgTrZUED56U7BpmS5R7NGcgfKPynbCeKA9ZYM/L1awThhzJT6l2p4C0Dqs2ACKUFBVjTFzKEyywHMAMuScTmAZXInOpw0XRFhWVaShviBIOfuESZGh/uJHk3rcFgR+MA7sqCZGukCqgkCmtY5I6BRNhIC6VbzYVkSfgLVxwkKEOBcel3FShxMhqGyFDS/i5A3hrw5ZRcPKQx2YZE5AWLogKWqrjSUeVn5o6LHslyfASGlTZI3NxqRpMK3pFHaX95IkzEMNO/WRaBVJdcyUoPtKEYYjJkwiMIH3Gz3GEQuvk5UWw//4YOMsylrWpXMY9YV7d2TToGqaA7f8i1EZa4rpqFW7aVEAXpYoLUjLT6cbztfoEsTlWBPRi/hIyItDLCAFJd6PJ9QmxIqEkkimjZY2cH/SgE79LB+mESZDiQ+EvGmRaAKcbxAhsZu0HeipEmsXaBEssfV3JWIVyfY0TUPTCGciYe7iUHJwEKe6aMXBuYKmyoCL24JwkgCeHqcVJLJMxNEpmtYkGtTjzXOHdL4gv3FCkCmnxpMDqbJoZDo0UtCyf9KNRAAeZVue31ZQlGi/3GpvGnxcFKuNkqqcmQL2hT5RFS5WBfnGQzhDVj9nV7nv2w0ShECQPBrJttif2VK4CLM9BLGOKIcZSAMTmzD3TawxGLMRzHpCNdIVaSj4q8vxsJibixNrrXS+qdGJtgWdzCoF1ozST0kPFySCMV/Y4Ee2SiQmmUhjEq1QZtNFxaEt+yQGRx3ajZQy0uEHChJmHY0BgL99aZtHuwmzbasVlZdWI7NSK1oOMz0migf6lpPzA9xEgQ+zCDwE0VwOZN0YhiKGXGJuryNP/LxJICsiE+TC3i3DZy5dyxOWdWEwI05hYThH8oAyBdEi07yh+Iv0nKZ9xVwPfP4QQaIIBlVt0/RQRBwEq7QvRY0AsF5WhcVWY+BozqQa6PkskxYwoAsH5sRSItVG0krnbSDHdkMuMWKqmuj0kZ6ZsTJI4fnEn5o/JhMbRxxE0Aln3pJlCz0jWcGgqmXhWagiBjA6qSD8qq1lp5W1zuez7Xjc7OKE3HsYqMG3bKMDEcg1zQmIPUckAa5CZNQGBZlSusqhUkpTvJbaOhI9VBAGPxS6CIteSdjY62gYhy45VcrnExj5cyPyXBg6iVR8VufaZ7dpVCUhhDOZn4xUSIA62+u8hQll71B/LjYXZEyUCpFnoejIxNt00TASOwoPQ6Cy5RgsIyvdhk8viBIKifb6TBBDh5NJmMuEwjKOoiv5TkzrkOyY3IG0Yv1dwuEGQn/cQ4rdqTnsKp3r5PaE4e4wgz4CiT3Awf7xjH/BgJEStL+01r/H3+Pv8ff4e/w3h03oExhybJKxX9wP8LTYYwpPvJJ33v+mKL4TiA+1hJ9/sCD/JIl/eIjkl6TQjRRVh4Tnc/z/F0S8hHeHw9l7f1UQe3ZS7Bmjf7GWZ0P6t+/+L4Tx+shBHMwF+vmBj/jgTY8q+VXj0kdZxHUeEp7OkZ/p40likV9WiJN1zcOE2PPl+idieF/WT0fpflESNez9B4+1Lq/my/3P3lh+PB3rX1aIcybITQ0lCOLN0sIzbb6Lad71ERpf3wTx9/ziw4vuOw1Po2KI29JdIyPq0QT5uPKWnUbubuO8v6eX8PSkufqrIJonNVRICITdf7FYIF025W3iEOve4t9gQT7O0mmEdy7Xj4dk6+fj7IIgt85H1iIWzM/dBZ0qy/21rq/4DdNV9nIb8WNr5AP+7nvTkvppu/35eft5jQlSGsDpQYK3e0DBwXTKW/eea/bmWXvv3GjG1QmCNd2d3T8Lkr0LEpZU2q6H7MIttwtusWalp4UzNJav+yHjC3LrfcT7F0HkTRDfa6Sz87C567vPUCOqj+u+7i5+EUTceNBmf/dX6U3LRLqW5bnkf3dWP7B9DbmmW5KZTh2HINDtQK0ZvzBNOHfV+4mzHeFtz/hXjImY74Lc4t60epFCGLUwfAsWqPHpeW/r8JCoLlTffOY79cdbCQGu+/2614jd04+bQ1WQ2kygE8R3GqFCyrII8f4WvEJ/+F4Q3flzn1fj7vS1tJwUDDKoelSoaYKUdzO5C/KQIxSKPQryqpHYHP6mEYtfb4rkHvS9l1dnt0tGdfb6YeV7eRdEc9p3GtmHjFAaJi7t8muwQUSx64OwxYsebxKqzTEFOT+G1ldBzE3cNxopA+wPaVvflklpeUOxQFk/2N+LIIa5x9WIv74Loj5yPpeZ+aX/RiOlBd+AoCxInQvbFV0hEkVc7kNWLO4+omHLiRs5s8NX49ubae2dQafALPjvNOJ6leB361dADKSzf8jopenqw1u57HtEN54gcMT1m0b20rHqZlvfaKS+hmPNDF+/RrLa8hPOhdDdhV/pwefYzi5hwxUABUH6VZ5NJ/8QtWic7jX/n+3mtx5ixuF7d9+9Gyn+UsWdRnpHfHd2XXwviBUW8iaIWLCq9zwCjg555HYLSFJes8/zH1b5czmk14jrUDw+vn95F0Rcn0eC47wK4u95Bv5tqhB59Jpa5AVG117cGJzYvdStNaKfe2yd1a9VEz/ydoeJ8m5aJtrNwHDRxbQext/27wVyPRYfxoHyggH2bMWDRttCMVP5eFiAkfBaNCHL/bS+zUmhP1hVKXoD/sURf17vibMyyjHJnu5bupGcPVBAWo5KwOL842ryDB38Q10a6K9n/sfqYdFvYkWf+O7a7t4q35sheT+ORnz3efeqwr9/gNyr9a6If5DU+0e6IVDh/2vnDlIABIEogIZk9z9y0Iyjtg7avLfIVVAzkvaDRtTQxtO7Src4ry9T48gG8mJi9xO/PZs5YhuNee4i99997Vikr5WPRL4fa95cUKM/17EmlN9stjL8zarN17z3zO1V2L4N+/yoQ6tTcr62Gvbk/u9vEQAAAAAAAAAAAGxuJ4J8RxZsfPkAAAAASUVORK5CYII=",
+  "enabled": true,
+  "credentialSchema": {
+    "title": "邮箱授权",
+    "titleEn": "Email Authorization",
+    "description": "输入邮箱地址和 IMAP/SMTP 授权码（非登录密码）。支持 163、126、yeah.net 等网易邮箱，以及其他支持 IMAP/SMTP 的邮箱。",
+    "descriptionEn": "Enter your email address and IMAP/SMTP authorization code (not your login password). Supports NetEase Mail (163, 126, yeah.net) and other IMAP/SMTP compatible email services.",
+    "docUrl": "https://help.mail.163.com/faqDetail.do?code=d7a5dc8471cd0c0e8b4b8f4f8e49998b374173cfe9171305fa1ce630d7f67ac286624f309a1a7089",
+    "docLabel": "如何开启 IMAP/SMTP 并获取授权码",
+    "docLabelEn": "How to enable IMAP/SMTP and get authorization code",
+    "fields": [
+      {
+        "key": "NETEASE_EMAIL_USER",
+        "label": "邮箱地址",
+        "labelEn": "Email Address",
+        "placeholder": "yourname@163.com",
+        "placeholderEn": "yourname@163.com",
+        "description": "完整邮箱地址，如 xxx@163.com、xxx@126.com、xxx@yeah.net",
+        "descriptionEn": "Full email address, e.g. xxx@163.com, xxx@126.com, xxx@yeah.net",
+        "type": "text",
+        "required": true
+      },
+      {
+        "key": "NETEASE_EMAIL_PASS",
+        "label": "IMAP/SMTP 授权码",
+        "labelEn": "IMAP/SMTP Authorization Code",
+        "placeholder": "在邮箱设置中生成的授权码",
+        "placeholderEn": "Authorization code generated in email settings",
+        "description": "在邮箱网页端「设置 → POP3/SMTP/IMAP」页面开启服务后生成的客户端授权码，不是登录密码",
+        "descriptionEn": "Client authorization code generated after enabling POP3/SMTP/IMAP in email web settings, not your login password",
+        "type": "password",
+        "required": true
+      }
+    ]
+  },
+  "requiresCliSetup": false,
+  "mcpServerNames": [],
+  "skillName": "netease-mail",
+  "skillNames": [
+    "netease-mail"
+  ]
+}

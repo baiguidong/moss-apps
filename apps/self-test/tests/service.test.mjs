@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadTestCatalog, selectTestCases, materializeTestCases, validateTestCatalog } from "../src/backend/catalog.mjs";
-import { createSelfTestService } from "../src/backend/service.mjs";
+import { createSelfTestService, suiteTimeoutMs } from "../src/backend/service.mjs";
 import { renderSelfTestReport } from "../src/backend/report.mjs";
 const catalogDirectory = fileURLToPath(new URL("../resources/self-tests", import.meta.url));
 const roots = [];
@@ -58,6 +58,30 @@ async function fixture(options = {}) {
   return { service, directory, calls, entered, finish, exit, run: () => createdRun };
 }
 describe("bundled test catalog", () => {
+  test("expanded modules have traceable sources, bounded budgets and independently selectable cases", async () => {
+    const catalog = await loadTestCatalog(catalogDirectory);
+    expect(new Set(catalog.cases.map(test => test.group)).size).toBe(10);
+    for (const item of catalog.cases) {
+      expect(item.sources.length).toBeGreaterThan(0);
+      expect(item.timeoutSeconds).toBeGreaterThanOrEqual(30);
+      expect(selectTestCases(catalog, [item.id])).toEqual([item]);
+    }
+    expect(suiteTimeoutMs(catalog.cases)).toBeGreaterThan(45 * 60_000);
+    expect(suiteTimeoutMs(selectTestCases(catalog, ['startup']))).toBe(45 * 60_000);
+    for (const field of [{ group: '' }, { sources: ['../settings.json'] }, { timeoutSeconds: -1 }, { timeoutSeconds: 180.5 }]) {
+      expect(() => validateTestCatalog({ version: 1, cases: [{ ...catalog.cases[0], ...field }] })).toThrow();
+    }
+    const fixtures = JSON.parse(await readFile(new URL('../resources/fixtures.json', import.meta.url), 'utf8')).fixtures;
+    expect(new Set(fixtures.map(file => file.name)).size).toBe(fixtures.length);
+    expect(fixtures.length).toBeLessThanOrEqual(20); // Host testing contract
+    for (const file of fixtures) {
+      expect(file.name).toMatch(/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/);
+      expect(file.content.length).toBeLessThanOrEqual(65536);
+    }
+    const pdf = fixtures.find(file => file.name.endsWith('.pdf')).content;
+    const xref = Number(pdf.match(/startxref\n(\d+)/)[1]);
+    expect(pdf.slice(xref, xref + 4)).toBe('xref');
+  });
   test("gives retained demo data a different visible identifier each run", async () => {
     const catalog = await loadTestCatalog(catalogDirectory);
     const first = materializeTestCases(catalog.cases, "11111111-1111-1111-1111-111111111111");
@@ -79,9 +103,9 @@ describe("bundled test catalog", () => {
   });
   test("loads defaults, honors explicit selection and rejects corrupt IDs", async () => {
     const catalog = await loadTestCatalog(catalogDirectory);
-    expect(catalog.cases).toHaveLength(10);
-    expect(selectTestCases(catalog, undefined)).toHaveLength(8);
-    expect(selectTestCases(catalog, undefined).filter((test) => test.requiresModel).map((test) => test.id)).toEqual(["session-switch", "chat-response", "workflow-demo", "agent-team-demo"]);
+    expect(catalog.cases).toHaveLength(59);
+    expect(selectTestCases(catalog, undefined)).toHaveLength(31);
+    expect(selectTestCases(catalog, undefined).filter((test) => test.requiresModel).map((test) => test.id)).toEqual(["session-switch", "chat-response"]);
     expect(selectTestCases(catalog, ["chat-response"])[0].requiresModel).toBe(true);
     expect(() => selectTestCases(catalog, ["startup", "startup"])).toThrow();
     expect(() => selectTestCases(catalog, ["unknown"])).toThrow();
@@ -90,6 +114,26 @@ describe("bundled test catalog", () => {
   });
 });
 describe("independent test lifecycle and reports", () => {
+  test("a missing installed App manifest falls back to AI inspection without dropping other cases", async () => {
+    const visited = [];
+    const f = await fixture({
+      launchInstance: async ({ run }) => {
+        run.inheritedApps = [{ id: "moss.missing", version: "1.0.0", enabled: true }];
+        return { endpoint: "http://127.0.0.1:12345", exited: new Promise(() => {}) };
+      },
+      executeController: async () => {
+        const run = f.run();
+        visited.push(run.activeCaseId);
+        await f.service.record({ run_id: run.id, case_id: run.activeCaseId, status: "blocked", notes: "已检查前置条件。" }, "controller");
+      },
+    });
+    await f.service.start(["startup", "apps-list", "chat-response"]);
+    await f.service.waitForIdle();
+    expect(visited).toEqual(["startup", "chat-response", "apps-list"]);
+    expect(f.run().scripts["apps-list"]).toBeUndefined();
+    expect(await readFile(f.run().scripts.startup, "utf8")).toContain("新会话");
+    expect(await readFile(f.run().scripts["chat-response"], "utf8")).toContain("MOSS_SELF_TEST_OK");
+  });
   test("advances after a submitted result even when the controller keeps its turn running", async () => {
     const visited = [];
     let release = () => {};
@@ -201,11 +245,19 @@ describe("independent test lifecycle and reports", () => {
     await expect(f.service.record({ ...record, evidence: [outside] }, "controller")).rejects.toThrow("证据必须");
     await symlink(outside, path.join(run.evidenceDir, "linked.png"));
     await expect(f.service.record({ ...record, evidence: ["linked.png"] }, "controller")).rejects.toThrow("证据必须");
-    await f.service.record(record, "controller");
+    const receipt = await f.service.record(record, "controller");
+    expect(receipt).toMatchObject({ runId: started.id, caseId: "startup", status: "passed" });
+    expect(JSON.stringify(receipt).length).toBeLessThan(240);
+    expect(receipt).not.toHaveProperty("cases");
     f.finish.resolve();
     await f.service.waitForIdle();
     const status = await f.service.getStatus();
     expect(status.phase).toBe("completed");
+    expect(status.results.startup.startedAt).toBeGreaterThanOrEqual(status.startedAt);
+    expect(status.results.startup.recordedAt).toBeGreaterThanOrEqual(status.results.startup.startedAt);
+    expect(status.results.startup.finishedAt).toBeGreaterThanOrEqual(status.results.startup.recordedAt);
+    expect(status.results.startup.checks).toEqual(checks);
+    expect(status.results.startup.evidence).toEqual(["startup.png"]);
     expect(status).toMatchObject({ model: "test-model", permissionMode: "bypassPermissions" });
     expect(f.calls).toEqual(["create", "stop"]);
     const saved = await readFile(status.reportPath, "utf8");
@@ -294,7 +346,7 @@ describe("standalone HTML report", () => {
       message: "<script>alert(1)</script>",
       model: "real-model",
       appVersion: "1",
-      cases: catalog.cases.slice(0, 3),
+      cases: selectTestCases(catalog, ["startup", "session-switch", "appearance"]),
       results: {
         startup: { status: "failed", notes: "<img src=x onerror=alert(1)>", checks: [], evidence: ["shot.png"] },
         "session-switch": { status: "blocked", notes: "模型不可用", checks: [] },

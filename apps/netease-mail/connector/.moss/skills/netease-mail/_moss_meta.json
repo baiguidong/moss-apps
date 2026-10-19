@@ -1,0 +1,10 @@
+{
+  "name": "netease-mail",
+  "display_name": "网易邮箱",
+  "description": "通过 IMAP/SMTP 连接邮箱，支持收发邮件、搜索、附件下载。支持 163、126、yeah.net 等网易邮箱及其他标准 IMAP/SMTP 邮箱。",
+  "source_type": "connector",
+  "connector_id": "netease-mail",
+  "connector_type": "unknown",
+  "enabled": true,
+  "installed_at": ""
+}

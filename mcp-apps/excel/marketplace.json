@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.excel",
+  "summary": "在对话中创建、读取和编辑本地 Excel 工作簿、公式与图表。",
+  "platforms": ["darwin-arm64"],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/mcp-apps/excel",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT"
+}

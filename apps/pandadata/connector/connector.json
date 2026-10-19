@@ -1,0 +1,40 @@
+{
+  "id": "pandadata",
+  "source": "pandadata",
+  "name": "PandaData 金融数据",
+  "nameEn": "PandaData",
+  "description": "查询、整理和分析 A 股、期货、期权、港美股、基金、宏观经济及量化因子等金融数据，支持统计比较与趋势归纳。",
+  "descriptionEn": "Query, organize, and analyze financial data across Chinese, Hong Kong, and U.S. equities, futures, options, funds, macroeconomics, and quantitative factors.",
+  "type": "mcp",
+  "authMode": "",
+  "providerId": "",
+  "authConfig": null,
+  "minWorkbuddyVersion": "",
+  "visibleIn": [
+    "internal",
+    "iOA",
+    "cloudhosted",
+    "selfhosted"
+  ],
+  "examples": [
+    "查询贵州茅台过去一年的日线行情，并统计月度收益率",
+    "比较沪深 300 和中证 500 最近三年的表现与波动",
+    "查询螺纹钢期货主力合约及近期行情变化",
+    "整理最近五年中国主要宏观指标并归纳趋势"
+  ],
+  "hasMcp": true,
+  "hasCli": false,
+  "hasSkills": true,
+  "hasCredentialSchema": false,
+  "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTExIiBoZWlnaHQ9Ijk2MyIgdmlld0JveD0iMCAwIDkxMSA5NjMiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik00NDguNzYyIDQ0My4xNzdMNDQzLjY4NCA0NjIuNDc1TDQxOC40NjEgNTQ3Ljk2MkwzNTIuOTQ5IDc0Ni44NjZMMzE0LjAxNSA4NzAuOTQ4TDM4Mi4yMzUgOTA5Ljg4M0MzODcuMzEzIDkxMi43NjEgNDU1Ljg3MiA5NDguMTQgNDU2LjU0OSA5NDguMTRDNDU3LjIyNiA5NDguMTQgNTMwLjg2MyA5MTAuNTYgNTM1LjQzNCA5MDguMDIxTDYwNy4wMzkgODY3LjkwMUw2MDAuNzc2IDg1NS41NDRMNTMwLjg2MyA2NTMuNzYyQzUzMC4wMTcgNjUxLjIyMyA0NjcuMjE0IDQ1NC44NTcgNDY3LjIxNCA0NTQuNjg4QzQ2Ny4yMTQgNDUxLjk4IDQ2Mi40NzQgNDQwLjk3NiA0NjAuNjEyIDQzOS40NTNDNDU1LjE5NSA0MzUuMDUyIDQ1Mi45OTQgNDM1LjcyOSA0NDguOTMxIDQ0My4xNzdINDQ4Ljc2MloiIGZpbGw9IiMwRjBGMTAiLz4KPHBhdGggZD0iTTQyNS45MDkgMTguOTU4NUwzMzQuODM2IDQwLjI4NzhDMjg2LjU5MSA1MC40NDQ2IDI1MS4zODEgNjAuMjYyOCAyNDYuNjQxIDY0LjgzMzRDMjQ1LjQ1NiA2Ni4wMTg0IDE0NC4wNTcgMjY1LjYgMTI1Ljk0NCAzMDIuNTAzTDEzLjIwMzQgNTMyLjU1NUwzNS4zNzkxIDU3My41MjFMMTAxLjczNyA2OTEuNTA5TDE1Ni45MjIgNzgzLjQyOEMxNjQuMzcxIDc5My40MTYgMTg4Ljc0NyA4MDguOTkgMjMxLjc0NCA4MzEuMzM1TDI5Ni45MTcgODYyLjk5TDI3OS44MiA4MTAuMzQ0TDIzMC43MjkgNjY2LjYyNUMyMTkuMDQ4IDYzMS4wNzYgMjAxLjEwNCA1NjguMTA0IDIwMS42MTIgNTY0LjM4QzIwMi42MjggNTU3LjEgMjMzLjYwNiA1MzcuMjk1IDMyNS42OTUgNDg0LjgxOEw0NDguMjU0IDQxNS4wNzRWMjE0LjY0NkM0NDguMjU0IDU3LjIxNTggNDQ3LjA2OSAxNC4zODc5IDQ0Mi40OTggMTQuNTU3MUw0MjUuOTA5IDE5LjEyNzdWMTguOTU4NVoiIGZpbGw9IiMwRjBGMTAiLz4KPHBhdGggZD0iTTQ2Ny4wNDQgMjEwLjkyM0M0NjcuMDQ0IDI4Ny40MzggNDY5LjI0NSA0MTEuODU5IDQ3MC41OTkgNDEzLjcyMUw1MDIuMDg1IDQzNC4zNzNMNjIyLjI3NCA1MDMuMjdDNzAwLjE0MyA1NDguMjk5IDcxNC41MzIgNTU4LjI4NiA3MTQuNTMyIDU2Ny40MjdDNzE0LjUzMiA1NzYuNTY4IDY4Ny4yNzggNjU4LjY2OSA2ODQuNzM4IDY2Ni4yODdMNjM1LjMwOSA4MDcuMjk3TDYxNy4xOTYgODYxLjQ2N0w2ODUuOTIzIDgyOS40NzNMNzUzLjEyOCA3OTYuMjk0TDgxMy4yMjIgNjkzLjU0MUw4ODguMDQ0IDU2Mi42ODdMOTAyLjYwMiA1MzQuNTg3TDgzNS4zOTggMzk2Ljc5M0w3MTkuMTAyIDE2MC45ODVDNjcwLjM1IDYzLjY0OSA2NjkuODQyIDYyLjgwMjcgNjUxLjM5IDU3LjU1NUw1NTYuMjU1IDM1LjA0MDdMNDczLjMwNyAxNS40MDQyQzQ2Ny44OSAxMy4zNzI4IDQ2Ni44NzUgNDQuODU5IDQ2Ni44NzUgMjEwLjc1NEw0NjcuMDQ0IDIxMC45MjNaIiBmaWxsPSIjMEYwRjEwIi8+Cjwvc3ZnPgo=",
+  "enabled": true,
+  "credentialSchema": null,
+  "requiresCliSetup": false,
+  "mcpServerNames": [
+    "pandadata"
+  ],
+  "skillName": "pandadata",
+  "skillNames": [
+    "pandadata"
+  ]
+}

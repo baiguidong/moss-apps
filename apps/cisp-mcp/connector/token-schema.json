@@ -1,0 +1,22 @@
+{
+  "title": "配置水滴征信企业信息查询凭证",
+  "titleEn": "Configure Zenicredit Enterprise Information Credentials",
+  "description": "请从水滴征信平台获取 API Key。凭证仅存储在本机，不会上传到云端。",
+  "descriptionEn": "Get your API Key from the zenicredit platform. Credentials are stored locally only.",
+  "docUrl": "https://cisp.zenitera.com/openapi",
+  "docLabel": "如何获取 API Key？",
+  "docLabelEn": "How to get API Key?",
+  "fields": [
+    {
+      "key": "CISP_API_KEY",
+      "label": "API Key",
+      "labelEn": "API Key",
+      "placeholder": "请输入您的 API Key（sk-agw- 开头）",
+      "placeholderEn": "Enter your API Key (starts with sk-agw-, )",
+      "description": "水滴征信平台的 API Key，格式为 sk-agw- 开头",
+      "descriptionEn": "Zenicredit API Key, starts with sk-agw-",
+      "type": "password",
+      "required": true
+    }
+  ]
+}

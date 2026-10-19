@@ -4,13 +4,14 @@ import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { execFileSync } from 'node:child_process'
+import { assertAppContentLayout, assertAppWorkspaceLayout } from './app-layout-check.mjs'
 const repo=fileURLToPath(new URL('..',import.meta.url)),core=process.env.MOSS_CORE_ROOT||path.resolve(repo,'../moss')
 const require=createRequire(path.join(repo,'apps/code-map/package.json')),requireCore=createRequire(path.join(core,'ui/package.json'))
 const {_electron:electron,expect}=require('@playwright/test'),{build}=require('vite'),{default:react}=require('@vitejs/plugin-react')
 const {Client}=require('@modelcontextprotocol/sdk/client/index.js'),{StdioClientTransport}=require('@modelcontextprotocol/sdk/client/stdio.js')
 const output=path.join(repo,'artifacts/engine-apps/verification'),shell=path.join(output,'shell/index.html'),styles=path.join(output,'shell.css')
 await fs.mkdir(output,{recursive:true})
-await fs.writeFile(styles,[`@import ${JSON.stringify(path.join(core,'ui/src/renderer-react/globals.css'))};`,`@source ${JSON.stringify(path.join(core,'ui/src/renderer-react/components/embedded-app-view.tsx'))};`,`@source ${JSON.stringify(path.join(core,'ui/src/renderer-react/components/ui/button.tsx'))};`].join('\n'))
+await fs.writeFile(styles,[`@import ${JSON.stringify(path.join(core,'ui/src/renderer-react/globals.css'))};`,`@source ${JSON.stringify(path.join(core,'ui/src/renderer-react/components'))};`].join('\n'))
 await build({configFile:false,root:path.join(repo,'scripts/local-tasks-verify'),base:'./',plugins:[react()],logLevel:'warn',resolve:{dedupe:['react','react-dom'],alias:{react:path.dirname(require.resolve('react/package.json')),'react-dom':path.dirname(require.resolve('react-dom/package.json')),'@':path.join(core,'ui/src/renderer-react'),'moss-core-embedded-view':path.join(core,'ui/src/renderer-react/components/embedded-app-view.tsx'),'moss-core-global-style':styles}},css:{postcss:{plugins:[requireCore('@tailwindcss/postcss')()]}},build:{outDir:path.dirname(shell),emptyOutDir:true}})
 const fixtures=path.join(output,'fixtures'),scans=path.join(fixtures,"扫描 中文 '[]$;&"),document=path.join(fixtures,"-输入 中文 '[]$;&.md")
 const repository=path.join(fixtures,'code sample');await fs.mkdir(repository,{recursive:true});await fs.writeFile(path.join(repository,'math.ts'),'export function add(a: number, b: number) { return a + b; }\nexport function total() { return add(2, 3); }\n')
@@ -18,7 +19,7 @@ process.env.PW_CHROMIUM_ATTACH_TO_OTHER='1'
 const names=process.argv.includes('--app')?[process.argv[process.argv.indexOf('--app')+1].replace(/^moss\./,'')]:['file-cleaner','document-converter','code-map']
 for(const name of names){
  const id=`moss.${name}`,checks=[],errors=[],report=path.join(output,name);await fs.mkdir(report,{recursive:true})
- const desktop=await electron.launch({executablePath:path.join(core,'ui/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'),args:[path.join(repo,'scripts/engine-apps-verify/desktop.cjs')],env:{...process.env,MOSS_CORE_ROOT:core,MOSS_TEST_APP:id,MOSS_TEST_VERSION:'0.1.1',MOSS_TEST_NODE:process.execPath,MOSS_TEST_SHELL:shell,MOSS_TEST_ARCHIVE:path.join(repo,'artifacts',id,'0.1.1',id+'-0.1.1-darwin-arm64.zip')},timeout:60000})
+ const desktop=await electron.launch({executablePath:path.join(core,'ui/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'),args:[path.join(repo,'scripts/engine-apps-verify/desktop.cjs')],env:{...process.env,MOSS_CORE_ROOT:core,MOSS_TEST_APP:id,MOSS_TEST_VERSION:'0.1.1',MOSS_TEST_NODE:process.execPath,MOSS_TEST_SHELL:shell,MOSS_TEST_ARCHIVE:process.env.MOSS_TEST_ARCHIVE||path.join(repo,'artifacts',id,'0.1.1',id+'-0.1.1-darwin-arm64.zip')},timeout:60000})
  let page,agent,directory
  const passed=text=>{checks.push(text);console.log(`PASS ${name}: ${text}`)}
  try{
@@ -32,13 +33,18 @@ for(const name of names){
   const pick=values=>desktop.evaluate((_e,paths)=>globalThis.localTaskFixture.pick(paths),values)
   const enter=async(locator,text)=>{await locator.focus();await locator.evaluate(el=>el.select());await desktop.evaluate((_e,text)=>globalThis.localTaskFixture.insertText(text),text);await expect(locator).toHaveValue(text)}
   const waitTask=async(status='succeeded',tool)=>{let task;await expect.poll(async()=>{task=(await invoke('workspace.get')).tasks.find(t=>!tool||t.input.tool===tool);return task?.status},{timeout:180000,intervals:[300,600,1000]}).toBe(status);return task}
-  const screenshot=async suffix=>{await page.evaluate(()=>scrollTo(0,0));await page.waitForTimeout(150);await fs.writeFile(path.join(report,suffix+'.png'),Buffer.from(await desktop.evaluate(()=>globalThis.localTaskFixture.screenshot()),'base64'))}
+  const screenshot=async suffix=>{await shellPage.mouse.move(1,1);await page.evaluate(()=>scrollTo(0,0));await page.waitForTimeout(150);await fs.writeFile(path.join(report,suffix+'.png'),Buffer.from(await desktop.evaluate(()=>globalThis.localTaskFixture.screenshot()),'base64'))}
   await expect(page.locator('main')).toBeVisible({timeout:60000});await expect(page.getByRole('button',{name:'检查引擎'})).toBeEnabled({timeout:60000})
   if(process.env.MOSS_TEST_DISCOVERY_GATE){
    await expect(page.getByRole('button',{name:/全部 MCP 工具/})).toContainText('17',{timeout:60000})
    await desktop.evaluate(()=>globalThis.localTaskFixture.releaseDiscovery())
   }
   assert.equal(await page.locator('header.app-header').count(),0)
+  const manifest=JSON.parse(await fs.readFile(path.join(repo,'apps',name,'app.moss.json'),'utf8'))
+  await assertAppContentLayout(page,manifest)
+  await assertAppWorkspaceLayout(page)
+  await expect(shellPage.getByText(manifest.displayName,{exact:true})).toHaveCount(1)
+  await expect(shellPage.getByText(manifest.description,{exact:true})).toHaveCount(1)
   const mainBox=await page.locator('main').boundingBox();assert(mainBox.y<=20,'Primary work should begin near the top')
   const capability = shellPage.getByRole('button',{name:name==='code-map'?/查看 AI 能力：17 个 AI 工具/:/查看 AI 能力：1 个 CLI skill/})
   await expect(capability).toBeVisible({timeout:60000});await capability.click()

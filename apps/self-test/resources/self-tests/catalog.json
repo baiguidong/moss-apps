@@ -16,6 +16,121 @@
       "expected": [
         "主界面正常显示，没有白屏或启动错误覆盖层。",
         "新建会话和设置入口可见且可交互。"
+      ],
+      "group": "基础与设置",
+      "sources": [
+        "ui/src/renderer-react/components/chat-area.tsx"
+      ],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "appearance",
+      "title": "设置与主题保存",
+      "default": true,
+      "requiresModel": false,
+      "prerequisites": [
+        "设置页可打开"
+      ],
+      "steps": [
+        "打开设置的外观选项，切换浅色和深色主题，分别观察并截图。",
+        "保持深色，关闭设置再重新打开，检查选择是否保留。"
+      ],
+      "expected": [
+        "浅色和深色选择能够改变页面外观，文字与操作控件可辨识。",
+        "重新打开设置后仍显示刚才保存的主题。"
+      ],
+      "group": "基础与设置",
+      "sources": [
+        "ui/src/renderer-react/components/settings-view.tsx"
+      ],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "chat-appearance",
+      "title": "字体、间距与消息外观",
+      "group": "基础与设置",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/settings-view.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "打开设置外观，记录聊天字体大小、行间距、消息间距的当前值。依次用滑块键盘操作改变一个刻度，观察“消息外观预览”。",
+        "离开设置再打开，核对三个值，截图外观区域后将三个值恢复原值。"
+      ],
+      "expected": [
+        "三个滑块都能修改，预览区域仍可读，没有文字或控件重叠。",
+        "重新打开后三个值保持修改结果，恢复原值成功。"
+      ]
+    },
+    {
+      "id": "settings-navigation",
+      "title": "设置分区与工具列表",
+      "group": "基础与设置",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/settings-view.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "依次打开通用、Agents、工具、高级设置，核对选中导航与内容。通用包含基本信息、模型、网页搜索、外观；高级设置包含权限、记忆、Agent 与执行、工具与性能、系统提示、服务地址。",
+        "在工具页展开内置工具及 App 提供的工具，检查说明与启用状态；返回新会话。截图只截标题或无密钥的区域。"
+      ],
+      "expected": [
+        "各导航能打开正确分区，不白屏、不出现错误覆盖层。",
+        "工具列表加载完成；可展开实际条目或显示明确空状态，返回聊天后可输入。"
+      ]
+    },
+    {
+      "id": "runtime-settings",
+      "title": "执行与性能参数保存",
+      "group": "基础与设置",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/settings-view.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "打开高级设置，记录“最大轮次”以及“单轮工具结果上限”的原值。用输入控件改为相邻有效值，离开再重新打开。",
+        "核对保存值后恢复原值。检查“会话运行时空闲回收”“最多保留会话运行时”“MCP 服务空闲回收”的当前显示；不修改服务地址和凭据。"
+      ],
+      "expected": [
+        "两个数值设置在重新打开后保持，且恢复成功。",
+        "性能设置正常显示，无保存失败或加载卡死。"
+      ]
+    },
+    {
+      "id": "memory-settings",
+      "title": "记忆与压缩策略设置",
+      "group": "基础与设置",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/settings-view.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "打开高级设置的记忆区域，记录“历史上下文搜索”“从纠正中学习”两个开关，分别切换后离开并重新打开。",
+        "核对开关保存并恢复；查看上下文压缩策略、会话摘要与长期记忆配置，不手动触发模型整理。"
+      ],
+      "expected": [
+        "两个开关保存并恢复成功，配置项不会消失。",
+        "压缩、摘要和长期记忆配置正确呈现，无报错。"
       ]
     },
     {
@@ -34,41 +149,323 @@
       "expected": [
         "发送后创建了两个可在侧栏选择的独立会话；A、B 分别收到包含 MOSS_SESSION_A_OK 和 MOSS_SESSION_B_OK 的真实 AI 回复，没有模型错误。",
         "来回切换后双方消息仍存在，各会话只显示自己的消息，选中状态正确且输入区域可以继续发送。"
+      ],
+      "group": "会话与消息",
+      "sources": [
+        "ui/src/renderer-react/components/chat-area.tsx"
+      ],
+      "timeoutSeconds": 420
+    },
+    {
+      "id": "chat-response",
+      "title": "真实模型收发消息",
+      "default": true,
+      "requiresModel": true,
+      "prerequisites": [
+        "主 Moss 已配置可用文本模型；本项会产生模型调用"
+      ],
+      "steps": [
+        "新建测试会话，发送：自测 {{runShortId}}，请只回复 MOSS_SELF_TEST_OK。",
+        "等待最多 180 秒，观察发送中状态、真实 AI 回复和结束状态。必须在 AI 消息中看到回复，输入框或用户消息中的相同文字不能算通过。",
+        "离开再回到该会话，检查双方消息仍存在并截图。"
+      ],
+      "expected": [
+        "用户消息显示，AI 回复包含 MOSS_SELF_TEST_OK 且没有模型错误。",
+        "回复结束后输入区域恢复可发送，重新打开会话后双方消息仍存在。"
+      ],
+      "group": "会话与消息",
+      "sources": [
+        "ui/src/renderer-react/components/chat-area.tsx"
+      ],
+      "timeoutSeconds": 240
+    },
+    {
+      "id": "chat-stop",
+      "title": "停止生成与再次发送",
+      "default": false,
+      "requiresModel": true,
+      "prerequisites": [
+        "文本模型可用；本项会产生模型调用"
+      ],
+      "steps": [
+        "新建测试会话，发送：请详细列出 100 个软件测试场景，每个场景解释 100 字。",
+        "看到生成中状态后点击停止；如果生成已结束，记录本项阻塞并说明未观察到停止窗口。",
+        "停止后发送：请只回复 STOP_RECOVERED，等待回复。"
+      ],
+      "expected": [
+        "生成过程中停止按钮可用，点击后会话退出生成状态。",
+        "停止后能够再次发送并收到包含 STOP_RECOVERED 的回复。"
+      ],
+      "group": "会话与消息",
+      "sources": [
+        "ui/src/renderer-react/components/chat-area.tsx"
+      ],
+      "timeoutSeconds": 240
+    },
+    {
+      "id": "model-selector",
+      "title": "会话模型与思考强度选择",
+      "default": false,
+      "requiresModel": false,
+      "prerequisites": [
+        "已配置文本模型；打开“自测样例”本地会话，不需要发送消息。模型不支持多个推理强度时本项阻塞。"
+      ],
+      "steps": [
+        "打开“自测样例”会话的“推理强度”入口，核对当前模型、可用范围和当前值。",
+        "通过滑块选择另一个支持的推理强度，关闭再打开，检查保存；恢复模型默认推理强度并再次核对。"
+      ],
+      "expected": [
+        "推理强度入口显示当前模型和可用范围；不可把全局模型设置当成会话选择器。",
+        "本会话强度修改后重新打开仍保留；恢复模型默认后显示默认值。"
+      ],
+      "group": "会话与消息",
+      "sources": [
+        "ui/src/renderer-react/components/session-effort-selector.tsx"
+      ],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "session-search",
+      "title": "全局会话搜索与定位",
+      "group": "会话与消息",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/global-session-search.tsx"
+      ],
+      "prerequisites": [
+        "Host 已创建“自测样例”会话。"
+      ],
+      "steps": [
+        "打开“搜索所有消息”，搜索“自测样例”，等待标题结果。点击结果打开对应会话。",
+        "重新搜索本轮不存在的字符串 MOSS_NO_SESSION_{{runShortId}}，观察无结果状态，清空搜索并关闭。"
+      ],
+      "expected": [
+        "标题搜索命中自测样例，点击能打开正确会话。",
+        "不存在的字符串显示无结果，清空和关闭后主界面恢复。"
       ]
     },
     {
-      "id": "appearance",
-      "title": "设置与主题保存",
+      "id": "session-info",
+      "title": "会话信息与统计",
+      "group": "会话与消息",
       "default": true,
       "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/session-info.tsx"
+      ],
       "prerequisites": [
-        "设置页可打开"
+        "Host 已创建“自测样例”会话。"
       ],
       "steps": [
-        "打开设置的外观选项，切换浅色和深色主题，分别观察并截图。",
-        "保持深色，关闭设置再重新打开，检查选择是否保留。"
+        "打开“自测样例”，点击“查看会话信息”，检查会话概览、Token 用量、工具调用、基本信息及任务与资源。",
+        "核对 ID、工作区与当前会话对应；允许无消息样例用量为零，不能显示 NaN 或负数。关闭弹窗再打开。"
       ],
       "expected": [
-        "浅色和深色选择能够改变页面外观，文字与操作控件可辨识。",
-        "重新打开设置后仍显示刚才保存的主题。"
+        "信息窗口可打开，展示样例会话身份、工作区及统计分区，无 NaN 或负数。",
+        "关闭再打开内容仍对应当前会话，关闭后可以操作输入区。"
       ]
     },
     {
-      "id": "apps-list",
-      "title": "继承应用与分类筛选",
-      "default": true,
-      "requiresModel": false,
+      "id": "session-rename",
+      "title": "会话重命名与搜索同步",
+      "group": "会话与消息",
+      "default": false,
+      "requiresModel": true,
+      "timeoutSeconds": 300,
+      "sources": [
+        "ui/src/renderer-react/components/app-sidebar.tsx"
+      ],
       "prerequisites": [
-        "主界面可以交互；已继承主 Moss 的 App 安装及配置，提示中附有继承清单"
+        "独立测试实例已启动；只操作本轮测试数据。"
       ],
       "steps": [
-        "进入应用管理的已安装列表，对照继承清单检查应用及启用状态。不要把应用市场的可安装条目当成已安装应用。",
-        "使用列表上方的 App 分类页签，选择至少两个现有分类（不足两个时选择现有分类），核对选中状态、卡片数量和分类；再切回“全部”。没有已安装 App 时检查空状态。当前界面通过分类筛选，不要求不存在的名称搜索框。",
-        "返回聊天界面。"
+        "新建会话，发送“自测 {{runShortId}} rename，请只回复 RENAME_OK”，等待真实回复结束。",
+        "在该会话菜单选择重命名，保存为 rename-{{runShortId}}。切换会话再回来，并通过全局搜索查找新名称。不要改名或删除自测样例。"
       ],
       "expected": [
-        "已安装列表包含继承清单中的 App，启用状态一致，没有一直加载或错误覆盖层；仅继承清单为空时可接受空状态。",
-        "分类切换后只显示对应分类的 App，页签选中状态和数量正确；切回“全部”恢复全部已安装 App。返回聊天界面后仍可操作；空安装环境应显示明确空状态。"
+        "新名称在侧栏持久显示，双方消息仍在。",
+        "新名称搜索命中且定位正确，旧会话内容没有丢失。"
+      ]
+    },
+    {
+      "id": "message-rendering",
+      "title": "Markdown、代码与表格消息",
+      "group": "会话与消息",
+      "default": false,
+      "requiresModel": true,
+      "timeoutSeconds": 240,
+      "sources": [
+        "ui/src/renderer-react/components/chat/assistant-message.tsx",
+        "ui/src/renderer-react/components/markdown/markdown-renderer.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "新建会话，请模型在同一条回复输出标题 MOSS_RENDER_{{runShortId}}、两行表格（A 240、B 240）、JavaScript 代码块 console.log(\"render-ok\") 和两项列表，等待完成。",
+        "检查 assistant 消息中的标题、表格、列表和代码展示；展开代码或工具区域的可用折叠入口，截图。"
+      ],
+      "expected": [
+        "实际 assistant 回复包含要求的四种结构，代码与表格不显示为残缺原始语法。",
+        "布局可读、没有横向遮挡主要操作，展开收起不丢失内容。"
+      ]
+    },
+    {
+      "id": "message-queue",
+      "title": "生成中排队与后续回复",
+      "group": "会话与消息",
+      "default": false,
+      "requiresModel": true,
+      "timeoutSeconds": 360,
+      "sources": [
+        "ui/src/renderer-react/components/chat-area.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "新建会话，请模型详细列举 30 个测试场景。生成尚未结束时追加发送“请只回复 QUEUE_OK_{{runShortId}}”。",
+        "观察排队提示和执行顺序，等待两轮结束。若未捕获生成窗口，记录阻塞，不把两个串行发送当成排队。"
+      ],
+      "expected": [
+        "后续消息在生成中实际进入队列，不覆盖当前请求。",
+        "队列消化后收到带本轮标记的 assistant 回复，输入区恢复，无重复或丢失用户消息。"
+      ]
+    },
+    {
+      "id": "session-fork",
+      "title": "消息分支与原会话隔离",
+      "group": "会话与消息",
+      "default": false,
+      "requiresModel": true,
+      "timeoutSeconds": 360,
+      "sources": [
+        "ui/src/renderer-react/components/chat/fork-session-button.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "新建会话发送“请只回复 FORK_BASE_{{runShortId}}”，等待回复结束。使用消息上的分支入口创建分支会话。",
+        "在分支中发送“请只回复 FORK_CHILD_{{runShortId}}”，等待完成；切回原会话和分支比较。"
+      ],
+      "expected": [
+        "分支实际创建并继承分支点以前的消息。",
+        "分支新回复只存在于分支，原会话仍保留原消息，两个会话都可打开。"
+      ]
+    },
+    {
+      "id": "permission-selector",
+      "title": "会话权限模式切换",
+      "group": "会话与消息",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/permission-mode-selector.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "打开“自测样例”，在输入区权限模式菜单记录当前模式，选择另一个支持的模式，关闭再打开。",
+        "离开会话再回来核对，恢复完全放行；不发送消息。"
+      ],
+      "expected": [
+        "菜单列出支持的模式，选择后输入区正确更新。",
+        "重新进入会话后所选模式保留，最终已恢复完全放行。"
+      ]
+    },
+    {
+      "id": "project-create",
+      "title": "项目创建、搜索与配置保存",
+      "group": "项目",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/projects/project-workspace.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "进入项目，新建 project-{{runShortId}}，指令填写 PROJECT_RULE_{{runShortId}}，创建后检查项目详情。",
+        "返回项目列表按名称搜索，打开项目及右侧项目配置，检查名称和指令；搜索不存在的名称再清空。"
+      ],
+      "expected": [
+        "项目创建成功且能从列表搜索并重新打开。",
+        "指令保存正确，无匹配搜索显示明确空状态，清空后项目重新出现。"
+      ]
+    },
+    {
+      "id": "project-resources",
+      "title": "项目资源配置与保留",
+      "group": "项目",
+      "default": false,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/projects/project-resource-picker.tsx",
+        "ui/src/renderer-react/components/projects/project-workspace.tsx"
+      ],
+      "prerequisites": [
+        "项目资源列表服务可用，技能或专家市场至少有一条可关联资源。项目选择器使用市场列表，与会话中的已安装资源列表不同。"
+      ],
+      "steps": [
+        "独立新建 resources-{{runShortId}} 项目，打开右侧配置的技能、专家、个人授权连接器选择器。等待每个列表结束加载；加载中、服务失败不能当成空列表。",
+        "从实际项目资源列表中选一个技能或专家，保存后关闭再打开项目核对；再取消本次新增的选择并保存核对。列表服务不可用或实际无可选资源时记录阻塞并说明具体状态；不额外安装、登录或操作外部业务。"
+      ],
+      "expected": [
+        "三个资源选择器可打开，选择项与显示标签一致。",
+        "项目资源关联在重新打开后保持，取消关联成功。"
+      ]
+    },
+    {
+      "id": "project-task",
+      "title": "项目任务执行、筛选与产物",
+      "group": "项目",
+      "default": false,
+      "requiresModel": true,
+      "timeoutSeconds": 480,
+      "sources": [
+        "ui/src/renderer-react/components/projects/project-tasks-tab.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "独立新建 tasks-{{runShortId}} 项目，从任务区域创建“计算 120*2+80*3+50*2，保存 project-result.md，并回复 PROJECT_TASK_OK_{{runShortId}}”。",
+        "等待真实任务完成，检查任务状态、展开详情、进入任务会话、打开报告；按任务标题搜索及按状态筛选。 通过任务会话工作区预览生成报告，并核对项目资产列表的同名关联；项目资产的默认打开按钮调用系统外部应用，本项不验证外部编辑器。"
+      ],
+      "expected": [
+        "真实任务完成且关联正确项目与会话，assistant 回复包含本轮标记，总额 580。",
+        "报告可打开，任务搜索、状态筛选和详情显示与完成状态一致。"
+      ]
+    },
+    {
+      "id": "project-decisions",
+      "title": "项目待决策与用户回答",
+      "group": "项目",
+      "default": false,
+      "requiresModel": true,
+      "timeoutSeconds": 480,
+      "sources": [
+        "ui/src/renderer-react/components/projects/project-workspace.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "新建 decision-{{runShortId}} 项目，在右侧项目配置把决策策略改成“AI 推荐，人工确认”并保存，避免默认自动决策跳过等待。随后发起任务：开始前通过真实提问工具询问用户输出中文还是英文，收到回答后再保存 decision-report.md。",
+        "等待项目待决策或会话提问卡出现，选择中文并提交；检查任务继续完成，决策记录和产物。若模型只用普通文字提问，没有真实决策，记录未达预期。 通过任务会话工作区预览生成报告，并核对项目资产列表的同名关联；项目资产的默认打开按钮调用系统外部应用，本项不验证外部编辑器。"
+      ],
+      "expected": [
+        "真实待决策可从项目定位和回答，问题与当前任务关联。",
+        "回答后任务继续，待决策状态解除，报告为中文且保留选择记录。"
       ]
     },
     {
@@ -87,66 +484,487 @@
       "expected": [
         "文件列表显示 self-test-note.txt，点击后预览包含 Moss self-test fixture。",
         "关闭预览后文件列表与聊天界面仍可正常操作。"
-      ]
+      ],
+      "group": "文件与版本",
+      "sources": [
+        "ui/src/renderer-react/components/file-tree.tsx"
+      ],
+      "timeoutSeconds": 120
     },
     {
-      "id": "chat-response",
-      "title": "真实模型收发消息",
+      "id": "workspace-refresh",
+      "title": "工作区刷新与文件定位",
+      "group": "文件与版本",
       "default": true,
-      "requiresModel": true,
+      "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/file-tree.tsx"
+      ],
       "prerequisites": [
-        "主 Moss 已配置可用文本模型；本项会产生模型调用"
+        "Host 已注入完整样例文件。"
       ],
       "steps": [
-        "新建测试会话，发送：自测 {{runShortId}}，请只回复 MOSS_SELF_TEST_OK。",
-        "等待最多 180 秒，观察发送中状态、真实 AI 回复和结束状态。必须在 AI 消息中看到回复，输入框或用户消息中的相同文字不能算通过。",
-        "离开再回到该会话，检查双方消息仍存在并截图。"
+        "打开“自测样例”的右侧文件区，点击“刷新工作区”，核对 self-test-note.txt、self-test-preview.md、self-test-data.csv。 同时通过“搜索工作区文件”按 self-test-note 检索，再清空搜索。",
+        "收起并重新展开右侧栏，检查列表仍在；依次选择两个文件后关闭预览。"
       ],
       "expected": [
-        "用户消息显示，AI 回复包含 MOSS_SELF_TEST_OK 且没有模型错误。",
-        "回复结束后输入区域恢复可发送，重新打开会话后双方消息仍存在。"
+        "刷新结束后样例文件完整显示，加载状态不持续旋转。 文件搜索命中对应样例，清空恢复列表。",
+        "收起再展开文件仍在，切换选择打开对应文件，不残留上一个文件内容。"
       ]
     },
     {
-      "id": "chat-stop",
-      "title": "停止生成与再次发送",
-      "default": false,
-      "requiresModel": true,
+      "id": "workspace-version",
+      "title": "保存工作区版本与历史检索",
+      "group": "文件与版本",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/workspace-versions.tsx",
+        "ui/src/workspace-versions/workspace-version-service.mjs"
+      ],
       "prerequisites": [
-        "文本模型可用；本项会产生模型调用"
+        "本地样例工作区存在且可写。"
       ],
       "steps": [
-        "新建测试会话，发送：请详细列出 100 个软件测试场景，每个场景解释 100 字。",
-        "看到生成中状态后点击停止；如果生成已结束，记录本项阻塞并说明未观察到停止窗口。",
-        "停止后发送：请只回复 STOP_RECOVERED，等待回复。"
+        "打开“自测样例”文件区，如已有历史版本先记录数量。点击保存版本，填写 v-{{runShortId}} 并确认。首次或有文件变化时应新建；复用环境文件未变时按代码设计应提示“没有文件变化，无需保存版本”。",
+        "打开历史版本，新建时选择本轮标签；无变化时核对数量不增加，选择现有版本。搜索 self-test-note.txt 并打开查看快照内容，再返回当前工作区。"
       ],
       "expected": [
-        "生成过程中停止按钮可用，点击后会话退出生成状态。",
-        "停止后能够再次发送并收到包含 STOP_RECOVERED 的回复。"
+        "有文件变化时生成带本轮标签的新版本；无变化时明确提示无需保存且历史数量不增加，不能将旧版本说成本轮新建。",
+        "历史可搜索并预览 Moss self-test fixture，返回后当前工作区仍可操作。"
       ]
     },
     {
-      "id": "model-selector",
-      "title": "会话模型与思考强度选择",
+      "id": "workspace-restore",
+      "title": "版本差异与文件恢复",
+      "group": "文件与版本",
       "default": false,
       "requiresModel": true,
+      "timeoutSeconds": 480,
+      "sources": [
+        "ui/src/renderer-react/components/workspace-versions.tsx"
+      ],
       "prerequisites": [
-        "文本模型已配置"
+        "独立测试实例已启动；只操作本轮测试数据。"
       ],
       "steps": [
-        "打开聊天输入区的模型与思考强度选择入口，检查当前模型。",
-        "选择另一个可用思考强度，关闭再打开选择器，检查选择。",
-        "若没有多个模型选项，记录该观察，无需编造可选模型。"
+        "新建独立测试会话，让模型创建 restore-{{runShortId}}.txt，内容 VERSION_ONE，等待后通过 UI 保存版本 before-{{runShortId}}。",
+        "让模型把同一文件改成 VERSION_TWO，等待后从历史版本预览差异并恢复本轮 before 版本，确认恢复影响范围。",
+        "重新打开文件并刷新，检查 VERSION_ONE；保留前后版本供复核。"
       ],
       "expected": [
-        "选择入口正常显示当前模型与可用选项。",
-        "思考强度选择能够保存并在重新打开时正确显示。"
+        "历史差异显示本轮文件从 VERSION_ONE 到 VERSION_TWO 的实际变化。",
+        "恢复后文件实际内容为 VERSION_ONE，未恢复其他工作区。"
+      ]
+    },
+    {
+      "id": "attachment-send",
+      "title": "附件选择、移除与真实读取",
+      "group": "文件与版本",
+      "default": false,
+      "requiresModel": true,
+      "timeoutSeconds": 300,
+      "sources": [
+        "ui/src/renderer-react/components/chat-area.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "新建会话，通过真实文件拖放导入测试附件 self-test-note.txt（路径见本轮 fixturePath），检查附件标签；移除后再导入。检查附件导入链路，系统原生文件选择窗口不在 CDP 覆盖范围内。",
+        "发送“读取附件并原样回复其第一行”，等待模型回复。"
+      ],
+      "expected": [
+        "附件标签出现，移除后消失，重新添加成功。",
+        "真实 assistant 回复包含 Moss self-test fixture，消息中保留附件关联，不把用户提示当成读取结果。"
+      ]
+    },
+    {
+      "id": "preview-markdown",
+      "title": "Markdown 文件预览",
+      "group": "多格式预览",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/preview/viewers/MarkdownViewer.tsx"
+      ],
+      "prerequisites": [
+        "Host 已注入 self-test-preview.md。"
+      ],
+      "steps": [
+        "打开自测样例文件区，双击 self-test-preview.md。",
+        "检查标题 Moss Preview、表格 A/240 与 B/240、列表和代码块；截图并关闭预览。"
+      ],
+      "expected": [
+        "Markdown 正常渲染标题、两行表格、列表与代码。",
+        "关闭预览后样例工作区和输入区仍可用。"
+      ]
+    },
+    {
+      "id": "preview-html",
+      "title": "HTML 文件预览",
+      "group": "多格式预览",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/preview/viewers/HTMLViewer.tsx"
+      ],
+      "prerequisites": [
+        "Host 已注入 self-test-preview.html。"
+      ],
+      "steps": [
+        "打开自测样例文件区，双击 self-test-preview.html。",
+        "检查页面标题 MOSS_HTML_PREVIEW 和订单总额 580，截图并关闭预览。"
+      ],
+      "expected": [
+        "HTML 渲染真实页面，能看到标题与总额 580，没有白屏。",
+        "关闭后回到原会话，工作区仍可操作。"
+      ]
+    },
+    {
+      "id": "preview-csv",
+      "title": "CSV 表格与字段内容",
+      "group": "多格式预览",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/preview/viewers/ExcelViewer.tsx"
+      ],
+      "prerequisites": [
+        "Host 已注入 self-test-data.csv。"
+      ],
+      "steps": [
+        "打开自测样例 self-test-data.csv。",
+        "检查表头 product,price,quantity,total 和 A/120/2/240、B/80/3/240、C/50/2/100，切换可用表格视图后关闭。"
+      ],
+      "expected": [
+        "CSV 可读，表头和三行数据完整，列未错位。",
+        "中文或数字无乱码，关闭后工作区仍可操作。"
+      ]
+    },
+    {
+      "id": "preview-code",
+      "title": "JSON 与代码文件预览",
+      "group": "多格式预览",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/preview/viewers/CodeViewer.tsx",
+        "ui/src/renderer-react/components/preview/viewers/TextViewer.tsx"
+      ],
+      "prerequisites": [
+        "Host 已注入 JSON 和 JavaScript 两个样例文件。"
+      ],
+      "steps": [
+        "依次打开自测样例 self-test-data.json 与 self-test-code.js。",
+        "检查 JSON 中 marker=MOSS_JSON_PREVIEW、total=580，以及 JavaScript 中 MOSS_CODE_PREVIEW；截图两种格式并关闭。"
+      ],
+      "expected": [
+        "JSON 内容完整可读，总额为 580。",
+        "JavaScript 显示完整代码与标记，无被错误执行或预览异常。"
+      ]
+    },
+    {
+      "id": "preview-svg",
+      "title": "图片预览与缩放",
+      "group": "多格式预览",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/preview/viewers/ImageViewer.tsx"
+      ],
+      "prerequisites": [
+        "Host 已注入 self-test-image.svg。"
+      ],
+      "steps": [
+        "打开自测样例 self-test-image.svg，检查蓝色矩形、绿色圆和文字 MOSS_IMAGE_PREVIEW。",
+        "使用可用缩放或适应窗口控件，核对图形没有丢失，再关闭预览。"
+      ],
+      "expected": [
+        "图片实际渲染几何图形与文字，没有破图。",
+        "缩放或适应窗口后仍能辨认完整图形，关闭正常。"
+      ]
+    },
+    {
+      "id": "preview-pdf",
+      "title": "PDF 页面与缩放",
+      "group": "多格式预览",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/preview/viewers/PDFViewer.tsx"
+      ],
+      "prerequisites": [
+        "Host 已注入有效的单页 PDF 样例。"
+      ],
+      "steps": [
+        "打开自测样例 self-test-preview.pdf，等待 PDF 渲染完成。",
+        "检查单页中的 MOSS_PDF_PREVIEW 与 Total 580，操作缩放或页码控件，截图并关闭。"
+      ],
+      "expected": [
+        "PDF 成功显示一页，文字和总额完整，无转换失败。",
+        "页码与缩放控件可用且不白屏，关闭后工作区可操作。"
+      ]
+    },
+    {
+      "id": "preview-office",
+      "title": "Word、Excel、PPT 预览",
+      "group": "多格式预览",
+      "default": false,
+      "requiresModel": true,
+      "timeoutSeconds": 600,
+      "sources": [
+        "ui/src/renderer-react/components/preview/viewers/WordViewer.tsx",
+        "ui/src/renderer-react/components/preview/viewers/ExcelViewer.tsx",
+        "ui/src/renderer-react/components/preview/viewers/PPTViewer.tsx"
+      ],
+      "prerequisites": [
+        "目标环境已配置可生成 Office 文件的工具及所需预览转换组件。"
+      ],
+      "steps": [
+        "在新测试会话中要求模型通过可用文档工具实际生成 office-{{runShortId}}.docx、.xlsx、.pptx，内容都含 OFFICE_PREVIEW 和总额 580。",
+        "在工作区逐一打开三种文件并截图；Excel 检查单元格，Word 检查正文，PPT 检查幻灯片。缺生成工具或预览转换依赖时记录阻塞及受影响格式，不安装系统软件。"
+      ],
+      "expected": [
+        "三个文件均真实生成且可打开，正文、单元格、幻灯片内容正确。",
+        "三种预览均可关闭并重新打开，无转换错误或空白页。"
+      ]
+    },
+    {
+      "id": "skills-hub",
+      "title": "技能列表、搜索与详情",
+      "group": "资源中心",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/skill-hub-view.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "打开侧栏“技能·专家·连接器”，进入技能的已安装列表，检查条目或明确空状态。",
+        "有条目时按现有名称搜索并核对卡片名称、描述等详情；如有独立详情入口，再打开并关闭；再搜索 NO_RESOURCE_{{runShortId}}，检查无结果，清空后恢复。连接器仅检查授权状态，不触发登录。"
+      ],
+      "expected": [
+        "技能已安装列表完成加载，存在条目或明确空状态；不能用市场条目代替。",
+        "已有资源搜索匹配，名称、描述等详情可读；有独立详情入口时可开关。无匹配搜索与清空可用。"
+      ]
+    },
+    {
+      "id": "experts-hub",
+      "title": "专家列表、搜索与详情",
+      "group": "资源中心",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/expert-hub-view.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "打开侧栏“技能·专家·连接器”，进入专家的已安装列表，检查条目或明确空状态。",
+        "有条目时按现有名称搜索并核对卡片名称、描述等详情；如有独立详情入口，再打开并关闭；再搜索 NO_RESOURCE_{{runShortId}}，检查无结果，清空后恢复。连接器仅检查授权状态，不触发登录。"
+      ],
+      "expected": [
+        "专家已安装列表完成加载，存在条目或明确空状态；不能用市场条目代替。",
+        "已有资源搜索匹配，名称、描述等详情可读；有独立详情入口时可开关。无匹配搜索与清空可用。"
+      ]
+    },
+    {
+      "id": "connectors-hub",
+      "title": "连接器列表与授权状态",
+      "group": "资源中心",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/connector-hub-view.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "打开侧栏“技能·专家·连接器”，进入连接器的已安装列表，检查条目或明确空状态。",
+        "有条目时按现有名称搜索并核对卡片名称、描述等详情；如有独立详情入口，再打开并关闭；再搜索 NO_RESOURCE_{{runShortId}}，检查无结果，清空后恢复。连接器仅检查授权状态，不触发登录。"
+      ],
+      "expected": [
+        "连接器已安装列表完成加载，存在条目或明确空状态；不能用市场条目代替。",
+        "已有资源搜索匹配，名称、描述等详情可读；有独立详情入口时可开关。无匹配搜索与清空可用。"
+      ]
+    },
+    {
+      "id": "resource-selection",
+      "title": "会话资源选择与取消",
+      "group": "资源中心",
+      "default": false,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/composer-resource-selection-area.tsx"
+      ],
+      "prerequisites": [
+        "至少有一个已安装且可选的资源。"
+      ],
+      "steps": [
+        "新建会话打开“选择资源”，依次检查实际可见的技能、专家、连接器、App 及工作流分类。",
+        "选择一个已安装资源并关闭，检查输入区标签；重新打开取消该资源，检查标签移除。没有任何可选资源时记录阻塞。"
+      ],
+      "expected": [
+        "资源选择器分类和已安装选项显示正确，空分类有明确提示。",
+        "选择与取消后输入区标签同步，不混入未选择资源。"
+      ]
+    },
+    {
+      "id": "apps-list",
+      "title": "继承应用与分类筛选",
+      "default": true,
+      "requiresModel": false,
+      "prerequisites": [
+        "主界面可以交互；已继承主 Moss 的 App 安装及配置，提示中附有继承清单"
+      ],
+      "steps": [
+        "进入应用管理的已安装列表，对照继承清单检查应用及启用状态。不要把应用市场的可安装条目当成已安装应用。",
+        "使用列表上方的 App 分类页签，选择至少两个现有分类（不足两个时选择现有分类），核对选中状态、卡片数量和分类；再切回“全部”。没有已安装 App 时检查空状态。当前界面通过分类筛选，不要求不存在的名称搜索框。",
+        "返回聊天界面。"
+      ],
+      "expected": [
+        "已安装列表包含继承清单中的 App，启用状态一致，没有一直加载或错误覆盖层；仅继承清单为空时可接受空状态。",
+        "分类切换后只显示对应分类的 App，页签选中状态和数量正确；切回“全部”恢复全部已安装 App。返回聊天界面后仍可操作；空安装环境应显示明确空状态。"
+      ],
+      "group": "Apps",
+      "sources": [
+        "ui/src/renderer-react/components/apps-panel.tsx"
+      ],
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "app-launch",
+      "title": "App 打开、返回与设置入口",
+      "group": "Apps",
+      "default": false,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/apps-panel.tsx"
+      ],
+      "prerequisites": [
+        "至少有一个带 UI 的已启用 App。"
+      ],
+      "steps": [
+        "进入已安装 Apps，选择一个有 UI 且已启用的 App（优先非自测 App），点击打开。",
+        "等待主视图，返回 Apps 再打开；如该 App 提供设置入口，一并打开检查。不要提交业务写入。"
+      ],
+      "expected": [
+        "App UI 成功加载且能与 Moss 导航正常返回，不一直显示空白或加载。",
+        "重新打开可用；有设置贡献时对应设置页加载成功。"
+      ]
+    },
+    {
+      "id": "app-toggle",
+      "title": "App 停用、启用与入口同步",
+      "group": "Apps",
+      "default": false,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/apps-panel.tsx"
+      ],
+      "prerequisites": [
+        "至少有一个非 AI 自测的已安装 App。"
+      ],
+      "steps": [
+        "从测试实例已安装列表选择一个非自测、非本项正在使用的 App，记录原启用状态。",
+        "切换停用，核对打开入口禁用；再启用并核对，离开重新进入确认状态；最后恢复原状态。"
+      ],
+      "expected": [
+        "停用后入口不可用，重新启用后状态和入口一致。",
+        "状态在重新进入后保持，原状态已恢复；自测控制端未被停用。"
+      ]
+    },
+    {
+      "id": "app-versions",
+      "title": "App 版本与运行实例详情",
+      "group": "Apps",
+      "default": false,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/apps-panel.tsx"
+      ],
+      "prerequisites": [
+        "至少安装一个 App。"
+      ],
+      "steps": [
+        "打开已安装 App 的“版本”，核对当前版本与卡片显示一致。",
+        "展开可用实例详情查看启用状态与日志入口；关闭再打开版本面板。不执行回滚、清除密钥或卸载。"
+      ],
+      "expected": [
+        "版本列表显示真实当前版本，与卡片一致。",
+        "实例状态和版本面板正常加载；未配置实例时明确显示状态。"
+      ]
+    },
+    {
+      "id": "app-tool-scope",
+      "title": "App 工具会话选择范围",
+      "group": "Apps",
+      "default": false,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/settings-view.tsx",
+        "ui/src/renderer-react/components/app-mcp-tool-rows.tsx",
+        "ui/src/renderer-react/components/composer-resource-selection-area.tsx"
+      ],
+      "prerequisites": [
+        "至少有一个已启用且提供工具的 App。"
+      ],
+      "steps": [
+        "打开设置的工具分区，选择一个提供工具的已安装 App，核对名称、工具列表以及“全局 · 按需”或“指定 · 选择后常驻”范围。",
+        "新建会话通过选择资源关联该 App，关闭再打开核对已选状态；取消关联检查标签移除。App 声明的全局/指定范围本身不会因一次会话勾选而改变。"
+      ],
+      "expected": [
+        "App 工具名称、来源和声明范围正确，工具详情可查看。",
+        "会话关联与取消后，选择器状态与输入区标签同步；App 声明范围不被会话勾选改写。"
+      ]
+    },
+    {
+      "id": "app-marketplace",
+      "title": "应用市场分类、详情与刷新",
+      "group": "Apps",
+      "default": false,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/app-marketplace-panel.tsx"
+      ],
+      "prerequisites": [
+        "应用市场网络服务可用。"
+      ],
+      "steps": [
+        "打开应用市场，等待真实条目，选择现有分类并核对所属分类；切回全部。",
+        "打开一个条目的详情，检查名称、版本和说明；收起后刷新目录并返回已安装 Apps。只浏览，不安装升级。当前市场没有名称搜索入口，不把不存在的功能作为已实现功能验收。"
+      ],
+      "expected": [
+        "市场实际条目和分类对应，切回全部恢复列表；服务不可达不能当成空市场通过。",
+        "详情显示真实版本及说明；收起、刷新和返回正常，未安装或升级应用。"
       ]
     },
     {
       "id": "workflow-demo",
       "title": "真实工作流演示任务",
-      "default": true,
+      "default": false,
       "requiresModel": true,
       "prerequisites": [
         "继承环境已安装工作流 App；在测试实例中启用该 App；使用当前真实模型"
@@ -160,12 +978,17 @@
         "实际创建并运行了工作流，至少两个 Agent 节点执行完成，运行最终成功；只有定义或口头描述不算通过。",
         "真实节点输出中订单总额为 580，复核结果一致；没有模型或节点执行错误。",
         "用户能打开运行详情和 workflow-demo-report.md，查看节点结果、最终结论和测试数据。"
-      ]
+      ],
+      "group": "Agent 与自动化",
+      "sources": [
+        "ui/src/renderer-react/components/composer-resource-selection-area.tsx"
+      ],
+      "timeoutSeconds": 600
     },
     {
       "id": "agent-team-demo",
       "title": "真实 Agent Team 协作任务",
-      "default": true,
+      "default": false,
       "requiresModel": true,
       "prerequisites": [
         "当前真实模型可用；在测试实例设置中启用 Agent Teams"
@@ -179,6 +1002,319 @@
         "实际创建了至少两个独立队友，各有独立任务和执行记录；不能只有队长文字模拟协作。",
         "两名队友均返回真实模型结果，队长在任务完成后汇总，总额为 580，没有卡死或未完成成员任务。",
         "团队历史、成员执行记录、任务状态和 team-demo-report.md 可供用户打开查看。"
+      ],
+      "group": "Agent 与自动化",
+      "sources": [
+        "ui/src/renderer-react/components/agent-teams-workbench.tsx"
+      ],
+      "timeoutSeconds": 600
+    },
+    {
+      "id": "agent-manager",
+      "title": "自定义 Agent 创建与编辑",
+      "group": "Agent 与自动化",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 240,
+      "sources": [
+        "ui/src/renderer-react/components/agent-manager.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "打开设置 Agents，新建 agent-{{runShortId}}，填写描述 SELF_TEST_AGENT 和角色指令，只允许 Read 工具，保存。",
+        "重新打开编辑，把描述改为 SELF_TEST_AGENT_EDITED 后保存，再打开核对，保留本轮 Agent。"
+      ],
+      "expected": [
+        "本轮 Agent 实际保存并在列表显示，名称与工具范围正确。",
+        "修改描述持久保存，重开编辑仍包含角色指令和工具配置。"
+      ]
+    },
+    {
+      "id": "cron-list",
+      "title": "定时任务位置与状态",
+      "group": "Agent 与自动化",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/cron-view.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "从更多功能进入定时任务，查看本地位置的任务列表或明确空状态。",
+        "若有云端页签，切换检查登录或加载状态，再回本地；仅查看，不执行已有任务。"
+      ],
+      "expected": [
+        "本地定时任务列表正确显示，空列表有明确提示。",
+        "位置切换可返回，云端未登录时显示对应状态，不能持续加载。"
+      ]
+    },
+    {
+      "id": "cron-execution",
+      "title": "定时任务创建、暂停与执行",
+      "group": "Agent 与自动化",
+      "default": false,
+      "requiresModel": true,
+      "timeoutSeconds": 420,
+      "sources": [
+        "ui/src/renderer-react/components/cron-view.tsx"
+      ],
+      "prerequisites": [
+        "本地调度工具可用；不操作其他已有任务。"
+      ],
+      "steps": [
+        "新建测试会话，请模型通过真实调度工具创建 cron-{{runShortId}}，每天 23:59 执行“只回复 CRON_OK_{{runShortId}}”，仅用于本轮测试。",
+        "打开定时任务找到本轮任务，暂停、启用并立即执行；检查运行记录和回复；最后暂停本轮任务，保留记录以免未来重复执行。"
+      ],
+      "expected": [
+        "真实任务存在，暂停和启用状态可持久切换。",
+        "立即执行产生真实运行和回复，结束后本轮任务已暂停。"
+      ]
+    },
+    {
+      "id": "overview-usage",
+      "title": "用量概览与统计切换",
+      "group": "概览与记忆",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/overview-view.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "从更多功能打开概览，检查本地电脑 Token 用量和 Token 活动。",
+        "切换实际提供的每日、每周、累计统计方式，点击刷新概览，检查数值和图表；未登录云端时核对登录状态。"
+      ],
+      "expected": [
+        "本地统计无 NaN、负数或加载错误，零数据应明确显示。",
+        "统计方式切换与刷新可用，图表标题、选中态和显示方式一致。"
+      ]
+    },
+    {
+      "id": "resource-monitor",
+      "title": "运行资源与进程监控",
+      "group": "概览与记忆",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/resource-monitor-view.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "在概览切换资源监控，检查 CPU、内存及运行会话/进程信息。",
+        "切换可用的监控分区或刷新，核对数值单位与列表；不结束任何进程。"
+      ],
+      "expected": [
+        "资源图表和进程列表完成加载，CPU/内存数值有效且单位可读。",
+        "刷新或分区切换后仍正常显示；空运行实例有明确状态。"
+      ]
+    },
+    {
+      "id": "memory-overview",
+      "title": "记忆范围与条目浏览",
+      "group": "概览与记忆",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/memory-overview.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "从概览进入记忆，依次查看实际提供的全局、项目、会话范围。",
+        "有条目时打开详情或来源，搜索已知词后清空；无数据时检查空状态。不删除已有记忆，不触发 Dream。"
+      ],
+      "expected": [
+        "不同范围可切换，条目或空状态与所选范围对应。",
+        "详情来源或空状态可读，返回后范围状态正确，无持续加载。"
+      ]
+    },
+    {
+      "id": "agent-mail",
+      "title": "协作邮箱列表与详情",
+      "group": "概览与记忆",
+      "default": false,
+      "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/agent-mail-view.tsx"
+      ],
+      "prerequisites": [
+        "已开启云端模式并启用协作邮箱，且账号和网络可用；只读浏览，不发送邮件。"
+      ],
+      "steps": [
+        "从更多功能打开协作邮箱，检查实际可见的信箱、筛选及消息列表。",
+        "有本轮测试协作记录时打开一条详情核对参与者、正文及状态；否则核对空状态。仅浏览。"
+      ],
+      "expected": [
+        "收件箱和筛选正常加载，空状态明确。",
+        "现有消息可查看完整详情，返回后列表可用；无消息时如实记录未覆盖详情。"
+      ]
+    },
+    {
+      "id": "notifications",
+      "title": "消息中心通知与返回",
+      "group": "概览与记忆",
+      "default": true,
+      "requiresModel": false,
+      "timeoutSeconds": 120,
+      "sources": [
+        "ui/src/renderer-react/components/notification-center.tsx"
+      ],
+      "prerequisites": [
+        "独立测试实例已启动；只操作本轮测试数据。"
+      ],
+      "steps": [
+        "打开消息中心，检查通知列表或空状态。",
+        "如有本轮测试通知，打开其关联会话或任务核对跳转；无通知则关闭再打开检查空状态。"
+      ],
+      "expected": [
+        "通知面板可开关，通知内容或空状态可辨识。",
+        "本轮通知跳转对应目标；空环境能关闭再打开，不把未执行的跳转宣称已通过。"
+      ]
+    },
+    {
+      "id": "browser-panel",
+      "title": "浏览器面板与页面导航",
+      "group": "扩展能力",
+      "default": false,
+      "requiresModel": false,
+      "timeoutSeconds": 240,
+      "sources": [
+        "ui/src/renderer-react/components/browser-panel.tsx"
+      ],
+      "prerequisites": [
+        "浏览器 App/浏览器运行环境可用且可以访问 example.com。"
+      ],
+      "steps": [
+        "打开自测样例右侧栏的“浏览器”页签，按实际界面进入浏览器，导航至 https://example.com，等待 Example Domain。",
+        "在浏览器面板刷新并检查页面、地址与加载状态，关闭再打开。不输入外部账号。"
+      ],
+      "expected": [
+        "实际浏览器页面可见，标题与地址对应 Example Domain。",
+        "刷新及重新打开正常，截图能看到渲染页面。"
+      ]
+    },
+    {
+      "id": "session-terminal",
+      "title": "会话终端与工作区",
+      "group": "扩展能力",
+      "default": false,
+      "requiresModel": false,
+      "timeoutSeconds": 180,
+      "sources": [
+        "ui/src/renderer-react/components/session-terminal-actions.tsx"
+      ],
+      "prerequisites": [
+        "终端运行环境可用；本项使用可见终端输入。"
+      ],
+      "steps": [
+        "打开自测样例会话的终端入口，核对终端绑定工作区。",
+        "在终端运行打印 MOSS_TERMINAL_OK 的简单命令，检查输出，关闭终端并回到会话。不要启动服务或修改文件。"
+      ],
+      "expected": [
+        "终端成功打开且工作区对应当前会话。",
+        "真实命令输出 MOSS_TERMINAL_OK，无错误，关闭后会话可操作。"
+      ]
+    },
+    {
+      "id": "remote-session",
+      "title": "远程会话连接与文件浏览",
+      "group": "扩展能力",
+      "default": false,
+      "requiresModel": false,
+      "timeoutSeconds": 240,
+      "sources": [
+        "ui/src/renderer-react/components/workspace-selector.tsx"
+      ],
+      "prerequisites": [
+        "已配置可访问的远程实例且已登录；只读验证。"
+      ],
+      "steps": [
+        "通过界面打开可用远程工作区或远程会话，查看连接状态。",
+        "只读查看该会话消息和文件列表，返回本地自测样例；不创建远程任务或改动远程文件。"
+      ],
+      "expected": [
+        "真实远程连接成功，身份和工作区显示为选中的远程目标。",
+        "消息/文件可以读取且能返回本地；未配置或未登录必须阻塞。"
+      ]
+    },
+    {
+      "id": "web-search",
+      "title": "真实网页搜索与来源",
+      "group": "扩展能力",
+      "default": false,
+      "requiresModel": true,
+      "timeoutSeconds": 300,
+      "sources": [
+        "ui/src/renderer-react/components/settings-view.tsx"
+      ],
+      "prerequisites": [
+        "已配置可用网页搜索服务。"
+      ],
+      "steps": [
+        "新建会话，请模型通过已配置网页搜索查询 example.com 的用途，列出来源 URL，回复 SEARCH_OK_{{runShortId}}。",
+        "检查真实搜索工具调用、返回内容和 assistant 来源；搜索工具未调用不能算通过。"
+      ],
+      "expected": [
+        "真实搜索工具执行成功，有来源结果，未使用模型记忆冒充搜索。",
+        "assistant 回复包含来源链接与本轮标记，工具结果可展开查看。"
+      ]
+    },
+    {
+      "id": "image-generation",
+      "title": "图片生成与产物预览",
+      "group": "扩展能力",
+      "default": false,
+      "requiresModel": true,
+      "timeoutSeconds": 480,
+      "sources": [
+        "ui/src/renderer-react/components/preview/viewers/ImageViewer.tsx"
+      ],
+      "prerequisites": [
+        "已配置可用图片生成模型或 App；本项产生图片模型调用。"
+      ],
+      "steps": [
+        "新建会话，请模型通过已配置图片生成工具生成一张蓝底绿色圆形测试图，保存 image-{{runShortId}}.png。",
+        "等待实际工具完成，打开生成图片及产物卡，检查蓝底和绿色圆形。"
+      ],
+      "expected": [
+        "真实图片生成工具完成且存在可打开的本轮图片文件。",
+        "图片内容与任务相符，产物卡和工作区预览对应同一文件。"
+      ]
+    },
+    {
+      "id": "computer-use",
+      "title": "原生电脑操作与授权状态",
+      "group": "扩展能力",
+      "default": false,
+      "requiresModel": true,
+      "timeoutSeconds": 300,
+      "sources": [
+        "ui/src/renderer-react/components/computer-use.tsx"
+      ],
+      "prerequisites": [
+        "系统已授予截图及辅助功能权限，且原生操作运行时可用。CDP 本身不覆盖系统原生能力。"
+      ],
+      "steps": [
+        "在被测 Moss 新建会话，打开选择资源的 App 页签并勾选已启用的“电脑操控”（moss.computer-use），确认输入区已选标签。该 App 属于会话范围；控制 AI 自己没有原生工具不代表目标没有能力。先请目标模型调用真实电脑操控工具的 status，检查系统截图/辅助功能权限与运行时，再仅定位当前测试实例窗口并截图；不得用 CDP 截图冒充原生工具。若系统权限不足或无法区分主 Moss 与测试窗口，记录阻塞，不操作其他窗口。",
+        "出现“电脑操控”授权浮层时核对目标及本轮会话，仅允许本次；检查真实工具返回的测试窗口截图，然后点击停止控制并核对浮层退出。不操作其他应用。"
+      ],
+      "expected": [
+        "真实原生工具返回测试窗口截图；若出现授权，目标和会话对应本轮测试。",
+        "停止控制后退出活动状态，测试窗口仍可交互；未配置原生能力时明确阻塞。"
       ]
     }
   ]

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.ctrip-wendao",
+  "summary": "通过携程问道 API 获取旅行规划与攻略。支持酒店查询、机票搜索、景点推荐、行程规划、美食住宿攻略。",
+  "description": "通过携程问道 API 获取旅行规划与攻略。支持酒店查询、机票搜索、景点推荐、行程规划、美食住宿攻略。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/ctrip-wendao",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

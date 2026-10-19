@@ -1,0 +1,10 @@
+{
+  "name": "ihr-insurance",
+  "display_name": "i人事AI·HR专家",
+  "description": "智能连接 i 人事，一句话查询组织架构、员工档案、入转调离、合同培训、考勤审批、薪资台账与绩效结果，并协助发起和管理面谈会议等 HR 事务。",
+  "source_type": "connector",
+  "connector_id": "ihr-cli",
+  "connector_type": "cli",
+  "enabled": true,
+  "installed_at": ""
+}

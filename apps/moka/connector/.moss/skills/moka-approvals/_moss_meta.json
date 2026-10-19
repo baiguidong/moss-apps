@@ -1,0 +1,10 @@
+{
+  "name": "moka-approvals",
+  "display_name": "Moka HR 智能体",
+  "description": "招聘和人事一体的 AI 同事，把查询与执行收进一个对话。人才推荐、招聘动态、考勤绩效、审批待办，一句话问清；候选人寻访、面试分析与面试官评估，一句话发起。",
+  "source_type": "connector",
+  "connector_id": "moka",
+  "connector_type": "mcp",
+  "enabled": true,
+  "installed_at": ""
+}

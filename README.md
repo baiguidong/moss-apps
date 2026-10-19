@@ -1,5 +1,7 @@
 # Moss Apps
 
+新增 115 个 MCP / CLI / 技能服务的源码位于 `apps/<服务名>`，App ID 使用 `moss.<服务名>`，与现有 App 共用构建、签名发布和应用市场。新增飞书 CLI 使用 `feishu-cli`，避免与现有飞书 App 重名。现有 App 卡片和安装保持原样；不自动迁移用户的旧连接器数据。参见 [连接器 App 交付](docs/connector-apps-delivery.md)。
+
 Moss 官方 App 的独立源码与发布仓库。普通 App 位于 `apps/<name>`；配置型 MCP App 位于 `mcp-apps/<name>`，只维护定义和资源，由 Moss Core 提供公共 UI 与运行能力。两者共用自动发布与应用市场。
 
 App 按主要用途分组：
@@ -7,13 +9,15 @@ App 按主要用途分组：
 | 分类 | App |
 | --- | --- |
 | 沟通协作 `communication` | [飞书](apps/feishu/README.md)、[即时消息](apps/openim/README.md) |
-| 知识与文件 `knowledge` | [知识库](apps/library/README.md)、[网盘](apps/drive/README.md)、[文件系统](mcp-apps/filesystem/README.md)、[图片工具](apps/image-tools/README.md)、[PDF 工作台](apps/pdf-tools/README.md)、[语音转写](apps/transcription/README.md)、[文件清理](apps/file-cleaner/README.md)、[文档格式转换](apps/document-converter/README.md) |
+| 知识与文件 `knowledge` | [知识库](apps/library/README.md)、[网盘](apps/drive/README.md)、[文件系统](mcp-apps/filesystem/README.md)、[文档转换](mcp-apps/markitdown/README.md)、[Excel 表格](mcp-apps/excel/README.md)、[图片工具](apps/image-tools/README.md)、[PDF 工作台](apps/pdf-tools/README.md)、[语音转写](apps/transcription/README.md)、[文件清理](apps/file-cleaner/README.md)、[文档格式转换](apps/document-converter/README.md) |
 | 自动化 `automation` | [工作流](apps/workflow/README.md)、[网页操控](apps/browser-use/README.md)、[电脑操控](apps/computer-use/README.md) |
 | AI 增强 `ai` | [记忆](apps/memory/README.md)、[分步思考](mcp-apps/sequential-thinking/README.md)、[MCP 管理](apps/mcp/README.md) |
-| 开发工具 `development` | [应用构建](apps/app-builder/README.md)、[开发工具](apps/devtools/README.md)、[Git 仓库](mcp-apps/git/README.md)、[代码地图](apps/code-map/README.md) |
+| 开发工具 `development` | [应用构建](apps/app-builder/README.md)、[开发工具](apps/devtools/README.md)、[Git 仓库](mcp-apps/git/README.md)、[数据库查询](apps/database/README.md)、[代码地图](apps/code-map/README.md) |
 | 诊断与审计 `diagnostics` | [调用追踪](apps/trace/README.md)、[审计中心](apps/audit/README.md) |
 
 规划中的本地工具扩展见 [本地工具 App 选型与接入方案](docs/local-tool-apps-plan.md)，覆盖开发工具、HTTP 调试、图片和音视频处理。
+
+文档转换、Excel 与数据库查询的接入、Core 配套修复及真实服务验证见 [三个本地 MCP App 交付记录](docs/office-mcp-app-delivery.md)。
 
 图片工具、PDF 工作台和语音转写采用自有 UI 与本地 Backend，首批交付范围、安装包和实际 Moss 页面验证见 [本地任务 App 交付记录](docs/local-task-apps-delivery.md)。
 

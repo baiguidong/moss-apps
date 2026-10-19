@@ -1,0 +1,44 @@
+{
+  "title": "福马AI外呼配置",
+  "titleEn": "Fuma AI Callout Configuration",
+  "description": "连接福马AI账号，用于查询智能体、成员并创建外呼任务。凭证仅存储在本机 ~/.workbuddy 中。",
+  "descriptionEn": "Connect your Fuma AI account to query phone agents, query assignable members, and create callout tasks. Credentials are stored locally in ~/.workbuddy only.",
+  "docUrl": "https://docs.qq.com/doc/DTGtFdFVVZGJoYmdj",
+  "docLabel": "如何获取福马AI凭证？",
+  "docLabelEn": "How to get Fuma AI credentials?",
+  "fields": [
+    {
+      "key": "ACCESS_TOKEN",
+      "label": "凭证",
+      "labelEn": "Access Token",
+      "placeholder": "从福马AI后台获取",
+      "placeholderEn": "Get it from the Fuma AI console",
+      "description": "用于鉴权的访问令牌。",
+      "descriptionEn": "The access token used for authentication.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "key": "ORG_CODE",
+      "label": "组织编码",
+      "labelEn": "orgCode",
+      "placeholder": "请输入 orgCode",
+      "placeholderEn": "Enter orgCode",
+      "description": "调用福马AI开放接口时使用的组织编码。",
+      "descriptionEn": "The organization code used when calling Fuma AI open APIs.",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "LOGIN_NAME",
+      "label": "登录名",
+      "labelEn": "loginName",
+      "placeholder": "请输入 loginName",
+      "placeholderEn": "Enter loginName",
+      "description": "调用福马AI开放接口时使用的登录名。",
+      "descriptionEn": "The login name used when calling Fuma AI open APIs.",
+      "type": "text",
+      "required": true
+    }
+  ]
+}

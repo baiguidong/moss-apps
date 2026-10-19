@@ -857,14 +857,12 @@ export function AuditView({
     <div className="flex h-full min-h-0 flex-col bg-background">
       <div className="shrink-0 border-b border-border/70 px-4 py-3 sm:px-6">
         <div className="mx-auto flex max-w-[1280px] items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-emerald-600 text-white"><ShieldCheck className="h-4.5 w-4.5" /></span>
           <div className="min-w-0 flex-1">
-            <div className="text-sm font-medium text-foreground">审计中心</div>
             <div className="mt-0.5 truncate text-xs text-muted-foreground">
               {running ? (progress?.total ? `正在审计 ${progress.completed}/${progress.total}` : "正在审计") : summary?.latestCompletedAt ? `最近完成于 ${formatTime(summary.latestCompletedAt)}` : "尚未执行"}
             </div>
           </div>
-          <Button variant="outline" size="sm" className="h-8" onClick={() => void refresh()} disabled={loading || auditBusy} title="刷新"><RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} /></Button>
+          <Button variant="outline" size="sm" className="h-8" onClick={() => void refresh()} disabled={loading || auditBusy} title="刷新审计记录" aria-label="刷新审计记录"><RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} /></Button>
           <Button size="sm" className="h-8" onClick={() => void runFullAudit()} disabled={auditBusy}>
             <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />{running ? "审计中" : "重新审计"}
           </Button>

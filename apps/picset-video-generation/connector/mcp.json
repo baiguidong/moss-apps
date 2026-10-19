@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "picset-video-generation": {
+      "type": "http",
+      "url": "https://picsetai.cn/functions/v1/agent-video-mcp-v1/mcp",
+      "headers": {
+        "Authorization": "Bearer ${PICSET_AGENT_SK}"
+      }
+    }
+  }
+}
