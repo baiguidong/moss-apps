@@ -13,7 +13,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-14, macos-15-intel, windows-latest]
+        include:
+          - { os: ubuntu-latest, platform: linux-x64 }
+          - { os: macos-14, platform: darwin-arm64 }
+          - { os: macos-15-intel, platform: darwin-x64 }
+          - { os: windows-latest, platform: win32-x64 }
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
@@ -34,12 +38,21 @@ jobs:
           key: ${{ runner.os }}-bun-1.3.10-${{ hashFiles('bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-1.3.10-
       - run: bun install --frozen-lockfile
-      - run: node scripts/package-app.mjs --app "${{ inputs.app }}"
-      - run: node scripts/verify-source-package.mjs --app "${{ inputs.app }}" --rebuild
+      - id: target
+        shell: bash
+        env:
+          APP_ID: ${{ inputs.app }}
+          TARGET_PLATFORM: ${{ matrix.platform }}
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; import { selectApps } from "./scripts/lib.mjs"; const app = selectApps(["--app", process.env.APP_ID])[0]; fs.appendFileSync(process.env.GITHUB_OUTPUT, "supported=" + (app.manifest.platforms || app.marketplace.platforms).includes(process.env.TARGET_PLATFORM) + "\n")'
+      - if: steps.target.outputs.supported == 'true'
+        run: node scripts/package-app.mjs --app "${{ inputs.app }}"
+      - if: steps.target.outputs.supported == 'true'
+        run: node scripts/verify-source-package.mjs --app "${{ inputs.app }}" --rebuild
       - uses: actions/setup-python@v5
-        if: contains(fromJSON('["moss.excel","moss.markitdown"]'), inputs.app)
+        if: steps.target.outputs.supported == 'true' && contains(fromJSON('["moss.excel","moss.markitdown"]'), inputs.app)
         with:
           python-version: '3.13'
       - name: Call portable MCP service on the target OS
-        if: contains(fromJSON('["moss.database","moss.excel","moss.markitdown"]'), inputs.app)
+        if: steps.target.outputs.supported == 'true' && contains(fromJSON('["moss.database","moss.excel","moss.markitdown"]'), inputs.app)
         run: node scripts/verify-portable-services.mjs --app "${{ inputs.app }}"

@@ -24,6 +24,6 @@ node scripts/verify-source-package.mjs --app moss.markitdown --rebuild
 node scripts/verify-office-mcp.mjs --app moss.markitdown
 ```
 
-包位于 `artifacts/moss.markitdown/0.1.1/`，携带配置源码、资源、固定 Core 生成器和构建锁文件。MCP 服务及其运行依赖在首次连接时下载，不在 ZIP 中预装。真实服务验证使用临时文件和独立配置，不读取用户文档；发布任务在 macOS、Windows 和 Linux 检查实际 MCP 调用。
+包位于 `artifacts/moss.markitdown/0.1.1/`，携带配置源码、资源、固定 Core 生成器和构建锁文件。MCP 服务及其运行依赖在首次连接时下载，不在 ZIP 中预装。真实服务验证使用临时文件和独立配置，不读取用户文档；发布任务在 macOS Apple Silicon、Windows x64 和 Linux x64 检查实际 MCP 调用。macOS Intel 上依赖安装超过 Host 的四分钟上限，暂不声明支持。
 
 上游：[Microsoft MarkItDown MCP](https://github.com/microsoft/markitdown/tree/main/packages/markitdown-mcp)。许可证原文位于 `resources/assets/licenses/markitdown-mcp-LICENSE.txt`。

@@ -3,7 +3,6 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { DatabaseSync } from 'node:sqlite'
 import { pathToFileURL } from 'node:url'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
@@ -18,6 +17,7 @@ let client
 try {
   let config
   if (appId === 'moss.database') {
+    const { DatabaseSync } = await import('node:sqlite')
     const file = path.join(root, 'test.sqlite')
     const db = new DatabaseSync(file)
     db.exec('CREATE TABLE records (value INTEGER NOT NULL); INSERT INTO records VALUES (42)')
