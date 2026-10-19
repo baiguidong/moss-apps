@@ -136,7 +136,8 @@ export class DatabaseService {
       const name = previous?.name || `db_${randomUUID().replaceAll('-', '').slice(0, 16)}`
       try {
         catalog = await request('servers.save', { name, ...(previous ? { previousName: name } : {}), enabled: old ? previous.enabled : true,
-          config: { type: 'stdio', command: 'npx', args: ['-y', '@bytebase/dbhub@1.5.0', '--transport', 'stdio', '--config', file], env } })
+          config: { type: 'stdio', command: process.platform === 'win32' ? 'cmd' : 'npx',
+            args: [...(process.platform === 'win32' ? ['/c', 'npx'] : []), '-y', '@bytebase/dbhub@1.5.0', '--transport', 'stdio', '--config', file], env } })
       } catch (error) { await fs.rm(file, { force: true }); throw error }
       // Files are immutable per revision: failed saves cannot break a live connection.
       return { ...await this.list(catalog, directory), savedId: name }

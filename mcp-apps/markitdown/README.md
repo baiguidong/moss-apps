@@ -1,6 +1,6 @@
 # 文档转换 · MarkItDown
 
-配置型 App `moss.markitdown@0.1.0`。固定使用微软 [`markitdown-mcp==0.0.1a7`](https://pypi.org/project/markitdown-mcp/0.0.1a7/)，由 Moss Core 提供设置页、Python 环境、MCP 连接和生命周期，不包含独立 Backend。
+配置型 App `moss.markitdown@0.1.1`。固定使用微软 [`markitdown-mcp==0.0.1a7`](https://pypi.org/project/markitdown-mcp/0.0.1a7/)，由 Moss Core 提供设置页、Python 环境、MCP 连接和生命周期，不包含独立 Backend。
 
 需要 Host API >=3.11 和 Python >=3.10。首次检查或调用时，Core 在独立虚拟环境下载上游依赖，后续复用缓存；不向系统 Python 安装包。固定的是顶层 MCP 包，传递依赖由上游版本约束解析。首次依赖准备需要联网。上游当前版本为预发布版。
 
@@ -24,6 +24,6 @@ node scripts/verify-source-package.mjs --app moss.markitdown --rebuild
 node scripts/verify-office-mcp.mjs --app moss.markitdown
 ```
 
-包位于 `artifacts/moss.markitdown/0.1.0/`，携带配置源码、资源、固定 Core 生成器和构建锁文件。MCP 服务及其运行依赖在首次连接时下载，不在 ZIP 中预装。真实服务验证使用临时文件和独立配置，不读取用户文档。首版市场只声明已实测的 macOS Apple Silicon。
+包位于 `artifacts/moss.markitdown/0.1.1/`，携带配置源码、资源、固定 Core 生成器和构建锁文件。MCP 服务及其运行依赖在首次连接时下载，不在 ZIP 中预装。真实服务验证使用临时文件和独立配置，不读取用户文档；发布任务在 macOS、Windows 和 Linux 检查实际 MCP 调用。
 
 上游：[Microsoft MarkItDown MCP](https://github.com/microsoft/markitdown/tree/main/packages/markitdown-mcp)。许可证原文位于 `resources/assets/licenses/markitdown-mcp-LICENSE.txt`。

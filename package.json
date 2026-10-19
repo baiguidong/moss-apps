@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@moss/app-sdk": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.29.0",
     "fflate": "^0.8.2",
     "semver": "^7.7.4",
     "yauzl": "^3.2.1",

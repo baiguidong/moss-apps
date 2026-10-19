@@ -1,6 +1,6 @@
 # Excel 表格
 
-配置型 App `moss.excel@0.1.0`。固定 [`excel-mcp-server==2.0.0`](https://pypi.org/project/excel-mcp-server/2.0.0/)，由 Core 提供设置页、Python 环境和 stdio MCP 连接。基于 openpyxl，无需安装 Microsoft Excel。
+配置型 App `moss.excel@0.1.1`。固定 [`excel-mcp-server==2.0.0`](https://pypi.org/project/excel-mcp-server/2.0.0/)，由 Core 提供设置页、Python 环境和 stdio MCP 连接。基于 openpyxl，无需安装 Microsoft Excel。
 
 需要 Host API >=3.11、Python >=3.11。首次连接在 Core 独立虚拟环境下载依赖，后续复用缓存。固定顶层 MCP 包；传递依赖按上游版本约束解析。入口是 `python -I -m excel_mcp stdio`，不是旧版本的模块名称。
 
@@ -28,6 +28,6 @@ node scripts/verify-source-package.mjs --app moss.excel --rebuild
 node scripts/verify-office-mcp.mjs --app moss.excel
 ```
 
-包位于 `artifacts/moss.excel/0.1.0/`，携带可重建配置源码与固定 Core 生成器。服务运行依赖首次使用时下载。真实验证使用临时工作簿，覆盖读写、保存后重连、图表和目录拒绝。首版市场只声明已实测的 macOS Apple Silicon。
+包位于 `artifacts/moss.excel/0.1.1/`，携带可重建配置源码与固定 Core 生成器。服务运行依赖首次使用时下载。真实验证使用临时工作簿，覆盖读写、保存后重连、图表和目录拒绝；发布任务在 macOS、Windows 和 Linux 检查实际 MCP 调用。
 
 上游：https://github.com/haris-musa/excel-mcp-server 。许可证原文位于 `resources/assets/licenses/excel-mcp-server-LICENSE.txt`。

@@ -1,6 +1,6 @@
 # 数据库查询
 
-`moss.database@0.2.1` 在 App 页面中动态管理数据库连接，无需手写 TOML 或修改启动参数。数据库工具由固定版本 `@bytebase/dbhub@1.5.0` 提供，需要 Moss Host API >=3.9 和 Node >=22.5。
+`moss.database@0.2.2` 在 App 页面中动态管理数据库连接，无需手写 TOML 或修改启动参数。数据库工具由固定版本 `@bytebase/dbhub@1.5.0` 提供，需要 Moss Host API >=3.9 和 Node >=22.5。
 
 ## 使用
 
@@ -29,6 +29,6 @@ node apps/database/scripts/verify-layout.mjs
 
 `verify-ui.mjs` 需要完整 Core checkout（默认 `../moss`，可设置 `MOSS_CORE_ROOT`）、已构建的 `ui/electron-direct.mjs` 和 Chrome。它使用临时 App profile、真实 Backend/Core 凭据库、DBHub 和 SQLite；浏览器页面操作覆盖添加、验证、重启恢复、编辑、启停、删除、密码不回显及浅色/深色/窄屏布局。不会连接个人或生产数据库。`verify-layout.mjs` 使用模拟桥接验证深浅色、窄屏与较矮面板中的滚动区、按钮和错误提示，无需数据库。其他数据库驱动的连接地址生成和凭据更新由单元测试覆盖。
 
-ZIP、源码快照与验证截图位于 `artifacts/moss.database/0.2.1/`。目前市场仅声明已验证的 macOS Apple Silicon。
+ZIP、源码快照与验证截图位于 `artifacts/moss.database/0.2.2/`。同一签名 ZIP 声明支持 macOS、Windows 和 Linux；发布任务在各平台检查实际 SQLite MCP 查询。
 
 上游：[DBHub](https://github.com/bytebase/dbhub)，[MIT 许可证](assets/licenses/dbhub-LICENSE.txt)。

@@ -1,5 +1,9 @@
 # 更新记录
 
+## 0.3.7
+
+- 将不含平台专属运行文件的工作流包开放给 macOS、Windows 和 Linux；同一签名 ZIP 适用于声明的平台。
+
 ## 0.3.6
 
 - 统一使用 Moss 的 StructuredOutput 返回节点结果，避免文字/JSON 指令与工具输出协议冲突。

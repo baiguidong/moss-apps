@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+- 数据库查询包支持 macOS、Windows 和 Linux；Windows 使用 `cmd /c npx` 启动 DBHub。
+
 ## 0.2.1
 
 - 修复较矮窗口中表单与底部按钮重叠，内容独立滚动、操作栏始终可见。

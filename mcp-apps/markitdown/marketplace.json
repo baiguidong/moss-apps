@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "appId": "moss.markitdown",
   "summary": "将 PDF、Office 文档和网页转换为 Markdown，方便在对话中阅读与分析。",
-  "platforms": ["darwin-arm64"],
+  "platforms": ["darwin-arm64", "darwin-x64", "win32-x64", "linux-x64"],
   "homepage": "https://github.com/baiguidong/moss-apps/tree/main/mcp-apps/markitdown",
   "repository": "https://github.com/baiguidong/moss-apps",
   "license": "MIT"

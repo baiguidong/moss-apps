@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "moss.excel",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "displayName": "Excel 表格",
   "description": "在本机创建、读取和编辑 Excel 工作簿、公式与图表，无需安装 Excel。",
   "category": "knowledge",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "moss.markitdown",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "displayName": "文档转换",
   "description": "使用 MarkItDown 将 PDF、Word、PowerPoint、Excel 和网页转换为 Markdown。",
   "category": "knowledge",

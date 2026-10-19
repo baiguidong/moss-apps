@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- 同一签名 ZIP 支持 macOS、Windows 和 Linux，Python 依赖由 Host 在目标系统分别准备。
+
 ## 0.1.0
 
 - 新增配置型文档转换 App，固定 MarkItDown MCP 0.0.1a7，通过 Core 独立 Python 环境和 stdio 运行。

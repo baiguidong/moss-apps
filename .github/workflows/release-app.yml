@@ -115,6 +115,13 @@ jobs:
           path: artifacts/offline-apps/*.json
       - name: Rebuild final archive independently
         run: node scripts/verify-source-package.mjs --app "${{ steps.release.outputs.app_id }}" --rebuild
+      - uses: actions/setup-python@v5
+        if: contains(fromJSON('["moss.excel","moss.markitdown"]'), inputs.app_id)
+        with:
+          python-version: '3.13'
+      - name: Call portable MCP service on the target OS
+        if: contains(fromJSON('["moss.database","moss.excel","moss.markitdown"]'), inputs.app_id)
+        run: node scripts/verify-portable-services.mjs --app "${{ inputs.app_id }}"
       - name: Verify signed platform archive
         if: steps.release.outputs.variants == 'true'
         run: node scripts/verify-source-package.mjs --app "${{ inputs.app_id }}" --require-signature

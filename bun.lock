@@ -5,6 +5,7 @@
     "": {
       "name": "moss-apps",
       "devDependencies": {
+        "@modelcontextprotocol/sdk": "1.29.0",
         "@moss/app-sdk": "workspace:*",
         "ajv": "^8.18.0",
         "fflate": "^0.8.2",
@@ -232,7 +233,7 @@
     },
     "apps/database": {
       "name": "@moss/database-app",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -1046,7 +1047,7 @@
     },
     "apps/takt": {
       "name": "@moss/takt-app",
-      "version": "0.3.6",
+      "version": "0.3.7",
       "dependencies": {
         "@dagrejs/dagre": "3.1.1",
         "@moss/app-sdk": "workspace:*",
