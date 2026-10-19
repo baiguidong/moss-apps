@@ -114,5 +114,8 @@ async function verify(app){
   }
   const report={appId:id,version:app.manifest.version,platform,network:'OS sandbox denies external IP connections',emptyUserData:true,archiveSha256:optionValue(args,'--package')?null:await hash(archive),dependencies,checks,checkedAt:new Date().toISOString()}
   const output=path.join(repoRoot,'artifacts/offline-apps');await fs.mkdir(output,{recursive:true});await fs.writeFile(path.join(output,id+'.json'),JSON.stringify(report,null,2)+'\n');console.log(`PASS offline ${id}: ${checks.join('; ')}`)
- }finally{await fs.rm(temporary,{recursive:true,force:true})}
+ }finally{
+  // The MCP process may still be closing its index when its transport exits.
+  await fs.rm(temporary,{recursive:true,force:true,maxRetries:20,retryDelay:100})
+ }
 }
