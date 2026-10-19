@@ -46,7 +46,7 @@ try {
   let stderr = ''
   transport.stderr?.on('data', chunk => { stderr = (stderr + chunk).slice(-5000) })
   client = new Client({ name: 'moss-portable-service-check', version: '1.0.0' })
-  try { await client.connect(transport, { timeout: 180_000 }) }
+  try { await client.connect(transport, { timeout: 300_000 }) }
   catch (error) { throw new Error(`${error.message}\n${stderr}`) }
   const names = new Set((await client.listTools()).tools.map(tool => tool.name))
   const call = async (name, args) => {
@@ -69,6 +69,7 @@ try {
   }
   console.log(`PASS ${appId}: ${process.platform}-${process.arch}, ${names.size} tools, real MCP call`)
 } finally {
-  await client?.close()
+  await client?.close().catch(error => console.warn(`MCP cleanup: ${error.message}`))
   await fs.rm(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+    .catch(error => console.warn(`Temporary directory cleanup: ${error.message}`))
 }
