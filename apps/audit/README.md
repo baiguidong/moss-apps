@@ -1,6 +1,6 @@
 # 审计中心
 
-`moss.audit@0.1.10`，需要 Host API `^3.16.0` 的 Moss Desktop。
+`moss.audit@0.1.11`，需要 Host API `^3.16.0` 的 Moss Desktop。
 
 查看本地会话、工具调用、风险发现、操作事件和审计记录，配置规则并批量处理发现项。保留原有七类规则、子 Agent 工具归属去重、增量扫描、严重发现通知，以及跳转会话和定位工具调用。此版本不审计远程会话，不注册 AI 工具。
 
@@ -42,6 +42,6 @@ bun run --cwd apps/audit test:integration
 bun run --cwd apps/audit test:browser
 ```
 
-集成验证默认使用固定在 `vendor/moss-core` 的真实 Host 与实际 ZIP，可通过 `MOSS_CORE_ROOT` 指定其他 Core 检出。浏览器验证使用真实 SQLite 服务，覆盖主要页面与交互。验证用临时目录，不读写用户会话。当前本地 ZIP 位于 `artifacts/moss.audit/0.1.10/`；正式版本须通过签名与集成验证后发布。
+集成验证默认使用固定在 `vendor/moss-core` 的真实 Host 与实际 ZIP，可通过 `MOSS_CORE_ROOT` 指定其他 Core 检出。浏览器验证使用真实 SQLite 服务，覆盖主要页面与交互。验证用临时目录，不读写用户会话。当前本地 ZIP 位于 `artifacts/moss.audit/0.1.11/`；正式版本须通过签名与集成验证后发布。
 
 本版本要求 Moss Host API >=3.16.0，展示入口为“更多” → 审计中心。位置由 Manifest 声明。

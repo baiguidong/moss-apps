@@ -69,10 +69,12 @@ try {
   checks.push('unchanged scans avoid export; changed session exports once')
   const finding = dashboard.findings[0]
   await invoke('finding.update', { id: finding.id, status: 'acknowledged' })
+  const beforeRestartExports = exportCount
   await runtime.restartInstance(appId, instanceId)
   dashboard = await invoke('dashboard.get')
   assert.equal(dashboard.findings[0].status, 'acknowledged')
-  checks.push('restart retains database and decisions')
+  assert.equal(exportCount, beforeRestartExports)
+  checks.push('restart retains database and decisions without re-exporting unchanged sessions')
   await invoke('findings.update', { ids: [finding.id], status: 'open' })
   await invoke('audit.run')
   await invoke('audit.run')

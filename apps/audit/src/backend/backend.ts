@@ -3,6 +3,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { createLocalAuditService } from './service.mjs'
+import { loadSessionCache, saveSessionCache } from './session-cache.mjs'
 import { createResultTransport } from './transport'
 
 const sourceProtocol = 'moss.session-source/v1'
@@ -12,6 +13,7 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
   let sessions: any[] = []
   const sessionsById = new Map<string, any>()
   const revisions = new Map<string, string>()
+  let cacheLoaded = false
   let dataDir = ''
   let timer: ReturnType<typeof setInterval> | undefined
   let initialTimer: ReturnType<typeof setTimeout> | undefined
@@ -53,13 +55,21 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
   })
   async function capture() {
     const directory = dataDir
+    if (!cacheLoaded) {
+      const cached = await loadSessionCache(directory)
+      for (const [id, session] of cached.sessions) sessionsById.set(id, session)
+      for (const [id, revision] of cached.revisions) revisions.set(id, revision)
+      cacheLoaded = true
+    }
     const listed = await backend.host.request(sourceProtocol, 'session.list', {}, { timeoutMs: 120_000 }) as {
       sessions: Array<{ id: string; revision: string }>
     }
+    let changed = false
     const present = new Set(listed.sessions.map(entry => entry.id))
     for (const id of sessionsById.keys()) if (!present.has(id)) {
       sessionsById.delete(id)
       revisions.delete(id)
+      changed = true
       const fileName = `session-${createHash('sha256').update(id).digest('hex')}.json`
       await fs.rm(path.join(directory, 'session-source', fileName), { force: true })
     }
@@ -73,7 +83,9 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
       if (session.id !== entry.id) throw new Error('会话导出 ID 不匹配。')
       sessionsById.set(entry.id, session)
       revisions.set(entry.id, exported.revision)
+      changed = true
     }
+    if (changed) await saveSessionCache(directory, revisions)
     sessions = [...sessionsById.values()]
     service ??= createLocalAuditService({ dbPath: path.join(directory, 'audit.db'), getLocalSessions: () => sessions,
       onChanged: (event: any) => { const { alerts: _alerts, ...change } = event; backend.emit('audit.changed', change) } })
