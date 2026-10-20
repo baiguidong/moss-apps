@@ -37,7 +37,7 @@ jobs:
       - name: Build marketplace catalog from published releases
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: node scripts/build-catalog.mjs --github-repository "$GITHUB_REPOSITORY" --mirror-apps moss.library
+        run: node scripts/build-catalog.mjs --github-repository "$GITHUB_REPOSITORY" --mirror-apps moss.library,moss.audit
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
