@@ -128,7 +128,13 @@ UI 通过绑定 client 调用已声明的 `app.actions.invoke(action, input)`，
 
 Trace App 使用 2.5 引入的 `moss.trace/v1` 协议，当前要求 Host API `^3.0.0`。构建按 App 声明的最低 Host 版本校验；市场和安装时仍检查实际 Host 版本。参见 [Trace App](../apps/trace/README.md)。
 
-审计中心使用 2.6 引入的 `moss.audit/v1` 协议，当前要求 Host API `^3.0.0`。App 自己维护规则引擎、SQLite 和扫描；Host 负责脱敏会话、撤销事件、定位会话和投递通知。固定的 Core 提交也用于安装包集成验证。参见 [审计中心](../apps/audit/README.md)。
+## 会话来源与通知（Host API 3.16）
+
+需要读取本地会话历史的 App 声明 `moss.session-source/v1` 和 `session-source:read`。`session.list({})` 只返回会话 ID、`revision`、`updatedAt`、历史长度和忙碌状态；Backend 保存上次的 revision，只对新增或变化的会话调用 `session.export({sessionId})`。导出文件位于当前 App 实例数据目录的 `session-source/<fileName>`，Host 已在写入前脱敏。已从列表消失的会话应从 App 的内存索引中移除。
+
+`session.export` 返回实际导出的 revision；若列表与导出之间会话发生变化，以导出结果为准。Backend 重启时重新比对列表并读取需要的文件。历史正文不通过 Host IPC 返回，也不要求每轮读取所有会话。`session-source:open` 允许调用 `session.open({sessionId,toolUseId?})` 定位仍存在的本地会话。
+
+声明 `moss.notifications/v1` 和 `notifications:publish` 后，可调用 `publish({id,severity,title,message,details?})` 发送带 App 来源和 ID 前缀的幂等通知。Core 的会话操作事件写入授权 App 的 `session-source/events/`，App 自己决定如何导入和处理。审计中心的扫描、规则与数据库均在 App 中，接入示例见 [审计中心](../apps/audit/README.md)。
 
 
 ## 2.8 Workflow App 与会话资源

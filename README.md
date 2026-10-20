@@ -173,7 +173,7 @@ App ZIP 与 Moss 桌面安装包分开。纯 JavaScript App 可以用同一个�
 
 SDK 源码只在 Moss Core 的 `packages/app-sdk` 维护。本仓库通过 Git 子模块 `vendor/moss-core` 固定引用 Core 提交，将其中的 SDK 纳入 Bun workspace；App 和构建脚本统一通过 `@moss/app-sdk` 包导入，不手工维护另一套 SDK。发布时由打包流程从固定提交自动导出所需 SDK、host-contracts 及本地构建依赖到源码快照，供该版本独立重建；这份不可变发布快照不是新的 SDK 维护分支。
 
-当前开发快照包含 Host API 3.9；各 App 按自身功能声明最低 Host 版本，配置型 MCP App 要求 `^3.9.0`。正式发布须将已推送的 Core 提交固定到子模块；Tasks/Execution 与 MCP 的契约由同一 Core 提交中的 `packages/host-contracts` 提供。UI 使用 `@moss/app-sdk/ui` 自动绑定当前 App，普通调用不传实例 ID。通用文件、截图和外链使用 `moss.platform/v1`，审计中心使用 `moss.audit/v1`。接入方式见 [SDK 接入说明](docs/app-sdk.md)。SDK 会忽略 Manifest 的未知字段；本仓库的构建与发布校验仍会在规范化前拒绝 `backend.targets`、`backend.serverOwnerScope` 和 `moss.remote/v1` 声明。
+当前开发快照包含 Host API 3.16；各 App 按自身功能声明最低 Host 版本。正式发布须将已推送的 Core 提交固定到子模块；Tasks/Execution 与 MCP 的契约由同一 Core 提交中的 `packages/host-contracts` 提供。UI 使用 `@moss/app-sdk/ui` 自动绑定当前 App，普通调用不传实例 ID。通用文件、截图和外链使用 `moss.platform/v1`，审计中心使用通用 `moss.session-source/v1` 和 `moss.notifications/v1`。接入方式见 [SDK 接入说明](docs/app-sdk.md)。SDK 会忽略 Manifest 的未知字段；本仓库的构建与发布校验仍会在规范化前拒绝 `backend.targets`、`backend.serverOwnerScope` 和 `moss.remote/v1` 声明。
 
 初次检出使用 `git clone --recurse-submodules`，已有检出按上方命令初始化子模块。CI、App 发布和市场索引工作流都会检出相同的固定提交。
 

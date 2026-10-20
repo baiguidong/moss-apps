@@ -5,10 +5,13 @@ import { createHash } from 'node:crypto'
 import { createLocalAuditService } from './service.mjs'
 import { createResultTransport } from './transport'
 
-const protocol = 'moss.audit/v1'
+const sourceProtocol = 'moss.session-source/v1'
+const notificationsProtocol = 'moss.notifications/v1'
 export function createAuditBackend(options: ConstructorParameters<typeof AppBackendClient>[0] = {}) {
   let service: ReturnType<typeof createLocalAuditService> | undefined
   let sessions: any[] = []
+  const sessionsById = new Map<string, any>()
+  const revisions = new Map<string, string>()
   let dataDir = ''
   let timer: ReturnType<typeof setInterval> | undefined
   let initialTimer: ReturnType<typeof setTimeout> | undefined
@@ -49,16 +52,38 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
     },
   })
   async function capture() {
-    await backend.host.request(protocol, 'source.capture', {}, { timeoutMs: 120_000 })
     const directory = dataDir
-    const source = JSON.parse(await fs.readFile(path.join(directory, 'source/snapshot.json'), 'utf8'))
-    if (source.schemaVersion !== 1 || !Array.isArray(source.sessions)) throw new Error('不支持的会话快照版本。')
-    sessions = source.sessions.map((session: any) => ({ ...session, mossHome: source.mossHome }))
+    const listed = await backend.host.request(sourceProtocol, 'session.list', {}, { timeoutMs: 120_000 }) as {
+      sessions: Array<{ id: string; revision: string }>
+    }
+    const present = new Set(listed.sessions.map(entry => entry.id))
+    for (const id of sessionsById.keys()) if (!present.has(id)) {
+      sessionsById.delete(id)
+      revisions.delete(id)
+      const fileName = `session-${createHash('sha256').update(id).digest('hex')}.json`
+      await fs.rm(path.join(directory, 'session-source', fileName), { force: true })
+    }
+    for (const entry of listed.sessions) {
+      if (revisions.get(entry.id) === entry.revision) continue
+      const exported = await backend.host.request(sourceProtocol, 'session.export', { sessionId: entry.id }, { timeoutMs: 120_000 }) as {
+        sessionId: string; revision: string; fileName: string
+      }
+      if (exported.sessionId !== entry.id || !/^session-[0-9a-f]{64}\.json$/.test(exported.fileName)) throw new Error('无效的会话导出文件。')
+      const session = JSON.parse(await fs.readFile(path.join(directory, 'session-source', exported.fileName), 'utf8'))
+      if (session.id !== entry.id) throw new Error('会话导出 ID 不匹配。')
+      sessionsById.set(entry.id, session)
+      revisions.set(entry.id, exported.revision)
+    }
+    sessions = [...sessionsById.values()]
     service ??= createLocalAuditService({ dbPath: path.join(directory, 'audit.db'), getLocalSessions: () => sessions,
       onChanged: (event: any) => { const { alerts: _alerts, ...change } = event; backend.emit('audit.changed', change) } })
-    for (const entry of await fs.readdir(path.join(directory, 'events'), { withFileTypes: true })) {
+    const eventsDir = path.join(directory, 'session-source', 'events')
+    for (const entry of await fs.readdir(eventsDir, { withFileTypes: true }).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === 'ENOENT') return []
+      throw error
+    })) {
       if (!entry.isFile() || !/^[a-f0-9-]+\.json$/.test(entry.name)) continue
-      const raw = await fs.readFile(path.join(directory, 'events', entry.name), 'utf8')
+      const raw = await fs.readFile(path.join(eventsDir, entry.name), 'utf8')
       const hash = createHash('sha256').update(raw).digest('hex')
       if (imported.get(entry.name) === hash) continue
       const event = JSON.parse(raw)
@@ -69,7 +94,7 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
   }
   async function deliverAlerts() {
     for (const alert of service!.listPendingAlerts()) {
-      await backend.host.request(protocol, 'notification.publish', {
+      await backend.host.request(notificationsProtocol, 'publish', {
         id: String(alert.fingerprint),
         severity: alert.severity === 'critical' ? 'error' : 'warning',
         title: String(alert.title || '审计发现').slice(0, 240),
@@ -93,7 +118,7 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
     await deliverAlerts().catch(error => backend.status('degraded', { error: error.message }))
     return transfer.pack(result)
   }))
-  backend.registerAction('session.open', async (input: unknown) => transfer.pack(await backend.host.request(protocol, 'session.open', input as { sessionId: string; toolUseId?: string })))
+  backend.registerAction('session.open', async (input: unknown) => transfer.pack(await backend.host.request(sourceProtocol, 'session.open', input as { sessionId: string; toolUseId?: string })))
   backend.registerAction('status.get', () => transfer.pack({ ready: Boolean(service), scanning: service?.isRunning() || false }))
   backend.registerAction('result.read', (input: any) => transfer.read(input))
   backend.registerAction('result.release', (input: any) => transfer.release(input.id))
