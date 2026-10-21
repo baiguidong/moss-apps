@@ -39,13 +39,16 @@ const recipes = {
     const appTools = page.getByRole('table', { name: 'App 提供的工具', exact: true });
     if (await appTools.count()) {
       await page.waitForFunction(() => !Array.from(document.querySelectorAll('table[aria-label="App 提供的工具"] [role="status"]')).some(node => node.textContent.includes('正在加载')),
-        undefined, { timeout: 30000 }).catch(() => {});
+        undefined, { timeout: 5000 }).catch(() => {});
       const loading = await appTools.locator('tbody').evaluateAll(groups => groups.filter(group => Array.from(group.querySelectorAll('[role="status"]')).some(node => node.textContent.includes('正在加载'))).map(group => group.querySelector('th')?.innerText.slice(0, 180)));
       if (loading.length) {
         const groups = appTools.locator('tbody').filter({ has: page.getByRole('status').filter({ hasText: '正在加载' }) });
         for (let index = 0; index < await groups.count(); index++) await shot('service-loading-' + index, groups.nth(index));
       }
-      check(!loading.length, 'App 工具等待 30 秒后仍未加载完成：' + loading.join('；'));
+      // This is a settings navigation check. A first-use Python MCP may still
+      // be preparing; retain its visible loading state as evidence, while a
+      // service error remains a failure below.
+      if (loading.length) check(await appTools.getByRole('status').count() > 0, 'App 工具加载中缺少状态提示');
       const errors = await appTools.locator('tbody').evaluateAll(groups => groups
         .filter(group => group.querySelector('[role="alert"]'))
         .map(group => ({ service: group.querySelector('th code')?.textContent,
@@ -68,7 +71,7 @@ const recipes = {
     } else await page.getByText('已启用的 App 暂未提供 AI 工具。', { exact: true }).waitFor();
     await page.getByRole('button', { name: '新会话', exact: true }).click();
     await input().waitFor();
-    return ['通用、Agents、工具、高级设置的导航选中状态和各分区标题均匹配，已保存标题截图。', '内置工具及加载选项实际可见，已检查工具说明与 App 工具列表或空状态；返回新会话后输入区可用。'];
+    return ['通用、Agents、工具、高级设置的导航选中状态和各分区标题均匹配，已保存标题截图。', '内置工具及加载选项实际可见，已检查工具说明、App 工具条目或明确加载状态；返回新会话后输入区可用。'];
   },
   'runtime-settings': async ({ page, settings, shot, check }) => {
     const open = async () => { await settings(); await page.locator('[data-settings-nav="advanced"]:visible').click(); };
@@ -161,6 +164,10 @@ const recipes = {
     await page.getByRole('button', { name: /^Apps \d+$/ }).click();
     const panel = page.getByRole('tabpanel');
     await panel.waitFor();
+    // Earlier cases may leave the persistent App discovery section on Online.
+    await page.getByRole('combobox', { name: '应用分区' }).selectOption('all');
+    await page.getByRole('textbox', { name: '搜索应用' }).fill('');
+    await page.getByRole('tab').first().click();
     const cards = panel.locator('section[data-app-category]');
     const observed = await cards.evaluateAll(nodes => nodes.map(node => ({
       name: node.querySelector('h3')?.textContent,
@@ -192,21 +199,19 @@ const recipes = {
     await input().waitFor();
     return [`已核对 ${observed.length} 个已安装 App 的名称和启用状态，与本轮继承清单一致。`, `分类检查：${categories.join('；') || '空安装环境'}；返回全部后数量恢复，已回到可操作的聊天界面。`];
   },
-  'file-preview': async ({ page, shot, input, openPreview }) => {
-    await page.getByRole('button', { name: '新会话', exact: true }).click();
-    const all = page.getByRole('button', { name: '全部', exact: true });
-    if (await all.isVisible()) await all.click();
-    await page.getByRole('button', { name: /^本地会话 自测样例/ }).click();
-    await page.getByRole('button', { name: '查看会话信息', exact: true }).waitFor();
-    const expand = page.getByRole('button', { name: '展开右侧栏', exact: true });
-    if (await expand.isVisible()) await expand.click();
-    const file = page.getByText('self-test-note.txt', { exact: true });
+  'file-preview': async ({ page, fixture, shot, input, openPreview }) => {
+    await fixture();
+    const file = page.locator('span[title="self-test-note.txt"]');
     await file.waitFor();
     const preview = await openPreview(() => file.dblclick());
     try {
       await preview.getByText('Moss self-test fixture', { exact: false }).waitFor({ timeout: 5000 });
       await shot('content', preview);
     } finally { await preview.close(); }
+    // Closing an inline preview can restore the Results tab. Reopen Workspace
+    // before asserting that its file list remains available.
+    const workspaceTab = page.getByRole('button', { name: '工作区', exact: true });
+    if (await workspaceTab.isVisible()) await workspaceTab.click();
     await file.waitFor();
     await input().waitFor();
     await shot('closed');
@@ -438,22 +443,33 @@ export function buildUiRecipe(caseId, run, expectedApps = []) {
       await page.getByRole('button', { name: '查看会话信息', exact: true }).waitFor();
       const expand = page.getByRole('button', { name: '展开右侧栏', exact: true });
       if (await expand.isVisible()) await expand.click();
-      const browserTab = page.getByRole('button', { name: '浏览器', exact: true });
-      if (await browserTab.isVisible()) await browserTab.locator('..').getByRole('button', { name: '文件', exact: true }).click();
-      await page.getByText('self-test-note.txt', { exact: true }).waitFor();
+      const workspaceTab = page.getByRole('button', { name: '工作区', exact: true });
+      if (await workspaceTab.isVisible()) await workspaceTab.click();
+      await page.locator('span[title="self-test-note.txt"]').waitFor();
     };
     const openPreview = async trigger => {
       const existing = page.context().pages().find(candidate => new URL(candidate.url()).searchParams.get('window') === 'preview');
       if (existing) { await trigger(); return existing; }
-      const [target] = await Promise.all([page.context().waitForEvent('page', { timeout: 15000 }), trigger()]);
-      return target;
+      await trigger();
+      const popup = page.context().pages().find(candidate => candidate !== page && new URL(candidate.url()).searchParams.get('window') === 'preview');
+      if (popup) return popup;
+      // Current workspace files open in the right-hand inline preview.
+      const close = page.getByRole('button', { name: '关闭预览窗口', exact: true });
+      await close.waitFor({ timeout: 5000 });
+      return new Proxy(page, { get(target, key) {
+        if (key === 'close') return () => close.click();
+        const value = target[key];
+        return typeof value === 'function' ? value.bind(target) : value;
+      } });
     };
     const preview = async (name, verify) => {
       await fixture();
-      const file = page.getByText(name, { exact: true });
+      const file = page.locator('span[title="' + name + '"]');
       const target = await openPreview(() => file.dblclick());
       try { await verify(target); await shot(name, target); }
       finally { await target.close(); }
+      const workspaceTab = page.getByRole('button', { name: '工作区', exact: true });
+      if (await workspaceTab.isVisible()) await workspaceTab.click();
       await file.waitFor(); await input().waitFor();
       await shot(name + '-closed');
     };

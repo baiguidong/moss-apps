@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.document-converter",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "displayName": "文档格式转换",
   "category": "knowledge",
   "keywords": [
@@ -11,7 +11,7 @@
   ],
   "description": "通过 Pandoc 转换文档格式、设置排版与引用，在 Moss 查看和导出结果。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.14.0",
+  "hostApi": "^3.20.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -33,7 +33,7 @@
     "entry": "dist/backend/main.mjs",
     "runtime": "node",
     "apiVersion": 1,
-    "lifecycle": "persistent",
+    "lifecycle": "on-demand",
     "actions": [
       {
         "name": "workspace.get",
@@ -93,7 +93,9 @@
   },
   "host": {
     "protocols": [
-      "moss.local-files/v1"
+      "moss.local-files/v1",
+      "moss.runtime/v1",
+      "moss.artifacts/v1"
     ]
   },
   "permissions": [

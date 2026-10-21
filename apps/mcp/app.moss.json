@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.mcp",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "displayName": "MCP 管理",
   "category": "ai",
   "keywords": [
@@ -24,59 +24,6 @@
       "width": 1120,
       "height": 780,
       "resizable": true
-    }
-  },
-  "backend": {
-    "entry": "dist/backend/main.mjs",
-    "runtime": "node",
-    "apiVersion": 1,
-    "lifecycle": "persistent",
-    "actions": [
-      {
-        "name": "servers.list",
-        "inputSchema": "schemas/servers.list.input.json",
-        "outputSchema": "schemas/result.json",
-        "timeoutMs": 65000
-      },
-      {
-        "name": "servers.save",
-        "inputSchema": "schemas/servers.save.input.json",
-        "outputSchema": "schemas/result.json",
-        "timeoutMs": 65000
-      },
-      {
-        "name": "servers.remove",
-        "inputSchema": "schemas/servers.remove.input.json",
-        "outputSchema": "schemas/result.json",
-        "timeoutMs": 65000
-      },
-      {
-        "name": "servers.set-enabled",
-        "inputSchema": "schemas/servers.set-enabled.input.json",
-        "outputSchema": "schemas/result.json",
-        "timeoutMs": 65000
-      },
-      {
-        "name": "servers.inspect",
-        "inputSchema": "schemas/servers.inspect.input.json",
-        "outputSchema": "schemas/result.json",
-        "timeoutMs": 65000
-      },
-      {
-        "name": "auth.start",
-        "inputSchema": "schemas/auth.start.input.json",
-        "outputSchema": "schemas/result.json",
-        "timeoutMs": 300000
-      },
-      {
-        "name": "auth.clear",
-        "inputSchema": "schemas/auth.clear.input.json",
-        "outputSchema": "schemas/result.json",
-        "timeoutMs": 65000
-      }
-    ],
-    "configuration": {
-      "secrets": "schemas/secrets.json"
     }
   },
   "permissions": [

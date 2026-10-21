@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.data-workbench",
+  "summary": "用 DuckDB 查看、查询和导出本地数据文件。",
+  "description": "用 DuckDB 查看、查询和导出本地数据文件。",
+  "platforms": [
+    "darwin-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/data-workbench",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT",
+  "featured": false
+}

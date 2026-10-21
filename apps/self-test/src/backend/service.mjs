@@ -39,7 +39,7 @@ export function suiteTimeoutMs(cases) {
   return Math.max(45 * 60_000, 300_000 + cases.reduce((sum, test) => sum + (test.timeoutSeconds || 180) * 1000, 0));
 }
 
-export function createSelfTestService({ directory, catalogDirectory, appVersion, instanceHome, isTarget = false, getSettings, prepareBrowser, launchInstance, createController, executeController, executeRecipe, stopController, interruptController = stopController, notify = () => {}, openReportWindow = async () => {}, timeoutMs, reviewTimeoutMs = 45_000, diagnosticTimeoutMs = 60_000, diagnosticBudgetMs = 120_000, finishController = interruptController, batchWaitMs = 100 }) {
+export function createSelfTestService({ directory, catalogDirectory, appVersion, instanceHome, isTarget = false, getSettings, prepareBrowser, launchInstance, createController, executeController, executeRecipe, stopController, interruptController = stopController, notify = () => {}, openReportWindow = async () => {}, autoOpenReport = true, timeoutMs, reviewTimeoutMs = 45_000, diagnosticTimeoutMs = 60_000, diagnosticBudgetMs = 120_000, finishController = interruptController, batchWaitMs = 100 }) {
   let current = null, controller = null, pending = Promise.resolve(), starting = false, saveQueue = Promise.resolve();
   const assignments = new Map();
   const getCatalog = () => loadTestCatalog(catalogDirectory);
@@ -98,7 +98,8 @@ export function createSelfTestService({ directory, catalogDirectory, appVersion,
     const lifetime = new AbortController();
     const signal = AbortSignal.any([parentSignal, lifetime.signal]);
     const budgets = new Map(), diagnoses = new Map();
-    let instance, reviewQueue;
+    let contextImages = 0;
+    let instance, reviewQueue, sessionId, instructionsSent = false;
     const timer = setTimeout(() => lifetime.abort(new Error('自测超过限定时间，已停止。')), timeoutMs ?? suiteTimeoutMs(current.cases));
     const stop = () => { for (const [id] of assignments) void Promise.resolve(interruptController(id)).catch(() => {}); };
     signal.addEventListener('abort', stop, { once: true });
@@ -124,21 +125,30 @@ export function createSelfTestService({ directory, catalogDirectory, appVersion,
         await persist(); return;
       }
       const evidenceReview = !diagnostic && !dynamic && tests.every(test => current.results[test.id].observation?.evidence?.some(file => /\.(png|jpe?g|webp)$/i.test(file)));
-      const jobId = randomUUID(), deadlineAt = performance.now() + budget;
+      const jobId = randomUUID();
+      let deadlineAt = Infinity, deadline;
       const entry = { jobId, sessionId: null, caseIds: tests.map(test => test.id), evidenceReview,
         stage: diagnostic ? 'diagnosis' : dynamic ? 'dynamic' : 'review', startedAt: Date.now(), promptChars: [], budgetMs: Math.round(budget) };
-      let sessionId, execution;
+      let execution;
       const turnAbort = new AbortController(), turnSignal = AbortSignal.any([signal, turnAbort.signal]);
-      const deadline = setTimeout(() => {
-        entry.timedOut = true;
-        turnAbort.abort(new Error('AI 核对超过本项时间上限。'));
-        if (sessionId) void Promise.resolve(interruptController(sessionId)).catch(() => {});
-      }, budget);
       current.controllerSessions.push(entry);
       try {
-        sessionId = await createController(current, { ...current.browserConfig, evidenceReview });
+        if (!sessionId) sessionId = await createController(current, { ...current.browserConfig, evidenceReview: false });
         signal.throwIfAborted();
         entry.sessionId = sessionId; current.sessionId = sessionId;
+        const initialEvidence = [...new Set(tests.flatMap(test => current.results[test.id].observation?.evidence || []))]
+          .filter(file => /\.(png|jpe?g|webp)$/i.test(file));
+        if (contextImages && contextImages + initialEvidence.length > 24) {
+          await executeController(sessionId, '/compact', signal);
+          contextImages = 0;
+          entry.compacted = true;
+        }
+        deadlineAt = performance.now() + budget;
+        deadline = setTimeout(() => {
+          entry.timedOut = true;
+          turnAbort.abort(new Error('AI 核对超过本项时间上限。'));
+          if (sessionId) void Promise.resolve(interruptController(sessionId)).catch(() => {});
+        }, budget);
         current.controllerReadyAt ||= Date.now(); current.activeCaseIds = [...entry.caseIds];
         if (!evidenceReview) current.activeCaseId = tests[0].id;
         for (const test of tests) Object.assign(current.results[test.id], {
@@ -161,11 +171,13 @@ export function createSelfTestService({ directory, catalogDirectory, appVersion,
           if (!missing.length) break;
           turnSignal.throwIfAborted();
           if (performance.now() >= deadlineAt) throw new Error('AI 核对超过本项时间上限。');
-          const prompt = executeRecipe ? buildReviewPrompt(current, missing, { retry: attempt > 0, evidenceReview })
+          const prompt = executeRecipe ? buildReviewPrompt(current, missing, { retry: attempt > 0, evidenceReview,
+            firstTurn: !instructionsSent })
             : buildTestPrompt({ ...current, cases: missing, caseIndex: 0 });
           entry.promptChars.push(prompt.length);
-          const evidence = [...new Set(missing.flatMap(test => current.results[test.id].observation?.evidence || []))]
-            .filter(file => /\.(png|jpe?g|webp)$/i.test(file));
+          const evidence = attempt === 0 ? initialEvidence : [];
+          instructionsSent = true;
+          contextImages += evidence.length;
           execution = executeController(sessionId, prompt, turnSignal, { evidence: evidence.length ? evidence : undefined });
           await Promise.race([abortable(execution, turnSignal), instance.exited.then(() => { throw new Error('测试实例提前退出。'); })]);
           signal.throwIfAborted();
@@ -181,7 +193,6 @@ export function createSelfTestService({ directory, catalogDirectory, appVersion,
         if (sessionId) {
           if (turnSignal.aborted || entry.error) await interruptController(sessionId);
           await execution?.catch(() => {});
-          await stopController(sessionId);
           assignments.delete(sessionId);
         }
         entry.finishedAt = Date.now(); current.activeCaseIds = [];
@@ -292,14 +303,19 @@ export function createSelfTestService({ directory, catalogDirectory, appVersion,
       current.message = errorText(signal.aborted ? signal.reason : error);
     } finally {
       if (signal.aborted) await reviewQueue?.close().catch(() => {});
+      if (sessionId) {
+        await Promise.resolve(stopController(sessionId)).catch(() => {});
+        assignments.delete(sessionId);
+      }
       clearTimeout(timer); signal.removeEventListener('abort', stop);
       current.activeCaseId = null; current.executionCaseId = null; current.activeCaseIds = [];
       delete current.browserConfig;
       if (instance?.isAlive?.() === true) current.message += ' 测试实例和数据已保留，可直接查看。';
       current.finishedAt = Date.now();
       await persist();
-      try { await openReportWindow(current.reportHtmlPath); }
-      catch (error) { current.reportOpenError = errorText(error); await persist(); }
+      try {
+        if (await (typeof autoOpenReport === 'function' ? autoOpenReport() : autoOpenReport)) await openReportWindow(current.reportHtmlPath);
+      } catch (error) { current.reportOpenError = errorText(error); await persist(); }
       controller = null;
     }
   }
@@ -383,7 +399,7 @@ export function createSelfTestService({ directory, catalogDirectory, appVersion,
       throw new Error('程序已记录失败，重试成功不能覆盖。仅确认测试定位或断言错误时，提供 correction:{kind:"test-error",reason:"具体错误及验证依据"}，并补齐全部检查和截图；产品偶发问题仍应 failed。');
     }
     if (input.status === 'passed' && current.results[test.id].observation?.error
-      && current.controllerSessions.find(entry => entry.sessionId === sessionId)?.evidenceReview) {
+      && assignments.get(sessionId)?.entry.evidenceReview) {
       throw new Error('程序未完成时，图片验收不能直接改判通过；请先 inspect，在浏览器中补齐未执行步骤，再提交纠错依据。');
     }
     const { notes, checks, evidence: resolvedEvidence } = await validatedResult({ ...input, evidence: input.evidence ?? current.results[test.id].evidence }, test);
@@ -427,7 +443,7 @@ export function createSelfTestService({ directory, catalogDirectory, appVersion,
       if (input.action === 'record') return record(input, sessionId);
       if (input.action === 'inspect') {
         if (!current || current.phase !== 'running' || input.run_id !== current.id || !ownsCase(sessionId)) throw new Error('只有本轮测试会话可以请求补查。');
-        const entry = current.controllerSessions.find(item => item.sessionId === sessionId);
+        const entry = assignments.get(sessionId)?.entry;
         const result = current.results[input.case_id];
         if (!entry?.evidenceReview || !ownsCase(sessionId, input.case_id) || result?.status !== 'pending'
           || typeof input.notes !== 'string' || input.notes.trim().length < 10 || input.notes.length > 2000) throw new Error('图片验收补查必须指定当前待核对项，并说明具体矛盾或缺失证据。');

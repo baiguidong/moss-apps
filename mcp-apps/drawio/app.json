@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "moss.drawio",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "displayName": "Draw.io",
   "description": "在对话中创建和编辑 Draw.io 图表，支持 XML、CSV 与 Mermaid。",
   "category": "development",
@@ -16,10 +16,9 @@
   "toolScope": "session",
   "mcpServers": {
     "drawio": {
-      "command": "npx",
+      "command": "node",
       "args": [
-        "-y",
-        "@drawio/mcp"
+        "@app/runtime/node_modules/@drawio/mcp/src/index.js"
       ]
     }
   },

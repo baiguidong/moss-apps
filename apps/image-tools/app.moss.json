@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.image-tools",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "displayName": "图片工具",
   "category": "knowledge",
   "keywords": [
@@ -13,7 +13,7 @@
   ],
   "description": "批量转换、裁剪、缩放、旋转、调色、降噪与添加水印，在 Moss 内比较和导出结果。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.11.0",
+  "hostApi": "^3.17.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -31,7 +31,7 @@
     "entry": "dist/backend/main.mjs",
     "runtime": "node",
     "apiVersion": 1,
-    "lifecycle": "persistent",
+    "lifecycle": "on-demand",
     "actions": [
       {
         "name": "workspace.get",
@@ -44,6 +44,12 @@
         "inputSchema": "schemas/files.pick.json",
         "outputSchema": "schemas/result.json",
         "timeoutMs": 300000
+      },
+      {
+        "name": "files.preview",
+        "inputSchema": "schemas/files.preview.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 30000
       },
       {
         "name": "files.import",
@@ -73,7 +79,9 @@
   },
   "host": {
     "protocols": [
-      "moss.local-files/v1"
+      "moss.local-files/v1",
+      "moss.runtime/v1",
+      "moss.artifacts/v1"
     ]
   },
   "permissions": [

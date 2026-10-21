@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.6
+
+- 将固定版本的 Draw.io MCP 服务及依赖随 App 打包，连接时不再执行 npx 在线安装。
+
 ## 0.1.5
 
 - 新增 Linux AMD64 支持，沿用 Host 管理的跨平台 MCP 运行环境。

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.pdf-tools",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "displayName": "PDF 工作台",
   "category": "knowledge",
   "keywords": [
@@ -13,7 +13,7 @@
   ],
   "description": "整理 PDF 页面、识别扫描件文字，在 Moss 内查看和导出。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.11.0",
+  "hostApi": "^3.17.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -31,7 +31,7 @@
     "entry": "dist/backend/main.mjs",
     "runtime": "node",
     "apiVersion": 1,
-    "lifecycle": "persistent",
+    "lifecycle": "on-demand",
     "actions": [
       {
         "name": "workspace.get",
@@ -73,7 +73,9 @@
   },
   "host": {
     "protocols": [
-      "moss.local-files/v1"
+      "moss.local-files/v1",
+      "moss.runtime/v1",
+      "moss.artifacts/v1"
     ]
   },
   "permissions": [

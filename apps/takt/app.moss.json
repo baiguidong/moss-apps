@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.takt",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "displayName": "TAKT 工作流",
   "category": "automation",
   "keywords": [

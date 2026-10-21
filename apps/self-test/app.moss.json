@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.self-test",
-  "version": "0.1.9",
+  "version": "0.1.20",
   "displayName": "AI 自测",
   "category": "diagnostics",
   "keywords": [
@@ -87,6 +87,16 @@
       {
         "name": "instance.status",
         "inputSchema": "schemas/empty.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "instance.frame",
+        "inputSchema": "schemas/empty.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "instance.input",
+        "inputSchema": "schemas/instance-input.json",
         "timeoutMs": 30000
       },
       {

@@ -1,0 +1,9 @@
+{
+  "name": "moss-drawio-bundled-runtime",
+  "version": "0.1.6",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@drawio/mcp": "1.6.3"
+  }
+}

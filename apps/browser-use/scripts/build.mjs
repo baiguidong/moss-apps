@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { mkdirSync, cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
+import { bundleBrowser } from './bundle-browser.mjs'
 
 const cwd = fileURLToPath(new URL('..', import.meta.url))
 mkdirSync(new URL('../dist/backend/', import.meta.url), { recursive: true })
@@ -40,5 +41,6 @@ copyPackage('@playwright/mcp', require)
 cpSync(path.join(cwd, 'src/playwright-cdp'), target, { recursive: true })
 writeFileSync(path.join(target, 'versions.json'), JSON.stringify(Object.fromEntries(copied), null, 2) + '\n')
 console.log('Bundled offline Playwright MCP:', Object.fromEntries(copied))
+await bundleBrowser(cwd, target)
 
 await buildAppSettings(fileURLToPath(new URL('..', import.meta.url)))

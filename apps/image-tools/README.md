@@ -2,7 +2,7 @@
 
 0.1.2 新增 Linux AMD64 独立包。原生依赖随对应平台包交付；Linux 在 Ubuntu 24.04 验证。浏览器内 App 页面仍依赖 Moss Web Host 的独立适配。
 
-普通 Moss App `moss.image-tools@0.1.2`，包含独立 React UI、Node Backend 和随包提供的 sharp 0.34.5。需要 Moss Host API >=3.11。首版声明并验证 macOS Apple Silicon。
+当前普通 Moss App `moss.image-tools@0.1.4`，包含独立 React UI、按需启动的 Node Backend 和随包提供的 sharp 0.34.5。需要 Moss Host API >=3.17，支持 macOS Apple Silicon 和 Linux AMD64。
 
 在“更多 → 图片工具”导入本地图片，按功能分组配置，可以组合后批量处理：
 
@@ -21,7 +21,7 @@
 
 Agent 与页面共用参数、文件和持久任务，提供 5 个真实入口：`files_import`、`workspace_get`、`tasks_start`、`tasks_cancel`、`files_export`。处理能力通过 `tasks_start.options` 组合，不以界面功能数冒充工具数量。退出 Moss 会中断工作，重新打开保留完成结果并可重试。
 
-所有处理依赖随包提供，运行无需网络或系统安装 sharp。后端只在本机启动带随机访问令牌的只读预览服务；导入文件复制到 App 私有目录，结果按文件 ID 提供。用户使用文件夹选择器导出，无需外部查看软件。
+所有处理依赖随包提供，运行无需网络或系统安装 sharp。导入文件复制到 App 私有目录；原图、结果和 Web 缩略图使用 Host 签名产物链接，后端空闲退出后仍可查看。任务运行时由 Host 保活，结束后可自动退出。用户使用文件夹选择器导出，无需外部查看软件。
 
 ```sh
 bun run --cwd apps/image-tools check

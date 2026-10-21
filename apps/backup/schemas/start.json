@@ -1,0 +1,52 @@
+{
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "command"
+  ],
+  "properties": {
+    "command": {
+      "type": "string",
+      "enum": [
+        "init",
+        "backup",
+        "snapshots",
+        "ls",
+        "restore",
+        "check",
+        "raw"
+      ],
+      "description": "操作；raw 可传入 Restic 完整参数数组"
+    },
+    "repo": {
+      "type": "string",
+      "description": "本地备份库绝对路径"
+    },
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "backup 的源目录绝对路径"
+    },
+    "snapshot": {
+      "type": "string",
+      "description": "ls/restore 的快照 ID"
+    },
+    "target": {
+      "type": "string",
+      "description": "restore 的目标目录绝对路径"
+    },
+    "args": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "raw 的完整 Restic argv，不含可执行文件名"
+    },
+    "confirmChanges": {
+      "type": "boolean",
+      "description": "raw 修改或清理备份库时设为 true"
+    }
+  }
+}

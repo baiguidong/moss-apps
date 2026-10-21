@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.data-workbench",
+  "version": "0.2.1",
+  "displayName": "本地数据工作台",
+  "category": "development",
+  "discovery": { "group": "local" },
+  "keywords": [
+    "DuckDB",
+    "CSV",
+    "Parquet",
+    "数据清洗"
+  ],
+  "description": "用 DuckDB 查看、查询和导出本地数据文件。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.20.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "toolScope": "session",
+  "navigation": {
+    "location": "more",
+    "viewId": "workspace"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1200,
+      "height": 820,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "on-demand",
+    "actions": [
+      {
+        "name": "workspace.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "catalog.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "engine.prepare",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "paths.pick",
+        "inputSchema": "schemas/pick.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.start",
+        "inputSchema": "schemas/start.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.get",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.cancel",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "artifacts.read",
+        "inputSchema": "schemas/artifact.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "artifacts.export",
+        "inputSchema": "schemas/artifact.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "dataset.sources.add",
+        "inputSchema": "schemas/dataset-add.json",
+        "outputSchema": "schemas/dataset-added.json"
+      },
+      {
+        "name": "dataset.sources.list",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/dataset-sources.json"
+      },
+      {
+        "name": "dataset.sources.remove",
+        "inputSchema": "schemas/dataset-id.json",
+        "outputSchema": "schemas/dataset-removed.json"
+      },
+      {
+        "name": "dataset.describe",
+        "inputSchema": "schemas/dataset-id.json",
+        "outputSchema": "schemas/dataset-description.json"
+      },
+      {
+        "name": "dataset.preview",
+        "inputSchema": "schemas/dataset-preview.json",
+        "outputSchema": "schemas/dataset-preview-result.json"
+      },
+      {
+        "name": "dataset.query",
+        "inputSchema": "schemas/dataset-query.json",
+        "outputSchema": "schemas/dataset-query-result.json"
+      },
+      {
+        "name": "dataset.result.read",
+        "inputSchema": "schemas/dataset-result-read.json",
+        "outputSchema": "schemas/dataset-read-result.json"
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.local-files/v1",
+      "moss.runtime/v1",
+      "moss.artifacts/v1"
+    ]
+  },
+  "permissions": [
+    "local-files:pick",
+    "dataset:share"
+  ],
+  "appCapabilities": {
+    "provides": [{
+      "protocol": "moss.dataset/v1",
+      "methods": [
+        { "name": "sources.list", "action": "dataset.sources.list", "permission": "dataset:share", "effect": "read" },
+        { "name": "describe", "action": "dataset.describe", "permission": "dataset:share", "effect": "read" },
+        { "name": "preview", "action": "dataset.preview", "permission": "dataset:share", "effect": "read" },
+        { "name": "query", "action": "dataset.query", "permission": "dataset:share", "effect": "read", "resourceReadMethod": "result.read" },
+        { "name": "result.read", "action": "dataset.result.read", "permission": "dataset:share", "effect": "read" }
+      ]
+    }]
+  },
+  "contributes": {
+    "views": [
+      {
+        "id": "workspace",
+        "title": "本地数据工作台",
+        "route": "#/",
+        "order": 270
+      }
+    ],
+    "tools": [
+      {
+        "id": "run",
+        "title": "运行本地数据工作台任务",
+        "description": "以结构化请求执行本地引擎任务，支持高级参数并记录结果。",
+        "action": "tasks.start",
+        "inputSchema": "schemas/start.json",
+        "effect": "write"
+      },
+      {
+        "id": "task",
+        "title": "查看本地数据工作台任务",
+        "description": "查看任务状态、运行参数和结果。",
+        "action": "tasks.get",
+        "inputSchema": "schemas/id.json",
+        "effect": "read"
+      },
+      {
+        "id": "catalog",
+        "title": "查看本地数据工作台能力",
+        "description": "查看本地引擎版本和可用任务模式。",
+        "action": "catalog.get",
+        "inputSchema": "schemas/empty.json",
+        "effect": "read"
+      },
+      {
+        "id": "list",
+        "title": "列出本地数据工作台任务",
+        "description": "列出页面和 Agent 共享的最近任务。",
+        "action": "workspace.get",
+        "inputSchema": "schemas/empty.json",
+        "effect": "read"
+      },
+      {
+        "id": "cancel",
+        "title": "取消本地数据工作台任务",
+        "description": "取消指定的运行中任务。",
+        "action": "tasks.cancel",
+        "inputSchema": "schemas/id.json",
+        "effect": "write"
+      },
+      {
+        "id": "read-result",
+        "title": "读取本地数据工作台文本结果",
+        "description": "读取指定任务的文本或 JSON 产物，单文件最大 2 MiB。",
+        "action": "artifacts.read",
+        "inputSchema": "schemas/artifact.json",
+        "effect": "read"
+      }
+    ],
+    "skills": [
+      {
+        "id": "moss-data-workbench",
+        "title": "本地数据工作台",
+        "description": "通过受管 CLI 使用完整引擎参数并与页面共享任务结果。",
+        "path": "resources/skills/moss-data-workbench/SKILL.md",
+        "cli": "dist/backend/cli.mjs"
+      }
+    ]
+  },
+  "platforms": [
+    "darwin-arm64"
+  ]
+}

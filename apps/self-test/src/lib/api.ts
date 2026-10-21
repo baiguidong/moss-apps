@@ -17,6 +17,10 @@ export const api = {
   openReport: (runId?: string) => invoke('report.open', { runId }),
   revealReport: (runId?: string) => invoke('report.reveal', { runId }),
   instanceStatus: () => invoke<SelfTestInstanceStatus>('instance.status'),
+  instanceFrame: () => invoke<{ image: string; width: number; height: number }>('instance.frame'),
+  instanceInput: (input: { type: 'click' | 'scroll' | 'text' | 'key'; x?: number; y?: number;
+    count?: 1 | 2; deltaX?: number; deltaY?: number; text?: string; key?: string; code?: string;
+    keyCode?: number; modifiers?: number }) => invoke<{ ok: boolean }>('instance.input', input),
   openInstance: () => invoke<SelfTestInstanceStatus>('instance.open'),
   closeInstance: () => invoke<SelfTestInstanceStatus>('instance.close'),
   syncInstance: () => invoke<SelfTestInstanceStatus>('instance.sync'),

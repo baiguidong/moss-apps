@@ -86,7 +86,7 @@
       ],
       "expected": [
         "各导航能打开正确分区，不白屏、不出现错误覆盖层。",
-        "工具列表加载完成；可展开实际条目或显示明确空状态，返回聊天后可输入。"
+        "内置工具列表加载完成；App 工具可展开实际条目或显示明确的首次准备状态，返回聊天后可输入。"
       ]
     },
     {
@@ -696,14 +696,14 @@
       "id": "preview-pdf",
       "title": "PDF 页面与缩放",
       "group": "多格式预览",
-      "default": true,
+      "default": false,
       "requiresModel": false,
       "timeoutSeconds": 180,
       "sources": [
         "ui/src/renderer-react/components/preview/viewers/PDFViewer.tsx"
       ],
       "prerequisites": [
-        "Host 已注入有效的单页 PDF 样例。"
+        "Host 已注入有效的单页 PDF 样例，且测试实例的原生 PDF 扩展支持 CDP 检查；无头 Linux 实例不满足此条件。"
       ],
       "steps": [
         "打开自测样例 self-test-preview.pdf，等待 PDF 渲染完成。",
@@ -784,24 +784,24 @@
     },
     {
       "id": "connectors-hub",
-      "title": "连接器列表与授权状态",
+      "title": "在线服务与连接状态",
       "group": "资源中心",
       "default": true,
       "requiresModel": false,
       "timeoutSeconds": 180,
       "sources": [
-        "ui/src/renderer-react/components/connector-hub-view.tsx"
+        "ui/src/renderer-react/components/apps-panel.tsx"
       ],
       "prerequisites": [
         "独立测试实例已启动；只操作本轮测试数据。"
       ],
       "steps": [
-        "打开侧栏“技能·专家·连接器”，进入连接器的已安装列表，检查条目或明确空状态。",
-        "有条目时按现有名称搜索并核对卡片名称、描述等详情；如有独立详情入口，再打开并关闭；再搜索 NO_RESOURCE_{{runShortId}}，检查无结果，清空后恢复。连接器仅检查授权状态，不触发登录。"
+        "打开 Apps 的在线服务分区，检查已安装条目或明确空状态。",
+        "有条目时按现有名称搜索并核对描述、启用状态与可见的连接按钮；再搜索 NO_RESOURCE_{{runShortId}}，检查无结果，清空后恢复。不触发登录或授权。"
       ],
       "expected": [
-        "连接器已安装列表完成加载，存在条目或明确空状态；不能用市场条目代替。",
-        "已有资源搜索匹配，名称、描述等详情可读；有独立详情入口时可开关。无匹配搜索与清空可用。"
+        "Apps 在线服务分区完成加载，存在已安装条目或明确空状态；不能用市场条目代替。",
+        "已有条目搜索匹配，名称、描述与状态可读；无匹配搜索与清空恢复可用。"
       ]
     },
     {

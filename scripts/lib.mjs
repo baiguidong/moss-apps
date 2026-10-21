@@ -44,6 +44,15 @@ export function validateRepositoryAppManifest(rawManifest) {
   for (const field of ['discovery', 'connectorApp']) {
     if (JSON.stringify(manifest[field]) !== JSON.stringify(rawManifest[field])) throw new Error(`The pinned SDK must preserve ${field}; upgrade the Core SDK before building`)
   }
+  if (rawManifest.appCapabilities) {
+    const snapshot = value => ({
+      provides: (value?.provides || []).map(provider => ({ protocol: provider.protocol, methods: provider.methods.map(method => ({ ...method })) })),
+      requires: (value?.requires || []).map(item => ({ protocol: item.protocol, optional: item.optional === true })),
+    })
+    if (JSON.stringify(snapshot(manifest.appCapabilities)) !== JSON.stringify(snapshot(rawManifest.appCapabilities))) {
+      throw new Error('The pinned SDK must preserve appCapabilities; upgrade the Core SDK before building')
+    }
+  }
   return manifest
 }
 

@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "mode"
+  ],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "inspect",
+        "trim",
+        "compress",
+        "audio",
+        "gif",
+        "convert",
+        "raw"
+      ]
+    },
+    "path": {
+      "type": "string",
+      "description": "输入媒体文件绝对路径"
+    },
+    "start": {
+      "type": "number"
+    },
+    "end": {
+      "type": "number"
+    },
+    "crf": {
+      "type": "number"
+    },
+    "fps": {
+      "type": "number"
+    },
+    "width": {
+      "type": "number"
+    },
+    "outputName": {
+      "type": "string",
+      "description": "产物文件名；raw 参数中使用 {output} 引用"
+    },
+    "args": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "raw 的完整 FFmpeg CLI argv，末尾需有 {output}"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "ffprobe",
+  "version": "5.0.1",
+  "platform": "darwin-arm64",
+  "url": "https://registry.npmjs.org/@ffprobe-installer/darwin-arm64/-/darwin-arm64-5.0.1.tgz",
+  "sha256": "27069fc32879761968823c3ce5353d3c6573f5df7d83d40b60bc2d878e886d39",
+  "archive": "tar.gz",
+  "executable": "ffprobe",
+  "member": "package/ffprobe",
+  "binarySha256": "c846d5db9d3b5bc33f987725e21f3ea14953931221c191575918e907ad6c18ff",
+  "targets": {
+    "linux-x64": {
+      "id": "ffprobe",
+      "version": "5.2.0",
+      "platform": "linux-x64",
+      "url": "https://registry.npmjs.org/@ffprobe-installer/linux-x64/-/linux-x64-5.2.0.tgz",
+      "archive": "tar.gz",
+      "executable": "ffprobe",
+      "sha256": "8b6b2e34bad5ea7cfbe1914185145f514f620f24203a1a421e8d00a698bf8e61",
+      "member": "package/ffprobe",
+      "binarySha256": "576c21674291ec1948d507ea8ab0d78eb6621a0be8c6f1a6db0f50c5fcb1e0f9"
+    }
+  }
+}

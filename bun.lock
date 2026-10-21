@@ -31,7 +31,7 @@
     },
     "apps/app-builder": {
       "name": "@moss/app-builder",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -42,7 +42,7 @@
     },
     "apps/audit": {
       "name": "@moss/audit-app",
-      "version": "0.1.8",
+      "version": "0.1.11",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@radix-ui/react-scroll-area": "1.2.10",
@@ -75,6 +75,27 @@
         "@moss/connector-app-build": "workspace:*",
       },
     },
+    "apps/backup": {
+      "name": "@moss/backup-app",
+      "version": "0.1.1",
+      "dependencies": {
+        "@modelcontextprotocol/sdk": "1.29.0",
+        "@moss/app-sdk": "workspace:*",
+        "@moss/engine-apps": "workspace:*",
+        "lucide-react": "0.564.0",
+        "react": "19.2.0",
+        "react-dom": "19.2.0",
+      },
+      "devDependencies": {
+        "@playwright/test": "1.58.2",
+        "@types/node": "26.6.2",
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "@vitejs/plugin-react": "5.0.4",
+        "typescript": "5.9.3",
+        "vite": "7.1.10",
+      },
+    },
     "apps/baidu-netdisk": {
       "name": "@moss/baidu-netdisk",
       "version": "0.1.0",
@@ -101,7 +122,7 @@
     },
     "apps/browser-use": {
       "name": "@moss/browser-use-app",
-      "version": "0.1.6",
+      "version": "0.1.8",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -122,7 +143,7 @@
     },
     "apps/buddy": {
       "name": "@moss/buddy",
-      "version": "0.1.3",
+      "version": "0.1.5",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -186,7 +207,7 @@
     },
     "apps/code-map": {
       "name": "@moss/code-map-app",
-      "version": "0.1.2",
+      "version": "0.1.4",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "@moss/app-sdk": "workspace:*",
@@ -231,6 +252,27 @@
         "@moss/connector-app-build": "workspace:*",
       },
     },
+    "apps/data-workbench": {
+      "name": "@moss/data-workbench-app",
+      "version": "0.2.1",
+      "dependencies": {
+        "@modelcontextprotocol/sdk": "1.29.0",
+        "@moss/app-sdk": "workspace:*",
+        "@moss/engine-apps": "workspace:*",
+        "lucide-react": "0.564.0",
+        "react": "19.2.0",
+        "react-dom": "19.2.0",
+      },
+      "devDependencies": {
+        "@playwright/test": "1.58.2",
+        "@types/node": "26.6.2",
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "@vitejs/plugin-react": "5.0.4",
+        "typescript": "5.9.3",
+        "vite": "7.1.10",
+      },
+    },
     "apps/database": {
       "name": "@moss/database-app",
       "version": "0.2.2",
@@ -269,7 +311,7 @@
     },
     "apps/devtools": {
       "name": "@moss/devtools-app",
-      "version": "0.2.5",
+      "version": "0.2.6",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "jsonc-parser": "3.3.1",
@@ -305,7 +347,7 @@
     },
     "apps/document-converter": {
       "name": "@moss/document-converter-app",
-      "version": "0.1.2",
+      "version": "0.1.4",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "@moss/app-sdk": "workspace:*",
@@ -326,7 +368,7 @@
     },
     "apps/drive": {
       "name": "@moss/drive-app",
-      "version": "0.3.6",
+      "version": "0.3.8",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "lucide-react": "0.564.0",
@@ -421,7 +463,7 @@
     },
     "apps/file-cleaner": {
       "name": "@moss/file-cleaner-app",
-      "version": "0.1.2",
+      "version": "0.1.4",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "@moss/app-sdk": "workspace:*",
@@ -522,7 +564,7 @@
     },
     "apps/image-tools": {
       "name": "@moss/image-tools-app",
-      "version": "0.1.2",
+      "version": "0.1.4",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/local-tasks": "workspace:*",
@@ -599,7 +641,7 @@
     },
     "apps/knowledge-rag": {
       "name": "@moss/knowledge-rag-app",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "@moss/app-sdk": "workspace:*",
@@ -644,7 +686,7 @@
     },
     "apps/library": {
       "name": "@moss/library-app",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -705,7 +747,7 @@
     },
     "apps/mcp": {
       "name": "@moss/mcp-app",
-      "version": "0.1.11",
+      "version": "0.1.13",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -723,9 +765,30 @@
         "vite": "7.1.10",
       },
     },
+    "apps/media-tools": {
+      "name": "@moss/media-tools-app",
+      "version": "0.1.0",
+      "dependencies": {
+        "@modelcontextprotocol/sdk": "1.29.0",
+        "@moss/app-sdk": "workspace:*",
+        "@moss/engine-apps": "workspace:*",
+        "lucide-react": "0.564.0",
+        "react": "19.2.0",
+        "react-dom": "19.2.0",
+      },
+      "devDependencies": {
+        "@playwright/test": "1.58.2",
+        "@types/node": "26.6.2",
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "@vitejs/plugin-react": "5.0.4",
+        "typescript": "5.9.3",
+        "vite": "7.1.10",
+      },
+    },
     "apps/memory": {
       "name": "@moss/memory-app",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "dependencies": {
         "@antv/g6": "5.1.1",
         "@modelcontextprotocol/server-memory": "2026.8.31",
@@ -829,7 +892,7 @@
     },
     "apps/openim": {
       "name": "@moss/openim-app",
-      "version": "0.2.14",
+      "version": "0.2.15",
       "dependencies": {
         "@livekit/components-react": "2.6.9",
         "@livekit/components-styles": "1.1.6",
@@ -878,7 +941,7 @@
     },
     "apps/pdf-tools": {
       "name": "@moss/pdf-tools-app",
-      "version": "0.1.2",
+      "version": "0.1.4",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/local-tasks": "workspace:*",
@@ -984,7 +1047,7 @@
     },
     "apps/self-test": {
       "name": "@moss/self-test-app",
-      "version": "0.1.9",
+      "version": "0.1.18",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -1047,7 +1110,7 @@
     },
     "apps/takt": {
       "name": "@moss/takt-app",
-      "version": "0.3.7",
+      "version": "0.3.8",
       "dependencies": {
         "@dagrejs/dagre": "3.1.1",
         "@moss/app-sdk": "workspace:*",
@@ -1199,7 +1262,7 @@
     },
     "apps/trace": {
       "name": "@moss/trace-app",
-      "version": "0.1.6",
+      "version": "0.1.7",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@radix-ui/react-slot": "1.2.4",
@@ -1229,7 +1292,7 @@
     },
     "apps/transcription": {
       "name": "@moss/transcription-app",
-      "version": "0.1.2",
+      "version": "0.1.4",
       "dependencies": {
         "@fugood/whisper.node": "1.1.3",
         "@moss/app-sdk": "workspace:*",
@@ -1870,6 +1933,8 @@
 
     "@moss/awesun": ["@moss/awesun@workspace:apps/awesun"],
 
+    "@moss/backup-app": ["@moss/backup-app@workspace:apps/backup"],
+
     "@moss/baidu-netdisk": ["@moss/baidu-netdisk@workspace:apps/baidu-netdisk"],
 
     "@moss/bazhuayu": ["@moss/bazhuayu@workspace:apps/bazhuayu"],
@@ -1901,6 +1966,8 @@
     "@moss/connector-app-build": ["@moss/connector-app-build@workspace:packages/connector-app-build"],
 
     "@moss/ctrip-wendao": ["@moss/ctrip-wendao@workspace:apps/ctrip-wendao"],
+
+    "@moss/data-workbench-app": ["@moss/data-workbench-app@workspace:apps/data-workbench"],
 
     "@moss/database-app": ["@moss/database-app@workspace:apps/database"],
 
@@ -2001,6 +2068,8 @@
     "@moss/mastergo-vibe-mcp": ["@moss/mastergo-vibe-mcp@workspace:apps/mastergo-vibe-mcp"],
 
     "@moss/mcp-app": ["@moss/mcp-app@workspace:apps/mcp"],
+
+    "@moss/media-tools-app": ["@moss/media-tools-app@workspace:apps/media-tools"],
 
     "@moss/memory-app": ["@moss/memory-app@workspace:apps/memory"],
 

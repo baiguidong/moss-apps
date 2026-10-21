@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.media-tools",
+  "summary": "使用 FFmpeg 裁剪、压缩、转换本地音视频。",
+  "description": "使用 FFmpeg 裁剪、压缩、转换本地音视频。",
+  "platforms": [
+    "darwin-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/media-tools",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT",
+  "featured": false
+}

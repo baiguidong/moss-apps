@@ -24,7 +24,7 @@ export function createSelfTestBackend(options = {}) {
     const env = await host('environment')
     if (env.disabled) return { phase: 'closed', prepared: false, disabled: true, message: '当前窗口是被测实例。' }
     const state = await host('target.status')
-    return { ...state, phase: state.operation && state.operation !== 'close' ? 'starting' : state.phase,
+    return { ...state, web: env.web === true, phase: state.operation && state.operation !== 'close' ? 'starting' : state.phase,
       message: state.operationError || state.message }
   }
   const backend = new AppBackendClient({ ...options,
@@ -52,7 +52,7 @@ export function createSelfTestBackend(options = {}) {
           return { endpoint: target.endpoint, exited: new Promise(() => {}), isAlive: () => targetAlive }
         },
         createController: async (run, config) => (await host('controller.create', {
-          runId: run.id, title: `Moss 自测 ${run.id.slice(0, 8)} · 核对 ${(run.controllerSessions?.length || 0) + 1}`, ...config,
+          runId: run.id, title: `Moss 自测 ${run.id.slice(0, 8)}`, ...config,
         })).sessionId,
         executeController: async (sessionId, prompt, signal, { evidence } = {}) => {
           await host('controller.turn.start', { sessionId, prompt, ...(evidence ? { evidence } : {}) }, signal)
@@ -72,6 +72,7 @@ export function createSelfTestBackend(options = {}) {
         stopController: sessionId => host('controller.dispose', { sessionId }),
         notify: state => backend.emit('self-test.changed', state),
         openReportWindow: file => closed ? Promise.resolve() : fileAction('preview', file),
+        autoOpenReport: async () => (await host('environment')).web !== true,
       })
       await backend.host.subscribe(protocol, 'target.changed', value => {
         backend.emit('instance.changed', { ...value, phase: value.operation && value.operation !== 'close' ? 'starting' : value.phase })
@@ -90,10 +91,13 @@ export function createSelfTestBackend(options = {}) {
     return host('controller.open', { sessionId: run.sessionId })
   })
   backend.registerAction('instance.status', instanceStatus)
+  backend.registerAction('instance.frame', () => host('target.frame'))
+  backend.registerAction('instance.input', input => host('target.input', input))
   for (const operation of ['open', 'close', 'sync', 'reset']) backend.registerAction(`instance.${operation}`, async () => {
     if (service.isRunning() && operation !== 'open') throw new Error('请先停止自测，再管理测试实例。')
     const state = await host(`target.${operation}`, operation === 'close' ? {} : fixtures)
-    return { ...state, phase: state.operation && state.operation !== 'close' ? 'starting' : state.phase }
+    return { ...state, web: (await host('environment')).web === true,
+      phase: state.operation && state.operation !== 'close' ? 'starting' : state.phase }
   })
   backend.registerAction('self-test', async input => {
     const caller = ['start', 'record', 'review', 'inspect'].includes(input.action) ? await host('controller.caller') : { sessionId: null }

@@ -1,4 +1,4 @@
-import { createPrivateKey, createPublicKey, sign, verify } from 'node:crypto'
+import { createHash, createPrivateKey, createPublicKey, sign, verify } from 'node:crypto'
 import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
@@ -37,6 +37,35 @@ function signingKeyFromEnvironment() {
 async function copyIfPresent(source, destination) {
   if (!fs.existsSync(source)) return
   await fsp.cp(source, destination, { recursive: true })
+}
+
+async function installTargetSharp(packageRoot, platform, temporary) {
+  const modules = path.join(packageRoot, 'dist', 'backend', 'node_modules')
+  const sharpManifest = path.join(modules, 'sharp', 'package.json')
+  if (!fs.existsSync(sharpManifest)) return
+  const sharp = readJson(sharpManifest)
+  const imgRoot = path.join(modules, '@img')
+  for (const name of await fsp.readdir(imgRoot)) {
+    if (name.startsWith('sharp-')) await fsp.rm(path.join(imgRoot, name), { recursive: true, force: true })
+  }
+  for (const name of [`sharp-${platform}`, `sharp-libvips-${platform}`]) {
+    const version = sharp.optionalDependencies?.[`@img/${name}`]
+    if (!version) throw new Error(`Sharp ${sharp.version} does not support ${name}`)
+    const registry = `https://registry.npmjs.org/@img%2F${name}/${version}`
+    const metadataResponse = await fetch(registry, { signal: AbortSignal.timeout(30000) })
+    if (!metadataResponse.ok) throw new Error(`Cannot fetch ${name} metadata: ${metadataResponse.status}`)
+    const metadata = await metadataResponse.json()
+    const tarballResponse = await fetch(metadata.dist.tarball, { signal: AbortSignal.timeout(60000) })
+    if (!tarballResponse.ok) throw new Error(`Cannot fetch ${name} archive: ${tarballResponse.status}`)
+    const archive = Buffer.from(await tarballResponse.arrayBuffer())
+    const actual = `sha512-${createHash('sha512').update(archive).digest('base64')}`
+    if (actual !== metadata.dist.integrity) throw new Error(`${name} archive integrity mismatch`)
+    const tarball = path.join(temporary, `${name}.tgz`)
+    const destination = path.join(imgRoot, name)
+    await fsp.writeFile(tarball, archive)
+    await fsp.mkdir(destination, { recursive: true })
+    execFileSync('tar', ['-xzf', tarball, '-C', destination, '--strip-components=1'])
+  }
 }
 
 async function createChecksums(packageRoot) {
@@ -86,7 +115,9 @@ async function packageApp(app, options) {
   await copySourceTree(sourceRoot, frozenSource)
   const sourceHash = sha256Hex(Buffer.from(JSON.stringify(await sourceFileList(frozenSource))))
   run('bun', ['install', '--frozen-lockfile'], sourceRoot)
-  for (const script of ['check', 'test', 'build']) if (spec.commands[script]) run('bun', ['run', script], builtApp)
+  for (const script of ['check', 'test']) if (spec.commands[script]) run('bun', ['run', script], builtApp)
+  const crossPlatform = Boolean(platform && platform !== `${process.platform}-${process.arch}`)
+  if (spec.commands.build) run('bun', ['run', 'build'], builtApp)
   const after = path.join(temporary, 'after')
   await copySourceTree(sourceRoot, after)
   if (sha256Hex(Buffer.from(JSON.stringify(await sourceFileList(after)))) !== sourceHash) throw new Error('Build or tests changed source inputs; regenerate and commit them before packaging')
@@ -106,10 +137,13 @@ async function packageApp(app, options) {
       await copyIfPresent(path.join(builtApp, fileName), path.join(packageRoot, fileName))
     }
     await writeJson(path.join(packageRoot, 'app.moss.json'), manifest)
+    if (crossPlatform) await installTargetSharp(packageRoot, platform, temporary)
   }
 
   const sourceDescriptor = await attachSourcePackage(packageRoot, frozenSource, { appRoot: spec.appRoot, origin: spec.origin, sdk: spec.sdk })
-  const verification = await verifyPackageRuntime(packageRoot, { nodeExecutable: process.execPath })
+  const verification = crossPlatform
+    ? { backend: 'cross-platform-runtime-check-required' }
+    : await verifyPackageRuntime(packageRoot, { nodeExecutable: process.execPath })
   await validateSourcePackage(packageRoot, { required: true })
   const checksums = await createChecksums(packageRoot)
   await writeJson(path.join(packageRoot, 'checksums.json'), checksums)

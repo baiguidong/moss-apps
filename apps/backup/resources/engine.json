@@ -1,0 +1,10 @@
+{
+  "id": "restic",
+  "version": "0.19.1",
+  "platform": "darwin-arm64",
+  "url": "https://github.com/restic/restic/releases/download/v0.19.1/restic_0.19.1_darwin_arm64.bz2",
+  "sha256": "7be0a144ccc377880f294204aa271d76e4b79554b42a751151d425ce6ebac143",
+  "archive": "bz2",
+  "executable": "restic",
+  "binarySha256": "06582569ff2f10e1935a6f12187c76db02f0bae99e6e54098f2cdc374766d768"
+}

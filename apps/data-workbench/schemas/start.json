@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "mode"
+  ],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "preview",
+        "query",
+        "export",
+        "raw"
+      ]
+    },
+    "path": {
+      "type": "string",
+      "description": "preview 的本地数据文件绝对路径"
+    },
+    "sql": {
+      "type": "string",
+      "description": "DuckDB SQL；可使用全部 DuckDB SQL 功能"
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "csv",
+        "json",
+        "parquet"
+      ]
+    },
+    "outputName": {
+      "type": "string",
+      "description": "导出文件名；raw 参数中可用 {output} 引用任务产物"
+    },
+    "args": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "raw 的完整 DuckDB CLI argv"
+    }
+  }
+}

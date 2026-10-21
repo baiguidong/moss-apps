@@ -5,17 +5,118 @@ import { clampCrop, dragCrop, ratioCrop } from './crop-geometry.mjs'
 
 const defaults = {format:'webp',quality:82,width:0,height:0,fit:'inside',position:'centre',allowEnlargement:false,background:'#ffffff',transparentBackground:false,border:0,rotation:0,flip:false,flop:false,brightness:1,saturation:1,hue:0,lightness:0,gamma:1,grayscale:false,negate:false,normalise:false,tint:'',blur:0,sharpen:0,median:0,thresholdEnabled:false,threshold:128,metadata:'strip'}
 const groups=['格式与压缩','尺寸与填充','裁剪','旋转与翻转','色彩调整','清晰度','文字水印','图片信息']
+const PREVIEW_RENEW_MS=12*60*60*1000
 const positions=[['centre','居中'],['north','上方'],['northeast','右上'],['east','右侧'],['southeast','右下'],['south','下方'],['southwest','左下'],['west','左侧'],['northwest','左上']]
 const handles=[['nw','左上'],['n','上边'],['ne','右上'],['e','右边'],['se','右下'],['s','下边'],['sw','左下'],['w','左边']]
 type Rect={left:number;top:number;width:number;height:number}
+type PreviewUrl={sourceUrl:string;url:string}
+type PreviewFailure={sourceUrl:string;count:number;retryAt:number}
+type PreviewRequest={id:string;sourceUrl:string;at:number}
 export function App() {
   const state=useWorkspace(),inputs=state.workspace.files.filter(f=>f.role==='input')
   const [selected,setSelected]=useState<string[]>([]),[active,setActive]=useState(''),[resultId,setResultId]=useState(''),[group,setGroup]=useState(groups[0])
   const [settings,setSettings]=useState({...defaults}),[crop,setCrop]=useState(false),[drawing,setDrawing]=useState(false),[rect,setRect]=useState<Rect>({left:0,top:0,width:1,height:1}),[ratio,setRatio]=useState(0),[compare,setCompare]=useState(50)
   const [watermarkOn,setWatermarkOn]=useState(false),[watermark,setWatermark]=useState({text:'',fontSize:32,opacity:0.5,color:'#ffffff',position:'southeast',margin:16})
+  const [previews,setPreviews]=useState<Record<string,PreviewUrl>>({}), [previewTick,setPreviewTick]=useState(0)
+  const requestedPreviews=useRef(new Map<string,PreviewRequest>()), previewFailures=useRef(new Map<string,PreviewFailure>())
+  const previewQueue=useRef<PreviewRequest[]>([]), activePreviews=useRef(0), previewAlive=useRef(true), drainPreviews=useRef<()=>void>(()=>{})
+  const previewTimers=useRef(new Set<ReturnType<typeof setTimeout>>())
+  const visibleResults=useRef(new Set<string>()), resultGridRef=useRef<HTMLElement>(null)
   const imageRef=useRef<HTMLImageElement>(null),gesture=useRef<{point:{x:number;y:number};rect:Rect;mode:string}|null>(null)
   const file=inputs.find(f=>f.id===active)||inputs[0],output=state.workspace.files.find(f=>f.id===resultId)
   const results=state.workspace.files.filter(f=>f.role==='output'&&f.kind==='image'),bounds={width:file?.metadata.width||1,height:file?.metadata.height||1}
+  const web=window.location.protocol==='https:'
+  const needsPreview=(item:LocalFile)=>web||item.metadata?.format==='tiff'&&!item.previewUrl
+  const generatedPreviews=web||state.workspace.files.some(item=>item.kind==='image'&&needsPreview(item))
+  const resultIds=results.filter(needsPreview).map(item=>item.id).join(',')
+  const blank='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
+  const imageUrl=(item:LocalFile)=>needsPreview(item)?(previews[item.id]?.sourceUrl===item.url?previews[item.id].url:blank):item.previewUrl||item.url
+  useEffect(()=>{previewAlive.current=true;return()=>{previewAlive.current=false;previewQueue.current=[];requestedPreviews.current.clear();previewFailures.current.clear();for(const timer of previewTimers.current)clearTimeout(timer);previewTimers.current.clear()}},[])
+  useEffect(()=>{
+    if(!generatedPreviews)return
+    const renew=()=>{if(!document.hidden)setPreviewTick(value=>value+1)}
+    const timer=setInterval(renew,60*60*1000)
+    window.addEventListener('focus',renew);document.addEventListener('visibilitychange',renew)
+    return()=>{clearInterval(timer);window.removeEventListener('focus',renew);document.removeEventListener('visibilitychange',renew)}
+  },[generatedPreviews])
+  useEffect(()=>{
+    if(!generatedPreviews)return
+    visibleResults.current.clear()
+    const grid=resultGridRef.current
+    if(!grid)return
+    const tiles=grid.querySelectorAll<HTMLElement>('[data-preview-id]')
+    if(typeof IntersectionObserver==='undefined'){
+      for(const tile of tiles)visibleResults.current.add(tile.dataset.previewId!)
+      setPreviewTick(value=>value+1)
+      return
+    }
+    const observer=new IntersectionObserver(entries=>{
+      let changed=false
+      for(const entry of entries){
+        const id=(entry.target as HTMLElement).dataset.previewId
+        if(!id)continue
+        if(entry.isIntersecting&&!visibleResults.current.has(id)){visibleResults.current.add(id);changed=true}
+        else if(!entry.isIntersecting&&visibleResults.current.delete(id))changed=true
+      }
+      if(changed)setPreviewTick(value=>value+1)
+    },{rootMargin:'200px'})
+    for(const tile of tiles)observer.observe(tile)
+    return()=>observer.disconnect()
+  },[generatedPreviews,resultIds])
+  useEffect(()=>{
+    if(!generatedPreviews){
+      for(const request of previewQueue.current)if(requestedPreviews.current.get(request.id)===request)requestedPreviews.current.delete(request.id)
+      previewQueue.current=[];drainPreviews.current=()=>{}
+      return
+    }
+    if(document.hidden)return
+    const images=new Map(state.workspace.files.filter(image=>image.kind==='image'&&needsPreview(image)).map(image=>[image.id,image]))
+    const wantedIds=[...new Set([output?.id,file?.id,...visibleResults.current].filter((id):id is string=>Boolean(id)))]
+    const wanted=new Set(wantedIds)
+    for(const id of wanted){
+      const image=images.get(id)
+      if(!image)continue
+      const previous=requestedPreviews.current.get(image.id)
+      const failure=previewFailures.current.get(image.id)
+      if(failure?.sourceUrl===image.url&&Date.now()<failure.retryAt)continue
+      if(failure&&failure.sourceUrl!==image.url)previewFailures.current.delete(image.id)
+      if(previous?.sourceUrl===image.url&&Date.now()-previous.at<PREVIEW_RENEW_MS)continue
+      const request={id:image.id,sourceUrl:image.url,at:Date.now()}
+      requestedPreviews.current.set(image.id,request)
+      previewQueue.current.push(request)
+    }
+    previewQueue.current=previewQueue.current.filter(entry=>{
+      if(requestedPreviews.current.get(entry.id)!==entry)return false
+      if(!images.has(entry.id)){requestedPreviews.current.delete(entry.id);return false}
+      if(wanted.has(entry.id))return true
+      requestedPreviews.current.delete(entry.id)
+      return false
+    })
+    const priority=new Map(wantedIds.map((id,index)=>[id,index]))
+    previewQueue.current.sort((a,b)=>(priority.get(a.id)??Infinity)-(priority.get(b.id)??Infinity))
+    const drain=()=>{
+      while(previewAlive.current&&!document.hidden&&activePreviews.current<2&&previewQueue.current.length){
+        const request=previewQueue.current.shift()!, {id,sourceUrl}=request
+        if(requestedPreviews.current.get(id)!==request)continue
+        activePreviews.current++
+        void state.previewFile(id).then(result=>{
+          if(previewAlive.current&&requestedPreviews.current.get(id)===request){previewFailures.current.delete(id);request.at=Date.now();setPreviews(previous=>({...previous,[id]:{sourceUrl,url:result.url}}))}
+        }).catch(error=>{
+          if(requestedPreviews.current.get(id)!==request)return
+          requestedPreviews.current.delete(id)
+          const previous=previewFailures.current.get(id)
+          const failures=(previous?.sourceUrl===sourceUrl?previous.count:0)+1
+          previewFailures.current.set(id,{sourceUrl,count:failures,retryAt:Date.now()+(failures<=2?failures*3000:60_000)})
+          if(!previewAlive.current)return
+          if(failures<=2){const timer=setTimeout(()=>{previewTimers.current.delete(timer);if(previewAlive.current)setPreviewTick(value=>value+1)},failures*3000);previewTimers.current.add(timer)}
+          else state.setError(`图片预览失败：${error instanceof Error?error.message:String(error)}`)
+        })
+          .finally(()=>{activePreviews.current--;drainPreviews.current()})
+      }
+    }
+    drainPreviews.current=drain
+    drain()
+  },[generatedPreviews,state.workspace.files,previewTick,state.previewFile,file?.id,output?.id])
   useEffect(()=>{if(!selected.length&&inputs.length){setSelected([inputs[0].id]);setActive(inputs[0].id)}},[inputs.length])
   useEffect(()=>{if(file)setRect({left:0,top:0,width:file.metadata.width,height:file.metadata.height});setCrop(false);gesture.current=null},[file?.id])
   const set=(key:keyof typeof defaults,value:any)=>setSettings(s=>({...s,[key]:value}))
@@ -40,8 +141,8 @@ export function App() {
           gesture.current={point:p,rect,mode:drawing?'draw':target?.dataset.cropHandle||'draw'};event.currentTarget.setPointerCapture(event.pointerId)
           if(drawing||!target)setRect(dragCrop(rect,p,p,'draw',bounds,ratio))
         }} onPointerMove={event=>{const g=gesture.current;if(g)setRect(dragCrop(g.rect,g.point,point(event),g.mode,bounds,ratio))}} onPointerUp={()=>{gesture.current=null;setDrawing(false)}} onPointerCancel={()=>{gesture.current=null}} onLostPointerCapture={()=>{gesture.current=null}}>
-          <img ref={imageRef} src={output?.previewUrl||output?.url||file.previewUrl||file.url} alt={output?.name||file.name} draggable={false}/>
-          {output&&!output.metadata.transformed&&!output.metadata.cropped&&output.metadata.sourceId===file.id&&<img className="comparison-original" src={file.previewUrl||file.url} alt="原图对比" style={{clipPath:`inset(0 ${100-compare}% 0 0)`}}/>}
+          <img ref={imageRef} src={output?imageUrl(output):imageUrl(file)} alt={output?.name||file.name} draggable={false}/>
+          {output&&!output.metadata.transformed&&!output.metadata.cropped&&output.metadata.sourceId===file.id&&<img className="comparison-original" src={imageUrl(file)} alt="原图对比" style={{clipPath:`inset(0 ${100-compare}% 0 0)`}}/>}
           {crop&&cropAllowed&&<div className="crop-box" data-crop-handle="move" role="group" aria-label="裁剪选区" tabIndex={0} style={{left:`${rect.left/bounds.width*100}%`,top:`${rect.top/bounds.height*100}%`,width:`${rect.width/bounds.width*100}%`,height:`${rect.height/bounds.height*100}%`}} onKeyDown={event=>{if(!event.key.startsWith('Arrow'))return;event.preventDefault();const n=event.shiftKey?10:1;setRect(clampCrop({...rect,left:rect.left+(event.key==='ArrowLeft'?-n:event.key==='ArrowRight'?n:0),top:rect.top+(event.key==='ArrowUp'?-n:event.key==='ArrowDown'?n:0)},bounds))}}>
             <span className="crop-dimensions">{rect.width} × {rect.height}</span>{handles.map(([key,label])=><span key={key} role="button" aria-label={`调整裁剪${label}`} data-crop-handle={key} className={`crop-handle handle-${key}`}/>)}
           </div>}
@@ -59,7 +160,7 @@ export function App() {
       {group===groups[6]&&<><label className="image-check"><input type="checkbox" checked={watermarkOn} onChange={e=>setWatermarkOn(e.target.checked)}/>添加文字水印</label><label className="field"><span>水印文字</span><input aria-label="水印文字" maxLength={120} value={watermark.text} onChange={e=>setWatermark({...watermark,text:e.target.value})}/></label><div className="fields">{(['fontSize','margin'] as const).map((key,i)=><label className="field" key={key}><span>{i?'水印边距':'水印字号'}</span><input aria-label={i?'水印边距':'水印字号'} type="number" min={i?0:8} max={i?1000:256} value={watermark[key]} onChange={e=>setWatermark({...watermark,[key]:+e.target.value})}/></label>)}</div><label className="field"><span>水印不透明度 · {Math.round(watermark.opacity*100)}%</span><input aria-label="水印不透明度" type="range" min="0.05" max="1" step="0.05" value={watermark.opacity} onChange={e=>setWatermark({...watermark,opacity:+e.target.value})}/></label><label className="field"><span>水印颜色</span><input aria-label="水印颜色" type="color" value={watermark.color} onChange={e=>setWatermark({...watermark,color:e.target.value})}/></label><label className="field"><span>水印位置</span><select aria-label="水印位置" value={watermark.position} onChange={e=>setWatermark({...watermark,position:e.target.value})}>{positions.map(([v,t])=><option key={v} value={v}>{t}</option>)}</select></label></>}
       {group===groups[7]&&<><label className="field"><span>输出元数据</span><select aria-label="输出元数据" value={settings.metadata} onChange={e=>set('metadata',e.target.value)}><option value="strip">移除 EXIF、ICC 等原始元数据</option><option value="keep">保留上游支持的 EXIF、ICC 等元数据</option></select></label>{file&&<dl className="image-metadata">{[['格式',file.metadata.format],['像素',`${file.metadata.width} × ${file.metadata.height}`],['透明通道',file.metadata.hasAlpha?'有':'无'],['色彩空间',file.metadata.space||'未知'],['EXIF',file.metadata.hasExif?'有':'无'],['ICC 配置',file.metadata.hasIcc?'有':'无']].map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>}</>}
     </div><div className="image-submit"><small>已选 {selected.length} 张 · {settings.format==='original'?'原格式':settings.format.toUpperCase()}{enabled.length?` · ${enabled.join('、')}`:''}</small><Submit state={state} disabled={!selected.length||watermarkOn&&!watermark.text.trim()} onClick={()=>void state.invoke('tasks.start',{fileIds:selected,options:{...settings,...(crop&&cropAllowed?{crop:rect}:{}),...(watermarkOn?{watermark}:{})}})}>开始处理</Submit></div></aside></div>
-    {!!results.length&&<section className="result-grid" aria-label="处理结果">{results.map(f=><button className={`result-tile ${resultId===f.id?'selected':''}`} key={f.id} onClick={()=>{setResultId(f.id);setActive(f.metadata.sourceId);setCrop(false)}}><img src={f.previewUrl||f.url} alt={f.name}/><span>{f.name}</span><small>{bytes(f.size)}{f.metadata.inputSize>f.size?` · 减少 ${Math.round((1-f.size/f.metadata.inputSize)*100)}%`:''}</small></button>)}</section>}
-    <History state={state} onSelect={task=>{const f=state.workspace.files.find(f=>f.id===task.outputs[0]);if(f){setActive(f.metadata.sourceId);setResultId(f.id);setCrop(false)}}}/>
+    {!!results.length&&<section ref={resultGridRef} className="result-grid" aria-label="处理结果">{results.map(f=><button data-preview-id={needsPreview(f)?f.id:undefined} className={`result-tile ${resultId===f.id?'selected':''}`} key={f.id} onClick={()=>{setResultId(f.id);setActive(f.metadata.sourceId);setCrop(false)}}><img src={imageUrl(f)} alt={f.name}/><span>{f.name}</span><small>{bytes(f.size)}{f.metadata.inputSize>f.size?` · 减少 ${Math.round((1-f.size/f.metadata.inputSize)*100)}%`:''}</small></button>)}</section>}
+    <History state={state} onSelect={task=>{const f=task.outputs.map(id=>state.workspace.files.find(file=>file.id===id&&file.kind==='image')).find(Boolean);if(f){setActive(f.metadata.sourceId);setResultId(f.id);setCrop(false)}}}/>
   </Shell>
 }

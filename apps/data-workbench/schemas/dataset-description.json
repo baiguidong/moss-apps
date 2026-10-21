@@ -1,0 +1,12 @@
+{
+  "type": "object", "additionalProperties": false,
+  "required": ["sourceId", "name", "revision", "schemaFingerprint", "columns"],
+  "properties": {
+    "sourceId": { "type": "string" }, "name": { "type": "string" },
+    "revision": { "type": "string" }, "schemaFingerprint": { "type": "string" },
+    "columns": { "type": "array", "items": {
+      "type": "object", "additionalProperties": false, "required": ["name", "type", "nullable"],
+      "properties": { "name": { "type": "string" }, "type": { "type": "string" }, "nullable": { "type": "boolean" } }
+    } }
+  }
+}

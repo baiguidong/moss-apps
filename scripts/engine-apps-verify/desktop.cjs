@@ -1,28 +1,42 @@
 // Actual Core container, preload, installer and runtime; isolated user profile.
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, protocol } = require('electron')
 const fs = require('node:fs/promises'), path = require('node:path'), os = require('node:os')
 const { pathToFileURL } = require('node:url')
 const core = process.env.MOSS_CORE_ROOT, appId = process.env.MOSS_TEST_APP
+// Electron requires scheme privileges to be registered synchronously, before
+// the app becomes ready. Awaiting a dynamic import can cross that boundary.
+if (process.env.MOSS_TEST_APP_UI_SCHEME === '1') {
+  protocol.registerSchemesAsPrivileged([{ scheme: 'moss-app', privileges: {
+    standard: true, secure: true, supportFetchAPI: true, stream: true, corsEnabled: true,
+  } }])
+}
 let mcpHost, releaseDiscovery, inspections = 0
 const discoveryGate = process.env.MOSS_TEST_DISCOVERY_GATE ? new Promise(resolve => { releaseDiscovery = resolve }) : Promise.resolve()
-let directory, runtime, window, guest, instance, picks = [], calls = 0
+let directory, runtime, window, guest, instance, picks = [], calls = 0, artifacts, appUiProtocol, appUiToken
 let appearance = { themeMode: 'light', cssThemeId: 'default' }
 ;(async () => {
   directory = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'moss-local-desktop-')))
   app.setPath('userData', path.join(directory, 'electron-profile'))
   process.env.MOSS_HOME = path.join(directory, 'moss')
   process.env.MOSS_CONFIG_DIR = process.env.MOSS_HOME
-  await app.whenReady()
   const fromCore = file => import(pathToFileURL(path.join(core, file)).href)
+  if (process.env.MOSS_TEST_APP_UI_SCHEME === '1') {
+    appUiProtocol = await fromCore('ui/src/apps/app-ui-protocol.mjs')
+  }
+  await app.whenReady()
+  appUiProtocol?.installAppUiProtocol(protocol)
   const { AppRuntimeHost } = await fromCore('packages/app-runtime/src/host/index.mjs')
   const { installAppArchive } = await fromCore('ui/src/apps/app-runtime.mjs')
+  const { createAppArtifactProtocolDefinition, createAppArtifactUrls } = await fromCore('ui/src/apps/app-artifacts.mjs')
   const { registerAppUiRequests } = await fromCore('ui/src/apps/app-ui-requests.mjs')
   const { createLocalFilesProtocolDefinition, createLocalAppHostHandlers } = await fromCore('ui/src/apps/app-local-host.mjs')
   const { AppMcpHost, createMcpProtocolDefinition, MCP_METHODS } = await fromCore('ui/src/apps/app-mcp-host.mjs')
   const { resolveAppSkills } = await fromCore('ui/src/apps/app-skills.mjs')
   const { inspectDesktopMcpServer } = await fromCore('ui/electron-direct.mjs')
   runtime = new AppRuntimeHost({ rootDir: path.join(directory, 'moss'), nodeExecutable: process.env.MOSS_TEST_NODE,
-    hostCapabilityOptions: { protocols: [createLocalFilesProtocolDefinition(), createMcpProtocolDefinition()] } })
+    hostCapabilityOptions: { protocols: [createLocalFilesProtocolDefinition(), createMcpProtocolDefinition(), createAppArtifactProtocolDefinition()] } })
+  artifacts = createAppArtifactUrls()
+  runtime.registerHostHandler('moss.artifacts/v1', 'url.get', (input, context) => artifacts.url(input, context))
   const handlers = createLocalAppHostHandlers({ dialog: { showOpenDialog: async () => ({ canceled: !picks.length, filePaths: picks.splice(0) }) }, shell: {}, BrowserWindow })
   for (const [method, handler] of Object.entries(handlers['moss.local-files/v1'])) runtime.registerHostHandler('moss.local-files/v1', method, handler)
   const mcpOptions = { getRuntime: () => runtime, onChanged: () => ({}), readLegacy: async () => ({}),
@@ -38,20 +52,30 @@ let appearance = { themeMode: 'light', cssThemeId: 'default' }
   await mcpHost.refresh()
   const info = await runtime.getActivePackage(appId)
   const uiFile = info.manifest.ui.builtin === 'mcp' ? path.join(core,'ui/dist/mcp-app/index.html') : path.join(info.root,info.manifest.ui.entry)
+  if (appUiProtocol && info.manifest.ui.entry) appUiToken = appUiProtocol.allowAppUiBundleRoot(info.root, info.manifest.ui.entry)
+  const uiUrl = appUiToken ? appUiProtocol.toAppUiUrl(appUiToken, info.manifest.ui.entry) : pathToFileURL(uiFile).href
   const dataDir = runtime.appDataPath(runtime.dataDir, appId, 'instances', instance.id)
   ipcMain.handle('app-ui:get-info', () => ({ id: appId, displayName: info.manifest.displayName, hasBackend: Boolean(info.manifest.backend), appearance }))
   ipcMain.handle('app-ui:get-status', () => runtime.getInstanceStatus(appId, instance.id))
   ipcMain.handle('app-ui:get-installation-state', () => runtime.getApp(appId))
   ipcMain.handle('app-ui:instances:list', () => runtime.listInstances(appId))
+  ipcMain.handle('app-ui:instances:update', async (_event, { instanceId, ...patch }) => {
+    await runtime.updateInstance(appId, instanceId, patch)
+    return runtime.listInstances(appId).then(items => items.find(item => item.id === instanceId))
+  })
   ipcMain.handle('app-ui:instances:get-status', () => runtime.getInstanceStatus(appId, instance.id))
   registerAppUiRequests({ ipc: ipcMain, getState: () => ({ id: appId, runtime }), beginRequest: () => { calls++; return () => {} } })
-  runtime.events.on('event', event => { if (guest && !guest.isDestroyed() && event.appId === appId) guest.send('app-ui:event:runtime', event) })
+  runtime.events.on('event', event => {
+    if (!guest || guest.isDestroyed() || event.appId !== appId) return
+    guest.send('app-ui:event:runtime', event)
+    if (event.type === 'backend-event' && event.name) guest.send(`app-ui:event:${event.name}`, event.data)
+  })
   window = new BrowserWindow({ width: 1180, height: 880, show: true, webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: false, webviewTag: true, preload: path.join(__dirname, '../local-tasks-verify/preload.cjs') } })
   window.webContents.on('will-attach-webview', (_event, preferences) => {
     preferences.preload = path.join(core, 'ui/src/apps/app-preload.mjs'); preferences.contextIsolation = true; preferences.nodeIntegration = false; preferences.sandbox = false
   })
   window.webContents.on('did-attach-webview', (_event, contents) => { guest = contents })
-  ipcMain.handle('local-test:open', () => ({ ok: true, embedId: appId, url: pathToFileURL(uiFile).href, preload: pathToFileURL(path.join(core, 'ui/src/apps/app-preload.mjs')).href, app: { id: appId, name: appId, displayName: info.manifest.displayName, description: info.manifest.description } }))
+  ipcMain.handle('local-test:open', () => ({ ok: true, embedId: appId, url: uiUrl, preload: pathToFileURL(path.join(core, 'ui/src/apps/app-preload.mjs')).href, app: { id: appId, name: appId, displayName: info.manifest.displayName, description: info.manifest.description } }))
   ipcMain.handle('local-test:close', () => ({ ok: true }))
   ipcMain.handle('local-test:list-apps', () => [{id:appId,name:appId,title:info.manifest.displayName,displayName:info.manifest.displayName,description:info.manifest.description,enabled:true,icon:'',width:1180,height:880,resizable:true,createdAt:0,updatedAt:0,toolScope:info.manifest.toolScope,contributes:info.manifest.contributes,agentTools:info.manifest.contributes?.tools||[],mcpServices:typeof mcpHost !== 'undefined'?mcpHost?.toolCatalog(appId)||[]:[]}])
   ipcMain.handle('local-test:inspect-mcp', (_event,input) => mcpHost.inspectTools(input))
@@ -68,7 +92,7 @@ let appearance = { themeMode: 'light', cssThemeId: 'default' }
     calls: () => calls,
     pick: paths => { picks = paths },
     invoke: (action, input = {}) => runtime.invoke(appId, instance.id, action, input, { timeoutMs: 300000 }),
-    invokeTool: (id, input = {}) => runtime.invokeToolContribution(`${appId}/${id}`, input, { timeoutMs: 300000 }),
+    invokeTool: (id, input = {}) => runtime.invokeToolContribution(`${appId}/${id}`, input, { timeoutMs: 300000, invocation: { surface: 'tool', origin: 'agent-tool' } }),
     tools: selected => runtime.listContributions({ kinds: ['tools'], selectedAppIds: selected ? [appId] : [], loadSchemas: true }),
     restart: () => runtime.restartInstance(appId, instance.id),
     reload: () => new Promise(resolve => { guest.once('did-finish-load', resolve); guest.reload() }),
@@ -94,8 +118,8 @@ let appearance = { themeMode: 'light', cssThemeId: 'default' }
     },
     resize: ({ width, height }) => window.setContentSize(width, height),
     screenshot: async () => (await window.webContents.capturePage()).toPNG().toString('base64'),
-    cleanup: () => runtime.shutdown(),
+    cleanup: async () => { await runtime.shutdown(); await artifacts.close(); if (appUiToken) appUiProtocol.revokeAppUiBundleRoot(appUiToken) },
   }
   await window.loadFile(process.env.MOSS_TEST_SHELL)
-})().catch(async error => { console.error(error); await runtime?.shutdown().catch(() => {}); if (directory) await fs.rm(directory, { recursive: true, force: true }); app.exit(1) })
+})().catch(async error => { console.error(error); await runtime?.shutdown().catch(() => {}); await artifacts?.close().catch(() => {}); if (appUiToken) appUiProtocol?.revokeAppUiBundleRoot(appUiToken); if (directory) await fs.rm(directory, { recursive: true, force: true }); app.exit(1) })
 app.on('window-all-closed', () => {})

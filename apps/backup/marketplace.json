@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.backup",
+  "summary": "使用 Restic 备份目录、浏览快照并恢复文件。",
+  "description": "使用 Restic 备份目录、浏览快照并恢复文件。",
+  "platforms": [
+    "darwin-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/backup",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT",
+  "featured": false
+}

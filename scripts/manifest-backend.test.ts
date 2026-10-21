@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test'
+import { readFileSync } from 'node:fs'
 import * as appSdk from '@moss/app-sdk'
 import { APP_HOST_API_VERSION, validateAppManifest } from '@moss/app-sdk'
 import { validateRepositoryAppManifest } from './lib.mjs'
@@ -37,10 +38,53 @@ describe('App Backend manifest', () => {
     expect(() => validateRepositoryAppManifest({ ...source, hostApi: 'invalid' })).toThrow()
   })
   it('advertises Host API 3 and rejects old UI contracts', () => {
-    expect(APP_HOST_API_VERSION).toBe('3.15.0')
+    expect(APP_HOST_API_VERSION).toBe('3.20.0')
     expect(validateAppManifest({ ...manifest(), hostApi: '^3.0.0' }).hostApi).toBe('^3.0.0')
     expect(() => validateAppManifest({ ...manifest(), hostApi: '^2.9.0' })).toThrow(/requires Host API/)
-    expect(() => validateAppManifest({ ...manifest(), hostApi: '^3.16.0' })).toThrow(/requires Host API/)
+    expect(() => validateAppManifest({ ...manifest(), hostApi: '^3.21.0' })).toThrow(/requires Host API/)
+  })
+
+  it.each(['backup', 'data-workbench', 'document-converter'])(
+    '%s requires the Host release with on-demand recovery and artifact previews', (name) => {
+      const source = JSON.parse(readFileSync(new URL(`../apps/${name}/app.moss.json`, import.meta.url), 'utf8'))
+      expect(source.hostApi).toBe('^3.20.0')
+      expect(source.backend.lifecycle).toBe('on-demand')
+      expect(source.host.protocols).toEqual(expect.arrayContaining(['moss.runtime/v1', 'moss.artifacts/v1']))
+      expect(() => validateAppManifest(source, { hostApiVersion: '3.19.0' })).toThrow(/requires Host API/)
+      expect(validateAppManifest(source).hostApi).toBe('^3.20.0')
+    },
+  )
+
+  it('accepts a new composition App that calls existing tools through Host API 3.19', () => {
+    const source = {
+      ...manifest({ protocols: ['moss.app-capabilities/v1'] }),
+      hostApi: '^3.19.0',
+      navigation: { location: 'none' },
+      permissions: ['apps:invoke'],
+      appCapabilities: { usesTools: [
+        { appId: 'moss.database', tools: ['execute_sql'] },
+        { appId: 'moss.data-workbench', tools: ['catalog'] },
+      ] },
+    }
+    expect(validateRepositoryAppManifest(source).appCapabilities?.usesTools).toEqual(source.appCapabilities.usesTools)
+    expect(() => validateRepositoryAppManifest({ ...source, hostApi: '^3.18.0' })).toThrow(/3\.19\.0/)
+  })
+
+  it('keeps cross-App declarations in the pinned SDK and rejects misspelled capability fields', () => {
+    const source = {
+      ...manifest(), hostApi: '^3.18.0', navigation: { location: 'none' }, permissions: ['dataset:share'],
+      backend: { ...backend, actions: [{ name: 'dataset.describe', inputSchema: 'input.json', outputSchema: 'output.json' }] },
+      appCapabilities: { provides: [{ protocol: 'moss.dataset/v1', methods: [
+        { name: 'describe', action: 'dataset.describe', permission: 'dataset:share', effect: 'read' },
+      ] }] },
+    }
+    expect(validateRepositoryAppManifest(source).appCapabilities?.provides?.[0].methods[0].name).toBe('describe')
+    expect(() => validateRepositoryAppManifest({
+      ...source,
+      appCapabilities: { provides: [{ ...source.appCapabilities.provides[0], methods: [
+        { ...source.appCapabilities.provides[0].methods[0], resourceReadMetod: 'result.read' },
+      ] }] },
+    })).toThrow(/Invalid appCapabilities declaration/)
   })
 
   it('preserves App-wide scope in repository output and excludes older Hosts', () => {

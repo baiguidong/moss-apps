@@ -33,7 +33,9 @@ export async function prepareBinary(spec, dataDir, signal) {
       else {
         // Extract only the pinned executable, never arbitrary archive entries.
         await new Promise((resolve, reject) => {
-          const child = spawn(spec.archive === 'zip' ? '/usr/bin/unzip' : '/usr/bin/tar', spec.archive === 'zip' ? ['-p', archive, spec.member] : ['-xOf', archive, spec.member], { stdio: ['ignore', 'pipe', 'pipe'], shell: false })
+          const extractor = spec.archive === 'zip' ? '/usr/bin/unzip' : spec.archive === 'bz2' ? '/usr/bin/bzip2' : '/usr/bin/tar'
+          const extractArgs = spec.archive === 'zip' ? ['-p', archive, spec.member] : spec.archive === 'bz2' ? ['-dc', archive] : ['-xOf', archive, spec.member]
+          const child = spawn(extractor, extractArgs, { stdio: ['ignore', 'pipe', 'pipe'], shell: false })
           let error = ''; child.stderr.on('data', x => { error += x })
           const streamed = pipeline(child.stdout, createWriteStream(output, { mode: 0o700 }))
           child.once('error', reject); child.once('close', async code => { try { await streamed; if (code) throw new Error(error); resolve() } catch (error) { reject(error) } })

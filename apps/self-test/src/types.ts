@@ -21,7 +21,7 @@ export type SelfTestStatus = {
     checks?: { index: number; passed: boolean; actual: string }[]; evidence?: string[] }>;
 };
 export type SelfTestInstanceStatus = {
-  phase: 'closed' | 'starting' | 'open'; prepared: boolean; home: string; directory: string; message: string; disabled?: boolean;
+  phase: 'closed' | 'starting' | 'open'; prepared: boolean; home: string; directory: string; message: string; disabled?: boolean; web?: boolean;
   id?: string; pid?: number | null; startedAt?: number; preparedAt?: number; inheritedApps?: { id: string; version: string; enabled: boolean }[];
   progress?: SelfTestStatus['preparation'] | null;
 };

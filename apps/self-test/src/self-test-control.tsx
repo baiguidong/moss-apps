@@ -2,6 +2,7 @@ import * as React from 'react';
 import { ArrowUpRight, Check, CheckCircle2, ChevronDown, Circle, CircleAlert, Clock3, FileText, Layers3, Loader2, Monitor, Play, RefreshCw, Square, Trash2, XCircle } from 'lucide-react';
 import { Button } from './lib/button';
 import { api } from './lib/api';
+import { TargetViewer } from './target-viewer';
 import type { SelfTestCase, SelfTestStatus, SelfTestInstanceStatus } from './types';
 
 const cleanError = (error: unknown) => error instanceof Error ? error.message.replace(/^Error invoking remote method '[^']+': (?:Error: )?/, '') : String(error);
@@ -26,6 +27,7 @@ export function SelfTestControl() {
   const [error, setError] = React.useState('');
   const [now, setNow] = React.useState(Date.now());
   const [instance, setInstance] = React.useState<SelfTestInstanceStatus | null>(null);
+  const [viewerOpen, setViewerOpen] = React.useState(false);
   const busy = ['starting', 'running', 'stopping'].includes(status.phase);
   const preparingInstance = instance?.phase === 'starting';
   const unavailable = status.disabled || instance?.disabled;
@@ -39,7 +41,7 @@ export function SelfTestControl() {
   React.useEffect(() => {
     let active = true, revision = 0, instanceRevision = 0;
     const off = api.onChanged(next => { revision++; if (active) setStatus(next); });
-    const offInstance = api.onInstanceChanged(next => { instanceRevision++; if (active) setInstance(next); });
+    const offInstance = api.onInstanceChanged(next => { instanceRevision++; if (active) setInstance(previous => ({ ...previous, ...next })); });
     void api.instanceStatus().then(next => { if (active && !instanceRevision) setInstance(next); }).catch(cause => { if (active) setError(cleanError(cause)); });
     void Promise.all([api.catalog(), api.status()]).then(([catalog, saved]) => {
       if (!active) return;
@@ -86,7 +88,7 @@ export function SelfTestControl() {
         {busy ? <Loader2 size={18} className="spin" /> : status.phase === 'completed' ? <CheckCircle2 size={18} /> : ['failed', 'interrupted'].includes(status.phase) ? <CircleAlert size={18} /> : <span className="state-dot" />}
         <strong>{phaseLabels[status.phase]}</strong><span className="run-label">{status.id ? `本轮 ${status.id.slice(0, 8)}` : '独立测试环境'}</span>
       </div><div className="run-actions"><span className="run-time"><Clock3 size={14} />{status.startedAt ? elapsed(status.startedAt, status.finishedAt || now) : '尚未运行'}</span>{busy ? <Button variant="outline" className="stop-button" disabled={pending || status.phase === 'stopping'} onClick={() => void act(async () => setStatus(await api.stop(status.id)))}><Square size={14} />{status.phase === 'stopping' ? '正在停止…' : '停止自测'}</Button>
-        : <Button className="start-button" disabled={!loaded || preparingInstance || pending || !selected.length || unavailable} onClick={() => void act(async () => setStatus(await api.start(selected, resetData)))}><Play size={15} />开始自测</Button>}</div></div>
+        : <Button className="start-button" disabled={!loaded || preparingInstance || pending || !selected.length || unavailable} onClick={() => void act(async () => { setStatus(await api.start(selected, resetData)); if (instance?.web) setViewerOpen(true); })}><Play size={15} />开始自测</Button>}</div></div>
       <p className="run-description">{status.controllerSessions ? status.message : activeCase ? `当前项目 · ${activeCase.title}` : status.message || '选择要检查的项目，AI 会操作独立窗口并保存截图与报告。'}</p>
       {status.executionMode && <div className="pipeline-progress" aria-label="执行与验收进度"><span>页面检查 <b>{pageChecked}/{total}</b></span><span>AI 已验收 <b>{reviewed}/{total}</b></span><span>待补查 <b>{status.diagnosisCaseIds?.length || 0}</b></span>{busy && reviewingTitles && <small>正在验收：{reviewingTitles}</small>}</div>}
       {busy && <div className="active-test" aria-label="当前测试详情">
@@ -120,7 +122,7 @@ export function SelfTestControl() {
 
     <section className="environment" aria-label="测试环境">
       <div className="environment-main"><Monitor size={18} /><div><strong>测试环境</strong><span className={`environment-state ${instance?.phase === 'open' ? 'is-open' : ''}`}><i />{preparingInstance ? '准备中' : instance?.phase === 'open' ? '窗口已打开' : instance?.prepared ? '已就绪 · 窗口已关闭' : '首次运行时准备'}</span></div>
-        <Button size="sm" variant="outline" disabled={pending || preparingInstance || unavailable} onClick={() => void act(async () => setInstance(await api.openInstance()))}><ArrowUpRight size={14} />打开测试实例</Button>
+        <Button size="sm" variant="outline" disabled={pending || preparingInstance || unavailable} onClick={() => void act(async () => { setInstance(await api.openInstance()); if (instance?.web) setViewerOpen(true); })}><ArrowUpRight size={14} />打开测试实例</Button>
       </div>
       <label className="reset-option"><input type="checkbox" checked={resetData} disabled={busy || pending || unavailable} onChange={event => setResetData(event.target.checked)} /><span>开始前自动清理上轮测试数据<small>每轮核对主环境变化，复用工具链缓存并保留历史报告。</small></span></label>
       {preparingInstance && <div className="environment-progress" aria-live="polite"><p>{instance.message}</p><progress aria-label="测试环境准备进度" value={instance.progress?.total ? instance.progress.current : undefined} max={instance.progress?.total || 1} /><span>已等待 {elapsed(instance.startedAt, now)}</span></div>}
@@ -132,6 +134,7 @@ export function SelfTestControl() {
       </div><p>清理会移除测试会话、团队和工作流；已安装环境与历史报告会保留。</p></div></details>
     </section>
 
+    {viewerOpen && instance?.web && <TargetViewer instance={instance} running={busy} onClose={() => setViewerOpen(false)} />}
     <section className="case-section" aria-label="测试项目">
       <div className="section-heading"><div><h2>测试项目</h2><span>{busy ? `本轮 ${total} 项` : `已选 ${selected.length} / ${cases.length} 项`}</span></div><span className="section-hint">{status.id ? '展开查看步骤与本轮结果' : '展开查看步骤与通过标准'}</span></div>
       <div className="case-presets" aria-label="快速选择测试项目">{presets.map(preset => {

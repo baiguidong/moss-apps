@@ -56,6 +56,19 @@ test('literal argv and a separate TaskStore cancellation stop a live CLI process
  }finally{await fs.rm(root,{recursive:true,force:true})}
 })
 
+test('a disconnected parent cannot start engine work after the start signal', async () => {
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'moss-engine-disconnect-'))
+ try {
+  const store=new TaskStore(root),task=await store.create({})
+  const reason=Object.assign(new Error('任务后台连接已断开'),{code:'ENGINE_PARENT_DISCONNECTED'})
+  let called=false
+  const result=await executeTask({execute:async()=>{called=true;return {status:'succeeded'}}},store,task,AbortSignal.abort(reason))
+  assert.equal(called,false)
+  assert.equal(result.status,'interrupted')
+  assert.equal((await store.read(task.id)).status,'interrupted')
+ } finally {await fs.rm(root,{recursive:true,force:true})}
+})
+
 test('runtime refuses missing dependencies without making a download request',async()=>{
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'moss-offline-runtime-'))
  let requests=0;const server=http.createServer((_req,res)=>{requests++;res.end('unexpected')});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve))

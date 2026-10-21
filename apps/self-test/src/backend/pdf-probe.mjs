@@ -8,7 +8,7 @@ export async function connection(url) {
   let id = 0;
   return { close: () => socket.close(), call: (method, params = {}) => new Promise((resolve, reject) => {
     const requestId = ++id;
-    const timer = setTimeout(() => { socket.removeEventListener('message', receive); reject(new Error('PDF CDP 操作超时')); }, 5000);
+    const timer = setTimeout(() => { socket.removeEventListener('message', receive); reject(new Error(`PDF CDP ${method} 操作超时`)); }, 12000);
     const receive = event => {
       const message = JSON.parse(event.data);
       if (message.id !== requestId) return;
@@ -24,7 +24,7 @@ export async function connection(url) {
 // the outer preview page; absence of an outer canvas is not a rendering error.
 export async function inspectNativePdf({ endpoint, evidenceDir, prefix = 'preview-pdf', verifyZoom = true }, expectedFile) {
   if (!/^[a-z0-9][a-z0-9._-]*$/.test(prefix)) throw new Error('PDF 证据文件名前缀无效。');
-  const deadline = Date.now() + 20000;
+  const deadline = Date.now() + 30000;
   let client, state;
   const snapshot = `(() => {
     const viewer = document.querySelector('pdf-viewer');

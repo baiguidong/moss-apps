@@ -31,7 +31,7 @@ test('failed task submission is persisted and restart retires unfinished submiss
 test('conversation previews pin revisions and node discussion validates the run and occurrence', () => fixture(async directory => {
   const store = new Store(directory), flow = store.create({ yaml: single, title: '讨论验证' })
   const preview = definitionPresentation(flow)
-  assert.equal(preview.presentation.route, `#/flows/${flow.id}?revision=1`)
+  assert.equal(preview.presentation.route, `moss-app://moss.takt/flows/${flow.id}?revision=1`)
   const ref = { workflowId: flow.id, revision: 1, runId: 'run_test', nodeId: 'first', occurrenceId: 'first:2' }
   store.saveRun({ id: ref.runId, workflowId: flow.id, revision: 1, graph: flow.graph, occurrences: [{ id: 'first:2', nodeId: 'first', visit: 2 }] })
   const resolve = composerActions(store)['composer.resolve']

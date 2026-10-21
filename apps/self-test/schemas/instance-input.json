@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "type": { "enum": ["click", "scroll", "text", "key"] },
+    "x": { "type": "number", "minimum": 0, "maximum": 10000 },
+    "y": { "type": "number", "minimum": 0, "maximum": 10000 },
+    "count": { "enum": [1, 2] },
+    "deltaX": { "type": "number", "minimum": -2000, "maximum": 2000 },
+    "deltaY": { "type": "number", "minimum": -2000, "maximum": 2000 },
+    "text": { "type": "string", "maxLength": 1000 },
+    "key": { "type": "string", "maxLength": 40 },
+    "code": { "type": "string", "maxLength": 40 },
+    "keyCode": { "type": "integer", "minimum": 0, "maximum": 255 },
+    "modifiers": { "type": "integer", "minimum": 0, "maximum": 15 }
+  },
+  "required": ["type"],
+  "additionalProperties": false
+}

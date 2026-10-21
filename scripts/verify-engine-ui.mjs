@@ -15,16 +15,19 @@ await fs.writeFile(styles,[`@import ${JSON.stringify(path.join(core,'ui/src/rend
 await build({configFile:false,root:path.join(repo,'scripts/local-tasks-verify'),base:'./',plugins:[react()],logLevel:'warn',resolve:{dedupe:['react','react-dom'],alias:{react:path.dirname(require.resolve('react/package.json')),'react-dom':path.dirname(require.resolve('react-dom/package.json')),'@':path.join(core,'ui/src/renderer-react'),'moss-core-embedded-view':path.join(core,'ui/src/renderer-react/components/embedded-app-view.tsx'),'moss-core-global-style':styles}},css:{postcss:{plugins:[requireCore('@tailwindcss/postcss')()]}},build:{outDir:path.dirname(shell),emptyOutDir:true}})
 const fixtures=path.join(output,'fixtures'),scans=path.join(fixtures,"扫描 中文 '[]$;&"),document=path.join(fixtures,"-输入 中文 '[]$;&.md")
 const repository=path.join(fixtures,'code sample');await fs.mkdir(repository,{recursive:true});await fs.writeFile(path.join(repository,'math.ts'),'export function add(a: number, b: number) { return a + b; }\nexport function total() { return add(2, 3); }\n')
+await fs.writeFile(document, '# 中文标题\n\n| 项目 | 数值 |\n| --- | ---: |\n| 示例 | 128 |\n')
+await fs.writeFile(path.join(fixtures,'invalid.docx'), 'invalid document')
 process.env.PW_CHROMIUM_ATTACH_TO_OTHER='1'
 const names=process.argv.includes('--app')?[process.argv[process.argv.indexOf('--app')+1].replace(/^moss\./,'')]:['file-cleaner','document-converter','code-map']
 for(const name of names){
  const id=`moss.${name}`,checks=[],errors=[],report=path.join(output,name);await fs.mkdir(report,{recursive:true})
- const desktop=await electron.launch({executablePath:path.join(core,'ui/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'),args:[path.join(repo,'scripts/engine-apps-verify/desktop.cjs')],env:{...process.env,MOSS_CORE_ROOT:core,MOSS_TEST_APP:id,MOSS_TEST_VERSION:'0.1.1',MOSS_TEST_NODE:process.execPath,MOSS_TEST_SHELL:shell,MOSS_TEST_ARCHIVE:process.env.MOSS_TEST_ARCHIVE||path.join(repo,'artifacts',id,'0.1.1',id+'-0.1.1-darwin-arm64.zip')},timeout:60000})
+ const manifest=JSON.parse(await fs.readFile(path.join(repo,'apps',name,'app.moss.json'),'utf8'))
+ const desktop=await electron.launch({executablePath:path.join(core,'ui/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'),args:[path.join(repo,'scripts/engine-apps-verify/desktop.cjs')],env:{...process.env,MOSS_CORE_ROOT:core,MOSS_TEST_APP:id,MOSS_TEST_VERSION:manifest.version,MOSS_TEST_NODE:process.execPath,MOSS_TEST_SHELL:shell,MOSS_TEST_ARCHIVE:process.env.MOSS_TEST_ARCHIVE||path.join(repo,'artifacts',id,manifest.version,`${id}-${manifest.version}-darwin-arm64.zip`),MOSS_TEST_APP_UI_SCHEME:'1'},timeout:60000})
  let page,agent,directory
  const passed=text=>{checks.push(text);console.log(`PASS ${name}: ${text}`)}
  try{
   const shellPage=await desktop.firstWindow();await expect(shellPage.locator('webview')).toBeVisible({timeout:30000})
-  const isApp=p=>p.url().includes('/dist/ui/index.html');page=desktop.context().pages().find(isApp)||await desktop.context().waitForEvent('page',{predicate:isApp,timeout:30000})
+  const isApp=p=>p.url().startsWith('moss-app://');page=desktop.context().pages().find(isApp)||await desktop.context().waitForEvent('page',{predicate:isApp,timeout:30000})
   page.setDefaultTimeout(15000)
   directory=await desktop.evaluate(()=>globalThis.localTaskFixture.directory)
   page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')console.error(name,m.text().slice(0,500))})
@@ -40,7 +43,6 @@ for(const name of names){
    await desktop.evaluate(()=>globalThis.localTaskFixture.releaseDiscovery())
   }
   assert.equal(await page.locator('header.app-header').count(),0)
-  const manifest=JSON.parse(await fs.readFile(path.join(repo,'apps',name,'app.moss.json'),'utf8'))
   await assertAppContentLayout(page,manifest)
   await assertAppWorkspaceLayout(page)
   await expect(shellPage.getByText(manifest.displayName,{exact:true})).toHaveCount(1)
@@ -73,8 +75,19 @@ for(const name of names){
    const preview=page.frameLocator('iframe[title="文档内容预览"]');await expect(preview.locator('body')).toContainText('中文标题');await expect(preview.locator('table')).toContainText('128')
    const exports=path.join(directory,'exports');await fs.mkdir(exports);await pick([exports]);await click(page.getByRole('button',{name:'导出结果',exact:true}));await expect(page.getByRole('status')).toContainText('已导出');assert((await fs.readdir(exports)).some(file=>file.endsWith('.docx')))
    const skill=skills.skills[0],request=path.join(directory,'agent-convert.json');await fs.writeFile(request,JSON.stringify({...task.input,to:'html5'}))
-   const result=JSON.parse(execFileSync(process.execPath,[skill.cliPath,'--data-dir',skill.dataDir,'run','--input-file',request],{encoding:'utf8',timeout:60000}));assert.equal(result.status,'succeeded');await expect.poll(async()=>(await invoke('workspace.get')).tasks.some(t=>t.id===result.id)).toBe(true)
-   passed('UI conversion, real DOCX readback preview, DOCX export and independent Agent CLI share results')
+   assert.equal(await page.evaluate(()=>document.hidden),false,'App page must remain visible during the Agent CLI task')
+   const result=JSON.parse(execFileSync(process.execPath,[skill.cliPath,'--data-dir',skill.dataDir,'run','--input-file',request],{encoding:'utf8',timeout:60000}));assert.equal(result.status,'succeeded')
+   await expect(page.locator('.task-row').first()).toContainText('Agent skill',{timeout:25000})
+   await click(page.locator('.task-row').first().locator('.task-title'))
+   await expect(page.locator('.result-panel')).toContainText('已完成')
+   passed('UI conversion, real DOCX readback preview, DOCX export and independent Agent CLI result appears in the visible page')
+   await page.getByLabel('输出格式',{exact:true}).selectOption('pdf');await click(page.getByRole('button',{name:'转换文档',exact:true}))
+   let pdfTask;await expect.poll(async()=>{pdfTask=(await invoke('workspace.get')).tasks.find(task=>task.input.to==='pdf'&&task.source==='ui');return pdfTask?.status},{timeout:180000}).toBe('succeeded')
+   assert(pdfTask.artifacts.some(file=>file.kind==='pdf'))
+   const pdfFrame=page.locator('iframe[title="PDF 预览"]');await expect(pdfFrame).toBeVisible({timeout:30000})
+   const pdfUrl=await pdfFrame.getAttribute('src');assert.match(pdfUrl||'',/^http:\/\/127\.0\.0\.1:\d+\//)
+   await expect.poll(()=>page.frames().some(frame=>frame.url()===pdfUrl),{timeout:15000}).toBe(true)
+   passed('PDF conversion opens a signed artifact in the embedded browser preview')
    await pick([path.join(fixtures,'invalid.docx')]);await click(page.getByRole('button',{name:'选择文件',exact:true}));await page.getByLabel('输出格式',{exact:true}).selectOption('html5');await click(page.getByRole('button',{name:'转换文档',exact:true}));await waitTask('partial');await expect(page.locator('.batch-files')).toContainText('失败 · invalid.docx');await expect(page.locator('.batch-files')).toContainText('已完成');await expect(preview.locator('body')).toContainText('128');passed('Mixed-input UI batch reports individual failure and preserves successful preview')
   }else{
    await expect(page.getByRole('button',{name:/全部 MCP 工具/})).toContainText('17',{timeout:60000})
@@ -95,6 +108,7 @@ for(const name of names){
   await desktop.evaluate(()=>globalThis.localTaskFixture.resize({width:440,height:900}));await page.waitForTimeout(150);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await screenshot('narrow')
   await desktop.evaluate(()=>globalThis.localTaskFixture.resize({width:1180,height:880}))
   const before=await invoke('workspace.get');await desktop.evaluate(()=>globalThis.localTaskFixture.restart());await desktop.evaluate(()=>globalThis.localTaskFixture.reload());await expect(page.locator('main')).toBeVisible({timeout:30000});await expect.poll(async()=>{try{return (await invoke('workspace.get')).tasks.length}catch(error){if(/context was destroyed/.test(error.message))return -1;throw error}},{timeout:60000}).toBe(before.tasks.length)
+  if(name==='document-converter')await expect(page.frameLocator('iframe[title="文档内容预览"]').locator('body')).toContainText('128',{timeout:30000})
   await desktop.evaluate(()=>globalThis.localTaskFixture.enabled(false));assert.equal((await desktop.evaluate(()=>globalThis.localTaskFixture.skills(true))).skills.length,0);assert.equal(Object.keys(await desktop.evaluate(()=>globalThis.localTaskFixture.servers(true))).length,0)
   passed('Moss light/dark/narrow UI, restart persistence and disabling Agent discovery verified')
   assert.deepEqual(errors,[]);await fs.writeFile(path.join(report,'report.json'),JSON.stringify({appId:id,checks,pageErrors:errors},null,2)+'\n')

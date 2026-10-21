@@ -4,7 +4,7 @@ export const extendedRecipes = {
   'browser-panel': async ({ page, fixture, input, shot, check }) => {
     await fixture();
     const browser = page.getByRole('button', { name: '浏览器', exact: true });
-    const files = browser.locator('..').getByRole('button', { name: '文件', exact: true });
+    const files = page.getByRole('button', { name: '工作区', exact: true });
     await browser.click();
     await page.getByRole('tablist', { name: '浏览器标签页', exact: true }).getByRole('tab').first().waitFor();
     const address = page.getByPlaceholder('网址或 localhost:3000', { exact: true });

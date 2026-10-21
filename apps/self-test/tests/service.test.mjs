@@ -104,7 +104,8 @@ describe("bundled test catalog", () => {
   test("loads defaults, honors explicit selection and rejects corrupt IDs", async () => {
     const catalog = await loadTestCatalog(catalogDirectory);
     expect(catalog.cases).toHaveLength(59);
-    expect(selectTestCases(catalog, undefined)).toHaveLength(31);
+    expect(selectTestCases(catalog, undefined)).toHaveLength(30);
+    expect(selectTestCases(catalog, undefined).some((test) => test.id === "preview-pdf")).toBe(false);
     expect(selectTestCases(catalog, undefined).filter((test) => test.requiresModel).map((test) => test.id)).toEqual(["session-switch", "chat-response"]);
     expect(selectTestCases(catalog, ["chat-response"])[0].requiresModel).toBe(true);
     expect(() => selectTestCases(catalog, ["startup", "startup"])).toThrow();
@@ -214,6 +215,20 @@ describe("independent test lifecycle and reports", () => {
     } });
     await historical.openReport(f.run().id);
     expect(opened).toHaveLength(2);
+  });
+  test("Web runs save the report without a background preview prompt", async () => {
+    const opened = [];
+    const f = await fixture({ autoOpenReport: async () => false, openReportWindow: async file => opened.push(file) });
+    await f.service.start(["startup"]);
+    await f.entered.promise;
+    f.finish.resolve();
+    await f.service.waitForIdle();
+    const status = await f.service.getStatus();
+    expect(status.reportOpenError).toBeUndefined();
+    expect(await readFile(status.reportHtmlPath, "utf8")).toContain("问题与阻塞");
+    expect(opened).toEqual([]);
+    await f.service.openReport(status.id);
+    expect(opened).toEqual([status.reportHtmlPath]);
   });
   test("an open-window failure retains the saved report and reports the opening error", async () => {
     const f = await fixture({ openReportWindow: async () => {

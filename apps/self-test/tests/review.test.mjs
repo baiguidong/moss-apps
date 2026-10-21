@@ -38,13 +38,35 @@ test('fresh bounded review batches exclude unrelated catalog, history and script
   await f.service.waitForIdle();
   const run = f.service.snapshot();
   expect(run.phase).toBe('completed');
-  expect(f.controllers).toHaveLength(2);
+  expect(f.controllers).toHaveLength(1);
   expect(f.executions).toHaveLength(6);
   expect(run.controllerSessions.every(session => session.caseIds.length <= 3)).toBe(true);
   expect(prompts.every(prompt => prompt.length < 9000 && !prompt.includes('async (initialPage)') && !prompt.includes('workflow-demo'))).toBe(true);
   expect(prompts[1]).not.toContain('startup');
+  expect(prompts[1]).not.toContain('你负责 Moss 界面验收');
   expect(run.results.startup.observation.evidence).toEqual(['startup.png']);
-  expect(run.results.startup.controllerSessionId).not.toBe(run.results['memory-settings'].controllerSessionId);
+  expect(run.results.startup.controllerSessionId).toBe(run.results['memory-settings'].controllerSessionId);
+});
+
+test('one control session compacts historical images before the model limit', async () => {
+  const prompts = [];
+  const f = await fixture({ executeController: async value => {
+    prompts.push({ prompt: value.prompt, images: value.options?.evidence?.length || 0, sessionId: value.sessionId });
+    if (value.prompt !== '/compact') await confirm(value);
+  } });
+  const catalog = await f.service.getCatalog();
+  await f.service.start(catalog.cases.filter(item => item.default).map(item => item.id));
+  await f.service.waitForIdle();
+  expect(f.service.snapshot().phase).toBe('completed');
+  expect(f.controllers).toHaveLength(1);
+  expect(prompts.filter(item => item.prompt === '/compact').length).toBeGreaterThan(0);
+  expect(new Set(prompts.map(item => item.sessionId)).size).toBe(1);
+  expect(prompts.filter(item => item.prompt.includes('你负责 Moss 界面验收'))).toHaveLength(1);
+  let images = 0;
+  for (const turn of prompts) {
+    if (turn.prompt === '/compact') images = 0;
+    else { images += turn.images; expect(images).toBeLessThanOrEqual(24); }
+  }
 });
 test('missing submissions get one repair turn without rerunning successful operations', async () => {
   let turns = 0;
@@ -115,7 +137,7 @@ test('evidence review receives current screenshots on its first request', async 
     await confirm(value);
   } });
   await f.service.start(['startup', 'appearance']); await f.service.waitForIdle();
-  expect(f.configs.map(config => config.evidenceReview)).toEqual([true]);
+  expect(f.configs.map(config => config.evidenceReview)).toEqual([false]);
   expect(f.service.snapshot().results.startup.status).toBe('passed');
 });
 test('visual ambiguity escalates only the named case, never replays successful scripts', async () => {
@@ -136,7 +158,7 @@ test('visual ambiguity escalates only the named case, never replays successful s
   } });
   await f.service.start(['startup','appearance']); await f.service.waitForIdle();
   const run=f.service.snapshot();
-  expect(calls).toBe(2); expect(f.configs.map(c=>c.evidenceReview)).toEqual([true,false]);
+  expect(calls).toBe(2); expect(f.configs.map(c=>c.evidenceReview)).toEqual([false]);
   expect(f.executions).toEqual(['startup','appearance']);
   expect(run.results.startup.status).toBe('failed'); expect(run.results.appearance.status).toBe('passed');
   expect(run.results.appearance.controllerSessionId).toBe(f.controllers[0]);
@@ -160,7 +182,7 @@ test('an error with screenshots gets evidence triage before any browser diagnosi
     await service.handle({action:'record',run_id:run.id,case_id:'startup',status:'failed',checks:[],evidence:['failed.png'],notes:'截图与失败位置一致，停止后实际输出没有停止。'},sessionId);
   } });
   await f.service.start(['startup']); await f.service.waitForIdle();
-  expect(f.configs.map(c=>c.evidenceReview)).toEqual([true]);
+  expect(f.configs.map(c=>c.evidenceReview)).toEqual([false]);
   expect(f.service.snapshot().results.startup.status).toBe('failed');
 });
 test('retry success cannot silently overwrite an observed failure', async () => {
@@ -194,7 +216,7 @@ test('a screenshot reviewer cannot approve unfinished steps using a test-error c
     } else await service.handle(submission, sessionId);
   } });
   await f.service.start(['startup']); await f.service.waitForIdle();
-  expect(f.configs.map(config => config.evidenceReview)).toEqual([true, false]);
+  expect(f.configs.map(config => config.evidenceReview)).toEqual([false]);
   expect(f.service.snapshot().results.startup.status).toBe('passed');
 });
 
@@ -228,7 +250,7 @@ test('browser diagnoses wait until independent fixed checks have finished',async
     executed.push(test.id);const file=test.id+'.png';await fs.writeFile(path.join(run.evidenceDir,file),Buffer.from('89504e470d0a1a0a','hex'));
     return {checks:test.expected.map((_,index)=>({index,passed:true,actual:'actual control visible'})),evidence:[file]};
   },executeController:async value=>{
-    const run=value.service.snapshot(),entry=run.controllerSessions.find(c=>c.sessionId===value.sessionId);
+    const run=value.service.snapshot(),entry=run.controllerSessions.at(-1);
     if(entry.evidenceReview) {
       if(entry.caseIds.includes('startup')) await value.service.handle({action:'inspect',run_id:run.id,case_id:'startup',notes:'首页截图存在遮挡，需要单独重新定位补查。'},value.sessionId);
       const ids=entry.caseIds.filter(id=>id!=='startup');

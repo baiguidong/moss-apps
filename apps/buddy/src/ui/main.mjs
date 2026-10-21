@@ -56,6 +56,7 @@ async function send(text,requestId=crypto.randomUUID()){
  try{const result=await invoke('chat.send',{text,requestId});$('chat-input').value='';requestBusy=false;render(result)}catch(error){notice(error.message);requestBusy=false;await refresh()}finally{requestBusy=false;if(state)render(state)}
 }
 $('hatch-form').onsubmit=async event=>{event.preventDefault();const button=event.submitter;button.disabled=true;notice();try{render(await invoke('pet.hatch',{name:$('pet-name').value,skin:$('hatch-skin').value}));product.classList.add('b-jump');$('chat-input').focus()}catch(error){notice(error.message)}finally{button.disabled=false}}
+$('hatch-skin').onchange=()=>{const selected=$('hatch-skin');const stage=root.querySelector('.b-stage');stage.dataset.skin=selected.value;stage.setAttribute('aria-label',`孵化预览：${selected.selectedOptions[0]?.textContent||'小苔团'}`)}
 $('chat-form').onsubmit=event=>{event.preventDefault();void send($('chat-input').value)}
 $('chat-input').onkeydown=event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();void send(event.target.value)}}
 root.querySelectorAll('[data-prompt]').forEach(button=>button.onclick=()=>send(button.dataset.prompt))

@@ -4,9 +4,38 @@ export async function openMoreView(page, name) {
 }
 
 export async function resourceCheck({ page, shot, check, marker }, label) {
-  await page.getByRole('button', { name: /技能.*专家.*连接器/ }).click();
-  await page.getByRole('tablist', { name: '连接器分类', exact: true }).getByRole('tab', { name: label, exact: true }).click();
-  const panel = page.getByRole('tabpanel', { name: label, exact: true });
+  if (label === '连接器') {
+    await page.getByRole('button', { name: /Apps\s*\d+/ }).first().click();
+    const section = page.getByRole('combobox', { name: '应用分区', exact: true });
+    await section.selectOption('online');
+    check(await section.inputValue() === 'online', '在线服务分区未选中');
+    const cards = page.locator('#installed-apps section[data-app-category]');
+    const count = await cards.count();
+    if (!count) await page.getByText('没有匹配的 App，可切换到全部或调整筛选', { exact: true }).waitFor();
+    await shot('installed');
+    const search = page.getByRole('textbox', { name: '搜索应用', exact: true });
+    let detail = '当前没有已安装的在线服务，已核对明确空状态。';
+    if (count) {
+      const name = (await cards.first().getByRole('heading', { level: 3 }).innerText()).trim();
+      await search.fill(name);
+      const match = cards.filter({ has: page.getByRole('heading', { name, exact: true }) });
+      await match.first().waitFor();
+      check(await match.first().locator('p').first().innerText() !== '', '应用描述为空');
+      await shot('detail', match.first());
+      detail = `已搜索 ${name} 并核对应用描述及启用状态；授权按钮若存在仅检查显示，不触发登录。`;
+    }
+    await search.fill('NO_RESOURCE_' + marker.split(' ')[1].slice(0, 8));
+    await page.getByText('没有匹配的 App，可切换到全部或调整筛选', { exact: true }).waitFor();
+    check(await cards.count() === 0, '无匹配搜索仍有应用卡片');
+    await shot('empty');
+    await search.fill('');
+    check(await cards.count() === count, '清空搜索后卡片数量未恢复');
+    await shot('restored');
+    return [`Apps 在线服务分区完成加载，共 ${count} 个已安装条目；未使用应用市场列表。`, detail + '无匹配搜索与清空恢复正常。'];
+  }
+  await page.getByRole('button', { name: /技能.*专家/ }).click();
+  await page.getByRole('tablist', { name: '资源分类', exact: true }).getByRole('tab', { name: label, exact: true }).click();
+  const panel = page;
   await panel.getByRole('button', { name: label === '技能' ? /^已安装/ : /^我安装的/ }).click();
   const search = panel.getByPlaceholder('搜索已安装' + label, { exact: true });
   await search.waitFor();
@@ -100,8 +129,9 @@ export const extraRecipes = {
   'preview-pdf': async ({ preview, nativePdf, evidence, check }) => {
     check(typeof nativePdf === 'function', '需要原生 PDF 查看器检查能力，外层 DOM 不能验证 PDF 内容。');
     await preview('self-test-preview.pdf', async page => {
-      await page.locator('webview').waitFor({ state: 'attached' });
-      const source = await page.locator('webview').getAttribute('src');
+      const pdfView = page.locator('webview[src*="self-test-preview.pdf"]');
+      await pdfView.waitFor({ state: 'attached' });
+      const source = await pdfView.getAttribute('src');
       const result = await nativePdf(decodeURIComponent(new URL(source).pathname));
       evidence.push(...result.evidence);
       check(!result.error, result.error);
@@ -170,17 +200,18 @@ export const extraRecipes = {
     await fixture();
     const refresh = page.getByRole('button', { name: '刷新工作区', exact: true });
     await refresh.click();
-    for (const name of ['self-test-note.txt', 'self-test-preview.md', 'self-test-data.csv']) await page.getByText(name, { exact: true }).waitFor();
+    for (const name of ['self-test-note.txt', 'self-test-preview.md', 'self-test-data.csv']) await page.locator('span[title="' + name + '"]').waitFor();
     await page.waitForFunction(() => { const button = document.querySelector('button[aria-label="刷新工作区"]'); return button && !button.disabled; }, undefined, { timeout: 15000 });
     const search = page.getByRole('textbox', { name: '搜索工作区文件', exact: true });
     if (!(await search.isVisible())) await page.getByRole('button', { name: '搜索工作区文件', exact: true }).click();
     await search.fill('self-test-note');
-    await page.getByText('self-test-note.txt', { exact: true }).waitFor();
-    check(await page.getByText('self-test-data.csv', { exact: true }).count() === 0, '文件筛选未生效');
+    await page.locator('span[title="self-test-note.txt"]').waitFor();
+    check(await page.locator('span[title="self-test-data.csv"]').count() === 0, '文件筛选未生效');
     await shot('search'); await search.fill('');
     await page.getByRole('button', { name: '收起右侧栏', exact: true }).click();
     await page.getByRole('button', { name: '展开右侧栏', exact: true }).click();
-    await page.getByText('self-test-data.csv', { exact: true }).waitFor();
+    await page.getByRole('button', { name: '工作区', exact: true }).click();
+    await page.locator('span[title="self-test-data.csv"]').waitFor();
     await preview('self-test-note.txt', async p => { await p.getByText('Moss self-test fixture', { exact: false }).waitFor(); });
     await preview('self-test-preview.md', async p => {
       await p.getByRole('heading', { name: 'Moss Preview', exact: true }).waitFor();
@@ -300,7 +331,18 @@ export const extraRecipes = {
     check(await filter.getByRole('button', { name: 'App', exact: true }).getAttribute('aria-pressed') === 'true', '进程筛选未生效');
     await shot('app-processes');
     await filter.getByRole('button', { name: '全部', exact: true }).click();
-    return ['CPU/内存趋势和进程表已加载，截图供核对数据与单位。', '已切换 CPU/内存和 App/全部筛选，未结束或重启进程。'];
+    await filter.getByRole('button', { name: '异常', exact: true }).click();
+    const anomalyRows = await table.locator('tbody tr').count();
+    if (anomalyRows === 0) {
+      await page.getByText('当前没有异常进程', { exact: true }).waitFor();
+      await shot('empty-state');
+      check(true, '空进程筛选状态可读');
+    } else {
+      check(anomalyRows > 0, '异常进程筛选未显示结果');
+      await shot('alerts');
+    }
+    await filter.getByRole('button', { name: '全部', exact: true }).click();
+    return ['CPU/内存趋势和进程表已加载，截图供核对数据与单位。', '已切换 CPU/内存、App 和异常筛选并核对空状态，未结束或重启进程。'];
   },
   'memory-overview': async ({ page, more, shot, check, marker }) => {
     await more('概览');

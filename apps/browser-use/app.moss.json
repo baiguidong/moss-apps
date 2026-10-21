@@ -1,7 +1,8 @@
 {
   "schemaVersion": 2,
   "id": "moss.browser-use",
-  "version": "0.1.7",
+  "version": "0.1.8",
+  "platforms": ["darwin-arm64", "darwin-x64", "win32-x64", "linux-x64"],
   "displayName": "网页操控",
   "category": "automation",
   "keywords": [
