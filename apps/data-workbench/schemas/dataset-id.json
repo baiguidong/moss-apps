@@ -1,6 +1,0 @@
-{
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["sourceId"],
-  "properties": { "sourceId": { "type": "string", "pattern": "^[a-f0-9-]{36}$" } }
-}

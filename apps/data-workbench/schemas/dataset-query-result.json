@@ -1,9 +1,0 @@
-{
-  "type": "object", "additionalProperties": false,
-  "required": ["resourceId", "sourceId", "revision", "schemaFingerprint", "rowCount"],
-  "properties": {
-    "resourceId": { "type": "string" }, "sourceId": { "type": "string" },
-    "revision": { "type": "string" }, "schemaFingerprint": { "type": "string" },
-    "rowCount": { "type": "integer", "minimum": 0 }
-  }
-}

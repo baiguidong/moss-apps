@@ -7,7 +7,6 @@ import { execFileSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { buildCommand, fileSql } from '../src/backend/engine.mjs'
-import { querySql } from '../src/backend/dataset.mjs'
 
 const bundledBinary = fileURLToPath(new URL('../dist/engines/duckdb/1.5.6/duckdb', import.meta.url))
 const duckdbBinary = process.env.MOSS_TEST_DUCKDB || bundledBinary
@@ -29,7 +28,7 @@ test('file preview quotes path and export writes inside task directory', async (
   } finally { await fs.rm(root, { recursive: true, force: true }) }
 })
 
-test('literal shared file paths never expand adjacent files across all readers', { skip: !canRunDuckDB }, async () => {
+test('literal selected file paths never expand adjacent files across all readers', { skip: !canRunDuckDB }, async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-duckdb-glob-'))
   try {
     const directory = path.join(root, "folder[one]?'")
@@ -48,22 +47,6 @@ test('literal shared file paths never expand adjacent files across all readers',
       }
       const rows = rowsFor('SELECT value FROM (' + fileSql(selected) + ')')
       assert.deepEqual(rows, [{ value: 'public' }], extension)
-    }
-  } finally { await fs.rm(root, { recursive: true, force: true }) }
-})
-
-test('structured query quotes column names and filter values', { skip: !canRunDuckDB }, async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-duckdb-query-'))
-  try {
-    const file = path.join(root, 'quoted.csv')
-    await fs.writeFile(file, '"a""b"\npublic\nsecret\n')
-    const source = { path: file }
-    const columns = [{ name: 'a"b' }]
-    const input = value => ({ columns: ['a"b'], filters: [{ column: 'a"b', op: 'eq', value }] })
-    assert.deepEqual(rowsFor(querySql(source, columns, input('public'))), [{ 'a"b': 'public' }])
-    assert.deepEqual(rowsFor(querySql(source, columns, input("public' OR TRUE --"))), [])
-    for (const op of ['constructor', '__proto__']) {
-      assert.throws(() => querySql(source, columns, { filters: [{ column: 'a"b', op, value: 'public' }] }), /筛选条件无效/)
     }
   } finally { await fs.rm(root, { recursive: true, force: true }) }
 })

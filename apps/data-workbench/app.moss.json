@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.data-workbench",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "displayName": "本地数据工作台",
   "category": "development",
   "discovery": { "group": "local" },
@@ -90,41 +90,6 @@
         "inputSchema": "schemas/artifact.json",
         "outputSchema": "schemas/result.json",
         "timeoutMs": 300000
-      },
-      {
-        "name": "dataset.sources.add",
-        "inputSchema": "schemas/dataset-add.json",
-        "outputSchema": "schemas/dataset-added.json"
-      },
-      {
-        "name": "dataset.sources.list",
-        "inputSchema": "schemas/empty.json",
-        "outputSchema": "schemas/dataset-sources.json"
-      },
-      {
-        "name": "dataset.sources.remove",
-        "inputSchema": "schemas/dataset-id.json",
-        "outputSchema": "schemas/dataset-removed.json"
-      },
-      {
-        "name": "dataset.describe",
-        "inputSchema": "schemas/dataset-id.json",
-        "outputSchema": "schemas/dataset-description.json"
-      },
-      {
-        "name": "dataset.preview",
-        "inputSchema": "schemas/dataset-preview.json",
-        "outputSchema": "schemas/dataset-preview-result.json"
-      },
-      {
-        "name": "dataset.query",
-        "inputSchema": "schemas/dataset-query.json",
-        "outputSchema": "schemas/dataset-query-result.json"
-      },
-      {
-        "name": "dataset.result.read",
-        "inputSchema": "schemas/dataset-result-read.json",
-        "outputSchema": "schemas/dataset-read-result.json"
       }
     ]
   },
@@ -136,21 +101,8 @@
     ]
   },
   "permissions": [
-    "local-files:pick",
-    "dataset:share"
+    "local-files:pick"
   ],
-  "appCapabilities": {
-    "provides": [{
-      "protocol": "moss.dataset/v1",
-      "methods": [
-        { "name": "sources.list", "action": "dataset.sources.list", "permission": "dataset:share", "effect": "read" },
-        { "name": "describe", "action": "dataset.describe", "permission": "dataset:share", "effect": "read" },
-        { "name": "preview", "action": "dataset.preview", "permission": "dataset:share", "effect": "read" },
-        { "name": "query", "action": "dataset.query", "permission": "dataset:share", "effect": "read", "resourceReadMethod": "result.read" },
-        { "name": "result.read", "action": "dataset.result.read", "permission": "dataset:share", "effect": "read" }
-      ]
-    }]
-  },
   "contributes": {
     "views": [
       {

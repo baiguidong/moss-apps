@@ -1,5 +1,0 @@
-{
-  "type": "object", "additionalProperties": false,
-  "required": ["text", "nextOffset"],
-  "properties": { "text": { "type": "string" }, "nextOffset": { "type": ["integer", "null"] } }
-}
