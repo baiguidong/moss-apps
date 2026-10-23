@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.textin-xparse",
+  "displayName": "TextIn xParse·智能文档解析",
+  "description": "通过命令行将文件（PDF、图片、Word、Excel、PPT、扫描件等）解析为 Markdown 或结构化 JSON，可还原文档目录结构和复杂表格结构，适用于高精度高性能要求的文档处理任务，每日免费1000页。",
+  "category": "knowledge",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "keywords": [
+    "textin-xparse",
+    "TextIn xParse · Intelligent Document Par",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "textin-xparse",
+    "source": "textin-xparse",
+    "name": "TextIn xParse·智能文档解析",
+    "nameEn": "TextIn xParse · Intelligent Document Parsing",
+    "description": "通过命令行将文件（PDF、图片、Word、Excel、PPT、扫描件等）解析为 Markdown 或结构化 JSON，可还原文档目录结构和复杂表格结构，适用于高精度高性能要求的文档处理任务，每日免费1000页。",
+    "descriptionEn": "Parse PDFs, images, Word, Excel, PowerPoint, scanned documents, and more into Markdown or structured JSON from the command line. Preserve document hierarchies and complex table structures for high-accuracy, high-performance document processing. Parse up to 1,000 pages free each day.",
+    "type": "cli",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "5.0.0",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "解析并总结这份 PDF 的核心内容：https://web-api.textin.com/image/download?filename=4249da45f6e946d2afd8380d59.pdf"
+    ],
+    "hasMcp": false,
+    "hasCli": true,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/png;base64,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",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [],
+    "skillName": "xparse-parse",
+    "skillNames": [
+      "xparse-parse"
+    ]
+  },
+  "cli": {
+    "runtime": {
+      "type": "node",
+      "version": ">=18"
+    },
+    "init": {
+      "darwin": "env -u NODE_OPTIONS npm install --global --registry=https://registry.npmmirror.com xparse-cli@latest && env -u NODE_OPTIONS xparse-cli --profile workbuddy config set base_url https://api.textin.com",
+      "linux": "env -u NODE_OPTIONS npm install --global --registry=https://registry.npmmirror.com xparse-cli@latest && env -u NODE_OPTIONS xparse-cli --profile workbuddy config set base_url https://api.textin.com",
+      "win32": "set \"NODE_OPTIONS=\" && npm.cmd install --global --registry=https://registry.npmmirror.com xparse-cli@latest && xparse-cli.cmd --profile workbuddy config set base_url https://api.textin.com"
+    },
+    "auth": {
+      "darwin": "env -u NODE_OPTIONS xparse-cli --profile workbuddy auth device --open-browser=always --output=jsonl",
+      "linux": "env -u NODE_OPTIONS xparse-cli --profile workbuddy auth device --open-browser=always --output=jsonl",
+      "win32": "set \"NODE_OPTIONS=\" && xparse-cli.cmd --profile workbuddy auth device --open-browser=always --output=jsonl"
+    },
+    "unAuth": {
+      "darwin": "env -u NODE_OPTIONS xparse-cli --profile workbuddy auth logout --method oauth",
+      "linux": "env -u NODE_OPTIONS xparse-cli --profile workbuddy auth logout --method oauth",
+      "win32": "set \"NODE_OPTIONS=\" && xparse-cli.cmd --profile workbuddy auth logout --method oauth"
+    },
+    "status": {
+      "darwin": "env -u NODE_OPTIONS xparse-cli --profile workbuddy auth status --output=json",
+      "linux": "env -u NODE_OPTIONS xparse-cli --profile workbuddy auth status --output=json",
+      "win32": "set \"NODE_OPTIONS=\" && xparse-cli.cmd --profile workbuddy auth status --output=json"
+    },
+    "statusMatchJson": {
+      "logged_in": "true",
+      "method": "oauth"
+    },
+    "authUrlDomain": "api.textin.com",
+    "env": {
+      "XPARSE_OAUTH_CLIENT_ID": "cli_textin_xparse_workbuddy",
+      "XPARSE_BASE_URL": "https://api.textin.com"
+    },
+    "versionCheck": {
+      "command": {
+        "darwin": "env -u NODE_OPTIONS xparse-cli version",
+        "linux": "env -u NODE_OPTIONS xparse-cli version",
+        "win32": "set \"NODE_OPTIONS=\" && xparse-cli.cmd version"
+      },
+      "minVersion": "2.2.1",
+      "versionPattern": "xparse-cli version v?(\\d+\\.\\d+\\.\\d+)"
+    },
+    "authDeviceFlow": {
+      "uriPattern": "\"verification_uri_complete\"\\s*:\\s*\"(https?://[^\"]+)\"",
+      "codePattern": "\"user_code\"\\s*:\\s*\"([A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4})\"",
+      "defaultExpiresInSeconds": 240,
+      "codeEmbeddedInUri": true
+    }
+  }
+}

@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "ShareCRM": {
-      "type": "http",
-      "url": "https://open.fxiaoke.com/mcp/connector?id=workbuddy"
-    }
-  }
-}

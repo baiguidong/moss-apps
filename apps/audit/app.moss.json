@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.audit",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "displayName": "审计中心",
   "category": "diagnostics",
   "keywords": [
@@ -30,6 +30,7 @@
     "runtime": "node",
     "apiVersion": 1,
     "lifecycle": "persistent",
+    "configuration": { "schema": "schemas/config.json" },
     "actions": [
       {
         "name": "dashboard.get",

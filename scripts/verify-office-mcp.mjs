@@ -104,7 +104,7 @@ data+=b'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+str(xref).encode()+b'\n
 try {
   await start()
   for (const name of apps) {
-    const definition = JSON.parse(await fs.readFile(path.join(repo, 'mcp-apps', name, 'app.json'), 'utf8'))
+    const definition = JSON.parse(await fs.readFile(path.join(repo, 'tool-apps', name, 'app.json'), 'utf8'))
     const output = path.join(repo, 'artifacts', definition.id, definition.version)
     const archive = path.join(output, `${definition.id}-${definition.version}.zip`)
     const checks = []

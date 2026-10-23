@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.mastergo-vibe-mcp",
+  "displayName": "MasterGo 莫高设计",
+  "description": "连接 MasterGo 画布，让 AI 进行设计、修改、同步和获取 D2C 代码。",
+  "category": "creative",
+  "discovery": {
+    "group": "online"
+  },
+  "keywords": [
+    "mastergo-vibe-mcp",
+    "MasterGo",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "mastergo-vibe-mcp",
+    "source": "mastergo-vibe-mcp",
+    "name": "MasterGo 莫高设计",
+    "nameEn": "MasterGo",
+    "description": "连接 MasterGo 画布，让 AI 进行设计、修改、同步和获取 D2C 代码。",
+    "descriptionEn": "Connect to the MasterGo canvas to allow AI to design, modify, synchronize, and retrieve D2C code.",
+    "type": "mcp",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "使用 MasterGo MCP，为我设计一个任务管理系统界面",
+      "用当前文件已订阅的团队组件库生成 CRM 客户管理页面",
+      "把当前选中按钮背景改成黑色，文字改成白色",
+      "为我生成一套按钮组件，要求有大中小尺寸和不同的状态",
+      "获取我当前选中图层的前端代码"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEABAMAAACuXLVVAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAPUExURen/+Tlw45G37sTh9VmK59xpBHAAAAOVSURBVHja7Zt/kqIwEIUlyQE26gFI8AAgcwDRuf+Z1p1ZHJA0JKE7W7X1vn8tK1/Rr5+/8HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgmWtDPdL3BY5Xg7XnOvSI9k9a6fP18/ynQegc/4W0QGe/OAUuzbdAI3wB7F9a4gJIXwIzCtyIC+B9LSrgRoHjYjdGAdkZjOcvY+h9iRmol4CtAzv4TSu/A4E9UD8CdYkILEJw/RFoCizhchG9LxECMxWoiQlIzqCbCpyICUjOYJgKnEkBX2AJ32agZ+eLLaKZC9yICMiFwM0FjtQExEIwP38aAv9GkQhMQqDfBWRCUL0LPIgISIXAvQsciQgIhUDbBS0l4Ass4TQES4FWuofnbbwUaKR7eL6ISwFfJAKvEChfYAYmJHAjekBiEV1I4Eg0oUQIQueXDIEKCoyLWCAEVVjgUSwELixQLATaErSFQmAogVIh6CiBEzmDWrqH5yEQngEZgVJtbGiBMm3saIEyi0ifX6aN1YpAkUWs1gRKtLFbEygQAm1XkW9jtS4gH4JuXeAkHoJhXUC8jTciIN/GZktAuo3dloD0Ig5bAsJtrOwmsotYbQvIhsBtC8iGYPv8148HIiGIiIBsCLoYAck2HmIEBEOgbRRybWziBOQWsYsTOInNYIgTEGtjZSORWsQqVkAqBC5WQGoRY8+XauPoCEiFoIsXkGnjIV5AJATaJkC3sXgPz0LAOoMuRUCijYcUAYE2VtZmzIBxEU2aAH8buzQB/kVMO5+/jRMjwB+CLlWAu41dqgBzCLRNhjcEJl2At427dAHeNh7SBVjbWFmbPQOWRTQ5Apxt7HIEOBcx53zOEGRFgDMEVZ4A348HLk+ALQTaZsLVxiZXgCsEXa4AVxsPuQJMi5gdAa6vq0y+AE8bu3wBnkXMP58nBGqHAMsiVnsEONrY7RFgCIG2u9jfxmqfwP4QVPsEbuQMaukXAq77LN0+gTGF6l8LaCmBc+Sv6Qd+gfO96b+SrHt/2by5Kv9+ZyKEn2/Pv17WQ7gMQbPnxfgeWGIdVPh1oGZQZxfRuaE6xA/k/dbLS9BmviH7XL1014H828Eh9/V4FoL75v841YX6942+5r0aqknuoy7bNAzzJzz3JedN4cfW6OkwPBaP9Dkfzi6bow+E4c+T7sELdE3/bNbnfLmoPZUX3XPczAEAAAAAAAAAAAAAAAAAAAAAAAAAAP5PfgO/WkXoeQpTMAAAAABJRU5ErkJggg==",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "mastergo"
+    ],
+    "skillName": "mastergo-vibe-mcp",
+    "skillNames": [
+      "mastergo-vibe-mcp"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "mastergo": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@mastergo/vibe-mcp",
+          "--url=http://localhost:50678"
+        ],
+        "env": {
+          "NO_PROXY": "localhost,127.0.0.1,::1"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.tmeet",
+  "displayName": "腾讯会议",
+  "description": "通过命令行创建、查询和管理腾讯会议。支持快速发起会议、查看日程安排、管理参会人员。",
+  "category": "communication",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "keywords": [
+    "tmeet",
+    "Tencent Meeting",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "tmeet",
+    "source": "tmeet",
+    "name": "腾讯会议",
+    "nameEn": "Tencent Meeting",
+    "description": "通过命令行创建、查询和管理腾讯会议。支持快速发起会议、查看日程安排、管理参会人员。",
+    "descriptionEn": "Create, query, and manage Tencent Meeting sessions via CLI.",
+    "type": "cli",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "",
+    "visibleIn": [],
+    "examples": [
+      "帮我创建一个明天下午 3 点的会议，主题是周报评审，时长 1 小时",
+      "查看我今天的所有会议安排",
+      "取消明天的周报评审会议"
+    ],
+    "hasMcp": false,
+    "hasCli": true,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgOS4xOTcgMTAxNC44MDI5OTk5OTk5OTk5IDEwMTQuODAzIiB3aWR0aD0iMjUwMCIgaGVpZ2h0PSIyNDc3Ij48cGF0aCBmaWxsPSIjMDM3N0ZDIiBkPSJNMjE1LjY0NiA5LjE5N2g1ODMuNTEycTIxNS42NDUgMCAyMTUuNjQ1IDIxNS42NDV2NTgzLjUxMnEwIDIxNS42NDYtMjE1LjY0NSAyMTUuNjQ2SDIxNS42NDZRMCAxMDI0IDAgODA4LjM1NFYyMjQuODQyUTAgOS4xOTcgMjE1LjY0NiA5LjE5N3oiLz48cGF0aCBmaWxsPSIjRkZGIiBkPSJNODQ0LjQ0MyA1MzYuMTMzbC04My4zNC04Mi4yNjItMTI2LjUzNC0xMjcuNTQ4LTEyNy40ODQgMTI2LjAyNkwzNzkuNiAzMjYuMzIzIDI1My4wNjcgNDUzLjgwN2wtODIuODM0IDgyLjM5YTYxLjk2NiA2MS45NjYgMCAwIDAgMCA4Ny40bDgyLjgzNCA4My4yNzcgMTI2Ljk3Ny0xMjYuNTMzIDEyNy4wNCAxMjguNTYzTDYzNC4wNjMgNTgwLjM0bDEyNy4wNCAxMjguMDU1IDgzLjM0MS04Mi44MzNhNjQuMDYgNjQuMDYgMCAwIDAgMC04OS40M3oiLz48cGF0aCBmaWxsPSIjRTBFQkZEIiBkPSJNMzg2LjA0OCAzMDUuNTg0bDEzNC41NDUgMTM0LjU0NS0yNjkuMDkgMjY5LjA5LTEzNC41NDYtMTM0LjU0NXoiLz48cGF0aCBmaWxsPSIjQUJDNEZCIiBkPSJNMzc5LjUzNiAzMjYuMzIzTDUxMy4zIDQ0NS44MTYgMzg3LjAyIDU5Ni4xMzRoLTMuOTk1eiIvPjwvc3ZnPg==",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [],
+    "skillName": "tmeet-skill",
+    "skillNames": [
+      "tmeet-skill"
+    ]
+  },
+  "cli": {
+    "runtime": {
+      "type": "node",
+      "version": ">=14"
+    },
+    "init": {
+      "darwin": "npm install -g @tencentcloud/tmeet",
+      "linux": "npm install -g @tencentcloud/tmeet",
+      "win32": "npm install -g @tencentcloud/tmeet"
+    },
+    "versionCheck": {
+      "command": {
+        "darwin": "tmeet --version",
+        "linux": "tmeet --version",
+        "win32": "tmeet.cmd --version"
+      },
+      "minVersion": "1.0.15"
+    },
+    "auth": {
+      "darwin": "tmeet auth login --no-browser",
+      "linux": "tmeet auth login --no-browser",
+      "win32": "tmeet.cmd auth login --no-browser"
+    },
+    "unAuth": {
+      "darwin": "tmeet auth logout",
+      "linux": "tmeet auth logout",
+      "win32": "tmeet.cmd auth logout"
+    },
+    "status": {
+      "darwin": "tmeet auth status",
+      "linux": "tmeet auth status",
+      "win32": "tmeet.cmd auth status"
+    },
+    "statusMatch": "Logged in",
+    "authUrlDomain": "meeting.tencent.com"
+  }
+}

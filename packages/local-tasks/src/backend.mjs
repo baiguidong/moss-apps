@@ -32,8 +32,11 @@ async function optionalPreviewRelative(root, directory, previewPath) {
   }
 }
 export async function atomicJson(file, value) {
+  const contents = JSON.stringify(value)
+  try { if (await fs.readFile(file, 'utf8') === contents) return }
+  catch (error) { if (error.code !== 'ENOENT') throw error }
   const temporary = `${file}.${randomUUID()}.tmp`
-  await fs.writeFile(temporary, JSON.stringify(value), { mode: 0o600 })
+  await fs.writeFile(temporary, contents, { mode: 0o600 })
   await fs.rename(temporary, file)
 }
 

@@ -1,7 +1,0 @@
-{
-  "name": "@moss/connector-app-build",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "dependencies": { "@moss/app-runtime": "workspace:*" }
-}

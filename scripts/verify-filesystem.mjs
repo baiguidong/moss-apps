@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const repo = fileURLToPath(new URL('..', import.meta.url))
 const core = process.env.MOSS_CORE_ROOT || path.resolve(repo, '../moss')
-const definition = JSON.parse(await fs.readFile(path.join(repo, 'mcp-apps/filesystem/app.json'), 'utf8'))
+const definition = JSON.parse(await fs.readFile(path.join(repo, 'tool-apps/filesystem/app.json'), 'utf8'))
 const output = path.join(repo, 'artifacts', definition.id, definition.version)
 const archive = path.join(output, `${definition.id}-${definition.version}.zip`)
 const previousIndex = process.argv.indexOf('--previous-archive')

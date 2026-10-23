@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.fuma-ai-callout",
+  "summary": "通过 WorkBuddy 查询福马AI手机智能体、成员列表，并创建 AI 外呼任务。",
+  "description": "通过 WorkBuddy 查询福马AI手机智能体、成员列表，并创建 AI 外呼任务。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/fuma-ai-callout",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

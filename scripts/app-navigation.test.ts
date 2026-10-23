@@ -15,9 +15,14 @@ test('all repository Apps explicitly choose navigation; Sequential Thinking stay
   const apps = listApps()
   expect(apps.length).toBeGreaterThan(0)
   for (const app of apps) {
-    if (app.kind === 'mcp') {
-      expect(app.manifest.navigation).toEqual({ location: 'settings', viewId: 'settings' })
-      expect(app.manifest.ui.builtin).toBe('mcp')
+    if (app.kind === 'tool') {
+      if (app.manifest.mcpApp) {
+        expect(app.manifest.navigation).toEqual({ location: 'settings', viewId: 'settings' })
+        expect(app.manifest.ui.builtin).toBe('mcp')
+      } else {
+        expect(app.manifest.navigation).toEqual({ location: 'none' })
+        expect(app.manifest.ui).toBeUndefined()
+      }
       continue
     }
     const raw = JSON.parse(fs.readFileSync(`${app.root}/app.moss.json`, 'utf8'))

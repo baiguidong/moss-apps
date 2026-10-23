@@ -11,7 +11,7 @@ test('App skill manifest survives normalization and rejects old Hosts and escapi
  const manifest=JSON.parse(await fs.readFile(new URL('../apps/file-cleaner/app.moss.json',import.meta.url),'utf8'))
  const normalized=validateAppManifest(manifest)
  assert.equal(normalized.contributes.skills[0].cli,'dist/backend/cli.mjs')
- assert.throws(()=>validateAppManifest({...manifest,hostApi:'^3.11.0'}),/3.14/)
+ assert.throws(()=>validateAppManifest({...manifest,category:'knowledge',hostApi:'^3.11.0'}),/3.14/)
  assert.throws(()=>validateAppManifest({...manifest,contributes:{...manifest.contributes,skills:[{...manifest.contributes.skills[0],path:'../SKILL.md'}]}}),/path|relative|Invalid/)
 })
 

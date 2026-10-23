@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.ctrip-wendao",
+  "displayName": "携程问道",
+  "description": "通过携程问道 API 获取旅行规划与攻略。支持酒店查询、机票搜索、景点推荐、行程规划、美食住宿攻略。",
+  "category": "life",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "keywords": [
+    "ctrip-wendao",
+    "Ctrip Wendao",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "ctrip-wendao",
+    "source": "ctrip-wendao",
+    "name": "携程问道",
+    "nameEn": "Ctrip Wendao",
+    "description": "通过携程问道 API 获取旅行规划与攻略。支持酒店查询、机票搜索、景点推荐、行程规划、美食住宿攻略。",
+    "descriptionEn": "Get travel planning and guides via Ctrip Wendao API. Supports hotel search, flight query, attraction recommendations, itinerary planning, and dining tips.",
+    "type": "unknown",
+    "authMode": "token",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "4.24.0",
+    "visibleIn": [],
+    "examples": [
+      "帮我规划一个三天两夜的三亚旅行",
+      "查一下下周五从北京到上海的机票",
+      "推荐杭州西湖附近性价比高的酒店",
+      "成都有哪些必打卡的美食和景点",
+      "暑假带孩子去日本玩一周，帮我做个攻略"
+    ],
+    "hasMcp": false,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": true,
+    "icon": "data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjIwNTgiIHZpZXdCb3g9Ii0xNy4yNDEyIC0zNC40NTM0IDEwOTIuNTU4NiAxMDkyLjU1ODYiIHdpZHRoPSIyMDU4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Im05MDAuNDg4IDYzMi4zNjRjNzAuOCAxMy4yNTcgODcuMzc3IDM1LjMzIDc5LjExMSAxMDUuMzI5LTE2LjM0OSAxMzguMjU1LTk5LjMwNyAyMjUuNjMzLTI1NC43NTkgMjY4LjI0NS0yNjguNDI5IDczLjU5My01NDAuODY0LTg0LjM1NS02MDIuMjA3LTM1Mi44NTItMjIuNTU0LTk4LjgyNi0xMC4zNS0xOTcuMTcxIDMwLjY4My0yOTEuMDk4IDEwLjgzLTI0LjgyIDM4LjEyNC00OS41OTYgOS44NjktNzguNDQ3LTI2LjY3Ni0yNy4yNDgtNTcuNDczLTEzLjIzNS04Ny4wMTEtNC4xOS05LjI5NyAyLjg0LTE4LjQzMyA2LjE4Mi0zMy43OTcgMTEuNDQ5LjUyNi0zOC42MjkgMTYuMjgtNjIuMTkgNDAuNTI4LTgyLjkxMyA0MS43ODktMzUuNzY2IDk1LjIzMi01Ni44NTQgMTQzLjU2OS00Ny4yMTQgNzIuOTUxIDE0LjQ3IDExNC42NDgtMjMuMTI3IDE2My45Ny02MC42OCA4OS40NTktNjguMTY0IDE4OS4wNDEtMTA4Ljc2MyAzMDUuMDQxLTk4LjM2NiA3NS4yNDEgNi43MzIgMTI0LjY3NyA0MC4yMyAxNDUuMTI1IDExMi4xOTggOC43NDcgMzAuNzUyIDIzLjUxNiAzOC45MjYgNTIuMjk4IDM3LjcxMiAyNy43OTgtMS4yMzYgNDguODE4IDEyLjU5NCA1NC41NDIgNDAuNjY3IDUuODE2IDI4LjY2Ny0xMi45NiA0Ni4xODQtMzQuOTE5IDU5Ljk5MS0yNi41MTUgMTYuNjkzLTY0LjQ4IDIwLjE1LTEzOS4xMjYgMTMuNzM5LTguNDAzIDEwLjMwNCAyLjk1NCAxMi43NTQgNy42OTQgMTYuNTU1IDYuMTEzIDQuOSAxMy41MzIgOC4xNTEgMjQuNDc3IDE0LjQ3MS0yNC41MjMgNy4xNjctNDUuMjkxIDEyLjgyMy02NS43ODUgMTkuMzAzLTQ5LjU5NiAxNS42ODUtOTEuMzYxIDI4Ljk0My05Mi44OTUgMTAwLjIyMy0xLjU4IDczLjI3Mi05Mi4zNDYgMTMyLjYtMTY5LjE5IDEyOC4zODcuNDU3LTQuMDA3IDAtOC41MTggMS42NDgtMTEuOTMgMTMuNzM4LTI3LjA0MiA1Ni43MTctNTMuNzYzIDE3LjY3Ny04NC4wMzQtMjkuNzY3LTIzLjA4MS01Ni45MjQgMTIuMTEzLTc5LjExMSAzMC41MjItOTEuMjAyIDc1LjU2My0xMjcuNDAzIDIwNi4wNzktOTAuMTI1IDMxNC4zODUgMzcuODcyIDExMC4xNiAxMzcuMzg1IDE4Ni43OTggMjY4Ljk1NSAxOTIuNjE0LTgzLjYtMzguMjg0LTEzOS4wMzQtODQuMDM0LTE2Ny42MzMtMTU0LjE5Mi0yOS4wNTgtNzEuMjU3LTI4LjQ0LTE0Mi44NTggNS42MS0yMTMuOTMzLTEwLjUzMyAxMDkuMTc2LTExLjcyNCAyMTMuNTkgMTA5LjYzMyAyNjcuODExIDE0OC40OTEgNDAuNTk3IDI1MC44NjctMjIuODk4IDI3OC43NzktMTcwLjc0OCA3Ljg1NC00Mi4wODUgMTYuOTktODcuNTgzIDc3LjM0OC04My4wMDN6IiBmaWxsPSIjMjU3N2UyIi8+PHBhdGggZD0ibTkwMC40ODggNjMyLjM2NGMtNTAuMzc1IDEyLjM4Ny01Ny40OTYgNTAuNjk1LTYxLjExNCA5NC45NTYtMTIuMTM2IDE0OC41MTQtMTYxLjcyNiAyMjguMjktMjk1LjA4MSAxNTguODE4IDE2MC43NC0yLjQ3MyAyMzUuMjI3LTg0LjMxIDIxOS4yOS0yNDAuNDI1LTQuMTY3LTQwLjgwNCA0LjM3NC03NS41NjIgNTEuNzk0LTgzLjY5IDU0LjYxMS05LjU1IDgxLjEwNCAxNy4zNzggODUuMTEgNzAuMzR6IiBmaWxsPSIjZmQ5ODE0Ii8+PHBhdGggZD0ibTcwMC4wNjUgMTE2LjM2NmMtMjYuODEzIDUwLjY1LTI2LjgxMyA1MC42NSA5LjQzNCA5Ni42MjgtMzQuMjEgMy4wMjItNTMuNjk1LTE0LjQyNi01OC40OC00My4wMjUtNC42MDMtMjcuOTggMTMuMzcyLTQ1LjA4NSA0OS4wNDYtNTMuNjAzeiIgZmlsbD0iI2QwZTFmOCIvPjwvc3ZnPg==",
+    "enabled": true,
+    "credentialSchema": {
+      "title": "携程问道授权",
+      "titleEn": "Ctrip Wendao Authorization",
+      "description": "输入携程问道 API Token（从携程问道开放平台申请）",
+      "descriptionEn": "Enter your Ctrip Wendao API Token (obtained from Ctrip Wendao Open Platform)",
+      "docUrl": "https://www.ctrip.com/wendao/openclaw",
+      "docLabel": "去携程问道开放平台申请 Token",
+      "docLabelEn": "Apply for Token on Ctrip Wendao Open Platform",
+      "fields": [
+        {
+          "key": "WENDAO_API_KEY",
+          "label": "API Token",
+          "labelEn": "API Token",
+          "placeholder": "输入从携程问道开放平台获取的 API Token",
+          "placeholderEn": "Enter the API Token from Ctrip Wendao Open Platform",
+          "description": "在携程问道开放平台 (ctrip.com/wendao/openclaw) 申请并复制的 API Token",
+          "descriptionEn": "API Token applied and copied from Ctrip Wendao Open Platform (ctrip.com/wendao/openclaw)",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    "requiresCliSetup": false,
+    "mcpServerNames": [],
+    "skillName": "ctrip-wendao",
+    "skillNames": [
+      "ctrip-wendao"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.tc-chengxin",
+  "summary": "同程程心可通过自然语言查询机票、火车票、酒店、景点、度假产品等旅行资源，支持火空联程、智能交通推荐、特价机票搜索、景区门票预订，以及完整行程规划，显著提升出行效率。",
+  "description": "同程程心可通过自然语言查询机票、火车票、酒店、景点、度假产品等旅行资源，支持火空联程、智能交通推荐、特价机票搜索、景区门票预订，以及完整行程规划，显著提升出行效率。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/tc-chengxin",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

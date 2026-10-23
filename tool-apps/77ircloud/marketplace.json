@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.77ircloud",
+  "summary": "通过自然语言管理铱云供应链：支持订单全链路操作，以及客户、商品、仓库库存、员工组织、资金账户、数据导出、经营统计和预警明细的查询分析。",
+  "description": "通过自然语言管理铱云供应链：支持订单全链路操作，以及客户、商品、仓库库存、员工组织、资金账户、数据导出、经营统计和预警明细的查询分析。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/77ircloud",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

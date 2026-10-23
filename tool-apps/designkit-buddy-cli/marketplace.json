@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.designkit-buddy-cli",
+  "summary": "一句话轻松调用美图设计室Agent Teams，从市场策略洞察，到电商套图、营销视频、社媒图文、海报及品牌等视觉物料，零门槛完成商业设计的全流程。",
+  "description": "一句话轻松调用美图设计室Agent Teams，从市场策略洞察，到电商套图、营销视频、社媒图文、海报及品牌等视觉物料，零门槛完成商业设计的全流程。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/designkit-buddy-cli",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

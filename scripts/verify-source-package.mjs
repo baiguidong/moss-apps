@@ -55,7 +55,8 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
       }
       const output = path.join(temp, 'rebuilt'), app = sourcePath(workspace, source.descriptor.appRoot)
       await fs.mkdir(output)
-      if (manifest.mcpApp) {
+      const declarativeTool = manifest.connectorApp && await fs.stat(path.join(app, 'app.json')).then(() => true, () => false)
+      if (manifest.mcpApp || declarativeTool) {
         await fs.cp(path.join(app, 'dist'), output, { recursive: true })
       } else {
         for (const name of ['dist', 'schemas', 'assets', 'resources', 'README.md', 'LICENSE', 'LICENSE.md', ...(manifest.connectorApp ? ['connector'] : [])]) {

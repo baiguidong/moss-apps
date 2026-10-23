@@ -99,6 +99,9 @@ jobs:
       - name: Validate source and runtime on the target desktop platform
         if: steps.release.outputs.variants != 'true'
         run: node scripts/package-app.mjs --app "${{ steps.release.outputs.app_id }}"
+      - name: Verify bundled DBX MCP on the target desktop platform
+        if: inputs.app_id == 'moss.dbx'
+        run: node scripts/verify-dbx-mcp.mjs
       - name: Build signed platform package
         if: steps.release.outputs.variants == 'true'
         env:

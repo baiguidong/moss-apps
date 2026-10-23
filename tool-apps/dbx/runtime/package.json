@@ -1,0 +1,20 @@
+{
+  "name": "moss-dbx-bundled-runtime",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "mossBundleAllPlatforms": true,
+  "mossRuntimeFiles": {
+    "native/win32-arm64/vcruntime140.dll": "node_modules/@dbx-app/mcp-win32-arm64/bin/vcruntime140.dll",
+    "native/win32-x64/vcruntime140.dll": "node_modules/@dbx-app/mcp-win32-x64/bin/vcruntime140.dll"
+  },
+  "dependencies": {
+    "@dbx-app/mcp-server": "0.4.127",
+    "@dbx-app/mcp-darwin-arm64": "0.4.127",
+    "@dbx-app/mcp-darwin-x64": "0.4.127",
+    "@dbx-app/mcp-linux-arm64-gnu": "0.4.127",
+    "@dbx-app/mcp-linux-x64-gnu": "0.4.127",
+    "@dbx-app/mcp-win32-arm64": "0.4.127",
+    "@dbx-app/mcp-win32-x64": "0.4.127"
+  }
+}

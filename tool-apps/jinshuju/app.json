@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.jinshuju",
+  "displayName": "金数据",
+  "description": "用自然语言在金数据（jinshuju.net）创建表单、表格、问卷、考试、报名、收款等各类场景应用：一句话生成表单与表格、批量处理数据、自动统计分析，零门槛快速搭建。",
+  "category": "automation",
+  "discovery": {
+    "group": "online"
+  },
+  "keywords": [
+    "jinshuju",
+    "Jinshuju",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "jinshuju",
+    "source": "jinshuju",
+    "name": "金数据",
+    "nameEn": "Jinshuju",
+    "description": "用自然语言在金数据（jinshuju.net）创建表单、表格、问卷、考试、报名、收款等各类场景应用：一句话生成表单与表格、批量处理数据、自动统计分析，零门槛快速搭建。",
+    "descriptionEn": "Create and edit forms, query and bulk-update entries, check plan quota on Jinshuju (jinshuju.net).",
+    "type": "mcp",
+    "authMode": "server-side",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "列一下我金数据里的表单",
+      "帮我建一个“2026 春季发布会”报名表，要姓名、手机号、公司、职位",
+      "把 form_token 为 abCdEf 的表单里最近 7 天的报名数据导出来",
+      "查一下我这个金数据账户的套餐还剩多少额度"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iNi4wNzUiIGZpbGw9IiNGRjg1MzMiLz4KPHJlY3Qgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iNi4wNzUiIGZpbGw9ImJsYWNrIiBmaWxsLW9wYWNpdHk9IjAuMDEiLz4KPGcgZmlsdGVyPSJ1cmwoI2ZpbHRlcjFfZF80MDBfMjg4NykiPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTguNjkwMiA4LjczMjI3QzguNjg2MDggOC43Mjc5IDguNjgwMDggOC43MjE1NCA4LjY2NjI1IDguNzI3NjFMNy45MDkxIDkuMTE2OThDNy45MDUxMiA5LjExOTAzIDcuODk5NyA5LjEyOTAyIDcuOTA0NDUgOS4xNDAyNEM3Ljk3MTgzIDkuMjk5MzggOC40NzkyOSAxMC41Mjk1IDguMzU4MDcgMTEuMTk5M0M4LjM1ODA3IDExLjE5OTMgOC4xNTQwMSAxMi4xODczIDcuNzEwNjYgMTIuODgyN0w3LjcxMDM3IDEyLjg4MzNDNy42OTcxNSAxMi45MDc1IDcuMjIxIDEzLjc3OSA2LjI0NTQ2IDEzLjY4NDhDNi4yNDAxIDEzLjY4NDMgNi4yMjc2NCAxMy42ODQ4IDYuMjI3NjQgMTMuNjk3NEw2LjE0Mzg5IDE0LjM5NjFDNi4xNDM4OSAxNC4zOTYxIDkuMjc1NTEgMTQuMzkwOSAxMS42NTAxIDE0LjM5MDlDMTEuNTk4OSAxNC4wNjI3IDExLjU0MDMgMTMuNjA1OCAxMS41Mjk1IDEzLjUyMDRDMTEuNTI4MyAxMy41MTEyIDExLjUyNDcgMTMuNTA2OCAxMS41MTI0IDEzLjUwOThDMTEuMzIyNCAxMy41NTI0IDkuNDIyNCAxMy45NDk0IDkuNDIyNCAxMi43ODU5QzkuNDIyNCAxMi43MTkxIDkuNDMwOTMgMTIuMjAyMiA5LjU0MTkxIDExLjgwNDZDOS43ODI4NSAxMC45NDIzIDEwLjUyMTIgMTAuMTk3OSAxMC41OTYgMTAuMTI0MkMxMC41OTk3IDEwLjEyMDIgMTAuNjAxOCAxMC4xMTA1IDEwLjU5OTcgMTAuMTAxM0wxMC40NTUxIDkuMDc2MDVDMTAuNDUzNSA5LjA3MDQ0IDEwLjQ0NCA5LjA1OTA1IDEwLjQyOTcgOS4wNzE2QzEwLjMwNjUgOS4yMjQ0OCA5LjY3MTg0IDkuOTcwODEgOS4zNTU0MiA5LjUzNzAyTDguNjkwOTEgOC43MzMwMkw4LjY5MDIgOC43MzIyN1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNi4zNzgyMSA5LjY2NzJDNi4yMTM1MSA5LjQ5Njk5IDUuMzUxMDQgOS4wNTgxOSAzLjk0MTQxIDkuODU2NThDMy45NDE0MSA5Ljg1NjU4IDQuNzEzNDYgMTAuOTcxNSA0Ljk4MTUgMTEuMjMzMUM1LjI0OTU0IDExLjQ5NDcgNS42MTYwOCAxMS43NDc0IDYuMjcwMDIgMTEuNTQ3N0w2LjI3MzgyIDExLjU0NjhDNi4zMDg1OSAxMS41Mzg3IDYuNTczNTMgMTEuNDcxOSA2LjY5NzEgMTEuMzAxM0M2Ljc0OTU5IDExLjIzNSA2Ljc4MzUyIDExLjEzMjkgNi43OTg4NiAxMS4wMDgzQzYuODIwNjYgMTAuNjc2OSA2LjgwMDUzIDEwLjAyNjMgNi4zNzgyMSA5LjY2NzJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTEzLjk2OTkgOC41NjYyOEMxMy40ODc5IDguNDg1NzQgMTIuOTc1MyA4LjQ3MDY1IDEyLjQ5MzQgOC41ODM1MkMxMi4zNjEgOC42MTUxOCAxMi4yNDIxIDguNjU5ODQgMTIuMTE4NSA4LjczNzhDMTEuODU0NiA4LjkwMjc2IDExLjcwMiA5LjE3ODY4IDExLjU3OTkgOS40Nzk5M0MxMS41Nzg4IDkuNDgzMjQgMTEuNTc2NiA5LjQ4OTQgMTEuNTczNCA5LjQ5ODFDMTEuNTM1NCA5LjYwMjI4IDExLjM2NDMgMTAuMDcxNiAxMS40NTcgMTAuMzk4M0MxMS41NDA4IDEwLjcwODUgMTIuMTU3NSAxMC44NjExIDEyLjI2MjEgMTAuODgzOUMxMi40NzU5IDEwLjkyOTcgMTIuNTU3OSAxMC45Mzc1IDEyLjY1NSAxMC45NDY3QzEyLjY2MyAxMC45NDc1IDEyLjY3MTEgMTAuOTQ4MiAxMi42NzkzIDEwLjk0OUMxMi43NDY1IDEwLjk1MzEgMTIuNzczOCAxMC45NTE1IDEyLjgwMzUgMTAuOTQ5OUMxMi44MDg0IDEwLjk0OTYgMTIuODEzMyAxMC45NDkzIDEyLjgxODUgMTAuOTQ5QzEzLjI0MzggMTAuOTI3IDE0LjE3MzcgMTAuNTQyOCAxNC43MzM2IDguNzA4ODhDMTQuNzM1MyA4LjcwMTI0IDE0LjAyNzcgOC41NzYxMiAxMy45Njk5IDguNTY2MjhaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTUuNjIzNzYgNC4yNTM4QzUuNjIzNzYgNC4yNTM4IDQuMjI1MjkgMy44MDg4NCAzLjk0MTQxIDMuNjAzOTNDMy45NDE0MSAzLjYwMzkzIDQuMjU3MzEgOC45MzMwNSA3LjE2NzYxIDguNzE4NzNDNy4zODk4NSA4LjcwNjQ1IDcuNjA1NzUgOC42Njg3NSA3Ljc5Mjg1IDguNjMyMzNDOC4wMTg5IDguNTc3MjYgOC4xMTM3MyA4LjU1MTg1IDguMzcyOCA4LjQzNDFDOC41MDMxOCA4LjM2NzE4IDguNjE0MDkgOC4yOTA5NCA4LjcxMDYgOC4xNzQ4OUM5LjAzMjMyIDcuODM3NzUgOS4wMzQ4NyA3LjAyMjg0IDguOTgwNjggNi42MDk0MUM4Ljk1Mjc0IDYuMzY0NiA4LjkxMzggNi4yMDQ1IDguODQ2MDcgNi4wMjE1M0M4LjQwMTg2IDQuOTk3NDIgNy41NjUxOCA0Ljc3NzQyIDYuNDY5MTUgNC40ODkyMkM2LjIwMjExIDQuNDE5IDUuOTE5NjcgNC4zNDQ3MyA1LjYyMzc2IDQuMjUzOFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMTEuNTAxMSA4LjAzNDYxQzExLjc0MzQgNy45MzIzMiAxMy44MzU0IDcuMDQ5MzggMTIuMDExMyAzLjYwMzkzQzEyLjAxMTMgMy42MDM5MyA4LjY3Mzk0IDUuMTczMSA5Ljk2NDYxIDcuNzc0NTlDMTAuMDk4NSA4LjAxNyAxMC4xNDA2IDguMDU4NjIgMTAuMjIyNyA4LjEzOTZDMTAuMjMwOSA4LjE0NzcyIDEwLjIzOTYgOC4xNTYyNCAxMC4yNDg3IDguMTY1NEMxMC41MTgxIDguNDQ2MDYgMTEuMzA2NyA4LjEzMzMyIDExLjQ5MDIgOC4wMzkyMUMxMS40OTMzIDguMDM3OSAxMS40OTY5IDguMDM2MzcgMTEuNTAxMSA4LjAzNDYxWiIgZmlsbD0id2hpdGUiLz4KPC9nPgo8ZGVmcz4KPGZpbHRlciBpZD0iZmlsdGVyMV9kXzQwMF8yODg3IiB4PSIyLjgxNjQxIiB5PSIzLjA0MTQzIiB3aWR0aD0iMTMuMDQyMSIgaGVpZ2h0PSIxMy4wNDIyIiBmaWx0ZXJVbml0cz0idXNlclNwYWNlT25Vc2UiIGNvbG9yLWludGVycG9sYXRpb24tZmlsdGVycz0ic1JHQiI+CjxmZUZsb29kIGZsb29kLW9wYWNpdHk9IjAiIHJlc3VsdD0iQmFja2dyb3VuZEltYWdlRml4Ii8+CjxmZUNvbG9yTWF0cml4IGluPSJTb3VyY2VBbHBoYSIgdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDEyNyAwIiByZXN1bHQ9ImhhcmRBbHBoYSIvPgo8ZmVPZmZzZXQgZHk9IjAuNTYyNSIvPgo8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIwLjU2MjUiLz4KPGZlQ29tcG9zaXRlIGluMj0iaGFyZEFscGhhIiBvcGVyYXRvcj0ib3V0Ii8+CjxmZUNvbG9yTWF0cml4IHR5cGU9Im1hdHJpeCIgdmFsdWVzPSIwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwLjA4IDAiLz4KPGZlQmxlbmQgbW9kZT0ibm9ybWFsIiBpbjI9IkJhY2tncm91bmRJbWFnZUZpeCIgcmVzdWx0PSJlZmZlY3QxX2Ryb3BTaGFkb3dfNDAwXzI4ODciLz4KPGZlQmxlbmQgbW9kZT0ibm9ybWFsIiBpbj0iU291cmNlR3JhcGhpYyIgaW4yPSJlZmZlY3QxX2Ryb3BTaGFkb3dfNDAwXzI4ODciIHJlc3VsdD0ic2hhcGUiLz4KPC9maWx0ZXI+CjwvZGVmcz4KPC9zdmc+Cg==",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "jinshuju"
+    ],
+    "skillName": "jinshuju-skill",
+    "skillNames": [
+      "jinshuju-skill"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "jinshuju": {
+        "type": "http",
+        "url": "https://jinshuju.net/mcp"
+      }
+    }
+  }
+}

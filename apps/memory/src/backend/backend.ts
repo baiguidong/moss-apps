@@ -65,7 +65,6 @@ export function createMemoryBackend(options: ConstructorParameters<typeof AppBac
       if (typeof options.onInitialize === 'function') await options.onInitialize(context)
       if (typeof context.dataDir === 'string' && isAbsolute(context.dataDir)) memoryFile = join(context.dataDir, 'memory', 'knowledge-graph.jsonl')
       // Registration and disk checks must not delay the SDK's service.ready handshake.
-      setImmediate(beginInspection)
     },
     onShutdown: async (context: unknown) => {
       closing = true
@@ -77,6 +76,7 @@ export function createMemoryBackend(options: ConstructorParameters<typeof AppBac
     try {
       if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('操作参数格式不正确。')
       if (method !== 'servers.save' && Object.keys(raw).length) throw new Error('此操作不接受额外参数。')
+      await ensureRegistered()
       if (method === 'servers.save') {
         const settings = validateSettings(raw)
         const pending = mutation.then(async () => {

@@ -91,6 +91,7 @@ const messages: MessageEntry[] = [
       { type: 'tool_use', id: 'tool-1', name: 'Bash', input: { command: 'ls -la /tmp' } },
     ],
     timestamp: '2026-06-09T10:00:02.000Z',
+    timestampSource: 'explicit',
   },
   {
     id: 'result-1',

@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "fenbi_mcp": {
-      "type": "http",
-      "url": "https://market-api.fenbi.com/workbuddy/mcp"
-    }
-  }
-}

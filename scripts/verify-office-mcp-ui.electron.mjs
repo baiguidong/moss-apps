@@ -70,7 +70,7 @@ try {
   await ready
   const invoke = (name, input) => handlers.get(name)({ sender: mainWindow.webContents }, input)
   for (const name of apps) {
-    const definition = JSON.parse(await fs.readFile(path.join(repo, 'mcp-apps', name, 'app.json'), 'utf8'))
+    const definition = JSON.parse(await fs.readFile(path.join(repo, 'tool-apps', name, 'app.json'), 'utf8'))
     output = path.join(repo, 'artifacts', definition.id, definition.version)
     selectedArchive = path.join(output, `${definition.id}-${definition.version}.zip`)
     assert.equal((await invoke('app:install-archive')).ok, true)

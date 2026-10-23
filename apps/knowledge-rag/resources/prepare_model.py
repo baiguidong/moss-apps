@@ -26,7 +26,7 @@ def file_hash(file):
     return digest.hexdigest()
 
 
-def prepare(cache):
+def prepare(cache, allow_download=False):
     marker = cache / 'moss-model.json'
     try:
         previous = json.loads(marker.read_text())
@@ -40,6 +40,8 @@ def prepare(cache):
         expected = previous.get('files', {}).get(name) if previous.get('revision') == REVISION else None
         actual = file_hash(target) if target.is_file() else None
         if not actual or not expected or actual != expected:
+            if not allow_download:
+                raise RuntimeError('本地模型缺失或校验失败，请显式准备检索引擎。')
             report(f'正在连接模型下载服务（文件 {index}/{len(FILES)}）：{name}')
             from huggingface_hub import hf_hub_download
             from tqdm.auto import tqdm
@@ -67,12 +69,15 @@ def prepare(cache):
     # FastEmbed resolves main while offline; bind it to the fully downloaded revision.
     ref = snapshot.parent.parent / 'refs' / 'main'
     ref.parent.mkdir(parents=True, exist_ok=True)
-    ref.write_text(REVISION)
-    temporary = marker.with_suffix('.tmp')
-    temporary.write_text(json.dumps({'repo': REPO, 'revision': REVISION, 'files': hashes}, indent=2))
-    temporary.replace(marker)
+    if not ref.exists() or ref.read_text() != REVISION:
+        ref.write_text(REVISION)
+    contents = json.dumps({'repo': REPO, 'revision': REVISION, 'files': hashes}, indent=2)
+    if not marker.exists() or marker.read_text() != contents:
+        temporary = marker.with_suffix('.tmp')
+        temporary.write_text(contents)
+        temporary.replace(marker)
     report('多语言模型已校验完成，可直接从本机加载')
 
 
 if __name__ == '__main__':
-    prepare(Path(sys.argv[1]))
+    prepare(Path(sys.argv[1]), allow_download='--allow-download' in sys.argv[2:])

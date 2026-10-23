@@ -3,7 +3,7 @@
   "id": "moss.media-tools",
   "version": "0.1.0",
   "displayName": "音视频工坊",
-  "category": "knowledge",
+  "category": "creative",
   "discovery": { "group": "local" },
   "keywords": [
     "FFmpeg",
@@ -13,7 +13,7 @@
   ],
   "description": "使用 FFmpeg 裁剪、压缩、转换本地音视频。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.14.0",
+  "hostApi": "^3.21.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"

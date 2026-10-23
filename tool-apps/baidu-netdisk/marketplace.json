@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.baidu-netdisk",
+  "summary": "连接百度网盘，支持文件与分类浏览、关键词及语义检索、文件和文件夹管理、创建分享链接、查询容量，以及保存文本内容或通过 URL 转存文件。",
+  "description": "连接百度网盘，支持文件与分类浏览、关键词及语义检索、文件和文件夹管理、创建分享链接、查询容量，以及保存文本内容或通过 URL 转存文件。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/baidu-netdisk",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

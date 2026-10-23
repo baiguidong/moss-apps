@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.emr-query",
+  "displayName": "弹性MapReduce",
+  "description": "通过CLI实现弹性 MapReduce 集群、节点、服务、作业、监控、YARN 调度、自动扩缩容、用户与配置等查询。",
+  "category": "data",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "keywords": [
+    "emr-query",
+    "Elastic MapReduce",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "emr-query",
+    "source": "emr-query",
+    "name": "弹性MapReduce",
+    "nameEn": "Elastic MapReduce",
+    "description": "通过CLI实现弹性 MapReduce 集群、节点、服务、作业、监控、YARN 调度、自动扩缩容、用户与配置等查询。",
+    "descriptionEn": "Query Elastic MapReduce (EMR) clusters, nodes, services, jobs, monitoring, YARN scheduling, auto-scaling, users, and configurations via CLI.",
+    "type": "cli",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "5.3.10",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "查看我所有的 EMR 集群列表",
+      "查询集群 emr-e3orculh 的节点信息",
+      "获取最近一天的 Spark 查询任务",
+      "查看集群的巡检结果和 EMR 事件",
+      "查询 YARN 队列和自动扩缩容记录"
+    ],
+    "hasMcp": false,
+    "hasCli": true,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzdfMykiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI4IiBmaWxsPSIjMDA1MkQ5Ii8+CjxwYXRoIGQ9Ik0xNiAyMi4xMTExQzE3LjM1IDIyLjExMTEgMTguNDQ0NCAyMy4yMDU1IDE4LjQ0NDQgMjQuNTU1NkMxOC40NDQ0IDI1LjkwNTYgMTcuMzUgMjcgMTYgMjdDMTQuNjQ5OSAyNyAxMy41NTU1IDI1LjkwNTYgMTMuNTU1NSAyNC41NTU2QzEzLjU1NTUgMjMuMjA1NSAxNC42NDk5IDIyLjExMTEgMTYgMjIuMTExMVpNMTYgNUMxNy4zNSA1IDE4LjQ0NDQgNi4wOTQ0MSAxOC40NDQ0IDcuNDQ0NDRDMTguNDQ0NCA4LjM0ODY5IDE3Ljk1MzQgOS4xMzgyNiAxNy4yMjM1IDkuNTYxMUwxNy4yMjMxIDExLjI2NTRDMTkuMzMxMyAxMS44MDg0IDIwLjg4ODkgMTMuNzIyMyAyMC44ODg5IDE2QzIwLjg4ODkgMTYuNzIxMiAyMC43MzI3IDE3LjQwNiAyMC40NTIzIDE4LjAyMjNMMjIuNTQ4NCAxOS43OTU0QzIyLjc5NDggMTkuNzExOSAyMy4wNTg4IDE5LjY2NjcgMjMuMzMzMyAxOS42NjY3QzI0LjY4MzMgMTkuNjY2NyAyNS43Nzc4IDIwLjc2MTEgMjUuNzc3OCAyMi4xMTExQzI1Ljc3NzggMjMuNDYxMSAyNC42ODMzIDI0LjU1NTYgMjMuMzMzMyAyNC41NTU2QzIxLjk4MzMgMjQuNTU1NiAyMC44ODg5IDIzLjQ2MTEgMjAuODg4OSAyMi4xMTExQzIwLjg4ODkgMjEuOTQ3NiAyMC45MDQ5IDIxLjc4NzkgMjAuOTM1NSAyMS42MzM0TDE4LjkxNjMgMTkuOTI0MkMxOC4xMDIxIDIwLjUzMDIgMTcuMDkyOSAyMC44ODg5IDE2IDIwLjg4ODlDMTQuOTIxNCAyMC44ODg5IDEzLjkyNDQgMjAuNTM5NiAxMy4xMTU5IDE5Ljk0OEwxMS4wNzI3IDIxLjY3NzNDMTEuMDk3OSAyMS44MTgxIDExLjExMTEgMjEuOTYzMSAxMS4xMTExIDIyLjExMTFDMTEuMTExMSAyMy40NjExIDEwLjAxNjcgMjQuNTU1NiA4LjY2NjY0IDI0LjU1NTZDNy4zMTY2MSAyNC41NTU2IDYuMjIyMiAyMy40NjExIDYuMjIyMiAyMi4xMTExQzYuMjIyMiAyMC43NjExIDcuMzE2NjEgMTkuNjY2NyA4LjY2NjY0IDE5LjY2NjdDOC45NTcxIDE5LjY2NjcgOS4yMzU3MyAxOS43MTczIDkuNDk0MTcgMTkuODEwM0wxMS41NjQzIDE4LjA1ODZDMTEuMjczNSAxNy40MzI5IDExLjExMTEgMTYuNzM1NCAxMS4xMTExIDE2QzExLjExMTEgMTMuNzIxOSAxMi42NjkzIDExLjgwNzcgMTQuNzc4IDExLjI2NTFMMTQuNzc3NyA5LjU2MTgxQzE0LjA0NzEgOS4xMzkxNSAxMy41NTU1IDguMzQ5MiAxMy41NTU1IDcuNDQ0NDRDMTMuNTU1NSA2LjA5NDQxIDE0LjY0OTkgNSAxNiA1Wk0xMy42OTU4IDE2LjgxOEwxMy43MTY1IDE2Ljg3NDFMMTMuNzI3OCAxNi45MDQ0TDEzLjc1IDE2Ljk1N0wxMy43Njk4IDE3LjAwMjNMMTMuNzg2NSAxNy4wMzY0TDEzLjgxMjUgMTcuMDkyMkwxMy44MzY2IDE3LjE0MDNMMTMuODY1OSAxNy4xOTI5TDEzLjg2ODQgMTcuMTk3OEwxMy44NjcxIDE3LjE5NDFMMTMuODc5NCAxNy4yMTYxTDEzLjg4MyAxNy4yMjM0TDEzLjkxNDggMTcuMjc0OEwxMy45MzE5IDE3LjMwMTdMMTMuOTM3MSAxNy4zMTJMMTMuOTY2MSAxNy4zNTU0TDEzLjk4MiAxNy4zNzk5TDEzLjk4NCAxNy4zODI4TDE0LjAxMTQgMTcuNDIyN0wxNC4wMTk5IDE3LjQzMzdMMTQuMTMyNyAxNy41Nzc2TDE0LjI3NjUgMTcuNzMzNUwxNC4zNDUxIDE3Ljc5OTFMMTQuMzY0NiAxNy44MTYyTDE0LjM4NDcgMTcuODM0N0MxNC40MDkzIDE3Ljg1NjQgMTQuNDM0MyAxNy44Nzc2IDE0LjQ1OTggMTcuODk4M0wxNC40MjIgMTcuODY2M0wxNC40ODMxIDE3LjkxNjRMMTQuNDg0OCAxNy45MTg0TDE0LjUzOTMgMTcuOTYwMkwxNC41ODM0IDE3Ljk5MUwxNC42MTM5IDE4LjAxM0wxNC42MjE1IDE4LjAxOUwxNC41NTU0IDE3Ljk3MjFDMTQuNjA0NSAxOC4wMDgxIDE0LjY1NDkgMTguMDQyNCAxNC43MDY3IDE4LjA3NDdMMTQuNjk4NiAxOC4wNjk2TDE0LjczNjEgMTguMDkyNEwxNC43NzA0IDE4LjExMzJMMTQuNzc3NyAxOC4xMTc0TDE0Ljc5MTggMTguMTI1NUwxNC44Mzc2IDE4LjE0OTlMMTQuODUxIDE4LjE1NzJMMTQuODY1NyAxOC4xNjQ2TDE0LjkwNzIgMTguMTg2NkwxNC45NDAyIDE4LjIwMjRMMTUuMTMyMyAxOC4yODZDMTUuNDAyIDE4LjM4ODQgMTUuNjk0NCAxOC40NDQ0IDE2IDE4LjQ0NDRDMTYuNDE1OCAxOC40NDQ0IDE2LjgwNzMgMTguMzQwNiAxNy4xNTAxIDE4LjE1NzVMMTcuMjQ0MSAxOC4xMDM0TDE3LjI5MyAxOC4wNzQxTDE3LjI3NTkgMTguMDgzOUwxNy4zMTc1IDE4LjA1ODJMMTcuMzI2IDE4LjA1MjFMMTcuMzQxMyAxOC4wNDM5TDE3LjM2ODggMTguMDI0TDE3LjMzOTUgMTguMDQzNkwxNy4zMjYgMTguMDUyMUwxNy4zMTg3IDE4LjA1N0wxNy4zMzk1IDE4LjA0MzZMMTcuMzY4OCAxOC4wMjRMMTcuMzc3NCAxOC4wMTc5TDE3LjQyMzggMTcuOTg2MUwxNy41Nzc3IDE3Ljg2NzJDMTcuNjgwOCAxNy43OCAxNy43NzY2IDE3LjY4NDQgMTcuODY0IDE3LjU4MTRMMTcuOTA5MSAxNy41MjY4TDE3Ljg4NTggMTcuNTUzNEwxNy45MjI1IDE3LjUwODJMMTcuOTY0NSAxNy40NTQ5TDE3Ljk2NjUgMTcuNDUwOEwxOC4wMTU0IDE3LjM4MjNMMTguMDM0MiAxNy4zNTZMMTguMDU0NSAxNy4zMjI0TDE4LjA2ODggMTcuMzAyN0wxOC4wODU0IDE3LjI3NTlMMTguMTE1NiAxNy4yMjM0TDE4LjEzMTUgMTcuMTk0MUwxOC4xMjA1IDE3LjIxNjFMMTguMTMyNyAxNy4xOTI5TDE4LjE2MjYgMTcuMTQwNUwxOC4xODY1IDE3LjA5MTRMMTguMjA4NSAxNy4wNDYyTDE4LjIwNDggMTcuMDU2N0wxOC4yMjA3IDE3LjAyMDZMMTguMjE0NiAxNy4wMzI4TDE4LjI4NjggMTYuODY1NEMxOC4zMTE1IDE2LjgwMDIgMTguMzMzNSAxNi43MzM3IDE4LjM1MjYgMTYuNjY2TDE4LjM2NjEgMTYuNjA3NEwxOC4zNjM3IDE2LjYxOTdMMTguMzcxOSAxNi41OTMzTDE4LjM3NzEgMTYuNTY3MUwxOC4zNjk4IDE2LjU5MjhMMTguMzgzMiAxNi41NDAyVjE2LjUzNzhMMTguMzkzIDE2LjQ5MjZMMTguNDAyOCAxNi40NDQ5TDE4LjQyNDQgMTYuMzE0MUMxOC40Mzc2IDE2LjIxMTMgMTguNDQ0NCAxNi4xMDY0IDE4LjQ0NDQgMTZDMTguNDQ0NCAxNC42NSAxNy4zNSAxMy41NTU2IDE2IDEzLjU1NTZDMTQuNjQ5OSAxMy41NTU2IDEzLjU1NTUgMTQuNjUgMTMuNTU1NSAxNkMxMy41NTU1IDE2LjA2MTQgMTMuNTU3OCAxNi4xMjIyIDEzLjU2MjIgMTYuMTgyNEwxMy41ODA4IDE2LjM1MjdDMTMuNTk5MiAxNi40Nzk5IDEzLjYyNzMgMTYuNjAzOCAxMy42NjQ1IDE2LjcyMzhMMTMuNjg5OSAxNi44MDE4TDEzLjcxMzEgMTYuODY1M0wxMy42OTU4IDE2LjgxOFpNMjMuOTQ0NCAxMC41QzI1LjI5NDQgMTAuNSAyNi4zODg5IDExLjU5NDQgMjYuMzg4OSAxMi45NDQ0QzI2LjM4ODkgMTQuMjk0NSAyNS4yOTQ0IDE1LjM4ODkgMjMuOTQ0NCAxNS4zODg5QzIyLjU5NDQgMTUuMzg4OSAyMS41IDE0LjI5NDUgMjEuNSAxMi45NDQ0QzIxLjUgMTEuNTk0NCAyMi41OTQ0IDEwLjUgMjMuOTQ0NCAxMC41Wk04LjA1NTUzIDEwLjVDOS40MDU1NiAxMC41IDEwLjUgMTEuNTk0NCAxMC41IDEyLjk0NDRDMTAuNSAxNC4yOTQ1IDkuNDA1NTYgMTUuMzg4OSA4LjA1NTUzIDE1LjM4ODlDNi43MDU1IDE1LjM4ODkgNS42MTEwOCAxNC4yOTQ1IDUuNjExMDggMTIuOTQ0NEM1LjYxMTA4IDExLjU5NDQgNi43MDU1IDEwLjUgOC4wNTU1MyAxMC41WiIgZmlsbD0id2hpdGUiLz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMF83XzMiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [],
+    "skillName": "emr-query-skill",
+    "skillNames": [
+      "emr-query-skill"
+    ]
+  },
+  "cli": {
+    "runtime": {
+      "type": "python",
+      "version": ">=3.11"
+    },
+    "init": {
+      "darwin": "python -m pip install --upgrade tccli",
+      "linux": "python -m pip install --upgrade tccli",
+      "win32": "python -m pip install --upgrade tccli"
+    },
+    "auth": {
+      "darwin": "tccli auth login",
+      "linux": "tccli auth login",
+      "win32": "tccli auth login"
+    },
+    "unAuth": {
+      "darwin": "tccli auth logout || true",
+      "linux": "tccli auth logout || true",
+      "win32": "tccli auth logout"
+    },
+    "status": {
+      "darwin": "tccli emr DescribeInstancesList --region ap-guangzhou --version 2019-01-03 --cli-unfold-argument --DisplayStrategy clusterList --Limit 1 >/dev/null 2>&1 && echo 'Authenticated and EMR accessible' || (echo 'Not authenticated or no EMR access' >&2; exit 1)",
+      "linux": "tccli emr DescribeInstancesList --region ap-guangzhou --version 2019-01-03 --cli-unfold-argument --DisplayStrategy clusterList --Limit 1 >/dev/null 2>&1 && echo 'Authenticated and EMR accessible' || (echo 'Not authenticated or no EMR access' >&2; exit 1)",
+      "win32": "powershell -Command \"tccli emr DescribeInstancesList --region ap-guangzhou --version 2019-01-03 --cli-unfold-argument --DisplayStrategy clusterList --Limit 1 *> $null; if ($LASTEXITCODE -eq 0) { Write-Output 'Authenticated and EMR accessible'; exit 0 } else { Write-Error 'Not authenticated or no EMR access'; exit 1 }\""
+    },
+    "authUrlDomain": "cloud.tencent.com",
+    "statusMatch": "Authenticated and EMR accessible",
+    "authWaitForExit": true,
+    "authSuppressBrowser": true,
+    "versionCheck": {
+      "command": {
+        "darwin": "tccli --version",
+        "linux": "tccli --version",
+        "win32": "tccli --version"
+      },
+      "minVersion": "3.1.56.1",
+      "versionPattern": "(\\d+\\.\\d+\\.\\d+(?:\\.\\d+)?)"
+    }
+  }
+}

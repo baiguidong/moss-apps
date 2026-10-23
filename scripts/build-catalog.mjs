@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import semver from 'semver'
-import { getAppDiscovery } from '../vendor/moss-core/packages/app-sdk/src/discovery.mjs'
+import { getAppCatalogDiscovery } from '../vendor/moss-core/packages/app-sdk/src/discovery.mjs'
 import { artifactsRoot, listApps, optionValue, readJson, repoRoot, writeJson } from './lib.mjs'
 import { fetchGitHubReleaseRecords } from './github-releases.mjs'
 import { mergeReleaseVersions } from './release-variants.mjs'
@@ -97,7 +97,8 @@ for (const [appId, entry] of [...byApp.entries()].sort(([left], [right]) => left
     category: sourceApp?.manifest.category ?? entry.app.category,
     categories: sourceApp?.marketplace.categories ?? entry.app.categories,
     keywords: sourceApp?.manifest.keywords ?? entry.app.keywords,
-    discovery: getAppDiscovery(sourceApp?.manifest || entry.app),
+    discovery: getAppCatalogDiscovery(sourceApp?.manifest || entry.app),
+    homepage: sourceApp?.marketplace.homepage || entry.app.homepage,
     iconUrl,
     latestVersion: latest.version,
     versions,

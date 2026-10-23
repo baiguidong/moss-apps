@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "xiaoe-cloud-cli": {
-      "type": "http",
-      "url": "https://agent.xiaoe-tech.com/mcp"
-    }
-  }
-}

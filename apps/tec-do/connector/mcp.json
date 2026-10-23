@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "tec-do": {
-      "type": "http",
-      "url": "https://tec-chi-external-skill-mcp.tec-do.cn/mcp"
-    }
-  }
-}

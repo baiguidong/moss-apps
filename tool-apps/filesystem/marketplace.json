@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.filesystem",
+  "summary": "默认读写会话工作目录中的文件，也可添加公共目录进行搜索和整理。",
+  "description": "默认读写会话工作目录中的文件，也可添加公共目录进行搜索和整理。 在设置 → 工具中管理公共目录、排除工具和服务检查；会话工作目录自动追加并优先使用，公共目录可留空。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "linux-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/filesystem",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

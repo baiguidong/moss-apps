@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { execFileSync } from 'node:child_process'
-import { createDeterministicZip } from './archive.mjs'
+import { createDeterministicZip, findExecutablePaths } from './archive.mjs'
 import os from 'node:os'
 import { verifySourceArchive } from './verify-source-package.mjs'
 import { exportAppSource, run } from './source-package.mjs'
@@ -127,7 +127,7 @@ async function packageApp(app, options) {
   await fsp.rm(packageRoot, { recursive: true, force: true })
   await fsp.mkdir(packageRoot, { recursive: true })
 
-  if (app.kind === 'mcp') {
+  if (app.kind === 'tool') {
     await fsp.cp(path.join(builtApp, 'dist'), packageRoot, { recursive: true })
   } else {
     for (const directory of ['dist', 'schemas', 'assets', 'resources', ...(manifest.connectorApp ? ['connector'] : [])]) {
@@ -177,10 +177,12 @@ async function packageApp(app, options) {
 
   await verifyPackageDirectory(packageRoot, manifest, signatureMetadata)
   const zipEntries = {}
-  for (const entry of await listFiles(packageRoot)) {
+  const packageFiles = await listFiles(packageRoot)
+  const executablePaths = await findExecutablePaths(packageFiles)
+  for (const entry of packageFiles) {
     zipEntries[entry.relativePath] = new Uint8Array(await fsp.readFile(entry.absolutePath))
   }
-  const archive = createDeterministicZip(zipEntries)
+  const archive = createDeterministicZip(zipEntries, { executablePaths })
   const stem = `${manifest.id}-${manifest.version}${platform ? `-${platform}` : ''}`
   const fileName = `${stem}.zip`
   const zipPath = path.join(outputDir, fileName)

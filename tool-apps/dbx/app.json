@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.dbx",
+  "version": "0.1.1",
+  "displayName": "DBX MCP",
+  "description": "通过原版 DBX MCP 查看数据库连接、表结构并执行数据库操作。",
+  "category": "data",
+  "keywords": [
+    "DBX",
+    "数据库",
+    "SQL",
+    "MySQL",
+    "PostgreSQL",
+    "Redis",
+    "MongoDB",
+    "MCP"
+  ],
+  "icon": "assets/icon.png",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "toolScope": "session",
+  "runtime": {
+    "state": "session"
+  },
+  "mcpServers": {
+    "dbx": {
+      "command": "node",
+      "args": [
+        "@app/runtime/node_modules/@dbx-app/mcp-server/bin/dbx-mcp-server.js",
+        "--stdio"
+      ]
+    }
+  },
+  "presentation": {
+    "headline": "在对话中使用 DBX 数据库工具",
+    "examples": [
+      "列出 DBX 中允许 AI 使用的数据库连接",
+      "查看这个数据库的表和字段，解释表之间的关系",
+      "执行只读 SQL，统计最近一个月的订单数量"
+    ],
+    "usage": "在设置 → Apps → DBX MCP 检查服务，在会话中选择此 App 使用。内置原版服务，无需 npx 下载或安装 Rust；这是 MCP 设置页，不包含 DBX 完整客户端页面。支持 macOS、Windows 10/11 和 Linux glibc >=2.30 的 x64/ARM64，不支持 Alpine/musl。Moss 设置控制服务开关、可用范围和排除工具；DBX 的数据库访问策略仍独立生效。无桌面客户端的新用户需使用独立空数据目录及私有密钥，在编辑连接 → 环境变量设置 DBX_DATA_DIR 和 DBX_SECRET_KEY_FILE 的绝对路径；MCP 管理中添加原版服务也设置相同参数。原版 MCP 不自动初始化钥匙串，缺少密钥会返回 KEY_PROVIDER_UNAVAILABLE。DBX_MCP_ALLOW_WRITES=0 强制只读，同时禁止新增连接；首次配置后再按需开启。已有加密数据必须恢复原密钥，不能随意更换。也可用 DBX_WEB_URL / DBX_WEB_PASSWORD 连接已有 DBX Web。"
+  },
+  "discovery": {
+    "group": "local"
+  }
+}

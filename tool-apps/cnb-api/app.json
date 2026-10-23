@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.cnb-api",
+  "displayName": "CNB",
+  "description": "通过自然语言管理 CNB 平台：仓库、Issue、PR、流水线、制品库等操作。",
+  "category": "development",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "keywords": [
+    "cnb-api",
+    "CNB",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "cnb-api",
+    "source": "cnb-api",
+    "name": "CNB",
+    "nameEn": "CNB",
+    "description": "通过自然语言管理 CNB 平台：仓库、Issue、PR、流水线、制品库等操作。",
+    "descriptionEn": "Manage CNB platform with natural language: repositories, issues, pull requests, pipelines, artifact registry and more.",
+    "type": "cli",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "4.22.8",
+    "visibleIn": [
+      "internal"
+    ],
+    "examples": [
+      "获取当前 Issue 的详情",
+      "在当前 PR 上发表评论：已完成代码评审",
+      "查看当前 PR 的 CI 构建状态",
+      "给当前 Issue 添加 bug 标签",
+      "列出当前 PR 的变更文件"
+    ],
+    "hasMcp": false,
+    "hasCli": true,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzE5XzUwMCkiPgo8cGF0aCBkPSJNMjMuMDQ3OSAzLjc0Mjk4QzIzLjE0MzQgMy40NjAwOSAyMy4wNjE3IDMuMTQ2NTkgMjIuODM5NiAyLjk0OTAzQzIyLjA5NTEgMi4yODQ5NCAyMC4yMTMzIDAuODg2MjUgMTcuMzg3OSAwLjY3OTQxNUMxNC4yMjM3IDAuNDQ3NTM4IDEyLjI2NDggMS4zMDQ1NiAxMS4yNzUyIDEuOTM5OUMxMC44NDg0IDIuMjEzNTIgMTAuODI0NSAyLjgzNDk1IDExLjIyMzggMy4xNDg0NUwxOS4yODQzIDkuNDc4NzFDMTkuOTk0OCAxMC4wMzYxIDIxLjAzNjcgOS43MjA3OSAyMS4zMjY4IDguODYwMDZMMjMuMDQ3OSAzLjc0Mjk4WiIgZmlsbD0iI0Y3Njk0NSIgc3R5bGU9ImZpbGw6I0Y3Njk0NTtmaWxsOmNvbG9yKGRpc3BsYXktcDMgMC45NzAwIDAuNDExMyAwLjI3MTYpO2ZpbGwtb3BhY2l0eToxOyIvPgo8cGF0aCBkPSJNMy4xNzgxNCAyMi41MzI3QzIuODQ4NiAyMi43NTYyIDIuNjk5ODkgMjMuMTY4MSAyLjgwNjM3IDIzLjU1NDhDMy4xMTI5NyAyNC42Njc4IDQuMDI2MzIgMjYuOTgzOCA2LjYxODYxIDI5LjA5MTFDOS4yMTA5IDMxLjE5ODQgMTIuMjc3OCAzMS40MjU3IDEzLjU4ODYgMzEuMzkzMkMxMy45ODA2IDMxLjM4MzkgMTQuMzIyIDMxLjEyMzMgMTQuNDQwNSAzMC43NDQ5TDE5LjYwNzYgMTQuMjIxM0MxOS45ODAzIDEzLjAyODUgMTguNjU3NSAxMi4wMjc3IDE3LjYzMDMgMTIuNzI1MkwzLjE3ODE0IDIyLjUzMjdaIiBmaWxsPSIjRjc2OTQ1IiBzdHlsZT0iZmlsbDojRjc2OTQ1O2ZpbGw6Y29sb3IoZGlzcGxheS1wMyAwLjk3MDAgMC40MTEzIDAuMjcxNik7ZmlsbC1vcGFjaXR5OjE7Ii8+CjxwYXRoIGQ9Ik02Ljk1NDU5IDUuMDk2MDZDNi43MDEyNCA0Ljk5NDk2IDYuNDE3NTkgNS4wMTE2NiA2LjE3ODAxIDUuMTQzMzZDNS4yMjE1MSA1LjY2OTI2IDIuNzcyNDIgNy4yODk2MiAxLjUwOTMyIDEwLjYxODVDMC41MzQ0NjIgMTMuMTg0IDAuODc3Nzc1IDE2LjAyMTIgMS4xNDU4MiAxNy40MDg4QzEuMjMzOTQgMTcuODYyMyAxLjcwNzYgMTguMTIzOSAyLjEzMzUzIDE3Ljk1NkwxNy42MzY4IDExLjg0QzE4Ljc0MzggMTEuNDAzMSAxOC43NDg0IDkuODIxNzMgMTcuNjQzMiA5LjM3OTMxTDYuOTU0NTkgNS4wOTYwNloiIGZpbGw9IiNGNzY5NDUiIHN0eWxlPSJmaWxsOiNGNzY5NDU7ZmlsbDpjb2xvcihkaXNwbGF5LXAzIDAuOTcwMCAwLjQxMTMgMC4yNzE2KTtmaWxsLW9wYWNpdHk6MTsiLz4KPHBhdGggZD0iTTI5Ljk1MjEgMTYuOTM2OUMzMC40MDAxIDE3LjI0MzkgMzEuMDEzMyAxNi45NzMgMzEuMDkxMyAxNi40MzE0QzMxLjI5NjkgMTQuOTk3NCAzMS40NzUgMTIuNTAxNSAzMC42NTM0IDEwLjYxODdDMjkuNTU4MyA4LjEwOTc1IDI3LjY5OTUgNi41NjI2NiAyNi44MTczIDUuOTMzODFDMjYuNTM4MyA1LjczNTMyIDI2LjE2MTkgNS43NTU3MiAyNS45MDU4IDUuOTg0ODJMMjEuOTkzNSA5LjQ5MDgxQzIxLjM1NDYgMTAuMDYzMSAyMS40MjA3IDExLjA4OTggMjIuMTI3NSAxMS41NzQ5TDI5Ljk1MjEgMTYuOTM4N1YxNi45MzY5WiIgZmlsbD0iI0Y3Njk0NSIgc3R5bGU9ImZpbGw6I0Y3Njk0NTtmaWxsOmNvbG9yKGRpc3BsYXktcDMgMC45NzAwIDAuNDExMyAwLjI3MTYpO2ZpbGwtb3BhY2l0eToxOyIvPgo8cGF0aCBkPSJNMTkuMDIwOSAzMC4zMjA4QzE4Ljk4MDYgMzAuNzg3NCAxOS4zNzE2IDMxLjE3MzIgMTkuODMyNCAzMS4xMjMxQzIxLjMxNDkgMzAuOTYyNyAyNC4zNjA2IDMwLjM2ODEgMjYuNjQyNyAyOC4xNjUzQzI4Ljg2NDEgMjYuMDIxOCAyOS41ODY1IDIzLjQ3NjcgMjkuNzk2NyAyMi40NjM5QzI5Ljg1MzcgMjIuMTkwMyAyOS43ODU3IDIxLjkwNTUgMjkuNjExMyAyMS42ODg1TDIyLjc3MDggMTMuMTU4MkMyMi4wMyAxMi4yMzQ0IDIwLjU1MyAxMi42OTA3IDIwLjQ1MDIgMTMuODc1MUwxOS4wMiAzMC4zMjA4SDE5LjAyMDlaIiBmaWxsPSIjRjc2OTQ1IiBzdHlsZT0iZmlsbDojRjc2OTQ1O2ZpbGw6Y29sb3IoZGlzcGxheS1wMyAwLjk3MDAgMC40MTEzIDAuMjcxNik7ZmlsbC1vcGFjaXR5OjE7Ii8+CjwvZz4KPGRlZnM+CjxjbGlwUGF0aCBpZD0iY2xpcDBfMTlfNTAwIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSJ3aGl0ZSIgc3R5bGU9ImZpbGw6d2hpdGU7ZmlsbC1vcGFjaXR5OjE7Ii8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [],
+    "skillName": "cnb-api",
+    "skillNames": [
+      "cnb-api"
+    ]
+  },
+  "cli": {
+    "runtime": {
+      "type": "node",
+      "version": ">=22"
+    },
+    "init": {
+      "darwin": "npm install -g @cnbcool/cnb-cli",
+      "linux": "npm install -g @cnbcool/cnb-cli",
+      "win32": "npm install -g @cnbcool/cnb-cli"
+    },
+    "versionCheck": {
+      "command": {
+        "darwin": "cnb -v",
+        "linux": "cnb -v",
+        "win32": "cnb.cmd -v"
+      },
+      "minVersion": "1.15.5"
+    },
+    "auth": {
+      "darwin": "cnb login",
+      "linux": "cnb login",
+      "win32": "cnb.cmd login"
+    },
+    "unAuth": {
+      "darwin": "cnb logout",
+      "linux": "cnb logout",
+      "win32": "cnb.cmd logout"
+    },
+    "status": {
+      "darwin": "cnb status",
+      "linux": "cnb status",
+      "win32": "cnb.cmd status"
+    },
+    "statusMatch": "已登录",
+    "authUrlDomain": "cnb.cool",
+    "authWaitForExit": true,
+    "authSuppressBrowser": true,
+    "authDeviceFlow": {
+      "uriPattern": "(https?://[^\\s]*/oauth2/device[^\\s]*)",
+      "codePattern": "user_code=([^&\\s]+)",
+      "defaultExpiresInSeconds": 300,
+      "codeEmbeddedInUri": true
+    },
+    "userProvidedData": []
+  }
+}

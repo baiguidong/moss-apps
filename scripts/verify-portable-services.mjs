@@ -33,7 +33,7 @@ try {
     assert.equal(config.command, process.platform === 'win32' ? 'cmd' : 'npx')
   } else {
     const name = appId.slice('moss.'.length)
-    const manifest = JSON.parse(await fs.readFile(new URL(`../mcp-apps/${name}/app.json`, import.meta.url), 'utf8'))
+    const manifest = JSON.parse(await fs.readFile(new URL(`../tool-apps/${name}/app.json`, import.meta.url), 'utf8'))
     config = structuredClone(manifest.mcpServers[name])
     if (name === 'excel') config.args[config.args.indexOf('--allow-dir') + 1] = root
     const env = { ...process.env, ...config.env,

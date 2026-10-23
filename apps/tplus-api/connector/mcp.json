@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "tplus-api": {
-      "type": "http",
-      "url": "https://mcphub.chanapp.chanjet.com/151/mcp"
-    }
-  }
-}

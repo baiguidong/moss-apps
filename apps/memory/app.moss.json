@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.memory",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "displayName": "记忆",
   "category": "ai",
   "keywords": [
@@ -29,7 +29,7 @@
     "entry": "dist/backend/main.mjs",
     "runtime": "node",
     "apiVersion": 1,
-    "lifecycle": "persistent",
+    "lifecycle": "on-demand",
     "actions": [
       {
         "name": "servers.list",

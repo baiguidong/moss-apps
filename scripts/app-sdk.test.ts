@@ -134,7 +134,7 @@ backend: {
     expect(h.sent.at(-1)).toMatchObject({ type: 'host.event.response', payload: { ok: false, eventId: 'event-2' } })
   })
 
-  it('rejects undeclared cloud access, raw paths, identity overrides and invalid Host results', async () => {
+  it('rejects undeclared cloud access and identity overrides without validating Host response shapes', async () => {
     const unavailable = await backendHarness([])
     await expect(createCloudStorageClient(unavailable.client.host).request('files.list'))
       .rejects.toMatchObject({ code: APP_ERROR_CODES.hostUnavailable })
@@ -146,9 +146,9 @@ backend: {
 
     const h = await backendHarness([MOSS_CLOUD_STORAGE_PROTOCOL], ['cloud-storage:read'])
     const pending = createCloudStorageClient(h.client.host).request('files.list')
-    const outcome = pending.then(result => result, error => error)
-    await h.reply({ files: [{ name: 'missing-metadata' }], nextCursor: null })
-    expect(await outcome).toMatchObject({ code: APP_ERROR_CODES.hostProtocol })
+    const response = { files: [{ name: 'missing-metadata' }], nextCursor: null, futureField: true }
+    await h.reply(response)
+    expect(await pending).toEqual(response)
   })
 
   it('uses Platform permissions and dispatches the renamed client API', async () => {

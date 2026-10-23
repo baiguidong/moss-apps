@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.tec-do",
+  "summary": "面向出海广告投放和增长团队的 AI 能力集合。",
+  "description": "面向出海广告投放和增长团队的 AI 能力集合。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/tec-do",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "wk-mcp": {
-      "type": "http",
-      "url": "https://mcp.wkinfo.com.cn/mcp-servers/integrated/"
-    }
-  }
-}

@@ -33,13 +33,13 @@ export async function installHostFixture(page: Page, options: { holdInitialList?
         if (current?.updatedAt === server.updatedAt && current?.enabled === server.enabled) current.check = server.check
         if (options.staleInspection) server.updatedAt++
       }
-      return { ok: true, data: { servers: snapshot } }
+      return { servers: snapshot }
     } else if (method === 'servers.set-enabled') {
       servers = servers.map(server => server.name === input.name ? { ...server, enabled: input.enabled!, updatedAt: Date.now(), check: null } : server)
     } else if (method === 'servers.remove') {
       servers = servers.filter(server => server.name !== input.name)
     }
-    return { ok: true, data: { servers } }
+    return { servers }
   })
   await page.exposeFunction('mcpFixtureCancel', () => { cancellations++ })
   await page.addInitScript(() => {
@@ -50,7 +50,15 @@ export async function installHostFixture(page: Page, options: { holdInitialList?
         getInstallationState: async () => ({ installation: { enabled: true } }),
         getStatus: async () => ({ state: 'running' }),
       },
-      actions: { invoke: async (method: string, input: unknown) => ({ ok: true, result: await invoke(method, input) }), cancel: () => (window as any).mcpFixtureCancel() },
+      host: {
+        request: async (_protocol: string, method: string, input: unknown) => {
+          if (method === 'capabilities.get') return { ok: true, result: { capabilities: [{ protocol: 'moss.mcp/v1', method: 'servers.list', available: true }] } }
+          const result = await invoke(method, input) as { ok?: boolean }
+          return result.ok === false ? result : { ok: true, result }
+        },
+        cancel: () => (window as any).mcpFixtureCancel(),
+        onEvent: () => () => {}, unsubscribe: async () => ({}), subscribe: async () => ({ ok: true, result: {} }),
+      },
       events: { on: () => () => {} },
     } })
   })

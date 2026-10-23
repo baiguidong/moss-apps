@@ -1,19 +1,32 @@
 # Moss Apps
 
-新增 115 个 MCP / CLI / 技能服务的源码位于 `apps/<服务名>`，App ID 使用 `moss.<服务名>`，与现有 App 共用构建、签名发布和应用市场。新增飞书 CLI 使用 `feishu-cli`，避免与现有飞书 App 重名。现有 App 卡片和安装保持原样；不自动迁移用户的旧连接器数据。参见 [连接器 App 交付](docs/connector-apps-delivery.md)。
+源码按交付形态分为自定义应用 `apps/<name>` 与声明式工具包 `tool-apps/<name>`。当前有 27 个应用工程和 121 个工具包；工具可组合 MCP、CLI、Skills，不因本地或在线服务属性而分开维护工程。现有 App ID、账号关联和数据归属保持不变，不自动迁移用户的旧连接器数据。参见 [应用与工具组织规范](docs/tool-app-organization.md)。
 
-Moss 官方 App 的独立源码与发布仓库。普通 App 位于 `apps/<name>`；配置型 MCP App 位于 `mcp-apps/<name>`，只维护定义和资源，由 Moss Core 提供公共 UI 与运行能力。两者共用自动发布与应用市场。
+Moss 官方 App 的独立源码与发布仓库。应用提供自己的 UI / Backend；工具包只维护 `app.json`、市场介绍及可选资源，由 Moss Core 生成安装包并管理运行。两者共用签名发布与应用市场；市场、已安装管理和会话选择器只以“应用 / 工具”分区，MCP / CLI / Skills、本地 / 在线仅作为信息标签，不提供额外下拉筛选。
 
 App 按主要用途分组：
 
 | 分类 | App |
 | --- | --- |
 | 沟通协作 `communication` | [飞书](apps/feishu/README.md)、[即时消息](apps/openim/README.md) |
-| 知识与文件 `knowledge` | [知识库](apps/library/README.md)、[网盘](apps/drive/README.md)、[文件系统](mcp-apps/filesystem/README.md)、[文档转换](mcp-apps/markitdown/README.md)、[Excel 表格](mcp-apps/excel/README.md)、[图片工具](apps/image-tools/README.md)、[PDF 工作台](apps/pdf-tools/README.md)、[语音转写](apps/transcription/README.md)、[文件清理](apps/file-cleaner/README.md)、[文档格式转换](apps/document-converter/README.md)、[备份与恢复](apps/backup/README.md)、[音视频工坊](apps/media-tools/README.md) |
+| 文档与知识 `knowledge` | [知识库](apps/library/README.md)、[PDF 工作台](apps/pdf-tools/README.md)、[文档转换](tool-apps/markitdown/README.md)、[Notion](tool-apps/notion/README.md) |
+| 文件与存储 `files` | [网盘](apps/drive/README.md)、[文件系统](tool-apps/filesystem/README.md)、[备份与恢复](apps/backup/README.md)、[文件清理](apps/file-cleaner/README.md) |
+| 设计与音视频 `creative` | [图片工具](apps/image-tools/README.md)、[音视频工坊](apps/media-tools/README.md)、[Canva](tool-apps/canva/README.md)、[Draw.io](tool-apps/drawio/README.md) |
+| 开发工具 `development` | [应用构建](apps/app-builder/README.md)、[Git 仓库](tool-apps/git/README.md)、[CloudBase](tool-apps/cloudbase/README.md)、[TAPD](tool-apps/tapd/README.md) |
+| 数据与分析 `data` | [数据库查询](apps/database/README.md)、[本地数据工作台](apps/data-workbench/README.md)、[Excel 表格](tool-apps/excel/README.md)、[DBX MCP](tool-apps/dbx/README.md) |
 | 自动化 `automation` | [工作流](apps/workflow/README.md)、[网页操控](apps/browser-use/README.md)、[电脑操控](apps/computer-use/README.md) |
-| AI 增强 `ai` | [记忆](apps/memory/README.md)、[分步思考](mcp-apps/sequential-thinking/README.md)、[MCP 管理](apps/mcp/README.md) |
-| 开发工具 `development` | [应用构建](apps/app-builder/README.md)、[开发工具](apps/devtools/README.md)、[Git 仓库](mcp-apps/git/README.md)、[数据库查询](apps/database/README.md)、[代码地图](apps/code-map/README.md)、[本地数据工作台](apps/data-workbench/README.md) |
-| 诊断与审计 `diagnostics` | [调用追踪](apps/trace/README.md)、[审计中心](apps/audit/README.md) |
+| AI 与智能体 `ai` | [记忆](apps/memory/README.md)、[分步思考](tool-apps/sequential-thinking/README.md)、[MCP 管理](apps/mcp/README.md) |
+| 销售与客户 `sales` | [纷享销客](tool-apps/sharecrm/README.md)、[云客](tool-apps/yunke-cli/README.md) |
+| 营销与电商 `marketing` | [腾讯营销投放](tool-apps/tencentads/README.md)、[TikTok](tool-apps/tiktok/README.md)、[Linkfox 选品](tool-apps/linkfox-product-selection/README.md) |
+| 金融与投研 `finance` | [Wind](tool-apps/wind-finance/README.md)、[Tushare](tool-apps/tushare/README.md) |
+| 经营与财税 `business` | [畅捷通 T+](tool-apps/tplus-api/README.md)、[云帐房](tool-apps/yzf-general-mcp-server/README.md) |
+| 人事与招聘 `hr` | [北森](tool-apps/beisen-cli/README.md)、[Moka](tool-apps/moka/README.md) |
+| 教育与文化 `education` | [粉笔](tool-apps/fenbi-baokao-decision/README.md)、[小鹅通](tool-apps/xiaoe-cloud-cli/README.md) |
+| 法律与风控 `legal` | [企查查](tool-apps/qcc-company/README.md)、[北大法宝](tool-apps/pkulaw/README.md) |
+| 出行与生活 `life` | [携程问道](tool-apps/ctrip-wendao/README.md)、[腾讯地图](tool-apps/tencent-map/README.md)、[UU跑腿](tool-apps/uupt/README.md) |
+| 诊断与安全 `diagnostics` | [调用追踪](apps/trace/README.md)、[审计中心](apps/audit/README.md)、[iOA](tool-apps/ioa/README.md) |
+
+148 个现有条目均有明确用途分类，「其他」仅作未知第三方兜底。完整数量、旧安装包展示兼容与 Host API 要求见 [组织规范](docs/tool-app-organization.md#用途分类)。
 
 规划中的本地工具扩展见 [本地工具 App 选型与接入方案](docs/local-tool-apps-plan.md)，覆盖开发工具、HTTP 调试、图片和音视频处理。
 
@@ -32,6 +45,7 @@ App 按主要用途分组：
 `0.1.1` 的鼠标裁剪、图片处理扩展、紧凑布局与 MCP 动态工具数量修复见 [App 界面更新](docs/app-ui-refinement.md)。
 
 ## App 创建手册
+
 
 创建或修改 App 前，请阅读 Moss 主仓库维护的说明。只检出本仓库时，也可以直接通过以下 GitHub 链接查看：
 
@@ -71,6 +85,8 @@ artifacts/<app-id>/<version>/<app-id>-<version>.release.json
 
 `Release Changed Apps` 在 main 提交、每 6 小时检查或手动运行时，比较两个目录的版本与全部已发布 GitHub Releases。新 App / 更高版本自动校验、测试、构建、签名并发布；同版本跳过，落后版本提示，不自动提升版本。
 
+因此，新增 App 只需将完整目录提交到 `main`；修改已有 App 时，先提升它的版本号并一起提交。普通 App 同步修改 `app.moss.json` 和 `package.json`，工具包修改 `app.json`。CI 会把未发布的版本加入发布矩阵，发布完成后自动刷新应用市场；CI 不会根据代码差异替你改版本号。
+
 普通 App 的版本来自 `app.moss.json`（同步 package.json）；配置型 App 来自 `app.json`。发布标签仍为 `<app-id>-v<semver>`，由 CI 绑定被检查的提交自动创建。每个 App 独立执行，最后统一刷新一次市场。中断的草稿可重试，正式版本不可覆盖。
 
 本地运行 `bun run release:plan` 只生成发布计划；Actions 手动运行默认 `dry_run=true`。完整规则、失败恢复及 Core 子模块上线前提见 [统一 App 自动发布](docs/automatic-app-release.md)。市场地址：
@@ -96,6 +112,8 @@ gh secret set MOSS_APP_SIGNING_PRIVATE_KEY < .secrets/moss-release-private.pem
 私钥只保存在 `.secrets/` 和 GitHub Actions Secret 中，禁止提交。
 
 ## App 目录约定
+
+自定义应用采用下方工程结构。声明式工具使用 `tool-apps/<name>/app.json`、`marketplace.json`、`README.md`，可选 `resources/`、`connector/` 技能资源和 `runtime/` 上游运行依赖；不维护逐工具 `package.json` 或生成后的 `app.moss.json`。检查单个工具：`node scripts/run-apps.mjs check --app moss.linear-mcp`。源码导出会自动补齐共享构建脚本、Manifest、临时工程和固定锁文件。
 
 每个 App 至少包含：
 

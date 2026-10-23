@@ -3,7 +3,7 @@
   "id": "moss.database",
   "version": "0.2.2",
   "displayName": "数据库查询",
-  "category": "development",
+  "category": "data",
   "keywords": [
     "数据库",
     "DBHub",
@@ -18,7 +18,7 @@
   ],
   "description": "使用 DBHub 查询 SQLite、PostgreSQL、MySQL 等数据库，查看表结构和分析数据。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.9.0",
+  "hostApi": "^3.21.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"

@@ -15,7 +15,7 @@ const runners = {
 const platforms = app.manifest.platforms || app.marketplace.platforms
 const values = {
   app_id: appId, version, tag, kind: app.kind,
-  package_name: app.kind === 'mcp' ? '@moss/app-runtime' : readJson(path.join(app.root, 'package.json')).name,
+  package_name: app.kind === 'tool' ? '@moss/app-runtime' : readJson(path.join(app.root, 'package.json')).name,
   app_dir: path.relative(repoRoot, app.root).split(path.sep).join('/'),
   variants: Boolean(app.manifest.platforms),
   platforms: JSON.stringify({ include: platforms.map(platform => {

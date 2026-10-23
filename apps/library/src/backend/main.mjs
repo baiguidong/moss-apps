@@ -6,15 +6,18 @@ import { createActionLane, listResult } from './actions.mjs'
 import { resolveToolAction } from './tools.mjs'
 
 let ready = false
-let service, python
+let service, python = { available: false }
+let pythonPreparation
 const lane = createActionLane()
 const backend = new AppBackendClient({
   async onInitialize(context) {
-    python = await context.host.request('moss.runtimes/v1', 'python.get', {})
     service = createLibraryService({
       libraryRoot: context.dataDir,
       parserPath: fileURLToPath(new URL('./library_parser.py', import.meta.url)),
-      pythonPath: python.available ? python.path : undefined,
+      getPython: signal => pythonPreparation ??= context.host.request('moss.runtimes/v1', 'python.get', {}, { signal })
+        .then(result => { python = result; return result })
+        .catch(error => { pythonPreparation = undefined; throw error }),
+      watchSources: context.config?.watchSources === true,
       requireManagedRuntime: true,
       getPythonModulePaths: () => [fileURLToPath(new URL('./python/', import.meta.url))],
       getEngineStatus: () => ({ installed: python.available }),

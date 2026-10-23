@@ -3,6 +3,8 @@ import { fixture, call } from '../tests/fixture'
 import { createTraceStore } from '../src/backend/store'
 import { closeTraceStore } from '../src/backend/api/traceStore'
 import { createResultTransport } from '../src/backend/backend'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
 test('real App reader drives list, full prompt, filters, refresh, theme and deletion', async ({ page }) => {
   const f = await fixture(); const transfer = createResultTransport()
@@ -62,4 +64,51 @@ test('real App reader drives list, full prompt, filters, refresh, theme and dele
 test('standalone page explains missing Host instead of showing fake records', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByText('请在 Moss 中打开调用追踪。')).toBeVisible()
+})
+
+test('overview counts failed calls once and uses real parallel tool execution intervals', async ({ page }) => {
+  const f = await fixture(); const transfer = createResultTransport()
+  try {
+    await f.append(call({ status: 'ok', startedAt: '2026-09-30T10:00:01.000Z',
+      completedAt: '2026-09-30T10:00:05.000Z', durationMs: 4000,
+      response: { status: 200, headers: {}, body: { contentType: 'json', bytes: 2, sha256: 'response', preview: '{}', truncated: false } } }))
+    const identities = ['failed-a', 'failed-b', 'success-a', 'success-b']
+    const messages = [{ id: 'user', type: 'user', content: '你好', timestamp: '2026-09-30T10:00:00.000Z' },
+      ...identities.flatMap((identity, index) => [
+        { id: `use-${identity}`, type: 'tool_use', timestamp: '2026-09-30T10:00:00.000Z', timestampSource: 'inherited',
+          content: [{ type: 'tool_use', id: identity, name: 'Read', input: {} }] },
+        { id: `result-${identity}`, type: 'tool_result', timestamp: '2026-09-30T10:00:05.200Z',
+          content: [{ type: 'tool_result', tool_use_id: identity, content: 'result', is_error: index < 2 }] },
+      ])]
+    await fs.writeFile(path.join(f.scope, 'sessions/session-1.json'), JSON.stringify({ schemaVersion: 1,
+      session: { id: 'desktop', title: '工具统计回归', projectPath: '/fixture', workDir: '/fixture' }, messages }))
+    for (const [index, identity] of identities.entries()) {
+      await fs.appendFile(path.join(f.scope, 'traces/session-1.jsonl'), JSON.stringify({ schemaVersion: 1, type: 'event', event: {
+        id: `${identity}-completed`, sessionId: 'session-1', timestamp: '2026-09-30T10:00:05.100Z',
+        phase: 'tool_execution_completed', severity: index < 2 ? 'error' : 'info',
+        metadata: { toolUseId: identity, startedAt: '2026-09-30T10:00:05.000Z', durationMs: 100, status: index < 2 ? 'error' : 'ok' },
+      } }) + '\n')
+    }
+    const store = createTraceStore(f.directory)
+    await page.exposeFunction('traceAction', async (name: string, input: any) => {
+      if (name === 'result.read') return transfer.read(input)
+      if (name === 'result.release') return transfer.release(input.id)
+      const result = await store.request(name, input)
+      if (name === 'traces.list') Object.assign(result, { captureStatus: { enabled: true, droppedRecords: 0 } })
+      return transfer.pack(result)
+    })
+    await page.addInitScript(() => {
+      window.mossApp = { actions: { invoke: async (name: string, input: unknown) => ({ ok: true, result: await (window as any).traceAction(name, input) }) },
+        app: { getInfo: async () => ({ appearance: { themeMode: 'light' } }) } } as any
+    })
+    await page.goto('/')
+    await page.getByRole('button', { name: /^工具统计回归/ }).click()
+    const overview = page.getByTestId('trace-overview')
+    await expect(overview).toBeVisible()
+    const stat = (label: string) => overview.getByText(label, { exact: true }).locator('..')
+    await expect(stat('错误')).toHaveText('错误2')
+    await expect(stat('工具调用')).toHaveText('工具调用4')
+    await expect(stat('工具耗时')).toHaveText('工具耗时100ms')
+    await expect(stat('模型耗时')).toHaveText('模型耗时4.00s')
+  } finally { transfer.close(); closeTraceStore(); await f.cleanup() }
 })

@@ -21,13 +21,13 @@ Stars 为当天对应仓库的关注度，CLI 引擎与 MCP 服务分别标明�
 | 网页诊断 | [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp) / 53,620 | MCP | 输入网站或 localhost 地址；在 Moss 查看截图、请求详情、控制台错误、性能记录 | 比现有网页操控更强调诊断结果。由 App 管理 headless Chrome for Testing，用户无需另开 DevTools 查看 |
 | 压缩包管理 | [7-Zip](https://github.com/ip7z/7zip) / 4,171 | CLI | 压缩包目录树、创建压缩包、指定目录解压、操作结果；支持类型的文件在 Moss 预览 | 成熟通用引擎，GitHub Stars 不是其全部使用规模。`-slt` 列表为文本，需要固定版本并验证解析 |
 
-**已有 App 补 UI 的投入更小。** [数据库查询](../apps/database/README.md) 已接 DBHub，可补表结构、SQL 编辑、结果表格；[Excel](../mcp-apps/excel/README.md) 已接 excel-mcp-server，可补工作表、范围读写、图表配置与结果查看。当前界面主要承担连接配置，对话调用已有服务；补界面能直接满足“不依赖大模型也可使用”。Excel 的完整公式重算能力仍以该上游版本为准。
+**已有 App 补 UI 的投入更小。** [数据库查询](../apps/database/README.md) 已接 DBHub，可补表结构、SQL 编辑、结果表格；[Excel](../tool-apps/excel/README.md) 已接 excel-mcp-server，可补工作表、范围读写、图表配置与结果查看。当前界面主要承担连接配置，对话调用已有服务；补界面能直接满足“不依赖大模型也可使用”。Excel 的完整公式重算能力仍以该上游版本为准。
 
 另有 [Repomix](https://github.com/yamadashy/repomix)（28,855 Stars，MCP + CLI），适合做仓库材料整理：文件勾选、包含/排除规则、输出预览、文件大小和 Token 分布。它不提供代码语义关系分析，可作为代码地图之后的轻量开发者 App。
 
 ## App 形态与代码边界
 
-采用 `apps/<name>` 的普通 Moss App，提供自定义 `ui.entry` 与薄 Backend。现有 `mcp-apps/<name>` 的公共配置页面适合启停和配置服务；目录名称本身不意味着已经具备可交互的业务结果 UI。
+采用 `apps/<name>` 的普通 Moss App，提供自定义 `ui.entry` 与薄 Backend。现有 `tool-apps/<name>` 的公共配置页面适合启停和配置服务；目录名称本身不意味着已经具备可交互的业务结果 UI。
 
 调用链是：
 

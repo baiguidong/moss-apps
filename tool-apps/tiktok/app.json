@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.tiktok",
+  "displayName": "TikTok for Business",
+  "description": "TikTok for Business MCP Server 是基于模型上下文协议（MCP）搭建的标准化桥梁，助力开发者与广告主将 AI 智能代理直接对接 TikTok 广告平台。它将广告核心能力⸺广告活动管理、效果报表、受众配置以及创意运营，封装为一套稳定、可投入生产环境使用的工具。AI智能代理仅通过简洁结构化指令，即可完成 TikTok 广告的管理、优化与数据依托这套工具报表查询工作。",
+  "category": "marketing",
+  "discovery": {
+    "group": "online"
+  },
+  "keywords": [
+    "tiktok",
+    "TikTok for Business",
+    "mcp"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "tiktok",
+    "source": "tiktok",
+    "name": "TikTok for Business",
+    "nameEn": "TikTok for Business",
+    "description": "TikTok for Business MCP Server 是基于模型上下文协议（MCP）搭建的标准化桥梁，助力开发者与广告主将 AI 智能代理直接对接 TikTok 广告平台。它将广告核心能力⸺广告活动管理、效果报表、受众配置以及创意运营，封装为一套稳定、可投入生产环境使用的工具。AI智能代理仅通过简洁结构化指令，即可完成 TikTok 广告的管理、优化与数据依托这套工具报表查询工作。",
+    "descriptionEn": "The TikTok for Business MCP Server is a standardized bridge built on the Model Context Protocol (MCP) that enables developers and advertisers to directly connect AI agents with the TikTok advertising platform. It encapsulates core advertising capabilities—such as campaign management, performance reporting, audience configuration, and creative operations—into a stable, production-ready toolkit. By using simple, structured instructions, AI agents can manage TikTok ads, optimize performance, and query data through this tool.",
+    "type": "mcp",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "",
+    "visibleIn": [],
+    "examples": [
+      "将所有广告活动结束日期更新为两周后",
+      "结合我名下广告活动年初至今的数据表现，为即将到来的季节性推广活动推荐广告活动类型与创意素材",
+      "识别消耗异常，并针对投放不达预期的广告活动给出优化建议"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": false,
+    "hasCredentialSchema": false,
+    "icon": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgODAwIj48ZGVmcz48c3R5bGU+LmNscy0xe2ZpbGw6I2YxMjA0YTt9LmNscy0ye2ZpbGw6I2ZmZjt9LmNscy0ze2ZpbGw6IzJkY2NkMzt9PC9zdHlsZT48L2RlZnM+PHJlY3Qgd2lkdGg9IjgwMCIgaGVpZ2h0PSI4MDAiIHJ4PSIxMDAiIHJ5PSIxMDAiLz48cGF0aCBpZD0iX1BhdGhfIiBjbGFzcz0iY2xzLTMiIGQ9Im0zNDguODUsMzM2Ljkxdi0xNy4xOGMtNy45NS0xLjMyLTE1Ljg5LTEuNzUtMjIuNDgtMS43NS04OS41NiwwLTE2NC41NCw3MS44Ny0xNjQuNTQsMTYxLDAsNTguNTEsMjguNDgsMTA4LjUzLDcxLjc1LDEzOC4xMy0zMC4xNS0yOS45Mi00OC44NS03MS43OS00OC44NS0xMTkuMiwwLTg4Ljk3LDc0Ljc1LTE2MC44LDE2NC4xMi0xNjFabTUxLjYxLTIwMS41NXYzNDYuN2MwLDQ1LjQyLTMyLjY0LDc0LjY0LTcyLjM0LDc0LjY0LTEzLjE3LDAtMjUuNjctMy4wOC0zNi41NC04Ljc2LDEzLjc5LDE3LjYxLDM1LjU3LDI3Ljc0LDU5LjQ0LDI3Ljc0LDM5LjY5LDAsNzIuMzQtMjkuMjIsNzIuMzQtNzQuNjhWMTU0LjI5aDYyLjkxYy0xLjcxLTYuMDQtMy4xMi0xMi4zNS00LjIxLTE4LjkzaC04MS42MVptMTQ0LjY0LDEwMi4yNmMyMC4wMiwyMC42NSw0NC45OSwzMy4yMyw3MC4xNiwzOC45NXYtMTUuNWMtMjMuNjUtMS42OC00OC4zOC05LjEyLTcwLjE2LTIzLjQ1WiIvPjxwYXRoIGlkPSJfUGF0aF8tMiIgY2xhc3M9ImNscy0xIiBkPSJtNTQ1LjExLDIzNy42MmMtMTkuMzYtMTkuOTEtMzQuMTItNDcuMzMtNDAuMTItODMuMzJoLTE4LjdjMTAuNjcsMzguOTIsMzIuNjQsNjYuMDcsNTguODIsODMuMzJabTcwLjE2LDM4Ljk1djY1LjY0Yy0zNi4zNCwwLTcwLjc0LTYuOTMtMTAxLjA1LTI3LjM1LDM1LjI5LDM1LjI5LDc4LjEsNDYuMzIsMTIzLjk1LDQ2LjMydi04MS4xOGMtNy41Ni0uNTEtMTUuMjctMS42NC0yMi45MS0zLjQzWm0tMzIzLjY3LDI3MS4zNmMtOS43NC0xMi4zMS0xNS41NC0yOC4yNC0xNS41NC00Ni45NCwwLTUyLjQ3LDQxLjAyLTgwLjIxLDk1LjcxLTc0LjQ0di04Ny44OGMtNy45NS0xLjMyLTE1Ljg5LTEuNzUtMjIuNTItMS43NWgtLjM5djcwLjY2Yy01NC42OS01LjczLTk1LjcxLDIxLjk3LTk1LjcxLDc0LjQ4LDAsMzAuNywxNS43LDUzLjk5LDM4LjQ1LDY1Ljg3Wm0xOTkuNzItNzEuNmMwLDExMC43MS04NC42OSwxNjkuMzctMTY0LjUxLDE2OS4zNy0zNC41NSwwLTY2LjY1LTEwLjQ0LTkzLjIyLTI4LjU5LDI5Ljg0LDI5LjYxLDcwLjksNDcuNTIsMTE2LjEyLDQ3LjUyLDc5LjgyLDAsMTY0LjUxLTU4LjY3LDE2NC41MS0xNjkuMzd2LTE4MC40Yy03Ljk1LTUuMzgtMTUuNTgtMTEuNjUtMjIuOTEtMTguOTd2MTgwLjQ0WiIvPjxwYXRoIGlkPSJfUGF0aF8tMyIgY2xhc3M9ImNscy0yIiBkPSJtMzI2LjgsNjQ1LjcxYzc5LjgyLDAsMTY0LjUxLTU4LjY3LDE2NC41MS0xNjkuMzd2LTE4MC40NGM3LjMyLDcuMzIsMTQuOTYsMTMuNiwyMi45MSwxOC45NywzMC4zMSwyMC40MSw2NC43LDI3LjM1LDEwMS4wNSwyNy4zNXYtNjUuNjRjLTI1LjE2LTUuNzMtNTAuMTMtMTguMzEtNzAuMTYtMzguOTUtMjYuMTgtMTcuMjYtNDguMTUtNDQuNDEtNTguODItODMuMzJoLTYyLjkxdjM0Ni43YzAsNDUuNDYtMzIuNjQsNzQuNjgtNzIuMzQsNzQuNjgtMjMuODgsMC00NS42NS0xMC4xMy01OS40NC0yNy43NC0yMi43NS0xMS44OC0zOC40NS0zNS4xOC0zOC40NS02NS44NywwLTUyLjUxLDQxLjAyLTgwLjIxLDk1LjcxLTc0LjQ4di03MC42NmMtODkuMzYuMTktMTY0LjEyLDcyLjAzLTE2NC4xMiwxNjEsMCw0Ny40MSwxOC43LDg5LjI4LDQ4Ljg1LDExOS4yLDI2LjU3LDE4LjE1LDU4LjY3LDI4LjU5LDkzLjIyLDI4LjU5WiIvPjwvc3ZnPg==",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "tiktok-mcp"
+    ],
+    "skillName": "",
+    "skillNames": []
+  },
+  "mcp": {
+    "mcpServers": {
+      "tiktok-mcp": {
+        "type": "http",
+        "url": "https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat"
+      }
+    }
+  }
+}

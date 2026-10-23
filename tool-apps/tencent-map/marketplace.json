@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.tencent-map",
+  "summary": "接入腾讯地图各类位置服务，包括地点搜索、路线规划（驾车/公交/步行/骑行）、地址正逆解析、沿途搜索和天气查询等。",
+  "description": "接入腾讯地图各类位置服务，包括地点搜索、路线规划（驾车/公交/步行/骑行）、地址正逆解析、沿途搜索和天气查询等。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/tencent-map",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

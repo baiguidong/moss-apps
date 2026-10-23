@@ -13,7 +13,7 @@ const output=path.join(repo,'artifacts/app-capabilities'),shell=path.join(output
 await fs.mkdir(output,{recursive:true})
 await fs.writeFile(styles,[`@import ${JSON.stringify(path.join(core,'ui/src/renderer-react/globals.css'))};`,`@source ${JSON.stringify(path.join(core,'ui/src/renderer-react/components'))};`].join('\n'))
 await build({configFile:false,root:path.join(repo,'scripts/local-tasks-verify'),base:'./',plugins:[react()],logLevel:'warn',resolve:{dedupe:['react','react-dom'],alias:{react:path.dirname(require.resolve('react/package.json')),'react-dom':path.dirname(require.resolve('react-dom/package.json')),'@':path.join(core,'ui/src/renderer-react'),'moss-core-embedded-view':path.join(core,'ui/src/renderer-react/components/embedded-app-view.tsx'),'moss-core-global-style':styles}},css:{postcss:{plugins:[requireCore('@tailwindcss/postcss')()]}},build:{outDir:path.dirname(shell),emptyOutDir:true}})
-const definition=JSON.parse(await fs.readFile(path.join(repo,'mcp-apps/excel/app.json')))
+const definition=JSON.parse(await fs.readFile(path.join(repo,'tool-apps/excel/app.json')))
 const {MANAGED_RUNTIME_VERSIONS}=await import(path.join(core,'ui/src/runtime/runtime-manifest.mjs'))
 const python=process.env.MOSS_PYTHON_PATH||path.join(os.homedir(),'.moss/runtimes/python/versions',MANAGED_RUNTIME_VERSIONS.python,'bin/python3')
 process.env.PW_CHROMIUM_ATTACH_TO_OTHER='1'

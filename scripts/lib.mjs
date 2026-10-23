@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 import semver from 'semver'
 import { loadJsonSchema, validateAppManifest, validateAppToolInputSchema } from '@moss/app-sdk'
 import { getAppCategory } from '@moss/app-sdk/categories'
-import { createMcpAppManifest } from '../vendor/moss-core/packages/app-runtime/src/packages/generate-mcp-app.mjs'
+import { createToolAppManifest } from '../vendor/moss-core/packages/app-runtime/src/packages/generate-tool-app.mjs'
 
 export const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 export const appsRoot = path.join(repoRoot, 'apps')
@@ -144,7 +144,7 @@ export function validateMarketplaceMetadata(raw, manifest, sourcePath) {
 export function listApps({ root: repositoryRoot = repoRoot, onError } = {}) {
   const apps = []
   const ids = new Set()
-  for (const [folder, kind, manifestName] of [['apps', 'app', 'app.moss.json'], ['mcp-apps', 'mcp', 'app.json']]) {
+  for (const [folder, kind, manifestName] of [['apps', 'app', 'app.moss.json'], ['tool-apps', 'tool', 'app.json']]) {
     const directory = path.join(repositoryRoot, folder)
     if (!fs.existsSync(directory)) continue
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })
@@ -166,11 +166,11 @@ export function listApps({ root: repositoryRoot = repoRoot, onError } = {}) {
         ids.add(appId)
       }
       try {
-        const rawManifest = kind === 'mcp' ? createMcpAppManifest(input) : input
+        const rawManifest = kind === 'tool' ? createToolAppManifest(input) : input
         if (!rawManifest.category) throw new Error(`App must declare category in ${manifestPath}`)
         if (!rawManifest.navigation) throw new Error(`App must declare navigation by intended use in ${manifestPath}`)
         const manifest = validateRepositoryAppManifest(rawManifest)
-        const resourceRoot = kind === 'mcp' ? path.join(root, 'resources') : root
+        const resourceRoot = kind === 'tool' ? path.join(root, 'resources') : root
         if (manifest.icon && !fs.existsSync(path.join(resourceRoot, manifest.icon))) throw new Error(`Missing App icon: ${manifest.icon}`)
         validateRepositoryAppToolSchemas(resourceRoot, manifest)
         if (!fs.existsSync(marketplacePath)) throw new Error(`Missing marketplace.json for ${manifest.id}`)

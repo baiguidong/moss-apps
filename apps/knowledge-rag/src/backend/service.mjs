@@ -85,12 +85,11 @@ export class KnowledgeService {
   }
   async initialize() {
     await this.prepareStorage()
-    if (this.installed()) this.begin('start')
   }
   begin(kind = 'start') {
     if (this.closed) throw new Error('知识库已关闭')
     if (this.operation) return this.status()
-    if (this.state === 'ready' && this.connection && this.process) return this.status()
+    if (kind !== 'install' && this.state === 'ready' && this.connection && this.process) return this.status()
     const install = kind === 'install' && !this.installed()
     this.preparation = new Preparation(install, () => this.emitProgress())
     this.change(install ? 'installing' : 'starting', '正在检查本地引擎…')
@@ -98,7 +97,7 @@ export class KnowledgeService {
       try {
         if (install) await this.install()
         this.controller.signal.throwIfAborted()
-        await this.start()
+        await this.start({ allowDownload: kind === 'install' })
         this.preparation.finish('done')
       } catch (error) {
         this.preparation.finish(this.controller.signal.aborted ? 'cancelled' : 'failed')
@@ -164,16 +163,17 @@ export class KnowledgeService {
     await fs.writeFile(`${marker}.tmp`, JSON.stringify({ version: ENGINE_VERSION, requirementsSha256: this.requirementsHash() }), { mode: 0o600 })
     await fs.rename(`${marker}.tmp`, marker)
   }
-  async start() {
+  async start({ allowDownload = false } = {}) {
     if (this.connection && this.process) return
     if (!this.installed()) throw new Error('请先准备检索引擎。')
     this.change('starting', '正在检查本地模型…')
-    this.step('model', '正在校验已下载的多语言模型，缺失或损坏的文件会重新下载…')
+    this.step('model', allowDownload ? '正在校验并准备多语言模型…' : '正在校验本地模型，不下载文件…')
     await this.stopProcess()
     await this.prepareStorage()
     const generation = ++this.generation
     const models = this.modelsCache || path.join(this.engineRoot, 'models')
-    await this.command(this.enginePython || pythonAt(this.venv), [path.join(this.resourcesDir, 'prepare_model.py'), models])
+    await this.command(this.enginePython || pythonAt(this.venv), [path.join(this.resourcesDir, 'prepare_model.py'), models,
+      ...(allowDownload ? ['--allow-download'] : [])])
     this.controller.signal.throwIfAborted()
     this.step('service', '正在加载模型、检查索引并启动本地服务…')
     const port = await freePort(), token = randomBytes(32).toString('hex')
@@ -259,6 +259,12 @@ export class KnowledgeService {
     await this.stopProcess(); await this.operation; await this.queue.catch(() => {})
   }
   async call(name, input = {}, options = {}) {
+    options.signal?.throwIfAborted()
+    if (this.state !== 'ready' && this.installed()) {
+      this.begin('start')
+      await this.operation
+      options.signal?.throwIfAborted()
+    }
     if (this.state !== 'ready' || !this.connection) throw new Error(this.error || '知识库尚未就绪，请先准备或启动引擎。')
     return this.connection.call(name, input, { ...options, signal: options.signal ? AbortSignal.any([this.controller.signal, options.signal]) : this.controller.signal })
   }

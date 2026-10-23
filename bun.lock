@@ -13,22 +13,6 @@
         "yauzl": "^3.2.1",
       },
     },
-    "apps/77ircloud": {
-      "name": "@moss/77ircloud",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/ai-hive": {
-      "name": "@moss/ai-hive",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
     "apps/app-builder": {
       "name": "@moss/app-builder",
       "version": "0.1.5",
@@ -67,14 +51,6 @@
         "vite": "7.1.10",
       },
     },
-    "apps/awesun": {
-      "name": "@moss/awesun",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
     "apps/backup": {
       "name": "@moss/backup-app",
       "version": "0.1.1",
@@ -94,30 +70,6 @@
         "@vitejs/plugin-react": "5.0.4",
         "typescript": "5.9.3",
         "vite": "7.1.10",
-      },
-    },
-    "apps/baidu-netdisk": {
-      "name": "@moss/baidu-netdisk",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/bazhuayu": {
-      "name": "@moss/bazhuayu",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/beisen-cli": {
-      "name": "@moss/beisen-cli",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
       },
     },
     "apps/browser-use": {
@@ -147,62 +99,6 @@
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
-      },
-    },
-    "apps/bugly-token": {
-      "name": "@moss/bugly-token",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/camscanner-mcp": {
-      "name": "@moss/camscanner-mcp",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/canva": {
-      "name": "@moss/canva",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/canva-ai": {
-      "name": "@moss/canva-ai",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/cisp-mcp": {
-      "name": "@moss/cisp-mcp",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/cloudbase": {
-      "name": "@moss/cloudbase",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/cnb-api": {
-      "name": "@moss/cnb-api",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
       },
     },
     "apps/code-map": {
@@ -242,14 +138,6 @@
         "bun-types": "latest",
         "typescript": "5.9.3",
         "vite": "7.1.10",
-      },
-    },
-    "apps/ctrip-wendao": {
-      "name": "@moss/ctrip-wendao",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
       },
     },
     "apps/data-workbench": {
@@ -293,22 +181,6 @@
         "vite": "7.1.10",
       },
     },
-    "apps/dcs-cloud": {
-      "name": "@moss/dcs-cloud",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/designkit-buddy-cli": {
-      "name": "@moss/designkit-buddy-cli",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
     "apps/devtools": {
       "name": "@moss/devtools-app",
       "version": "0.2.6",
@@ -327,22 +199,6 @@
         "bun-types": "latest",
         "typescript": "5.9.3",
         "vite": "7.1.10",
-      },
-    },
-    "apps/dingtalk": {
-      "name": "@moss/dingtalk",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/dknowc-mcp": {
-      "name": "@moss/dknowc-mcp",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
       },
     },
     "apps/document-converter": {
@@ -385,54 +241,6 @@
         "vite": "7.1.10",
       },
     },
-    "apps/duoguan-fengchao": {
-      "name": "@moss/duoguan-fengchao",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/edgeone-pages": {
-      "name": "@moss/edgeone-pages",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/emr-query": {
-      "name": "@moss/emr-query",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/ezjoin-meeting": {
-      "name": "@moss/ezjoin-meeting",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/fazhi-law": {
-      "name": "@moss/fazhi-law",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/fbs-connector": {
-      "name": "@moss/fbs-connector",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
     "apps/feishu": {
       "name": "@moss/feishu-app",
       "version": "0.4.14",
@@ -443,22 +251,6 @@
       "devDependencies": {
         "bun-types": "latest",
         "typescript": "^5.9.3",
-      },
-    },
-    "apps/feishu-cli": {
-      "name": "@moss/feishu-cli",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/fenbi-baokao-decision": {
-      "name": "@moss/fenbi-baokao-decision",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
       },
     },
     "apps/file-cleaner": {
@@ -482,86 +274,6 @@
         "vite": "7.1.10",
       },
     },
-    "apps/finenter": {
-      "name": "@moss/finenter",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/flova": {
-      "name": "@moss/flova",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/fuma-ai-callout": {
-      "name": "@moss/fuma-ai-callout",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/fyopen-lawsearch": {
-      "name": "@moss/fyopen-lawsearch",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/gangtise-mcp": {
-      "name": "@moss/gangtise-mcp",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/gaodun-job": {
-      "name": "@moss/gaodun-job",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/gildata": {
-      "name": "@moss/gildata",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/h3c-cloudnet": {
-      "name": "@moss/h3c-cloudnet",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/h3yun-connector": {
-      "name": "@moss/h3yun-connector",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/ihr-cli": {
-      "name": "@moss/ihr-cli",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
     "apps/image-tools": {
       "name": "@moss/image-tools-app",
       "version": "0.1.4",
@@ -581,62 +293,6 @@
         "@vitejs/plugin-react": "5.0.4",
         "typescript": "5.9.3",
         "vite": "7.1.10",
-      },
-    },
-    "apps/infimind-ecommerce-image": {
-      "name": "@moss/infimind-ecommerce-image",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/infimind-video": {
-      "name": "@moss/infimind-video",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/ioa": {
-      "name": "@moss/ioa",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/jinshuju": {
-      "name": "@moss/jinshuju",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/jiushuyun": {
-      "name": "@moss/jiushuyun",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/kling-ai-plugin": {
-      "name": "@moss/kling-ai-plugin",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/kling-ai-plugin-ai": {
-      "name": "@moss/kling-ai-plugin-ai",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
       },
     },
     "apps/knowledge-rag": {
@@ -660,30 +316,6 @@
         "vite": "7.1.10",
       },
     },
-    "apps/kuaicha-search": {
-      "name": "@moss/kuaicha-search",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/lemonclaw": {
-      "name": "@moss/lemonclaw",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/lexiang": {
-      "name": "@moss/lexiang",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
     "apps/library": {
       "name": "@moss/library-app",
       "version": "0.1.11",
@@ -705,49 +337,9 @@
         "vite": "7.1.10",
       },
     },
-    "apps/linear-mcp": {
-      "name": "@moss/linear-mcp",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/lingxing-mcp": {
-      "name": "@moss/lingxing-mcp",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/linkfox-product-selection": {
-      "name": "@moss/linkfox-product-selection",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/lovrabet-cli": {
-      "name": "@moss/lovrabet-cli",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/mastergo-vibe-mcp": {
-      "name": "@moss/mastergo-vibe-mcp",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
     "apps/mcp": {
       "name": "@moss/mcp-app",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -810,86 +402,7 @@
         "vite": "7.1.10",
       },
     },
-    "apps/mglc": {
-      "name": "@moss/mglc",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/miaoda": {
-      "name": "@moss/miaoda",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/moka": {
-      "name": "@moss/moka",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/morningstar": {
-      "name": "@moss/morningstar",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/mx-ds-mcp": {
-      "name": "@moss/mx-ds-mcp",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/mzl-trademark": {
-      "name": "@moss/mzl-trademark",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/neo-crm": {
-      "name": "@moss/neo-crm",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/netease-mail": {
-      "name": "@moss/netease-mail",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/notion": {
-      "name": "@moss/notion",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/opendata": {
-      "name": "@moss/opendata",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
+
     "apps/openim": {
       "name": "@moss/openim-app",
       "version": "0.2.15",
@@ -923,22 +436,6 @@
         "vite": "7.1.10",
       },
     },
-    "apps/pandadata": {
-      "name": "@moss/pandadata",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/patsnap-search": {
-      "name": "@moss/patsnap-search",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
     "apps/pdf-tools": {
       "name": "@moss/pdf-tools-app",
       "version": "0.1.4",
@@ -965,89 +462,9 @@
         "vite": "7.1.10",
       },
     },
-    "apps/picset-commerce-images": {
-      "name": "@moss/picset-commerce-images",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/picset-video-generation": {
-      "name": "@moss/picset-video-generation",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/pkulaw": {
-      "name": "@moss/pkulaw",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/proboost": {
-      "name": "@moss/proboost",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/qcc-company": {
-      "name": "@moss/qcc-company",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/qcc-legal": {
-      "name": "@moss/qcc-legal",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/qingflow": {
-      "name": "@moss/qingflow",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/qq-mail": {
-      "name": "@moss/qq-mail",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/ragflow": {
-      "name": "@moss/ragflow",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/seeyon-office-marketing-suite": {
-      "name": "@moss/seeyon-office-marketing-suite",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
     "apps/self-test": {
       "name": "@moss/self-test-app",
-      "version": "0.1.18",
+      "version": "0.1.20",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@moss/app-settings": "workspace:*",
@@ -1066,46 +483,6 @@
         "tailwindcss": "4.2.0",
         "typescript": "5.9.3",
         "vite": "7.1.10",
-      },
-    },
-    "apps/shanglv-mcp-gateway": {
-      "name": "@moss/shanglv-mcp-gateway",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/shanlong-claw": {
-      "name": "@moss/shanlong-claw",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/sharecrm": {
-      "name": "@moss/sharecrm",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/shareone": {
-      "name": "@moss/shareone",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/sq-company-dynamic": {
-      "name": "@moss/sq-company-dynamic",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
       },
     },
     "apps/takt": {
@@ -1130,134 +507,6 @@
         "@types/react-dom": "19.2.2",
         "esbuild": "0.25.12",
         "typescript": "5.9.3",
-      },
-    },
-    "apps/tanyuan-assistant": {
-      "name": "@moss/tanyuan-assistant",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tapd": {
-      "name": "@moss/tapd",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tc-chengxin": {
-      "name": "@moss/tc-chengxin",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tec-do": {
-      "name": "@moss/tec-do",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tencent-docs": {
-      "name": "@moss/tencent-docs",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tencent-docs-oa": {
-      "name": "@moss/tencent-docs-oa",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tencent-health-nges": {
-      "name": "@moss/tencent-health-nges",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tencent-map": {
-      "name": "@moss/tencent-map",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tencent-weiyun": {
-      "name": "@moss/tencent-weiyun",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tencentads": {
-      "name": "@moss/tencentads",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/textin-xparse": {
-      "name": "@moss/textin-xparse",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/textin-xparse-ai": {
-      "name": "@moss/textin-xparse-ai",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tiktok": {
-      "name": "@moss/tiktok",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tmeet": {
-      "name": "@moss/tmeet",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tongzhou-fin-research": {
-      "name": "@moss/tongzhou-fin-research",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tplus-api": {
-      "name": "@moss/tplus-api",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
       },
     },
     "apps/trace": {
@@ -1312,70 +561,6 @@
         "vite": "7.1.10",
       },
     },
-    "apps/tushare": {
-      "name": "@moss/tushare",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/tyc-mcp": {
-      "name": "@moss/tyc-mcp",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/uupt": {
-      "name": "@moss/uupt",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/wecom": {
-      "name": "@moss/wecom",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/weisheng-scrm": {
-      "name": "@moss/weisheng-scrm",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/wind-finance": {
-      "name": "@moss/wind-finance",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/wisenote": {
-      "name": "@moss/wisenote",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/wk-workbuddy": {
-      "name": "@moss/wk-workbuddy",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
     "apps/workflow": {
       "name": "@moss/workflow-app",
       "version": "0.1.17",
@@ -1404,102 +589,6 @@
         "vite": "7.1.10",
       },
     },
-    "apps/woscli": {
-      "name": "@moss/woscli",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/wps-knowledgebase": {
-      "name": "@moss/wps-knowledgebase",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/xiaoe-cloud-cli": {
-      "name": "@moss/xiaoe-cloud-cli",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/xingtu-claw-risk": {
-      "name": "@moss/xingtu-claw-risk",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/yingmi-mcp": {
-      "name": "@moss/yingmi-mcp",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/youshu-bd-mate": {
-      "name": "@moss/youshu-bd-mate",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/yuandian-mcp": {
-      "name": "@moss/yuandian-mcp",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/yunke-cli": {
-      "name": "@moss/yunke-cli",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/yzf-general-mcp-server": {
-      "name": "@moss/yzf-general-mcp-server",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/yzf-invoice-mcp-server": {
-      "name": "@moss/yzf-invoice-mcp-server",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/zfs-fssc-ai": {
-      "name": "@moss/zfs-fssc-ai",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
-    "apps/zsxq": {
-      "name": "@moss/zsxq",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@moss/app-runtime": "workspace:*",
-        "@moss/connector-app-build": "workspace:*",
-      },
-    },
     "packages/app-settings": {
       "name": "@moss/app-settings",
       "version": "0.1.0",
@@ -1515,13 +604,6 @@
         "@types/react": "19.2.2",
         "@types/react-dom": "19.2.2",
         "typescript": "5.9.3",
-      },
-    },
-    "packages/connector-app-build": {
-      "name": "@moss/connector-app-build",
-      "version": "0.1.0",
-      "dependencies": {
-        "@moss/app-runtime": "workspace:*",
       },
     },
     "packages/engine-apps": {
@@ -1917,10 +999,6 @@
 
     "@modelcontextprotocol/server-memory": ["@modelcontextprotocol/server-memory@2026.8.31", "https://registry.npmmirror.com/@modelcontextprotocol/server-memory/-/server-memory-2026.8.31.tgz", { "dependencies": { "@modelcontextprotocol/sdk": "^1.30.0" }, "bin": { "mcp-server-memory": "dist/index.js" } }, "sha512-ljj/3S4aGjxdNSQWw6gucKKGnTLdBPWxzapyY/MT2tOVyZwvxChvevXSLPwx59nKJAlVpUVW+cOlnVRXRwiqMQ=="],
 
-    "@moss/77ircloud": ["@moss/77ircloud@workspace:apps/77ircloud"],
-
-    "@moss/ai-hive": ["@moss/ai-hive@workspace:apps/ai-hive"],
-
     "@moss/app-builder": ["@moss/app-builder@workspace:apps/app-builder"],
 
     "@moss/app-runtime": ["@moss/app-runtime@workspace:vendor/moss-core/packages/app-runtime"],
@@ -1931,141 +1009,41 @@
 
     "@moss/audit-app": ["@moss/audit-app@workspace:apps/audit"],
 
-    "@moss/awesun": ["@moss/awesun@workspace:apps/awesun"],
-
     "@moss/backup-app": ["@moss/backup-app@workspace:apps/backup"],
-
-    "@moss/baidu-netdisk": ["@moss/baidu-netdisk@workspace:apps/baidu-netdisk"],
-
-    "@moss/bazhuayu": ["@moss/bazhuayu@workspace:apps/bazhuayu"],
-
-    "@moss/beisen-cli": ["@moss/beisen-cli@workspace:apps/beisen-cli"],
 
     "@moss/browser-use-app": ["@moss/browser-use-app@workspace:apps/browser-use"],
 
     "@moss/buddy": ["@moss/buddy@workspace:apps/buddy"],
 
-    "@moss/bugly-token": ["@moss/bugly-token@workspace:apps/bugly-token"],
-
-    "@moss/camscanner-mcp": ["@moss/camscanner-mcp@workspace:apps/camscanner-mcp"],
-
-    "@moss/canva": ["@moss/canva@workspace:apps/canva"],
-
-    "@moss/canva-ai": ["@moss/canva-ai@workspace:apps/canva-ai"],
-
-    "@moss/cisp-mcp": ["@moss/cisp-mcp@workspace:apps/cisp-mcp"],
-
-    "@moss/cloudbase": ["@moss/cloudbase@workspace:apps/cloudbase"],
-
-    "@moss/cnb-api": ["@moss/cnb-api@workspace:apps/cnb-api"],
-
     "@moss/code-map-app": ["@moss/code-map-app@workspace:apps/code-map"],
 
     "@moss/computer-use-app": ["@moss/computer-use-app@workspace:apps/computer-use"],
-
-    "@moss/connector-app-build": ["@moss/connector-app-build@workspace:packages/connector-app-build"],
-
-    "@moss/ctrip-wendao": ["@moss/ctrip-wendao@workspace:apps/ctrip-wendao"],
 
     "@moss/data-workbench-app": ["@moss/data-workbench-app@workspace:apps/data-workbench"],
 
     "@moss/database-app": ["@moss/database-app@workspace:apps/database"],
 
-    "@moss/dcs-cloud": ["@moss/dcs-cloud@workspace:apps/dcs-cloud"],
-
-    "@moss/designkit-buddy-cli": ["@moss/designkit-buddy-cli@workspace:apps/designkit-buddy-cli"],
-
     "@moss/devtools-app": ["@moss/devtools-app@workspace:apps/devtools"],
-
-    "@moss/dingtalk": ["@moss/dingtalk@workspace:apps/dingtalk"],
-
-    "@moss/dknowc-mcp": ["@moss/dknowc-mcp@workspace:apps/dknowc-mcp"],
 
     "@moss/document-converter-app": ["@moss/document-converter-app@workspace:apps/document-converter"],
 
     "@moss/drive-app": ["@moss/drive-app@workspace:apps/drive"],
 
-    "@moss/duoguan-fengchao": ["@moss/duoguan-fengchao@workspace:apps/duoguan-fengchao"],
-
-    "@moss/edgeone-pages": ["@moss/edgeone-pages@workspace:apps/edgeone-pages"],
-
-    "@moss/emr-query": ["@moss/emr-query@workspace:apps/emr-query"],
-
     "@moss/engine-apps": ["@moss/engine-apps@workspace:packages/engine-apps"],
-
-    "@moss/ezjoin-meeting": ["@moss/ezjoin-meeting@workspace:apps/ezjoin-meeting"],
-
-    "@moss/fazhi-law": ["@moss/fazhi-law@workspace:apps/fazhi-law"],
-
-    "@moss/fbs-connector": ["@moss/fbs-connector@workspace:apps/fbs-connector"],
 
     "@moss/feishu-app": ["@moss/feishu-app@workspace:apps/feishu"],
 
-    "@moss/feishu-cli": ["@moss/feishu-cli@workspace:apps/feishu-cli"],
-
-    "@moss/fenbi-baokao-decision": ["@moss/fenbi-baokao-decision@workspace:apps/fenbi-baokao-decision"],
-
     "@moss/file-cleaner-app": ["@moss/file-cleaner-app@workspace:apps/file-cleaner"],
-
-    "@moss/finenter": ["@moss/finenter@workspace:apps/finenter"],
-
-    "@moss/flova": ["@moss/flova@workspace:apps/flova"],
-
-    "@moss/fuma-ai-callout": ["@moss/fuma-ai-callout@workspace:apps/fuma-ai-callout"],
-
-    "@moss/fyopen-lawsearch": ["@moss/fyopen-lawsearch@workspace:apps/fyopen-lawsearch"],
-
-    "@moss/gangtise-mcp": ["@moss/gangtise-mcp@workspace:apps/gangtise-mcp"],
-
-    "@moss/gaodun-job": ["@moss/gaodun-job@workspace:apps/gaodun-job"],
-
-    "@moss/gildata": ["@moss/gildata@workspace:apps/gildata"],
-
-    "@moss/h3c-cloudnet": ["@moss/h3c-cloudnet@workspace:apps/h3c-cloudnet"],
-
-    "@moss/h3yun-connector": ["@moss/h3yun-connector@workspace:apps/h3yun-connector"],
 
     "@moss/host-contracts": ["@moss/host-contracts@workspace:vendor/moss-core/packages/host-contracts"],
 
-    "@moss/ihr-cli": ["@moss/ihr-cli@workspace:apps/ihr-cli"],
-
     "@moss/image-tools-app": ["@moss/image-tools-app@workspace:apps/image-tools"],
-
-    "@moss/infimind-ecommerce-image": ["@moss/infimind-ecommerce-image@workspace:apps/infimind-ecommerce-image"],
-
-    "@moss/infimind-video": ["@moss/infimind-video@workspace:apps/infimind-video"],
-
-    "@moss/ioa": ["@moss/ioa@workspace:apps/ioa"],
-
-    "@moss/jinshuju": ["@moss/jinshuju@workspace:apps/jinshuju"],
-
-    "@moss/jiushuyun": ["@moss/jiushuyun@workspace:apps/jiushuyun"],
-
-    "@moss/kling-ai-plugin": ["@moss/kling-ai-plugin@workspace:apps/kling-ai-plugin"],
-
-    "@moss/kling-ai-plugin-ai": ["@moss/kling-ai-plugin-ai@workspace:apps/kling-ai-plugin-ai"],
 
     "@moss/knowledge-rag-app": ["@moss/knowledge-rag-app@workspace:apps/knowledge-rag"],
 
-    "@moss/kuaicha-search": ["@moss/kuaicha-search@workspace:apps/kuaicha-search"],
-
-    "@moss/lemonclaw": ["@moss/lemonclaw@workspace:apps/lemonclaw"],
-
-    "@moss/lexiang": ["@moss/lexiang@workspace:apps/lexiang"],
-
     "@moss/library-app": ["@moss/library-app@workspace:apps/library"],
 
-    "@moss/linear-mcp": ["@moss/linear-mcp@workspace:apps/linear-mcp"],
-
-    "@moss/lingxing-mcp": ["@moss/lingxing-mcp@workspace:apps/lingxing-mcp"],
-
-    "@moss/linkfox-product-selection": ["@moss/linkfox-product-selection@workspace:apps/linkfox-product-selection"],
-
     "@moss/local-tasks": ["@moss/local-tasks@workspace:packages/local-tasks"],
-
-    "@moss/lovrabet-cli": ["@moss/lovrabet-cli@workspace:apps/lovrabet-cli"],
-
-    "@moss/mastergo-vibe-mcp": ["@moss/mastergo-vibe-mcp@workspace:apps/mastergo-vibe-mcp"],
 
     "@moss/mcp-app": ["@moss/mcp-app@workspace:apps/mcp"],
 
@@ -2073,145 +1051,20 @@
 
     "@moss/memory-app": ["@moss/memory-app@workspace:apps/memory"],
 
-    "@moss/mglc": ["@moss/mglc@workspace:apps/mglc"],
-
-    "@moss/miaoda": ["@moss/miaoda@workspace:apps/miaoda"],
-
-    "@moss/moka": ["@moss/moka@workspace:apps/moka"],
-
-    "@moss/morningstar": ["@moss/morningstar@workspace:apps/morningstar"],
-
-    "@moss/mx-ds-mcp": ["@moss/mx-ds-mcp@workspace:apps/mx-ds-mcp"],
-
-    "@moss/mzl-trademark": ["@moss/mzl-trademark@workspace:apps/mzl-trademark"],
-
-    "@moss/neo-crm": ["@moss/neo-crm@workspace:apps/neo-crm"],
-
-    "@moss/netease-mail": ["@moss/netease-mail@workspace:apps/netease-mail"],
-
-    "@moss/notion": ["@moss/notion@workspace:apps/notion"],
-
-    "@moss/opendata": ["@moss/opendata@workspace:apps/opendata"],
 
     "@moss/openim-app": ["@moss/openim-app@workspace:apps/openim"],
 
-    "@moss/pandadata": ["@moss/pandadata@workspace:apps/pandadata"],
-
-    "@moss/patsnap-search": ["@moss/patsnap-search@workspace:apps/patsnap-search"],
-
     "@moss/pdf-tools-app": ["@moss/pdf-tools-app@workspace:apps/pdf-tools"],
-
-    "@moss/picset-commerce-images": ["@moss/picset-commerce-images@workspace:apps/picset-commerce-images"],
-
-    "@moss/picset-video-generation": ["@moss/picset-video-generation@workspace:apps/picset-video-generation"],
-
-    "@moss/pkulaw": ["@moss/pkulaw@workspace:apps/pkulaw"],
-
-    "@moss/proboost": ["@moss/proboost@workspace:apps/proboost"],
-
-    "@moss/qcc-company": ["@moss/qcc-company@workspace:apps/qcc-company"],
-
-    "@moss/qcc-legal": ["@moss/qcc-legal@workspace:apps/qcc-legal"],
-
-    "@moss/qingflow": ["@moss/qingflow@workspace:apps/qingflow"],
-
-    "@moss/qq-mail": ["@moss/qq-mail@workspace:apps/qq-mail"],
-
-    "@moss/ragflow": ["@moss/ragflow@workspace:apps/ragflow"],
-
-    "@moss/seeyon-office-marketing-suite": ["@moss/seeyon-office-marketing-suite@workspace:apps/seeyon-office-marketing-suite"],
 
     "@moss/self-test-app": ["@moss/self-test-app@workspace:apps/self-test"],
 
-    "@moss/shanglv-mcp-gateway": ["@moss/shanglv-mcp-gateway@workspace:apps/shanglv-mcp-gateway"],
-
-    "@moss/shanlong-claw": ["@moss/shanlong-claw@workspace:apps/shanlong-claw"],
-
-    "@moss/sharecrm": ["@moss/sharecrm@workspace:apps/sharecrm"],
-
-    "@moss/shareone": ["@moss/shareone@workspace:apps/shareone"],
-
-    "@moss/sq-company-dynamic": ["@moss/sq-company-dynamic@workspace:apps/sq-company-dynamic"],
-
     "@moss/takt-app": ["@moss/takt-app@workspace:apps/takt"],
-
-    "@moss/tanyuan-assistant": ["@moss/tanyuan-assistant@workspace:apps/tanyuan-assistant"],
-
-    "@moss/tapd": ["@moss/tapd@workspace:apps/tapd"],
-
-    "@moss/tc-chengxin": ["@moss/tc-chengxin@workspace:apps/tc-chengxin"],
-
-    "@moss/tec-do": ["@moss/tec-do@workspace:apps/tec-do"],
-
-    "@moss/tencent-docs": ["@moss/tencent-docs@workspace:apps/tencent-docs"],
-
-    "@moss/tencent-docs-oa": ["@moss/tencent-docs-oa@workspace:apps/tencent-docs-oa"],
-
-    "@moss/tencent-health-nges": ["@moss/tencent-health-nges@workspace:apps/tencent-health-nges"],
-
-    "@moss/tencent-map": ["@moss/tencent-map@workspace:apps/tencent-map"],
-
-    "@moss/tencent-weiyun": ["@moss/tencent-weiyun@workspace:apps/tencent-weiyun"],
-
-    "@moss/tencentads": ["@moss/tencentads@workspace:apps/tencentads"],
-
-    "@moss/textin-xparse": ["@moss/textin-xparse@workspace:apps/textin-xparse"],
-
-    "@moss/textin-xparse-ai": ["@moss/textin-xparse-ai@workspace:apps/textin-xparse-ai"],
-
-    "@moss/tiktok": ["@moss/tiktok@workspace:apps/tiktok"],
-
-    "@moss/tmeet": ["@moss/tmeet@workspace:apps/tmeet"],
-
-    "@moss/tongzhou-fin-research": ["@moss/tongzhou-fin-research@workspace:apps/tongzhou-fin-research"],
-
-    "@moss/tplus-api": ["@moss/tplus-api@workspace:apps/tplus-api"],
 
     "@moss/trace-app": ["@moss/trace-app@workspace:apps/trace"],
 
     "@moss/transcription-app": ["@moss/transcription-app@workspace:apps/transcription"],
 
-    "@moss/tushare": ["@moss/tushare@workspace:apps/tushare"],
-
-    "@moss/tyc-mcp": ["@moss/tyc-mcp@workspace:apps/tyc-mcp"],
-
-    "@moss/uupt": ["@moss/uupt@workspace:apps/uupt"],
-
-    "@moss/wecom": ["@moss/wecom@workspace:apps/wecom"],
-
-    "@moss/weisheng-scrm": ["@moss/weisheng-scrm@workspace:apps/weisheng-scrm"],
-
-    "@moss/wind-finance": ["@moss/wind-finance@workspace:apps/wind-finance"],
-
-    "@moss/wisenote": ["@moss/wisenote@workspace:apps/wisenote"],
-
-    "@moss/wk-workbuddy": ["@moss/wk-workbuddy@workspace:apps/wk-workbuddy"],
-
     "@moss/workflow-app": ["@moss/workflow-app@workspace:apps/workflow"],
-
-    "@moss/woscli": ["@moss/woscli@workspace:apps/woscli"],
-
-    "@moss/wps-knowledgebase": ["@moss/wps-knowledgebase@workspace:apps/wps-knowledgebase"],
-
-    "@moss/xiaoe-cloud-cli": ["@moss/xiaoe-cloud-cli@workspace:apps/xiaoe-cloud-cli"],
-
-    "@moss/xingtu-claw-risk": ["@moss/xingtu-claw-risk@workspace:apps/xingtu-claw-risk"],
-
-    "@moss/yingmi-mcp": ["@moss/yingmi-mcp@workspace:apps/yingmi-mcp"],
-
-    "@moss/youshu-bd-mate": ["@moss/youshu-bd-mate@workspace:apps/youshu-bd-mate"],
-
-    "@moss/yuandian-mcp": ["@moss/yuandian-mcp@workspace:apps/yuandian-mcp"],
-
-    "@moss/yunke-cli": ["@moss/yunke-cli@workspace:apps/yunke-cli"],
-
-    "@moss/yzf-general-mcp-server": ["@moss/yzf-general-mcp-server@workspace:apps/yzf-general-mcp-server"],
-
-    "@moss/yzf-invoice-mcp-server": ["@moss/yzf-invoice-mcp-server@workspace:apps/yzf-invoice-mcp-server"],
-
-    "@moss/zfs-fssc-ai": ["@moss/zfs-fssc-ai@workspace:apps/zfs-fssc-ai"],
-
-    "@moss/zsxq": ["@moss/zsxq@workspace:apps/zsxq"],
 
     "@msgpackr-extract/msgpackr-extract-darwin-arm64": ["@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.4", "https://registry.npmmirror.com/@msgpackr-extract/msgpackr-extract-darwin-arm64/-/msgpackr-extract-darwin-arm64-3.0.4.tgz", { "os": "darwin", "cpu": "arm64" }, "sha512-LCkGo6JDfaBhgST7UpPWgNgLINpcpabaHfyz5OBx75nUYxBsaEPxjnyNjWpeb/xBup/682QnBfRBy2/LvPutZQ=="],
 
@@ -2681,9 +1534,9 @@
 
     "@vitejs/plugin-react": ["@vitejs/plugin-react@5.0.4", "https://registry.npmmirror.com/@vitejs/plugin-react/-/plugin-react-5.0.4.tgz", { "dependencies": { "@babel/core": "^7.28.4", "@babel/plugin-transform-react-jsx-self": "^7.27.1", "@babel/plugin-transform-react-jsx-source": "^7.27.1", "@rolldown/pluginutils": "1.0.0-beta.38", "@types/babel__core": "^7.20.5", "react-refresh": "^0.17.0" }, "peerDependencies": { "vite": "^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0" } }, "sha512-La0KD0vGkVkSk6K+piWDKRUyg8Rl5iAIKRMH0vMJI0Eg47bq1eOxmoObAaQG37WMW9MSyk7Cs8EIWwJC1PtzKA=="],
 
-    "@xyflow/react": ["@xyflow/react@12.11.6", "https://registry.npmmirror.com/@xyflow/react/-/react-12.11.6.tgz", { "dependencies": { "@xyflow/system": "0.0.82", "classcat": "^5.0.3", "zustand": "^4.4.0" }, "peerDependencies": { "@types/react": ">=17", "@types/react-dom": ">=17", "react": ">=17", "react-dom": ">=17" }, "optionalPeers": ["@types/react", "@types/react-dom"] }, "sha512-9XsEJNHjatKYndszKTF/bsU7FOP9dJ6V/EQwzy3oMdtqgBuUq7BjKSwkEo+C7s4qHstHQfwwoHA3E8QfpPxZZQ=="],
+    "@xyflow/react": ["@xyflow/react@12.12.0", "https://registry.npmmirror.com/@xyflow/react/-/react-12.12.0.tgz", { "dependencies": { "@xyflow/system": "0.0.83", "classcat": "^5.0.3", "zustand": "^4.4.0" }, "peerDependencies": { "@types/react": ">=17", "@types/react-dom": ">=17", "react": ">=17", "react-dom": ">=17" }, "optionalPeers": ["@types/react", "@types/react-dom"] }, "sha512-74oXI0Rgm1Eu33cHQAd74J6oVgCH9mbFyTVQbsGgp2kmWwh0HdtBr2VP04z8mbPD+M/xO69nqG5dDEt7/EN2rQ=="],
 
-    "@xyflow/system": ["@xyflow/system@0.0.82", "https://registry.npmmirror.com/@xyflow/system/-/system-0.0.82.tgz", { "dependencies": { "@types/d3-drag": "^3.0.7", "@types/d3-interpolate": "^3.0.4", "@types/d3-selection": "^3.0.10", "@types/d3-transition": "^3.0.8", "@types/d3-zoom": "^3.0.8", "d3-drag": "^3.0.0", "d3-interpolate": "^3.0.1", "d3-selection": "^3.0.0", "d3-zoom": "^3.0.0" } }, "sha512-4DKnL3CGtCGLRSmgDqaajRVgeksMXq/Yw4wPfdMfm7JvdIiWHGzVYOfFUztiATwdBXZqUU6HhehwUdbV9G23PQ=="],
+    "@xyflow/system": ["@xyflow/system@0.0.83", "https://registry.npmmirror.com/@xyflow/system/-/system-0.0.83.tgz", { "dependencies": { "@types/d3-drag": "^3.0.7", "@types/d3-interpolate": "^3.0.4", "@types/d3-selection": "^3.0.10", "@types/d3-transition": "^3.0.8", "@types/d3-zoom": "^3.0.8", "d3-drag": "^3.0.0", "d3-interpolate": "^3.0.1", "d3-selection": "^3.0.0", "d3-zoom": "^3.0.0" } }, "sha512-a//eDjez3WZF47aaPTfVUDD0OINOq+WVwBZCRTqG+m0a5euX8EwlJ4jMY1Wxz0Ocj4xOeekJ70V22Pq0ll8RJw=="],
 
     "accepts": ["accepts@2.0.0", "https://registry.npmmirror.com/accepts/-/accepts-2.0.0.tgz", { "dependencies": { "mime-types": "^3.0.0", "negotiator": "^1.0.0" } }, "sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng=="],
 
@@ -3751,6 +2604,7 @@
 
     "@moss/memory-app/zod": ["zod@4.3.6", "https://registry.npmmirror.com/zod/-/zod-4.3.6.tgz", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
 
+
     "@moss/openim-app/@tailwindcss/vite": ["@tailwindcss/vite@4.1.10", "https://registry.npmmirror.com/@tailwindcss/vite/-/vite-4.1.10.tgz", { "dependencies": { "@tailwindcss/node": "4.1.10", "@tailwindcss/oxide": "4.1.10", "tailwindcss": "4.1.10" }, "peerDependencies": { "vite": "^5.2.0 || ^6" } }, "sha512-QWnD5HDY2IADv+vYR82lOhqOlS1jSCUUAmfem52cXAhRTKxpDh3ARX8TTXJTCCO7Rv7cD2Nlekabv02bwP3a2A=="],
 
     "@moss/openim-app/tailwind-merge": ["tailwind-merge@3.3.1", "https://registry.npmmirror.com/tailwind-merge/-/tailwind-merge-3.3.1.tgz", {}, "sha512-gBXpgUm/3rp1lMZZrM/w7D8GKqshif0zAymAhbCyIt8KMe+0v9DQ7cdYLR4FHH/cKpdTXb+A/tKKU3eolfsI+g=="],
@@ -3763,11 +2617,11 @@
 
     "@moss/takt-app/@types/node": ["@types/node@22.19.15", "https://registry.npmmirror.com/@types/node/-/node-22.19.15.tgz", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-F0R/h2+dsy5wJAUe3tAU6oqa2qbWY5TpNfL/RGmo1y38hiyO1w3x2jPtt76wmuaJI4DQnOBu21cNXQ2STIUUWg=="],
 
+    "@moss/takt-app/@xyflow/react": ["@xyflow/react@12.11.6", "https://registry.npmmirror.com/@xyflow/react/-/react-12.11.6.tgz", { "dependencies": { "@xyflow/system": "0.0.82", "classcat": "^5.0.3", "zustand": "^4.4.0" }, "peerDependencies": { "@types/react": ">=17", "@types/react-dom": ">=17", "react": ">=17", "react-dom": ">=17" }, "optionalPeers": ["@types/react", "@types/react-dom"] }, "sha512-9XsEJNHjatKYndszKTF/bsU7FOP9dJ6V/EQwzy3oMdtqgBuUq7BjKSwkEo+C7s4qHstHQfwwoHA3E8QfpPxZZQ=="],
+
     "@moss/takt-app/zod": ["zod@4.3.6", "https://registry.npmmirror.com/zod/-/zod-4.3.6.tgz", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
 
     "@moss/trace-app/tailwindcss": ["tailwindcss@4.2.0", "https://registry.npmmirror.com/tailwindcss/-/tailwindcss-4.2.0.tgz", {}, "sha512-yYzTZ4++b7fNYxFfpnberEEKu43w44aqDMNM9MHMmcKuCH7lL8jJ4yJ7LGHv7rSwiqM0nkiobF9I6cLlpS2P7Q=="],
-
-    "@moss/workflow-app/@xyflow/react": ["@xyflow/react@12.12.0", "https://registry.npmmirror.com/@xyflow/react/-/react-12.12.0.tgz", { "dependencies": { "@xyflow/system": "0.0.83", "classcat": "^5.0.3", "zustand": "^4.4.0" }, "peerDependencies": { "@types/react": ">=17", "@types/react-dom": ">=17", "react": ">=17", "react-dom": ">=17" }, "optionalPeers": ["@types/react", "@types/react-dom"] }, "sha512-74oXI0Rgm1Eu33cHQAd74J6oVgCH9mbFyTVQbsGgp2kmWwh0HdtBr2VP04z8mbPD+M/xO69nqG5dDEt7/EN2rQ=="],
 
     "@moss/workflow-app/bun-types": ["bun-types@1.4.3", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.3.tgz", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-tinRJNGOmUN+tEAsn2y2e942n9JHRHR42iUYzDH75NmhJqVBokGSQkkfSFdNWwsANIdrK6ACH9t01M452YyTwg=="],
 
@@ -4261,7 +3115,7 @@
 
     "@moss/takt-app/@types/node/undici-types": ["undici-types@6.21.0", "https://registry.npmmirror.com/undici-types/-/undici-types-6.21.0.tgz", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
-    "@moss/workflow-app/@xyflow/react/@xyflow/system": ["@xyflow/system@0.0.83", "https://registry.npmmirror.com/@xyflow/system/-/system-0.0.83.tgz", { "dependencies": { "@types/d3-drag": "^3.0.7", "@types/d3-interpolate": "^3.0.4", "@types/d3-selection": "^3.0.10", "@types/d3-transition": "^3.0.8", "@types/d3-zoom": "^3.0.8", "d3-drag": "^3.0.0", "d3-interpolate": "^3.0.1", "d3-selection": "^3.0.0", "d3-zoom": "^3.0.0" } }, "sha512-a//eDjez3WZF47aaPTfVUDD0OINOq+WVwBZCRTqG+m0a5euX8EwlJ4jMY1Wxz0Ocj4xOeekJ70V22Pq0ll8RJw=="],
+    "@moss/takt-app/@xyflow/react/@xyflow/system": ["@xyflow/system@0.0.82", "https://registry.npmmirror.com/@xyflow/system/-/system-0.0.82.tgz", { "dependencies": { "@types/d3-drag": "^3.0.7", "@types/d3-interpolate": "^3.0.4", "@types/d3-selection": "^3.0.10", "@types/d3-transition": "^3.0.8", "@types/d3-zoom": "^3.0.8", "d3-drag": "^3.0.0", "d3-interpolate": "^3.0.1", "d3-selection": "^3.0.0", "d3-zoom": "^3.0.0" } }, "sha512-4DKnL3CGtCGLRSmgDqaajRVgeksMXq/Yw4wPfdMfm7JvdIiWHGzVYOfFUztiATwdBXZqUU6HhehwUdbV9G23PQ=="],
 
     "@tailwindcss/node/lightningcss/lightningcss-darwin-arm64": ["lightningcss-darwin-arm64@1.31.1", "https://registry.npmmirror.com/lightningcss-darwin-arm64/-/lightningcss-darwin-arm64-1.31.1.tgz", { "os": "darwin", "cpu": "arm64" }, "sha512-02uTEqf3vIfNMq3h/z2cJfcOXnQ0GRwQrkmPafhueLb2h7mqEidiCzkE4gBMEH65abHRiQvhdcQ+aP0D0g67sg=="],
 

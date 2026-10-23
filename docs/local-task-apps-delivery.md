@@ -10,7 +10,7 @@
 
 三者采用 `apps/` 下有自己代码的普通 Moss App：React UI、Node Backend、本地开源引擎及 AI 工具。页面负责预览、选择、编辑和导出，Backend 管理文件、任务和引擎进程。
 
-仓库的 `mcp-apps/` 用于配置型 MCP App，适合复用 Core 公共页面。此次图片裁剪、PDF 页面编排和逐字稿校对需要独立交互，因此使用普通 App。AI 通过 Moss 原生 `contributes.tools` 调用同一 Backend，不额外套 MCP transport；以后接已有 MCP 服务时仍可以保留这层 UI。
+仓库的 `tool-apps/` 用于配置型 MCP App，适合复用 Core 公共页面。此次图片裁剪、PDF 页面编排和逐字稿校对需要独立交互，因此使用普通 App。AI 通过 Moss 原生 `contributes.tools` 调用同一 Backend，不额外套 MCP transport；以后接已有 MCP 服务时仍可以保留这层 UI。
 
 三个入口都位于“更多”，分类为“知识与文件”，`toolScope: session`。在会话选择对应 App 后，AI 可导入文件、提交任务和查看进度；这些任务和结果同时出现在页面。
 

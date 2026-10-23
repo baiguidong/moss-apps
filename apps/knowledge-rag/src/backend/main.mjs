@@ -23,7 +23,11 @@ const backend = new AppBackendClient({
 })
 backend.registerAction('engine.status', (_input, context) => service.overview(context))
 backend.registerAction('engine.prepare', () => service.begin('install'))
-backend.registerAction('engine.start', () => service.begin('start'))
+backend.registerAction('engine.start', async () => {
+  service.begin('start')
+  await service.operation
+  return service.status()
+})
 backend.registerAction('engine.cancel', () => service.cancelPreparation())
 backend.registerAction('documents.list', (input, context) => service.list(input, context))
 backend.registerAction('documents.search', (input, context) => service.search(input, context))

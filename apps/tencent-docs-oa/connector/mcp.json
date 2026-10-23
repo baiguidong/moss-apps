@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "tencent-docs-oa": {
-      "type": "http",
-      "url": "https://saas.docs.qq.com/api/v6/open/agent/mcp"
-    }
-  }
-}

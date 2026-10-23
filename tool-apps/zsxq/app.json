@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.zsxq",
+  "displayName": "知识星球",
+  "description": "用自然语言管理知识星球：浏览星球内容、发帖评论、搜索主题、回答问题、管理笔记、查看用户信息。",
+  "category": "knowledge",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "keywords": [
+    "zsxq",
+    "Zsxq",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "zsxq",
+    "source": "zsxq",
+    "name": "知识星球",
+    "nameEn": "Zsxq",
+    "description": "用自然语言管理知识星球：浏览星球内容、发帖评论、搜索主题、回答问题、管理笔记、查看用户信息。",
+    "descriptionEn": "Manage Zsxq knowledge communities with natural language: browse groups, post topics, comment, answer questions, search content, manage notes, and view user profiles.",
+    "type": "cli",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "4.24.0",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "列出我加入的所有星球",
+      "帮我在「生财有术」搜索关于「跨境电商」的主题",
+      "帮我发一篇帖子，标题是「今天的学习心得」",
+      "查看我的知识星球用户资料",
+      "帮我创建一条公开笔记，内容是本周的阅读总结",
+      "看看最近大家在讨论什么热门话题"
+    ],
+    "hasMcp": false,
+    "hasCli": true,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyBjbGFzcz0iaWNvbiIgd2lkdGg9IjIwMHB4IiBoZWlnaHQ9IjIwMC4wMHB4IiB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTUxMiA5MzYuNmMtNTcuMyAwLTExMi45LTExLjItMTY1LjMtMzMuNC01MC42LTIxLjQtOTYtNTItMTM0LjktOTEtMzktMzktNjkuNi04NC40LTkxLTEzNC45LTIyLjEtNTIuNC0zMy40LTEwOC0zMy40LTE2NS4zczExLjItMTEyLjkgMzMuNC0xNjUuM2MyMS40LTUwLjYgNTItOTYgOTEtMTM0LjlzODQuNC02OS42IDEzNC45LTkxYzUyLjQtMjIuMSAxMDgtMzMuNCAxNjUuMy0zMy40IDIxLjIgMCA0Mi41IDEuNiA2My40IDQuNyA4LjIgMS4yIDE2LjUgMi43IDI0LjYgNC40IDIyLjIgNC43IDM2LjMgMjYuNCAzMS43IDQ4LjYtNC43IDIyLjItMjYuNCAzNi4zLTQ4LjYgMzEuNy02LjUtMS40LTEzLjItMi42LTE5LjgtMy42LTE2LjgtMi41LTM0LjEtMy44LTUxLjItMy44LTkxLjUgMC0xNzcuNSAzNS42LTI0Mi4yIDEwMC4zLTY0LjggNjQuOC0xMDAuNSAxNTAuOC0xMDAuNSAyNDIuM1MyMDUgNjg5LjUgMjY5LjcgNzU0LjJjNjQuNyA2NC43IDE1MC43IDEwMC4zIDI0Mi4yIDEwMC4zczE3Ny41LTM1LjYgMjQyLjItMTAwLjNjNjQuNy02NC43IDEwMC4zLTE1MC43IDEwMC4zLTI0Mi4yIDAtMTcuMS0xLjMtMzQuMi0zLjgtNTEtMy4zLTIyLjQgMTIuMS00My4zIDM0LjUtNDYuNiAyMi40LTMuMyA0My4zIDEyLjEgNDYuNiAzNC41IDMuMSAyMC43IDQuNyA0MS45IDQuNyA2MyAwIDU3LjMtMTEuMiAxMTIuOS0zMy40IDE2NS4zLTIxLjQgNTAuNi01MiA5Ni05MSAxMzQuOS0zOSAzOS04NC40IDY5LjYtMTM0LjkgOTEtNTIuMiAyMi4yLTEwNy44IDMzLjUtMTY1LjEgMzMuNXoiIGZpbGw9IiMxNkI5OTgiIC8+PHBhdGggZD0iTTcxMy41IDIzOS40YTc0LjUgNzQuNSAwIDEgMCAxNDkgMCA3NC41IDc0LjUgMCAxIDAtMTQ5IDB6IiBmaWxsPSIjMTZCOTk4IiAvPjwvc3ZnPg==",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [],
+    "skillName": "zsxq-skill",
+    "skillNames": [
+      "zsxq-skill"
+    ]
+  },
+  "cli": {
+    "runtime": {
+      "type": "node",
+      "version": ">=18"
+    },
+    "init": {
+      "darwin": "npm install -g zsxq-cli",
+      "linux": "npm install -g zsxq-cli",
+      "win32": "npm install -g zsxq-cli"
+    },
+    "versionCheck": {
+      "command": {
+        "darwin": "zsxq-cli --version",
+        "linux": "zsxq-cli --version",
+        "win32": "zsxq-cli.cmd --version"
+      },
+      "minVersion": "0.5.0"
+    },
+    "auth": {
+      "darwin": "zsxq-cli auth login --no-wait",
+      "linux": "zsxq-cli auth login --no-wait",
+      "win32": "zsxq-cli.cmd auth login --no-wait"
+    },
+    "unAuth": {
+      "darwin": "zsxq-cli auth logout",
+      "linux": "zsxq-cli auth logout",
+      "win32": "zsxq-cli.cmd auth logout"
+    },
+    "status": {
+      "darwin": "zsxq-cli auth status",
+      "linux": "zsxq-cli auth status",
+      "win32": "zsxq-cli.cmd auth status"
+    },
+    "authUrlDomain": "garden.zsxq.com",
+    "authSuppressBrowser": true,
+    "statusMatch": "Logged in as"
+  }
+}

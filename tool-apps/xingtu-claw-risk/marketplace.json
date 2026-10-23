@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.xingtu-claw-risk",
+  "summary": "企业风险 AI 分析助手，用自然语言识别企业所属行业、分析企业间关联方关系（股权/实控人/担保/共同投资）。",
+  "description": "企业风险 AI 分析助手，用自然语言识别企业所属行业、分析企业间关联方关系（股权/实控人/担保/共同投资）。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/xingtu-claw-risk",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

@@ -3,6 +3,7 @@ import { listApps, readJson } from './lib.mjs'
 import { validateAppManifest } from '@moss/app-sdk'
 import { validateAppPackage } from '../vendor/moss-core/packages/app-runtime/src/packages/index.mjs'
 import { readConnectorAppPackage } from '../vendor/moss-core/packages/app-runtime/src/packages/connector-app.mjs'
+import { generateToolApp } from '../vendor/moss-core/packages/app-runtime/src/packages/generate-tool-app.mjs'
 import { exportAppSource, parseLock } from './source-package.mjs'
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs/promises'
@@ -19,21 +20,24 @@ test('all 114 service sources use short App identities with matching payloads', 
       expect(path.basename(app.root)).toBe(name)
       expect(app.manifest.id).toBe(`moss.${name}`)
       expect(app.marketplace.appId).toBe(app.manifest.id)
-      expect(app.marketplace.homepage).toEndWith(`/apps/${name}`)
-      const packageJson = readJson(path.join(app.root, 'package.json'))
-      expect(packageJson.name).toBe(`@moss/${name}`)
+      expect(app.marketplace.homepage).toEndWith(`/tool-apps/${name}`)
+      expect(app.kind).toBe('tool')
+      expect(await fs.stat(path.join(app.root, 'package.json')).catch(() => null)).toBeNull()
+      expect(await fs.stat(path.join(app.root, 'app.moss.json')).catch(() => null)).toBeNull()
       expect(app.manifest.discovery.group).toBe('online')
       expect(app.manifest.navigation.location).toBe('none')
       expect(app.manifest.backend).toBeUndefined()
       expect(app.manifest.ui).toBeUndefined()
       const packageRoot = path.join(root, name)
-      await fs.mkdir(packageRoot)
-      for (const entry of ['app.moss.json', 'connector', 'assets', 'README.md']) {
-        await fs.cp(path.join(app.root, entry), path.join(packageRoot, entry), { recursive: true })
-      }
+      const definition = readJson(path.join(app.root, 'app.json'))
+      const connectorDir = await fs.stat(path.join(app.root, 'connector')).then(() => path.join(app.root, 'connector'), () => undefined)
+      await generateToolApp({ definition, resourcesDir: app.resourceRoot, connectorDir, destination: packageRoot })
       const pkg = await validateAppPackage(packageRoot, { requireChecksums: false })
       expect(pkg.manifest.connectorApp).toEqual(app.manifest.connectorApp)
-      expect(packageJson.scripts.build).toContain('connector-app-build')
+      expect(readJson(path.join(packageRoot, 'connector/connector.json'))).toEqual(definition.connector)
+      if (definition.mcp) expect(readJson(path.join(packageRoot, 'connector/mcp.json'))).toEqual(definition.mcp)
+      if (definition.cli) expect(readJson(path.join(packageRoot, 'connector/cli.json'))).toEqual(definition.cli)
+      if (definition.connector.credentialSchema) expect(readJson(path.join(packageRoot, 'connector/token-schema.json'))).toEqual(definition.connector.credentialSchema)
     }
   } finally { await fs.rm(root, { recursive: true, force: true }) }
   expect(apps.find(app => app.manifest.id === 'moss.feishu-cli')?.manifest.discovery.authMethods).toEqual(['browser'])
@@ -46,11 +50,16 @@ test('service metadata identity is explicit and independent of App ID', async ()
   const manifest = validateAppManifest({ ...app.manifest, id: 'example.team-chat' })
   expect(manifest.id).toBe('example.team-chat')
   expect(manifest.connectorApp.id).toBe('feishu')
-  const pkg = await readConnectorAppPackage(app.root, manifest)
-  expect(pkg.metadata.id).toBe('feishu')
-  await expect(readConnectorAppPackage(app.root, {
-    ...manifest, connectorApp: { ...manifest.connectorApp, id: 'dingtalk' },
-  })).rejects.toThrow('identity mismatch')
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'service-identity-'))
+  try {
+    const packageRoot = path.join(root, 'package')
+    await generateToolApp({ definition: readJson(path.join(app.root, 'app.json')), resourcesDir: app.resourceRoot, connectorDir: path.join(app.root, 'connector'), destination: packageRoot })
+    const pkg = await readConnectorAppPackage(packageRoot, manifest)
+    expect(pkg.metadata.id).toBe('feishu')
+    await expect(readConnectorAppPackage(packageRoot, {
+      ...manifest, connectorApp: { ...manifest.connectorApp, id: 'dingtalk' },
+    })).rejects.toThrow('identity mismatch')
+  } finally { await fs.rm(root, { recursive: true, force: true }) }
 })
 
 test('short service identities retain manifest and permission validation', () => {
@@ -67,12 +76,13 @@ test('source export preserves short service workspace identities', async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'service-source-'))
   try {
     const spec = await exportAppSource(app, root)
-    expect(spec.appRoot).toBe('apps/feishu-cli')
+    expect(spec.appRoot).toBe('tool-apps/feishu-cli')
     expect(readJson(path.join(root, spec.appRoot, 'app.moss.json')).id).toBe('moss.feishu-cli')
     const lock = parseLock(await fs.readFile(path.join(root, 'bun.lock'), 'utf8'))
-    expect(lock.workspaces['apps/feishu-cli'].name).toBe('@moss/feishu-cli')
-    expect(lock.packages['@moss/feishu-cli']).toEqual(['@moss/feishu-cli@workspace:apps/feishu-cli'])
-    expect(lock.packages['@moss/connector-app-build']).toEqual(['@moss/connector-app-build@workspace:packages/connector-app-build'])
+    expect(lock.workspaces[spec.appRoot].name).toBe('@moss/config-feishu-cli')
+    expect(lock.packages['@moss/config-feishu-cli']).toEqual(['@moss/config-feishu-cli@workspace:tool-apps/feishu-cli'])
+    expect(lock.packages['@moss/connector-app-build']).toBeUndefined()
+    expect(readJson(path.join(root, spec.appRoot, 'app.json')).connector.id).toBe('feishu')
   } finally { await fs.rm(root, { recursive: true, force: true }) }
 })
 
@@ -90,8 +100,10 @@ test('market catalog includes published connector Apps and preserves existing Ap
     expect(result.status, result.stderr).toBe(0)
     const apps = readJson(path.join(site, 'v1/index.json')).apps
     expect(apps).toHaveLength(2)
-    expect(apps.find(app => app.id === 'moss.tencent-map').discovery).toEqual({ group: 'online', authMethods: ['api-key'] })
+    expect(apps.find(app => app.id === 'moss.tencent-map').discovery).toEqual({ group: 'online', kind: 'tool', capabilities: ['mcp'], authMethods: ['api-key'] })
     expect(apps.find(app => app.id === 'moss.trace').displayName).toBe('原有调用追踪卡片')
     expect(apps.find(app => app.id === 'moss.trace').summary).toBe('Preserved summary')
+    const detail = readJson(path.join(site, 'v1/apps/moss.tencent-map.json'))
+    expect(detail.homepage).toEndWith('/tool-apps/tencent-map')
   } finally { await fs.rm(root, { recursive: true, force: true }) }
 })

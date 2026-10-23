@@ -1,6 +1,6 @@
 # 统一 App 自动发布
 
-`Release Changed Apps` 扫描 `apps/*/app.moss.json` 和 `mcp-apps/*/app.json`，把仓库中尚未发布的新版本自动构建、签名、发布到 GitHub Releases，最后统一部署应用市场。
+`Release Changed Apps` 扫描 `apps/*/app.moss.json` 和 `tool-apps/*/app.json`，把仓库中尚未发布的新版本自动构建、签名、发布到 GitHub Releases，最后统一部署应用市场。
 
 ## 实施清单
 
@@ -15,11 +15,13 @@
 | 类型 | 维护文件 | 构建方式 |
 | --- | --- | --- |
 | 普通 App | `apps/<name>/app.moss.json`、`package.json`、源码、资源、`marketplace.json` | 原有 App check/test/build |
-| 配置型 MCP App | `mcp-apps/<name>/app.json`、可选 `resources/`、`marketplace.json`、`CHANGELOG.md` | 共用 `scripts/build-mcp-app.mjs` 调用固定 Core 生成器 |
+| 声明式工具包（MCP / CLI / Skills） | `tool-apps/<name>/app.json`、可选资源与技能、`marketplace.json`、`CHANGELOG.md` | 共用 `scripts/build-tool-app.mjs` 调用固定 Core 生成器 |
 
 配置型 App 不需要手写 package.json、构建脚本或 UI。导出源码包时自动补齐这些构建入口，随包携带生成器及锁定的 SDK/runtime 源码。运行内容仍是配置和资源，UI 与 MCP 进程生命周期由 Moss Core 提供。`source/` 中的构建代码不会作为 App Backend 执行，Core 要求它通过完整源码描述与摘要验证。
 
 App 的版本就是发布意图，不根据代码差异自动提升版本。普通 App 同时更新 manifest 与 package.json；MCP App 更新 app.json。Draw.io 本次是 0.1.4，0.1.3 的本地产物保持原样。
+
+新增 App 提交到 `main` 后会按 `new-app` 进入发布计划。已有 App 修改代码时，必须先提升版本号并提交；版本高于最近正式 Release 时按 `new-version` 发布。版本不变的提交会按同版本规则跳过，不会自动改版本或覆盖已发布 ZIP。
 
 | 与全部已发布 GitHub Releases 的比较 | 行为 |
 | --- | --- |
@@ -82,7 +84,7 @@ Actions → **Release Changed Apps** → **Run workflow**，默认 `dry_run=true
 - 仓库脚本回归：62 项通过；最终签名字段校验调整后，13 项发布与 MCP 专项复验通过。
 - Core MCP 安装/资源/源码安全：7 项通过；源码描述校验：1 项通过。
 - Draw.io 0.1.4：本地 ZIP 打包、解压后独立重建一致；临时干净仓库和临时 Ed25519 密钥的真实签名包也验证通过。
-- 当时的普通 App `moss.sequential-thinking` 0.1.2：检查、5 项业务测试、打包、Backend 握手和 ZIP 独立重建通过。0.1.3 已转为 `mcp-apps/sequential-thinking/` 下的配置型 App，使用相同的配置包发布流程。
+- 当时的普通 App `moss.sequential-thinking` 0.1.2：检查、5 项业务测试、打包、Backend 握手和 ZIP 独立重建通过。0.1.3 已转为 `tool-apps/sequential-thinking/` 下的配置型 App，使用相同的配置包发布流程。
 - 四个相关 Actions workflow 通过 actionlint；冻结锁文件安装通过。
 - 只读扫描 GitHub 得到 20 个待发布 App，包含 Draw.io；计划保存在 `artifacts/automatic-release/plan.json`。日志保存在同目录。该记录来自首次本地验证；线上发布状态以 Actions 为准。
 

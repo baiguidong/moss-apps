@@ -10,7 +10,7 @@ import { copySourceTree } from '../vendor/moss-core/packages/app-runtime/src/pac
 const root = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-signed-release-test-'))
 const invoke = (command, args, cwd = root, env = {}) => execFileSync(command, args, { cwd, env: { ...process.env, ...env }, stdio: 'inherit', timeout: 300000 })
 try {
-  for (const folder of ['scripts', 'mcp-apps/drawio', 'vendor/moss-core/packages/app-sdk', 'vendor/moss-core/packages/app-runtime', 'vendor/moss-core/packages/host-contracts']) {
+  for (const folder of ['scripts', 'tool-apps/drawio', 'vendor/moss-core/packages/app-sdk', 'vendor/moss-core/packages/app-runtime', 'vendor/moss-core/packages/host-contracts']) {
     await copySourceTree(path.join(repoRoot, folder), path.join(root, folder))
   }
   await fs.mkdir(path.join(root, 'packages'))

@@ -31,7 +31,7 @@ class ModelPreparationTest(unittest.TestCase):
             marker.write_text(json.dumps({'revision': model.REVISION, 'files': files}))
             # Cached startup must not import the network downloader at all.
             with patch.dict(sys.modules, {'huggingface_hub': None}), contextlib.redirect_stdout(io.StringIO()) as output:
-                model.prepare(cache)
+                model.prepare(cache, allow_download=True)
             self.assertIn('多语言模型已校验完成', output.getvalue())
             (snapshot / model.FILES[-1]).write_bytes(b'damaged')
             downloaded = []

@@ -20,6 +20,10 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
   let queue: Promise<unknown> = Promise.resolve()
   let closed = false
   let scanPending = false
+  let backgroundLoaded = false
+  const backgroundRevisions = new Map<string, string>()
+  let initialEventBaseline = false
+  const backgroundImported = new Map<string, string>()
   const imported = new Map<string, string>()
   const transfer = createResultTransport()
   const serialized = <T,>(operation: () => Promise<T>): Promise<T> => {
@@ -28,14 +32,14 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
     return task
   }
   const backend = new AppBackendClient({ ...options,
-    onInitialize: async (context: { dataDir: string }) => {
+    onInitialize: async (context: { dataDir: string; config?: { continuousAudit?: boolean } }) => {
       dataDir = context.dataDir
-      // Readiness is local. Host startup can still be completing; failures retry without exiting.
+      if (context.config?.continuousAudit !== true) return
       const scan = () => {
         if (scanPending || closed) return
         scanPending = true
         void serialized(async () => {
-        await capture()
+        await capture(true)
         await service!.runIncrementalAudit()
         await deliverAlerts()
       }).then(() => backend.status('ready'), error => backend.status('degraded', { error: error.message }))
@@ -53,9 +57,9 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
       transfer.close()
     },
   })
-  async function capture() {
+  async function capture(background = false) {
     const directory = dataDir
-    if (!cacheLoaded) {
+    if (!background && !cacheLoaded) {
       const cached = await loadSessionCache(directory)
       for (const [id, session] of cached.sessions) sessionsById.set(id, session)
       for (const [id, revision] of cached.revisions) revisions.set(id, revision)
@@ -63,6 +67,15 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
     }
     const listed = await backend.host.request(sourceProtocol, 'session.list', {}, { timeoutMs: 120_000 }) as {
       sessions: Array<{ id: string; revision: string }>
+    }
+    if (background && !backgroundLoaded) {
+      let checkpoint: { revisions?: Record<string, string>; events?: Record<string, string> } = {}
+      try { checkpoint = JSON.parse(await fs.readFile(path.join(directory, 'background-checkpoint.json'), 'utf8')) }
+      catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error }
+      for (const [id, revision] of Object.entries(checkpoint.revisions || Object.fromEntries(listed.sessions.map(entry => [entry.id, entry.revision])))) backgroundRevisions.set(id, revision)
+      initialEventBaseline = !checkpoint.events
+      for (const [name, signature] of Object.entries(checkpoint.events || {})) backgroundImported.set(name, signature)
+      backgroundLoaded = true
     }
     let changed = false
     const present = new Set(listed.sessions.map(entry => entry.id))
@@ -75,6 +88,7 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
     }
     for (const entry of listed.sessions) {
       if (revisions.get(entry.id) === entry.revision) continue
+      if (background && backgroundRevisions.get(entry.id) === entry.revision) continue
       const exported = await backend.host.request(sourceProtocol, 'session.export', { sessionId: entry.id }, { timeoutMs: 120_000 }) as {
         sessionId: string; revision: string; fileName: string
       }
@@ -85,8 +99,8 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
       revisions.set(entry.id, exported.revision)
       changed = true
     }
-    if (changed) await saveSessionCache(directory, revisions)
-    sessions = [...sessionsById.values()]
+    if (changed && !background) await saveSessionCache(directory, revisions)
+    sessions = listed.sessions.map(entry => sessionsById.get(entry.id) || entry)
     service ??= createLocalAuditService({ dbPath: path.join(directory, 'audit.db'), getLocalSessions: () => sessions,
       onChanged: (event: any) => { const { alerts: _alerts, ...change } = event; backend.emit('audit.changed', change) } })
     const eventsDir = path.join(directory, 'session-source', 'events')
@@ -95,13 +109,29 @@ export function createAuditBackend(options: ConstructorParameters<typeof AppBack
       throw error
     })) {
       if (!entry.isFile() || !/^[a-f0-9-]+\.json$/.test(entry.name)) continue
-      const raw = await fs.readFile(path.join(eventsDir, entry.name), 'utf8')
-      const hash = createHash('sha256').update(raw).digest('hex')
-      if (imported.get(entry.name) === hash) continue
+      const file = path.join(eventsDir, entry.name)
+      const stat = await fs.stat(file)
+      const signature = `${stat.mtimeMs}:${stat.size}`
+      const checkpoints = background ? backgroundImported : imported
+      if (background && initialEventBaseline) { checkpoints.set(entry.name, signature); continue }
+      if (checkpoints.get(entry.name) === signature) continue
+      const raw = await fs.readFile(file, 'utf8')
       const event = JSON.parse(raw)
       if (event.schemaVersion !== 1 || `${event.id}.json` !== entry.name) throw new Error('无效的审计操作事件。')
       service.recordEvent(event)
-      imported.set(entry.name, hash)
+      checkpoints.set(entry.name, signature)
+    }
+    if (background) {
+      backgroundRevisions.clear()
+      for (const entry of listed.sessions) backgroundRevisions.set(entry.id, entry.revision)
+      const file = path.join(directory, 'background-checkpoint.json')
+      initialEventBaseline = false
+      const contents = JSON.stringify({ revisions: Object.fromEntries(backgroundRevisions), events: Object.fromEntries(backgroundImported) })
+      const previous = await fs.readFile(file, 'utf8').catch((error: NodeJS.ErrnoException) => { if (error.code !== 'ENOENT') throw error; return '' })
+      if (previous !== contents) {
+        await fs.writeFile(`${file}.tmp`, contents, { mode: 0o600 })
+        await fs.rename(`${file}.tmp`, file)
+      }
     }
   }
   async function deliverAlerts() {

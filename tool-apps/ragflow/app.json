@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.ragflow",
+  "displayName": "RAGFlow 企业知识库",
+  "description": "通过 Moss Server 登录态或 RAGFlow API Key 连接企业知识库，支持检索、文档管理、上传解析、聊天助手和 Agent。",
+  "category": "knowledge",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "moss-session",
+      "api-key"
+    ]
+  },
+  "keywords": [
+    "ragflow",
+    "RAGFlow Knowledge Base",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "ragflow",
+    "source": "ragflow",
+    "name": "RAGFlow 企业知识库",
+    "nameEn": "RAGFlow Knowledge Base",
+    "description": "通过 Moss Server 登录态或 RAGFlow API Key 连接企业知识库，支持检索、文档管理、上传解析、聊天助手和 Agent。",
+    "descriptionEn": "Connect to an enterprise RAGFlow knowledge base with a Moss Server session or RAGFlow API key for retrieval, document management, uploads, parsing, chats, and agents.",
+    "type": "mcp",
+    "authMode": "selectable",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "",
+    "visibleIn": [
+      "external",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "列出 RAGFlow 中的知识库和文档解析状态",
+      "从企业知识库检索这个问题并给出引用",
+      "把这份 PDF 上传到指定知识库并开始解析",
+      "创建一个 RAGFlow 会话并基于知识库回答问题"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": true,
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzQiIHZpZXdCb3g9IjAgMCAzMiAzNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTMuNDMyNjUgMjAuNzY3N0M0LjE1ODM1IDIxLjUwNjIgNC4xNTgzNCAyMi43MDM1IDMuNDMyNjIgMjMuNDQxOUwzLjM5NTQ2IDIzLjQ3OTdDMi42Njk3NCAyNC4yMTgyIDEuNDkzMTIgMjQuMjE4MiAwLjc2NzQxNyAyMy40Nzk3QzAuMDQxNzEwNyAyMi43NDEyIDAuMDQxNzIxOSAyMS41NDQgMC43Njc0NDIgMjAuODA1NUwwLjgwNDYwOCAyMC43Njc3QzEuNTMwMzMgMjAuMDI5MiAyLjcwNjk0IDIwLjAyOTMgMy40MzI2NSAyMC43Njc3WiIgZmlsbD0iI0IyRERGRiIvPgogIDxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMTIuMTY4OSAyMS4zMzc1QzEyLjg5MzMgMjIuMDc3MyAxMi44OTEyIDIzLjI3NDYgMTIuMTY0MSAyNC4wMTE3TDcuMDE2NjIgMjkuMjMwN0M2LjI4OTYgMjkuOTY3OCA1LjExMjk5IDI5Ljk2NTcgNC4zODg1OSAyOS4yMjU5QzMuNjY0MTkgMjguNDg2MSAzLjY2NjMyIDI3LjI4ODggNC4zOTMzNCAyNi41NTE3TDkuNTQwODUgMjEuMzMyN0MxMC4yNjc5IDIwLjU5NTYgMTEuNDQ0NSAyMC41OTc3IDEyLjE2ODkgMjEuMzM3NVoiIGZpbGw9IiM1M0IxRkQiLz4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE5LjE1NTEgMzAuMzIxN0MxOS43MjQ0IDI5LjQ1MjggMjAuODc4MSAyOS4yMTggMjEuNzMyMSAyOS43OTczTDIxLjg0MzYgMjkuODcyOUMyMi42OTc1IDMwLjQ1MjIgMjIuOTI4MyAzMS42MjYyIDIyLjM1OSAzMi40OTUyQzIxLjc4OTcgMzMuMzY0MSAyMC42MzU5IDMzLjU5ODkgMTkuNzgyIDMzLjAxOTZMMTkuNjcwNSAzMi45NDRDMTguODE2NSAzMi4zNjQ3IDE4LjU4NTggMzEuMTkwNyAxOS4xNTUxIDMwLjMyMTdaIiBmaWxsPSIjQjJEREZGIi8+CiAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0zMS40MTg0IDIwLjY1NDRDMzIuMTQ0MSAyMS4zOTI5IDMyLjE0NDEgMjIuNTkwMiAzMS40MTg0IDIzLjMyODZMMjguODkxMSAyNS45MDAzQzI4LjE2NTQgMjYuNjM4OCAyNi45ODg3IDI2LjYzODggMjYuMjYzIDI1LjkwMDNDMjUuNTM3MyAyNS4xNjE5IDI1LjUzNzMgMjMuOTY0NiAyNi4yNjMgMjMuMjI2MUwyOC43OTAzIDIwLjY1NDRDMjkuNTE2IDE5LjkxNiAzMC42OTI3IDE5LjkxNiAzMS40MTg0IDIwLjY1NDRaIiBmaWxsPSIjNTNCMUZEIi8+CiAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0zMS40NTU3IDExLjE0MjdDMzIuMTgxNCAxMS44ODEyIDMyLjE4MTQgMTMuMDc4NSAzMS40NTU3IDEzLjgxNjlMMTIuNzc5NyAzMi44MjA5QzEyLjA1NCAzMy41NTk0IDEwLjg3NzQgMzMuNTU5NCAxMC4xNTE3IDMyLjgyMDlDOS40MjU5OSAzMi4wODI1IDkuNDI1OTkgMzAuODg1MiAxMC4xNTE3IDMwLjE0NjdMMjguODI3NyAxMS4xNDI3QzI5LjU1MzQgMTAuNDA0MyAzMC43MyAxMC40MDQzIDMxLjQ1NTcgMTEuMTQyN1oiIGZpbGw9IiMxNTcwRUYiLz4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTI3LjkyNSA1LjI5OTk0QzI4LjY1MDggNi4wMzg0IDI4LjY1MDggNy4yMzU2OCAyNy45MjUgNy45NzQxNEwxNy4xODQgMTguOTAzOEMxNi40NTgzIDE5LjY0MjMgMTUuMjgxNyAxOS42NDIzIDE0LjU1NiAxOC45MDM4QzEzLjgzMDMgMTguMTY1MyAxMy44MzAzIDE2Ljk2ODEgMTQuNTU2IDE2LjIyOTZMMjUuMjk3IDUuMjk5OTRDMjYuMDIyNyA0LjU2MTQ4IDI3LjE5OTMgNC41NjE0OCAyNy45MjUgNS4yOTk5NFoiIGZpbGw9IiMxNTcwRUYiLz4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTIyLjI1NiAxLjU5Mjk5QzIyLjk4MjIgMi4zMzA5NSAyMi45ODMgMy41MjgyMyAyMi4yNTc4IDQuMjY3MThMOC40NTA1NSAxOC4zMzU4QzcuNzI1MzMgMTkuMDc0OCA2LjU0ODcxIDE5LjA3NTYgNS44MjI1MSAxOC4zMzc2QzUuMDk2MzEgMTcuNTk5NiA1LjA5NTUyIDE2LjQwMjQgNS44MjA3NSAxNS42NjM0TDE5LjYyNzkgMS41OTQ3OEMyMC4zNTMyIDAuODU1ODI3IDIxLjUyOTggMC44NTUwMjIgMjIuMjU2IDEuNTkyOTlaIiBmaWxsPSIjMTU3MEVGIi8+CiAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik04LjU4MjI1IDYuMDk2MTlDOS4zMDY3MSA2LjgzNTkyIDkuMzA0NjkgOC4wMzMyIDguNTc3NzIgOC43NzAzOEwzLjE3MDA2IDE0LjI1NDFDMi40NDMxIDE0Ljk5MTMgMS4yNjY0OSAxNC45ODkzIDAuNTQyMDI1IDE0LjI0OTVDLTAuMTgyNDM4IDEzLjUwOTggLTAuMTgwNDEzIDEyLjMxMjUgMC41NDY1NDggMTEuNTc1M0w1Ljk1NDIxIDYuMDkxNTlDNi42ODExNyA1LjM1NDQgNy44NTc3OCA1LjM1NjQ2IDguNTgyMjUgNi4wOTYxOVoiIGZpbGw9IiM1M0IxRkQiLz4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTExLjg5MyAwLjYyNDAyM0MxMi45MTkzIDAuNjI0MDIzIDEzLjc1MTMgMS40NzA2MyAxMy43NTEzIDIuNTE0OTdWMi43MDQwNkMxMy43NTEzIDMuNzQ4NCAxMi45MTkzIDQuNTk1MDEgMTEuODkzIDQuNTk1MDFDMTAuODY2NyA0LjU5NTAxIDEwLjAzNDcgMy43NDg0IDEwLjAzNDcgMi43MDQwNlYyLjUxNDk3QzEwLjAzNDcgMS40NzA2MyAxMC44NjY3IDAuNjI0MDIzIDExLjg5MyAwLjYyNDAyM1oiIGZpbGw9IiNCMkRERkYiLz4KPC9zdmc+Cg==",
+    "enabled": true,
+    "credentialSchema": {
+      "title": "连接 RAGFlow 企业知识库",
+      "titleEn": "Connect RAGFlow Knowledge Base",
+      "description": "选择使用当前 Moss Server 登录态，或直接使用 RAGFlow API Key。保存后会立即验证 MCP 连接。",
+      "descriptionEn": "Choose the current Moss Server session or a direct RAGFlow API key. Moss validates the MCP connection after saving.",
+      "docUrl": "",
+      "docLabel": "",
+      "docLabelEn": "",
+      "fields": [
+        {
+          "key": "RAGFLOW_AUTH_MODE",
+          "label": "认证方式",
+          "labelEn": "Authentication method",
+          "placeholder": "",
+          "placeholderEn": "",
+          "description": "",
+          "descriptionEn": "",
+          "type": "select",
+          "required": true,
+          "options": [
+            {
+              "value": "moss-server",
+              "label": "Moss Server 登录态（推荐）",
+              "labelEn": "Moss Server session (recommended)"
+            },
+            {
+              "value": "api-key",
+              "label": "RAGFlow API Key",
+              "labelEn": "RAGFlow API key"
+            }
+          ],
+          "defaultValue": "moss-server"
+        },
+        {
+          "key": "MOSS_RAG_MCP_ADDRESS",
+          "label": "Moss RAG MCP 主机和端口",
+          "labelEn": "Moss RAG MCP host and port",
+          "placeholder": "ragflow.company.local:9386",
+          "placeholderEn": "ragflow.company.local:9386",
+          "description": "使用当前 Moss 登录身份，通常连接部署服务的 9386 端口。",
+          "descriptionEn": "Uses the current Moss identity, usually through port 9386 of the deployment.",
+          "type": "text",
+          "required": false,
+          "visibleWhen": {
+            "field": "RAGFLOW_AUTH_MODE",
+            "equals": [
+              "moss-server"
+            ]
+          },
+          "requiredWhen": {
+            "field": "RAGFLOW_AUTH_MODE",
+            "equals": [
+              "moss-server"
+            ]
+          }
+        },
+        {
+          "key": "RAGFLOW_MCP_ADDRESS",
+          "label": "Extended MCP 主机和端口",
+          "labelEn": "Extended MCP host and port",
+          "placeholder": "ragflow.company.local:9385",
+          "placeholderEn": "ragflow.company.local:9385",
+          "description": "只填写 host:port，不要包含 http:// 或 /mcp。",
+          "descriptionEn": "Enter host:port only, without http:// or /mcp.",
+          "type": "text",
+          "required": false,
+          "visibleWhen": {
+            "field": "RAGFLOW_AUTH_MODE",
+            "equals": [
+              "api-key"
+            ]
+          },
+          "requiredWhen": {
+            "field": "RAGFLOW_AUTH_MODE",
+            "equals": [
+              "api-key"
+            ]
+          }
+        },
+        {
+          "key": "RAGFLOW_API_KEY",
+          "label": "RAGFlow API Key",
+          "labelEn": "RAGFlow API Key",
+          "placeholder": "ragflow-...",
+          "placeholderEn": "ragflow-...",
+          "description": "作为 Authorization: Bearer 请求头发送。不要填写 Ollama 或模型供应商的密钥。",
+          "descriptionEn": "Sent as an Authorization: Bearer header. Do not enter an Ollama or model-provider key.",
+          "type": "password",
+          "required": false,
+          "visibleWhen": {
+            "field": "RAGFLOW_AUTH_MODE",
+            "equals": [
+              "api-key"
+            ]
+          },
+          "requiredWhen": {
+            "field": "RAGFLOW_AUTH_MODE",
+            "equals": [
+              "api-key"
+            ]
+          }
+        }
+      ],
+      "authenticateOnSave": true
+    },
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "ragflow"
+    ],
+    "skillName": "ragflow",
+    "skillNames": [
+      "ragflow"
+    ]
+  },
+  "mcp": {
+    "variantField": "RAGFLOW_AUTH_MODE",
+    "defaultVariant": "moss-server",
+    "variants": {
+      "moss-server": {
+        "mcpServers": {
+          "ragflow": {
+            "type": "http",
+            "url": "http://${MOSS_RAG_MCP_ADDRESS}/mcp",
+            "headers": {
+              "Authorization": "Bearer ${MOSS_SERVER_AUTH_TOKEN}"
+            }
+          }
+        },
+        "authMode": "moss-session",
+        "authValidation": "tools-list"
+      },
+      "api-key": {
+        "mcpServers": {
+          "ragflow": {
+            "type": "http",
+            "url": "http://${RAGFLOW_MCP_ADDRESS}/mcp",
+            "headers": {
+              "Authorization": "Bearer ${RAGFLOW_API_KEY}"
+            }
+          }
+        },
+        "authMode": "api-key",
+        "authValidation": "tools-list"
+      }
+    }
+  }
+}

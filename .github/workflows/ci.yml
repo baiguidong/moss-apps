@@ -56,6 +56,8 @@ jobs:
         run: bun run test:browser
       - name: Package exact source snapshots and verify final archives
         run: node scripts/package-app.mjs --supported-platform linux-x64
+      - name: Verify bundled DBX MCP on Linux
+        run: node scripts/verify-dbx-mcp.mjs
       - name: Rebuild installed source without repository dependencies
         run: node scripts/verify-source-package.mjs --rebuild --supported-platform linux-x64
       - name: Verify Audit package with the pinned Core Host
@@ -125,6 +127,8 @@ jobs:
           path: artifacts/offline-apps/*.json
       - name: Verify source rebuild and packaged Backend on each desktop platform
         run: node scripts/verify-source-package.mjs --rebuild --supported-platform ${{ matrix.platform }}
+      - name: Verify bundled DBX MCP on the desktop platform
+        run: node scripts/verify-dbx-mcp.mjs
       - name: Upload verified native App archives
         uses: actions/upload-artifact@v4
         with:

@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.h3yun-connector",
+  "displayName": "氚云",
+  "description": "通过氚云连接器，将日常业务快速构建为可配置、可协同、可追踪的数字化应用。支持快速创建应用表单、管理业务数据、以流程驱动审批与任务流转，适用于客户、项目、采购、库存、售后等多类业务管理场景。",
+  "category": "automation",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "keywords": [
+    "h3yun-connector",
+    "H3Yun",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "h3yun-connector",
+    "source": "h3yun-connector",
+    "name": "氚云",
+    "nameEn": "H3Yun",
+    "description": "通过氚云连接器，将日常业务快速构建为可配置、可协同、可追踪的数字化应用。支持快速创建应用表单、管理业务数据、以流程驱动审批与任务流转，适用于客户、项目、采购、库存、售后等多类业务管理场景。",
+    "descriptionEn": "With the H3Yun connector, businesses can quickly turn everyday operations into configurable, collaborative, and traceable digital applications. It supports rapid app creation, business data management, and workflow-driven approvals and task routing, making it suitable for a wide range of scenarios including customer, project, procurement, inventory, and after-sales management.",
+    "type": "mcp",
+    "authMode": "token",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "4.23.0",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "帮我了解今日的待办",
+      "帮我搭建一个项目管理系统",
+      "帮我分析本月的销售经营数据，生成经营建议"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": true,
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzQ0MDlfMTcpIj4KPG1hc2sgaWQ9Im1hc2swXzQ0MDlfMTciIHN0eWxlPSJtYXNrLXR5cGU6YWxwaGEiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHg9IjAiIHk9IjAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+CjxyZWN0IHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcng9IjgiIGZpbGw9IiNEOUQ5RDkiLz4KPC9tYXNrPgo8ZyBtYXNrPSJ1cmwoI21hc2swXzQ0MDlfMTcpIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0wLjAwMzEzNDI2IDBINTkuOTk5OVYzMS40NjdDNTUuNzcxIDI5LjUyOTcgNTEuMzUxIDI4LjAxMjUgNDYuNzY3OSAyNi45MTUzQzQxLjM3OTIgMjUuNjIzOCAzNS43NjE3IDI0Ljk0NjcgMjkuOTg0MyAyNC45NDY3QzI0LjIwNjggMjQuOTQ2NyAxOC41OTI0IDI1LjYyMzggMTMuMjAwNiAyNi45MTUzQzguNjE3NTQgMjguMDEyNSA0LjE5NzQ4IDI5LjUyOTcgMCAzMS40NjdWMEgwLjAwMzEzNDI2Wk0xMy41NTggMTYuMzk1SDQ2LjQ0NVYyMC44NDk1SDEzLjU1OFYxNi4zOTVaTTUzLjg2ODIgNi4xOTc0OEM1My44NjgyIDcuODc0NTkgNTMuMTkxMSA5LjM5MTgzIDUyLjA1OTQgMTAuNTIzNUM1MC45NjIzIDExLjYyMDcgNDkuNDQ1IDEyLjI5NzggNDcuNzY3OSAxMi4yOTc4SDEyLjIwMDZDMTAuNTIzNSAxMi4yOTc4IDkuMDA2MjUgMTEuNjIwNyA3LjkwOTA3IDEwLjUyMzVDNi44MTE5IDkuMzk0OTcgNi4xMzQ3OCA3Ljg3NzczIDYuMTM0NzggNi4xOTc0OEgxMC42MjA3QzEwLjYyMDcgNi42NDg4OSAxMC43ODA1IDcuMDM3NiAxMS4wNzIxIDcuMzI2QzExLjM2MzYgNy42MTc1NCAxMS43ODA1IDcuODA4NzYgMTIuMjAwNiA3LjgwODc2SDQ3Ljc2NzlDNDguMjE5MyA3LjgwODc2IDQ4LjYwOCA3LjYxNDQgNDguODk2NCA3LjMyNkM0OS4xODggNy4wMzQ0NyA0OS4zNzkyIDYuNjQ4ODkgNDkuMzc5MiA2LjE5NzQ4SDUzLjg2NTFINTMuODY4MloiIGZpbGw9IiMwMEI5RUYiLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik01OS45OTk5IDM2LjQwNDNWNTkuOTk2N0gwLjAwMzE3MzgzVjM2LjQwNDNDNC40ODkwNiAzNC4xNzg2IDkuMjY2NDggMzIuNDY3IDE0LjIzNTEgMzEuMjcyNkMxOS4zMDA5IDMwLjA3ODMgMjQuNTY0MyAyOS40MzI1IDI5Ljk4NDMgMjkuNDMyNUMzNS40MDQ0IDI5LjQzMjUgNDAuNjk5IDMwLjA3ODMgNDUuNzMzNSAzMS4yNzI2QzUwLjczNjYgMzIuNDY3IDU1LjUxNCAzNC4xNzg2IDU5Ljk5OTkgMzYuNDA0M1pNNDYuNDQ1MSAzNS41MzI4VjUzLjc5OTJINDEuOTU5MlYzNS41MzI4SDQ2LjQ0NTFaTTE4LjAxMjUgMzUuNTMyOFY1My43OTkySDEzLjU1OFYzNS41MzI4SDE4LjAxMjVaTTMyLjI0NDUgMzUuNTMyOFY1My43OTkySDI3Ljc1ODZWMzUuNTMyOEgzMi4yNDQ1WiIgZmlsbD0iIzAyMjMzMiIvPgo8L2c+CjwvZz4KPGRlZnM+CjxjbGlwUGF0aCBpZD0iY2xpcDBfNDQwOV8xNyI+CjxyZWN0IHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgZmlsbD0id2hpdGUiLz4KPC9jbGlwUGF0aD4KPC9kZWZzPgo8L3N2Zz4K",
+    "enabled": true,
+    "credentialSchema": {
+      "title": "氚云 MCP 对接配置",
+      "titleEn": "H3Yun MCP Configuration",
+      "description": "连接您的 氚云 账号，用于查询业务数据和待办。Token 和 Base Url 仅存储在本机 ~/.workbuddy 下。",
+      "descriptionEn": "Connect your H3Yun account to query business data and to-do tasks. Token and Base Url are stored locally in ~/.workbuddy on this machine only.",
+      "docUrl": "https://help.h3yun.com/280976225/",
+      "docLabel": "如何获取 氚云 个人Token？",
+      "docLabelEn": "How to get H3Yun personal token?",
+      "fields": [
+        {
+          "key": "H3YUN_TOKEN",
+          "label": "个人Token",
+          "labelEn": "Personal Token",
+          "placeholder": "在 氚云个人信息 → 用户访问凭证 → 管理凭证 中生成",
+          "placeholderEn": "Generate in H3Yun Personal Information → User Access Credentials → Manage Credentials",
+          "description": "用于访问 氚云 的个人访问令牌。",
+          "descriptionEn": "Personal access token for H3Yun.",
+          "type": "password",
+          "required": true
+        },
+        {
+          "key": "H3YUN_API_BASE_URL",
+          "label": "业务基础地址",
+          "labelEn": "Business Base URL",
+          "placeholder": "www.h3yun.com",
+          "placeholderEn": "",
+          "description": "氚云 MCP服务地址",
+          "descriptionEn": "H3Yun MCP service address.",
+          "type": "text",
+          "required": false,
+          "defaultValue": "www.h3yun.com"
+        }
+      ]
+    },
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "h3yun-connector"
+    ],
+    "skillName": "connector-h3yun-connector",
+    "skillNames": [
+      "connector-h3yun-connector"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "h3yun-connector": {
+        "type": "http",
+        "url": "https://${H3YUN_API_BASE_URL}/v1/agent/mcp",
+        "headers": {
+          "Authorization": "Bearer ${H3YUN_TOKEN}"
+        }
+      }
+    }
+  }
+}

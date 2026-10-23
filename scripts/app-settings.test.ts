@@ -21,7 +21,7 @@ test('ordinary tool Apps build their shared settings page; configuration Apps us
   }
   expect(apps.find(app => app.manifest.id === 'moss.knowledge-rag').manifest.toolScope).toBe('session');
   const thinking = listApps().find(app => app.manifest.id === 'moss.sequential-thinking');
-  expect(thinking.kind).toBe('mcp');
+  expect(thinking.kind).toBe('tool');
   expect(thinking.manifest).toMatchObject({ ui: { builtin: 'mcp' }, toolScope: 'global', mcpApp: { runtime: { state: 'session' } } });
 });
 

@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "gildata-finance-data": {
-      "type": "http",
-      "url": "https://api.gildata.com/mcp-servers/aidata-assistant-srv-tool?token=${GILDATA_TOKEN}"
-    }
-  }
-}

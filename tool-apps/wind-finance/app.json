@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.wind-finance",
+  "displayName": "Wind 金融数据",
+  "description": "通过自然语言查询股票、基金、指数、债券、公告、财经新闻和宏观经济数据。",
+  "category": "finance",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "keywords": [
+    "wind-finance",
+    "Wind Financial Data",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "wind-finance",
+    "source": "wind-finance",
+    "name": "Wind 金融数据",
+    "nameEn": "Wind Financial Data",
+    "description": "通过自然语言查询股票、基金、指数、债券、公告、财经新闻和宏观经济数据。",
+    "descriptionEn": "Wind data for stocks, funds, indices, bonds, news, and macroeconomics.",
+    "type": "mcp",
+    "authMode": "token",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "4.23.0",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "筛选沪深市场市值超过500亿且连续5日上涨的股票",
+      "查询贵州茅台2024年ROE、营业收入和净利润",
+      "查询沪深300最近20日的MACD和涨跌幅",
+      "查询中国GDP最近10期数据"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": true,
+    "icon": "data:image/png;base64,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",
+    "enabled": true,
+    "credentialSchema": {
+      "title": "Wind 金融数据 MCP 配置",
+      "titleEn": "Wind Financial Data MCP Configuration",
+      "description": "填写 Wind API Key 以启用万得金融数据查询，支持股票、债券、基金、指数、宏观数据的查询与分析。Key 仅保存在本机 ~/.workbuddy 下，不会上传云端。",
+      "descriptionEn": "Enter your Wind API Key to enable financial data query and analysis across stocks, bonds, funds, indices, and macro indicators. The key is stored locally at ~/.workbuddy and never leaves your device.",
+      "docUrl": "https://aifinmarket.wind.com.cn/#/user/overview",
+      "docLabel": "如何获取 API Key？",
+      "docLabelEn": "How to get an API Key?",
+      "fields": [
+        {
+          "key": "WIND_API_KEY",
+          "label": "Wind API Key（个人密钥）",
+          "labelEn": "",
+          "placeholder": "请输入您的个人 Wind API Key",
+          "placeholderEn": "Enter your personal Wind API Key",
+          "description": "用于访问Wind MCP 的个人访问令牌。",
+          "descriptionEn": "Personal access token for accessing the Wind MCP.",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "wind-finance"
+    ],
+    "skillName": "wind-finance",
+    "skillNames": [
+      "wind-finance"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "wind-finance": {
+        "type": "http",
+        "url": "https://mcp.wind.com.cn/vserver_workbuddy/mcp/",
+        "headers": {
+          "Authorization": "Bearer ${WIND_API_KEY}",
+          "Accept": "application/json, text/event-stream"
+        }
+      }
+    }
+  }
+}

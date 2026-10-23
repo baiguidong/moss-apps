@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "canva-mcp": {
-      "type": "http",
-      "url": "https://mcp.canva.com/mcp"
-    }
-  }
-}

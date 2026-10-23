@@ -75,7 +75,7 @@
 
 ## Moss 接入方式与已确认的实现边界
 
-新增完整操作界面的 App 放在 `apps/<name>`，使用独立 `ui.entry` 和一个由 Desktop 管理的 Node Backend，日常操作入口放在“更多”。`mcp-apps/<name>` 的通用配置页适合服务启停配置，不是这些结果工作台的最终形态。
+新增完整操作界面的 App 放在 `apps/<name>`，使用独立 `ui.entry` 和一个由 Desktop 管理的 Node Backend，日常操作入口放在“更多”。`tool-apps/<name>` 的通用配置页适合服务启停配置，不是这些结果工作台的最终形态。
 
 UI 通过 Backend actions 操作本地引擎；AI 工具与 UI 应复用相同的任务、项目和产物记录。用户让 AI 处理文件后，打开 App 应能看到相同任务的结果，手工调整后也更新同一份状态。上游有原生 MCP 时可通过 `moss.mcp/v1` 接入，但要另外设计 AI 调用与页面之间的状态同步，不能认为 MCP 工具执行会自动触发 UI 刷新。
 

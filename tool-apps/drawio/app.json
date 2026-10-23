@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.drawio",
+  "version": "0.1.7",
+  "displayName": "Draw.io",
+  "description": "在对话中创建和编辑 Draw.io 图表，支持 XML、CSV 与 Mermaid。",
+  "category": "creative",
+  "keywords": [
+    "drawio",
+    "draw.io",
+    "图表",
+    "流程图",
+    "MCP"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "mcpServers": {
+    "drawio": {
+      "command": "node",
+      "args": [
+        "@app/runtime/node_modules/@drawio/mcp/src/index.js"
+      ]
+    }
+  },
+  "presentation": {
+    "headline": "在对话中创建和编辑图表",
+    "examples": [
+      "画一个用户登录流程图，包含验证码和异常处理",
+      "把这段 Mermaid 转成可编辑的 Draw.io 图表",
+      "根据这份需求画出系统架构图"
+    ],
+    "usage": "在会话中选择 Draw.io，用自然语言描述图表。生成后可打开返回的链接，在 Draw.io 中继续编辑和导出。"
+  },
+  "runtime": {
+    "state": "stateless"
+  },
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "discovery": {
+    "group": "local"
+  }
+}

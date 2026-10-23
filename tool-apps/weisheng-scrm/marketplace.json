@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.weisheng-scrm",
+  "summary": "查询或管理企业微信中的客户信息、客户标签、客户群、营销素材、活码、群发、跟进记录、联系人、商机、汇报、抽奖、客户日程、聊天记录等业务能力。",
+  "description": "查询或管理企业微信中的客户信息、客户标签、客户群、营销素材、活码、群发、跟进记录、联系人、商机、汇报、抽奖、客户日程、聊天记录等业务能力。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/weisheng-scrm",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

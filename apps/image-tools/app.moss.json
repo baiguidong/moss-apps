@@ -3,7 +3,7 @@
   "id": "moss.image-tools",
   "version": "0.1.4",
   "displayName": "图片工具",
-  "category": "knowledge",
+  "category": "creative",
   "keywords": [
     "图片",
     "压缩",
@@ -13,7 +13,7 @@
   ],
   "description": "批量转换、裁剪、缩放、旋转、调色、降噪与添加水印，在 Moss 内比较和导出结果。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.17.0",
+  "hostApi": "^3.21.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"

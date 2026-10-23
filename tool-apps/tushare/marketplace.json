@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.tushare",
+  "summary": "Tushare 金融数据服务，支持 A股、指数、ETF/基金、财务、估值、资金流、公告新闻、板块概念与宏观数据等研究工作。",
+  "description": "Tushare 金融数据服务，支持 A股、指数、ETF/基金、财务、估值、资金流、公告新闻、板块概念与宏观数据等研究工作。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/tushare",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

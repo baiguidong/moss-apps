@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.dcs-cloud",
+  "displayName": "DCS Cloud",
+  "description": "引导 dcs CLI（下载、自动更新、PAT 登录），之后直接执行 CLI 操作 DCS Cloud：项目、任务、工作流、计费、数据文件。用户需在云平台个人中心创建个人访问令牌(PAT)并粘贴到连接器。",
+  "category": "automation",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "keywords": [
+    "dcs-cloud",
+    "DCS Cloud",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "dcs-cloud",
+    "source": "dcs-cloud",
+    "name": "DCS Cloud",
+    "nameEn": "DCS Cloud",
+    "description": "引导 dcs CLI（下载、自动更新、PAT 登录），之后直接执行 CLI 操作 DCS Cloud：项目、任务、工作流、计费、数据文件。用户需在云平台个人中心创建个人访问令牌(PAT)并粘贴到连接器。",
+    "descriptionEn": "Bootstrap the dcs CLI (download, auto-update, PAT login), then run the CLI directly to operate DCS Cloud: projects, tasks, workflows, billing, and data files. Create a Personal Access Token (PAT) in the cloud platform profile page and paste it into the connector.",
+    "type": "mcp",
+    "authMode": "token",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "5.0.0",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "列出我所有的项目",
+      "查看当前项目和任务列表",
+      "查看任务 W202606130053472 的详情和日志",
+      "取消任务 W202606130053472",
+      "列出 /Files 目录下的数据文件"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": true,
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNS40MDAxIDM5LjQyMDZDMTYuMTA3IDM5LjQyMDYgMTYuNjgwMSAzOS45OTM3IDE2LjY4MDEgNDAuNzAwNlY0My45ODA2SDE0LjEyMDFWNDAuNzAwNkMxNC4xMjAxIDM5Ljk5MzcgMTQuNjkzMiAzOS40MjA2IDE1LjQwMDEgMzkuNDIwNlpNMjMuNzIwMSAzNS45MDA2QzI0LjQyNyAzNS45MDA2IDI1LjAwMDEgMzYuNDczNyAyNS4wMDAxIDM3LjE4MDZWNDMuOTgwNkgyMi40NDAxVjM3LjE4MDZDMjIuNDQwMSAzNi40NzM3IDIzLjAxMzIgMzUuOTAwNiAyMy43MjAxIDM1LjkwMDZaTTMyLjA0MDEgMzIuMDYwNkMzMi43NDcgMzIuMDYwNiAzMy4zMjAxIDMyLjYzMzcgMzMuMzIwMSAzMy4zNDA2VjQzLjk4MDZIMzAuNzYwMVYzMy4zNDA2QzMwLjc2MDEgMzIuNjMzNyAzMS4zMzMyIDMyLjA2MDYgMzIuMDQwMSAzMi4wNjA2Wk00MC4zNjAxIDM2Ljc4MDZDNDEuMDY3IDM2Ljc4MDYgNDEuNjQwMSAzNy4zNTM3IDQxLjY0MDEgMzguMDYwNlY0My45ODA2SDM5LjA4MDFWMzguMDYwNkMzOS4wODAxIDM3LjM1MzcgMzkuNjUzMiAzNi43ODA2IDQwLjM2MDEgMzYuNzgwNlpNNDguNjgwMSAzOC4zMDA2QzQ5LjM4NyAzOC4zMDA2IDQ5Ljk2MDEgMzguODczNyA0OS45NjAxIDM5LjU4MDZMNDkuOTYwMiA0My45MDVDNDkuNzIyOCA0My45MzUxIDQ5LjQ4MjcgNDMuOTU2NCA0OS4yNDAyIDQzLjk2ODZMNDkuMjQwMSA0My45ODA2SDQ3LjQwMDFWMzkuNTgwNkM0Ny40MDAxIDM4Ljg3MzcgNDcuOTczMiAzOC4zMDA2IDQ4LjY4MDEgMzguMzAwNlpNNTguMjAwMSAzNC41NDA2QzU4LjIwMDEgMzYuOTk5MSA1Ny4yNjAyIDM5LjIzODEgNTUuNzIwMyA0MC45MTc5TDU1LjcyMDMgMjguMTYzM0M1Ny4yNjAyIDI5Ljg0MzEgNTguMjAwMSAzMi4wODIxIDU4LjIwMDEgMzQuNTQwNlpNMTIuNTIwMSAyOC44MzFMMTIuNTIwMSAzNS43NDA2QzEyLjUyMDEgMzYuNDQ3NSAxMS45NDcgMzcuMDIwNiAxMS4yNDAxIDM3LjAyMDZDMTAuNTMzMSAzNy4wMjA2IDkuOTYwMDcgMzYuNDQ3NSA5Ljk2MDA3IDM1Ljc0MDZMOS45NTk5NiAyOS42MDE5QzEwLjc0NDYgMjkuMjAyOSAxMS42MDc3IDI4LjkzNjIgMTIuNTIwMSAyOC44MzFaTTM2LjI4MDEgMTMuOTgwNkMzNi42ODU1IDEzLjk4MDYgMzcuMDg1OSAxNC4wMDIgMzcuNDgwMiAxNC4wNDM3TDM3LjQ4MDEgMzIuNTQwNkMzNy40ODAxIDMzLjI0NzUgMzYuOTA3IDMzLjgyMDYgMzYuMjAwMSAzMy44MjA2QzM1LjQ5MzIgMzMuODIwNiAzNC45MjAxIDMzLjI0NzUgMzQuOTIwMSAzMi41NDA2TDM0LjkyMDEgMTQuMDYxN0MzNS4zNjU5IDE0LjAwODIgMzUuODE5OCAxMy45ODA2IDM2LjI4MDEgMTMuOTgwNlpNMjkuMTYwMSAxNi43MDA2VjMxLjk4MDZDMjkuMTYwMSAzMi42ODc1IDI4LjU4NyAzMy4yNjA2IDI3Ljg4MDEgMzMuMjYwNkMyNy4xNzMyIDMzLjI2MDYgMjYuNjAwMSAzMi42ODc1IDI2LjYwMDEgMzEuOTgwNkwyNi42MDAxIDE5LjQ2NjZDMjcuMjc0IDE4LjM0MyAyOC4xMzc5IDE3LjM0NjUgMjkuMTQ3NSAxNi41MjE1QzI5LjE1NTggMTYuNTggMjkuMTYwMSAxNi42Mzk4IDI5LjE2MDEgMTYuNzAwNlpNMjAuODQgMTkuODczTDIwLjg0MDEgMzEuNTAwNkMyMC44NDAxIDMyLjIwNzUgMjAuMjY3IDMyLjc4MDYgMTkuNTYwMSAzMi43ODA2QzE4Ljg1MzIgMzIuNzgwNiAxOC4yODAxIDMyLjIwNzUgMTguMjgwMSAzMS41MDA2TDE4LjI4MDEgMjAuOTY1OEMxOS4wNjM0IDIwLjQ4MDYgMTkuOTI0NCAyMC4xMDg2IDIwLjg0IDE5Ljg3M1pNNDUuODAwMyAxOS4yMDc5TDQ1LjgwMDEgMjkuNTgwNkM0NS44MDAxIDMwLjI4NzUgNDUuMjI3IDMwLjg2MDYgNDQuNTIwMSAzMC44NjA2QzQzLjgxMzIgMzAuODYwNiA0My4yNDAxIDMwLjI4NzUgNDMuMjQwMSAyOS41ODA2TDQzLjI0MDEgMTYuMzgzM0M0NC4yNDQ2IDE3LjE3MTkgNDUuMTExOSAxOC4xMjc0IDQ1LjgwMDMgMTkuMjA3OVpNNTQuMTIwMSAyNi43Njg5TDU0LjEyMDEgMjguNzAwNkM1NC4xMjAxIDI5LjQwNzUgNTMuNTQ3IDI5Ljk4MDYgNTIuODQwMSAyOS45ODA2QzUyLjEzMzIgMjkuOTgwNiA1MS41NjAxIDI5LjQwNzUgNTEuNTYwMSAyOC43MDA2TDUxLjU2MDEgMjUuNTIyOEM1Mi40ODE5IDI1LjgwODcgNTMuMzQzMiAyNi4yMzIgNTQuMTIwMSAyNi43Njg5WiIgZmlsbD0iIzZERDVDNyIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE5LjU2IDMzLjgyMDVDMjAuMjY3IDMzLjgyMDUgMjAuODQgMzQuMzkzNiAyMC44NCAzNS4xMDA1VjQzLjk4MDVIMTguMjhWMzUuMTAwNUMxOC4yOCAzNC4zOTM2IDE4Ljg1MzEgMzMuODIwNSAxOS41NiAzMy44MjA1Wk0yNy44OCAzNC4zMDA1QzI4LjU4NyAzNC4zMDA1IDI5LjE2IDM0Ljg3MzYgMjkuMTYgMzUuNTgwNVY0My45ODA1SDI2LjZWMzUuNTgwNUMyNi42IDM0Ljg3MzYgMjcuMTczMSAzNC4zMDA1IDI3Ljg4IDM0LjMwMDVaTTM2LjIgMzQuODYwNUMzNi45MDcgMzQuODYwNSAzNy40OCAzNS40MzM2IDM3LjQ4IDM2LjE0MDVWNDMuOTgwNUgzNC45MlYzNi4xNDA1QzM0LjkyIDM1LjQzMzYgMzUuNDkzMSAzNC44NjA1IDM2LjIgMzQuODYwNVpNNDQuNTIwMSAzMS45MDA1QzQ1LjIyNyAzMS45MDA1IDQ1LjgwMDEgMzIuNDczNiA0NS44MDAxIDMzLjE4MDVWNDMuOTgwNUg0My4yNDAxVjMzLjE4MDVDNDMuMjQwMSAzMi40NzM2IDQzLjgxMzEgMzEuOTAwNSA0NC41MjAxIDMxLjkwMDVaTTExLjI0IDM3Ljk4MDVDMTEuOTQ3IDM3Ljk4MDUgMTIuNTIgMzguNTUzNiAxMi41MiAzOS4yNjA1TDEyLjUyMDEgNDMuOTMwMUMxMS42MDc3IDQzLjgyNSAxMC43NDQ2IDQzLjU1ODIgOS45NTk5OSA0My4xNTkyTDkuOTYwMDQgMzkuMjYwNUM5Ljk2MDA0IDM4LjU1MzYgMTAuNTMzMSAzNy45ODA1IDExLjI0IDM3Ljk4MDVaTTUyLjg0MDEgMzEuMDIwNUM1My41NDcgMzEuMDIwNSA1NC4xMjAxIDMxLjU5MzYgNTQuMTIwMSAzMi4zMDA1TDU0LjEyMDIgNDIuMzEyMkM1My4zNDMzIDQyLjg0OSA1Mi40ODIgNDMuMjcyNCA1MS41NjAyIDQzLjU1ODNMNTEuNTYwMSAzMi4zMDA1QzUxLjU2MDEgMzEuNTkzNiA1Mi4xMzMxIDMxLjAyMDUgNTIuODQwMSAzMS4wMjA1Wk04LjM2MDA1IDMxLjAyMDVMOC4zNjAwMSA0Mi4wNjkxQzYuNzg5NzMgNDAuNjc2OCA1LjgwMDA1IDM4LjY0NDIgNS44MDAwNSAzNi4zODA1QzUuODAwMDUgMzQuMTMzNyA2Ljc3NTA5IDMyLjExNDUgOC4zMjUxNCAzMC43MjMxQzguMzQ4MDQgMzAuODE4NyA4LjM2MDA1IDMwLjkxODIgOC4zNjAwNSAzMS4wMjA1Wk0xNi42ODAxIDIyLjQ2MDVWMzcuMDIwNUMxNi42ODAxIDM3LjcyNzUgMTYuMTA3IDM4LjMwMDUgMTUuNDAwMSAzOC4zMDA1QzE0LjY5MzEgMzguMzAwNSAxNC4xMjAxIDM3LjcyNzUgMTQuMTIwMSAzNy4wMjA1TDE0LjEyIDI2Ljc1NDlDMTQuNTI1MiAyNS4wMDgzIDE1LjQyMzUgMjMuNDUwNyAxNi42NjA0IDIyLjIzNjlDMTYuNjczNCAyMi4zMDk2IDE2LjY4MDEgMjIuMzg0MyAxNi42ODAxIDIyLjQ2MDVaTTQ3LjQwOTggMjMuNDE0OEM0OC4zNDg2IDIzLjY5MzkgNDkuMjExNiAyNC4xNDk3IDQ5Ljk2MDEgMjQuNzQzNUw0OS45NjAxIDM1Ljk4MDVDNDkuOTYwMSAzNi42ODc1IDQ5LjM4NyAzNy4yNjA1IDQ4LjY4MDEgMzcuMjYwNUM0Ny45NzMxIDM3LjI2MDUgNDcuNDAwMSAzNi42ODc1IDQ3LjQwMDEgMzUuOTgwNUw0Ny40MDAzIDIzLjM1ODNMNDcuNDA5OCAyMy40MTQ4Wk00MS42NDAyIDE1LjMzM0w0MS42NDAxIDM0LjQ2MDVDNDEuNjQwMSAzNS4xNjc1IDQxLjA2NyAzNS43NDA1IDQwLjM2MDEgMzUuNzQwNUMzOS42NTMxIDM1Ljc0MDUgMzkuMDgwMSAzNS4xNjc1IDM5LjA4MDEgMzQuNDYwNUwzOS4wODAyIDE0LjMzMDhDMzkuOTgxOSAxNC41NjExIDQwLjg0MDIgMTQuOTAwMSA0MS42NDAyIDE1LjMzM1pNMjMuMTYgMTkuNTgwNUMyMy43OSAxOS41ODA1IDI0LjQwNTQgMTkuNjQzMyAyNS4wMDAxIDE5Ljc2M0wyNSAzMy41ODA1QzI1IDM0LjI4NzUgMjQuNDI3IDM0Ljg2MDUgMjMuNzIgMzQuODYwNUMyMy4wMTMxIDM0Ljg2MDUgMjIuNDQgMzQuMjg3NSAyMi40NCAzMy41ODA1TDIyLjQ0IDE5LjYwODFDMjIuNjc3NiAxOS41ODk4IDIyLjkxNzggMTkuNTgwNSAyMy4xNiAxOS41ODA1Wk0zMy4zMiAxNC40NjA1VjI5Ljc0MDVDMzMuMzIgMzAuNDQ3NSAzMi43NDcgMzEuMDIwNSAzMi4wNCAzMS4wMjA1QzMxLjMzMzEgMzEuMDIwNSAzMC43NiAzMC40NDc1IDMwLjc2IDI5Ljc0MDVMMzAuNzYwMSAxNS40MjEyQzMxLjU1NzQgMTQuOTcyOSAzMi40MTQ3IDE0LjYxODcgMzMuMzE3IDE0LjM3MzdDMzMuMzE5MSAxNC40MDI2IDMzLjMyIDE0LjQzMTQgMzMuMzIgMTQuNDYwNVoiIGZpbGw9IiMyRUM1QjEiLz4KPC9zdmc+Cg==",
+    "enabled": true,
+    "credentialSchema": {
+      "title": "DCS Cloud 对接配置",
+      "titleEn": "DCS Cloud Configuration",
+      "description": "连接您的 DCS Cloud 账号。请先登录 https://www.dcs.cloud/#/login ，在个人中心创建一个个人访问令牌(PAT)，复制后填入下方。PAT 仅存储在本机 ~/.workbuddy 下，不会上传云端；连接器用它登录 dcs CLI，之后无需再次填写。",
+      "descriptionEn": "Connect your DCS Cloud account. First log in at https://www.dcs.cloud/#/login , create a Personal Access Token (PAT) in your profile page, then paste it below. The PAT is stored locally in ~/.workbuddy only and never uploaded. The connector uses it to log in to the dcs CLI; you will not need to re-enter it afterwards.",
+      "docUrl": "https://www.dcs.cloud/#/login",
+      "docLabel": "登录 DCS Cloud 创建 PAT",
+      "docLabelEn": "Log in to DCS Cloud to create a PAT",
+      "fields": [
+        {
+          "key": "DCS_PAT",
+          "label": "个人访问令牌 (PAT)",
+          "labelEn": "Personal Access Token (PAT)",
+          "placeholder": "dcs_pat_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "placeholderEn": "dcs_pat_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "description": "登录 www.dcs.cloud 后，在个人中心 → 访问令牌页面创建并复制的 PAT（dcs_pat_ 开头）。",
+          "descriptionEn": "After logging in to www.dcs.cloud, create and copy a PAT (starting with dcs_pat_) from the profile page → access tokens.",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "dcs-cloud"
+    ],
+    "skillName": "dcs-cloud",
+    "skillNames": [
+      "dcs-cloud"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "dcs-cloud": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "dcs-cloud-mcp-server"
+        ],
+        "env": {
+          "DCS_PAT": "${DCS_PAT}"
+        }
+      }
+    }
+  }
+}

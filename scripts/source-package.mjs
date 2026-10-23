@@ -65,9 +65,9 @@ export async function exportAppSource(app, destination, { release = false, platf
   if (rootPackage.packageManager !== `bun@${bunVersion}`) throw new Error(`Expected ${rootPackage.packageManager}, found bun@${bunVersion}`)
   const appRoot = path.relative(repoRoot, app.root).split(path.sep).join('/')
   const localPaths = [appRoot, 'vendor/moss-core/packages/app-sdk', 'vendor/moss-core/packages/host-contracts']
-  const appPackage = app.kind === 'mcp' ? {
+  const appPackage = app.kind === 'tool' ? {
     name: `@moss/config-${app.directoryName}`, version: app.manifest.version, private: true, type: 'module',
-    scripts: { check: 'node ../../scripts/build-mcp-app.mjs --check', build: 'node ../../scripts/build-mcp-app.mjs' },
+    scripts: { check: 'node ../../scripts/build-tool-app.mjs --check', build: 'node ../../scripts/build-tool-app.mjs' },
     devDependencies: { '@moss/app-runtime': 'workspace:*' },
   } : readJson(path.join(app.root, 'package.json'))
   const appDependencies = dependencies(appPackage)
@@ -102,11 +102,12 @@ export async function exportAppSource(app, destination, { release = false, platf
   if (release && (dirty || coreDirty)) throw new Error('Signed releases require committed App source and a clean pinned Core submodule; local packages record dirty content hashes.')
   await fs.mkdir(destination, { recursive: true })
   for (const relative of localPaths) await copySourceTree(path.join(repoRoot, relative), path.join(destination, relative))
-  if (app.kind === 'mcp') {
+  if (app.kind === 'tool') {
     await writeJson(path.join(destination, appRoot, 'package.json'), appPackage)
     await writeJson(path.join(destination, appRoot, 'app.moss.json'), app.manifest)
     await fs.mkdir(path.join(destination, 'scripts'), { recursive: true })
-    await fs.copyFile(path.join(repoRoot, 'scripts/build-mcp-app.mjs'), path.join(destination, 'scripts/build-mcp-app.mjs'))
+    await fs.copyFile(path.join(repoRoot, 'scripts/build-tool-app.mjs'), path.join(destination, 'scripts/build-tool-app.mjs'))
+    await fs.copyFile(path.join(repoRoot, 'scripts/npm-command.mjs'), path.join(destination, 'scripts/npm-command.mjs'))
   }
   for (const name of ['LICENSE', 'LICENSE.md']) {
     try { await fs.copyFile(path.join(coreRoot, name), path.join(destination, 'vendor/moss-core', name)) }

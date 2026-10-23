@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.h3c-cloudnet",
+  "displayName": "新华三Cloudnet灵犀AI助手",
+  "description": "面向网络运维场景的 AI 助手，支持网络运行状态查询、网络问题分析、设备/AP 信息查询和无线终端故障排查，帮助用户快速定位网络异常并获取处理建议。",
+  "category": "development",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "keywords": [
+    "h3c-cloudnet",
+    "H3C Cloudnet LinSeer AI Assistant",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "h3c-cloudnet",
+    "source": "h3c-cloudnet",
+    "name": "新华三Cloudnet灵犀AI助手",
+    "nameEn": "H3C Cloudnet LinSeer AI Assistant",
+    "description": "面向网络运维场景的 AI 助手，支持网络运行状态查询、网络问题分析、设备/AP 信息查询和无线终端故障排查，帮助用户快速定位网络异常并获取处理建议。",
+    "descriptionEn": "An AI-powered network operations assistant that provides network status queries, network issue analysis, device/AP information queries, and wireless terminal troubleshooting to help users quickly identify network anomalies and obtain resolution recommendations.",
+    "type": "mcp",
+    "authMode": "token",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "4.23.0",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "排查成都实验局场所下，终端 001d-4330-0cbc 网络不好的原因",
+      "查看成都实验局场所整体网络健康度，有哪些网络问题",
+      "查询成都实验局场所今天每小时的接入成功率",
+      "查询成都实验局场所的 AP 数量和在线情况",
+      "查询设备 219801A5ND823CP002X3 的 CPU 和内存占用率"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": true,
+    "icon": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iX+WbvuWxgl8xIiBkYXRhLW5hbWU9IuWbvuWxgl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCAxMDAwIDEwMDAiPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyOS41LjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMCBCdWlsZCAxMzcpICAtLT4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogbm9uZTsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogdXJsKCNf5pyq5ZG95ZCN55qE5riQ5Y+YXzMyKTsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsbDogdXJsKCNf5pyq5ZG95ZCN55qE5riQ5Y+YXzMpOwogICAgICB9CgogICAgICAuc3QzIHsKICAgICAgICBmaWxsOiB1cmwoI1/mnKrlkb3lkI3nmoTmuJDlj5hfMzEpOwogICAgICB9CgogICAgICAuc3Q0IHsKICAgICAgICBmaWxsOiB1cmwoI1/mnKrlkb3lkI3nmoTmuJDlj5hfNCk7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9Il/mnKrlkb3lkI3nmoTmuJDlj5hfMyIgZGF0YS1uYW1lPSLmnKrlkb3lkI3nmoTmuJDlj5ggMyIgeDE9Ii00NDkuMzUiIHkxPSIxMDM1Ljc4IiB4Mj0iLTQ0Ny4zNCIgeTI9IjEwMzUuNzgiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzQ4NDAuMSA3OTIwNC42MSkgc2NhbGUoNzYuNCAtNzYpIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzkxMDAwMCIvPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4zMSIgc3RvcC1jb2xvcj0iI2FiMDAwMiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNlNjAwMTIiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZDcxNzE4Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJf5pyq5ZG95ZCN55qE5riQ5Y+YXzMxIiBkYXRhLW5hbWU9IuacquWRveWQjeeahOa4kOWPmCAzIiB4MT0iLTQzOS4yNSIgeTE9IjEwMjkuODkiIHgyPSItNDM3LjI0IiB5Mj0iMTAyOS44OSIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxNjI3MC4zIDM3NjA3LjQpIHNjYWxlKDM2IC0zNikiIHhsaW5rOmhyZWY9IiNf5pyq5ZG95ZCN55qE5riQ5Y+YXzMiLz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iX+acquWRveWQjeeahOa4kOWPmF8zMiIgZGF0YS1uYW1lPSLmnKrlkb3lkI3nmoTmuJDlj5ggMyIgeDE9Ii00NTcuODciIHkxPSIxMDM5LjQiIHgyPSItNDU1Ljg2IiB5Mj0iMTAzOS40IiBncmFkaWVudFRyYW5zZm9ybT0idHJhbnNsYXRlKDIwNDUzMC40OSAzMzczNDkuMTEpIHNjYWxlKDQ0Ni42IC0zMjQuMSkiIHhsaW5rOmhyZWY9IiNf5pyq5ZG95ZCN55qE5riQ5Y+YXzMiLz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iX+acquWRveWQjeeahOa4kOWPmF80IiBkYXRhLW5hbWU9IuacquWRveWQjeeahOa4kOWPmCA0IiB4MT0iLTQ1MS45OCIgeTE9IjEwMzcuMDYiIHgyPSItNDQ5Ljk3IiB5Mj0iMTAzNy4wNiIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSg1NDAwNC40NyAxMjQ1MTcuNzgpIHNjYWxlKDExNy45NiAtMTE5LjUpIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2Q3MTcxOCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNlNjAwMTIiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIuNjkiIHN0b3AtY29sb3I9IiNhYjAwMDIiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjOTEwMDAwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8Zz4KICAgIDxwYXRoIGlkPSJf6Lev5b6EIiBkYXRhLW5hbWU9Iui3r+W+hCIgY2xhc3M9InN0MiIgZD0iTTU3MC40Nyw1MDcuMTR2MWMwLC42LS4yLDEuMjEtLjIsMS44MS0uMiwxLjIxLS40LDMuMDEtLjQsNS4yMywwLDI1LjkzLDIxLjEsNDYuODMsNDYuODMsNDYuODNzNDYuODMtMjEuMSw0Ni44My00Ni44My0yMS4xLTQ2LjgzLTQ2LjgzLTQ2LjgzYy0yLjYxLDAtNS42MywwLTguNDQuNi0xLDAtMS44MSwwLTIuODEuMi0yLjAxLjItMy42Mi4yLTUuMDIsMC0xLjIxLS4yLTQuMDItMS42MS02LjYzLTQuMjItMi4yMS0yLjIxLTQuMjItNi44My00LjIyLTEwLjA1di01LjgzYzAtMjIuMzEtMTcuNDktMzkuNzktMzkuNzktMzkuNzlzLTM5Ljc5LDE3LjQ5LTM5Ljc5LDM5Ljc5djFsLjIsMWMuNiwzLjQyLDIuMDEsOC44NCwzLjQyLDEyLjQ2aDBjMy4yMiw4LjA0LDkuMjQsMTUuMDcsMTcuMjgsMTkuNyw4LjI0LDUuMDIsMTcuMDgsNS4wMiwyMi41MSw1LjAyaDMuMDFjMy42MiwwLDcuNDQsMS42MSwxMC4wNSw0LjIyLjIuMi40LjYuOCwxLjIxLjQuOCwxLDEuNjEsMi4wMSwyLjYxLjQsMS4yMS44LDIuNjEsMS40MSw0LjIyLjIuOC40LDEuNjEuNiwyLjQxLDAsMS4yMSwwLDIuMjEtLjQsMy42MmwtLjQuNloiLz4KICAgIDxwYXRoIGlkPSJf6Lev5b6EMSIgZGF0YS1uYW1lPSLot6/lvoQiIGNsYXNzPSJzdDMiIGQ9Ik00OTMuNSw0OTUuMjhjLTE5LjksMC0zNi4xOCwxNi4yOC0zNi4xOCwzNi4xOHMxNi4yOCwzNi4xOCwzNi4xOCwzNi4xOCwzNi4xOC0xNi4yOCwzNi4xOC0zNi4xOC0xNi4yOC0zNi4xOC0zNi4xOC0zNi4xOFoiLz4KICAgIDxwYXRoIGlkPSJf6Lev5b6EMiIgZGF0YS1uYW1lPSLot6/lvoQiIGNsYXNzPSJzdDEiIGQ9Ik03NzQuNDcsNDY4Ljc1aC0zOS4xOWMtMjUuMTIsMC00NS44MiwyMC41LTQ1LjgyLDQ1LjYyczIwLjUsNDUuODIsNDUuODIsNDUuODJoMzkuMTljNDEuOCwwLDc1Ljc3LDMzLjk3LDc1Ljc3LDc1Ljc3cy0zMy45Nyw3NS43Ny03NS43Nyw3NS43N2gtMTIxLjU5Yy0yLjQxLDAtNC42Mi4yLTcuMDMuNmgtMzIwLjU2Yy05Ni4yNy0xLjYxLTE3NC40NS03NS4zNy0xNzQuNDUtMTY0LjIsMC03Ni4zNyw1OC4yOC0xNDMuNywxMzguMjctMTYwLjE4bDUuMjMtMSwyLjAxLTUuMDJjMzYuMTgtODUuNjIsOTQuMDYtMTI5LjYzLDE3Mi40NC0xMzAuNjQsNTkuNDksMCwxMDMuMSwyNS41MiwxMTYuNTcsNjguMTMsNy4wMywyMi4zMSwyNi45MywzNy4xOCw0OS44NCwzNy4xOCwzLjQyLDAsNi42My0uNCwxMC4wNS0xaDIuMDFsMS4yMS0uNGMxMy42Ny0zLjYyLDI1LjEyLTEyLjI2LDMxLjk2LTI0LjUyLDYuNjMtMTEuODYsOC4yNC0yNS41Miw0LjIyLTM4Ljc5LTI1LjMyLTg0LjQxLTExMC4xNC0xMzkuMDgtMjE1Ljg1LTEzOS4wOC0xNy44OSwwLTMyLjk2LDIuODEtNDUuODIsNS40My05MS4wNCwxNy4wOC0xNjMuMTksNzMuOTYtMTg1LjMsMTQ1LjcxLTExMy45NSwyOS43NC0xOTIuOTQsMTI5LjgzLTE5Mi45NCwyNDUuNTl2NC40MmMxLjIxLDY3LjEzLDI4Ljk0LDEyOS44Myw3OC4xOCwxNzcuMDYsNDkuMjQsNDcuMDMsMTE0LjM2LDczLjE2LDE4My40OSw3My4xNmg0NjguMDhjOTIuNjUsMCwxNjcuODItNzUuMzcsMTY3LjgyLTE2Ny44Mi4yLTkyLjQ1LTc1LjE3LTE2Ny42MS0xNjcuODItMTY3LjYxWiIvPgogICAgPHBhdGggaWQ9Il/ot6/lvoQzIiBkYXRhLW5hbWU9Iui3r+W+hCIgY2xhc3M9InN0NCIgZD0iTTkyNi44MSw1ODguNTNjMC0xMC44NS0xLjQxLTIxLjMtNC4wMi0zMS4xNWgwYy0yOC4zNC01Mi42Ni04NC4wMS04OC40My0xNDguMTItODguNDNoLTM3Ljk4Yy0yMy41MSwwLTQ0LjAxLDE3LjA4LTQ2LjYzLDQwLjQtMy4yMiwyNy41MywxOC40OSw1MS4wNSw0NS40Miw1MS4wNWgzNy41OGMzOS41OSwwLDczLjU2LDI5LjU0LDc3LjE4LDY4Ljk0LDMuMjIsMzcuNTgtMjAuOSw3MC4xNC01NC44Nyw3OS43OWgxMC44NWM2Ni41Mi0uMiwxMjAuNTktNTQuMDYsMTIwLjU5LTEyMC41OWgwWiIvPgogIDwvZz4KICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSI1MDAiIGN5PSI1MDAuNSIgcj0iNTAwLjQyIi8+Cjwvc3ZnPg==",
+    "enabled": true,
+    "credentialSchema": {
+      "title": "Cloudnet MCP 对接配置",
+      "titleEn": "Cloudnet MCP Configuration",
+      "description": "请填写 Cloudnet 管理平台的 API Key 和平台主机名。凭证仅存储在本机 ~/.workbuddy 下，不会上传云端。",
+      "descriptionEn": "Please enter your Cloudnet API Key and platform host. Credentials are stored locally in ~/.workbuddy only.",
+      "docUrl": "https://oasis.h3c.com/oasis6/static/#/net/set/apikey",
+      "docLabel": "如何获取 Cloudnet API Key？",
+      "docLabelEn": "How to get Cloudnet API Key?",
+      "fields": [
+        {
+          "key": "CLOUDNET_API_KEY",
+          "label": "API Key",
+          "labelEn": "API Key",
+          "placeholder": "在 Cloudnet 管理平台 → 网络管理 → 设置 → 开放平台 获取",
+          "placeholderEn": "Get it from Cloudnet Console → Network Management → Settings → Open Platform",
+          "description": "用于访问 Cloudnet OpenAPI 的 API Key，将写入 Authorization 请求头。",
+          "descriptionEn": "API Key for Cloudnet OpenAPI, injected into the Authorization header.",
+          "type": "password",
+          "required": true
+        },
+        {
+          "key": "CLOUDNET_BASE_URL",
+          "label": "平台主机名",
+          "labelEn": "Platform Host",
+          "placeholder": "oasis.h3c.com",
+          "placeholderEn": "oasis.h3c.com",
+          "description": "Cloudnet 管理平台主机名（不含 https:// 前缀）。公网用户用默认值 oasis.h3c.com，私有部署用户填内网主机名。",
+          "descriptionEn": "Cloudnet platform host (without https:// prefix). Public users use the default oasis.h3c.com; private deployment users enter the internal host.",
+          "type": "text",
+          "required": true,
+          "defaultValue": "oasis.h3c.com"
+        }
+      ]
+    },
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "h3c-cloudnet"
+    ],
+    "skillName": "cloudnet-ai-assistant",
+    "skillNames": [
+      "cloudnet-ai-assistant"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "h3c-cloudnet": {
+        "type": "sse",
+        "url": "https://${CLOUDNET_BASE_URL}/mcp-server/api/sse",
+        "headers": {
+          "Authorization": "Bearer ${CLOUDNET_API_KEY}"
+        }
+      }
+    }
+  }
+}

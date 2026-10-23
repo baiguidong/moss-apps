@@ -1,0 +1,5 @@
+{
+  "type": "object",
+  "properties": { "watchSources": { "type": "boolean", "default": false } },
+  "additionalProperties": false
+}

@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.baidu-netdisk",
+  "displayName": "百度网盘",
+  "description": "连接百度网盘，支持文件与分类浏览、关键词及语义检索、文件和文件夹管理、创建分享链接、查询容量，以及保存文本内容或通过 URL 转存文件。",
+  "category": "files",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "keywords": [
+    "baidu-netdisk",
+    "Baidu Netdisk",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "baidu-netdisk",
+    "source": "baidu-netdisk",
+    "name": "百度网盘",
+    "nameEn": "Baidu Netdisk",
+    "description": "连接百度网盘，支持文件与分类浏览、关键词及语义检索、文件和文件夹管理、创建分享链接、查询容量，以及保存文本内容或通过 URL 转存文件。",
+    "descriptionEn": "Connect to Baidu Netdisk to browse and search files, manage folders and files, create share links, check storage usage, and save content or files from URLs.",
+    "type": "mcp",
+    "authMode": "server-side",
+    "providerId": "baidu-netdisk",
+    "authConfig": {
+      "authUrl": "https://openapi.baidu.com/oauth/2.0/authorize?response_type=token&client_id=QHOuRXiepJBMjtk0esLhrPoNlQyYd0mF&redirect_uri=oob&scope=basic,netdisk",
+      "browserMode": "moss",
+      "tokenParam": "access_token",
+      "allowedHosts": [
+        "baidu.com"
+      ]
+    },
+    "minWorkbuddyVersion": "4.24.0",
+    "visibleIn": [],
+    "examples": [
+      "查看我百度网盘根目录下的文件，并告诉我还剩多少可用空间",
+      "从文件名、文档内容和图片文字中搜索与「项目合同」相关的文件",
+      "找出网盘里与海边日落相关的图片和视频",
+      "新建一个「AIGC 调研资料」文件夹，把相关文件复制进去",
+      "为「周报.docx」创建一个有效期 7 天、带提取码的分享链接",
+      "把这段会议纪要保存到百度网盘，或者通过下载链接转存文件"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjE2NjciIHZpZXdCb3g9Ii0yLjk4MyAxMDcuOTg1IDEwMzAuNTkyIDEwMzAuNTkyIiB3aWR0aD0iMTY2NyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJtMjQ1Ljk2IDQyMS4zNzZhMjUwLjcxIDI1MC43MSAwIDAgMSAtNC4wOTctNDQuOTQyIDI2OC40MyAyNjguNDMgMCAwIDEgNTM2Ljg4OSAwIDMyOS4xMjggMzI5LjEyOCAwIDAgMSAwIDQ0Ljk0MiAyNDYuNjEzIDI0Ni42MTMgMCAxIDEgLTE3Ny44MDYgNDE5LjA0NCA2MS4zMjYgNjEuMzI2IDAgMCAxIDAtODYuNTU3IDYyLjAwOSA2Mi4wMDkgMCAwIDEgODcuMjEgMCAxMjQuMDE4IDEyNC4wMTggMCAxIDAgNC43NS0xODIuNjEzbC02LjgyNiA3LjUxLTQuNzUgNC4wOTUtMjU2Ljg1NCAyNTYuODUzYTI0Ni42NDIgMjQ2LjY0MiAwIDEgMSAtMTc4LjUxNi00MTguMzMyem0wIDM3MC42MzFhMTI0LjY3MiAxMjQuNjcyIDAgMSAwIC04Ni44MTMtMzYuNDk0IDEyNC42NzIgMTI0LjY3MiAwIDAgMCA4OC4xNzcgMzYuNTIzaC0xLjM2NXptMjYyLjk5NS0yNzIuNDk3YTE0NS4xMjQgMTQ1LjEyNCAwIDEgMCAtMTQzLjc1OC0xNDMuMDc1IDE0NS44MDYgMTQ1LjgwNiAwIDAgMCAxNDUuMTI0IDE0NS4wOTVsLTEuMzY2LTIuMDQ4eiIgZmlsbD0iIzA2YTdmZiIvPjxwYXRoIGQ9Im02NTUuNDQ1IDM5Mi4wNzhhMjguMDE4IDI4LjAxOCAwIDAgMSAwLTcuNDggNjIuMDA5IDYyLjAwOSAwIDEgMSAxMjQuMDE4IDAgMzUuNjE2IDM1LjYxNiAwIDAgMSAwIDguMTYzIDI2OC40NTkgMjY4LjQ1OSAwIDAgMSAtNTM1LjU1MiAwdi04LjE2NGE2Mi4wMDkgNjIuMDA5IDAgMCAxIDEyNC4wMTggMHY3LjQ4MWExNDUuODA2IDE0NS44MDYgMCAwIDAgMjg5LjU2NCAweiIgZmlsbD0iI2ZmNDM2YSIvPjwvc3ZnPg==",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "baidu-netdisk"
+    ],
+    "skillName": "connector-baidu-netdisk",
+    "skillNames": [
+      "connector-baidu-netdisk"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "baidu-netdisk": {
+        "type": "sse",
+        "url": "https://mcp-pan.baidu.com/sse"
+      }
+    }
+  }
+}

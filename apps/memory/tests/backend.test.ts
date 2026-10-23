@@ -51,10 +51,14 @@ async function fixture(options: { initial?: McpServer[]; inspect?: () => Promise
   return { backend, messages, invoke, stored: () => structuredClone(servers), recover: () => { failure = undefined } }
 }
 
-test('registers after ready, inspects after ready without any UI request, and remains idempotent', async () => {
+test('initialization is local; first use registers, explicit inspect connects, and registration stays idempotent', async () => {
   const f = await fixture()
   await tick()
+  expect(f.messages.some(message => message.type === 'host.request')).toBe(false)
+  await f.invoke('servers.list')
   expect(f.stored()).toMatchObject([{ name: MEMORY, enabled: true, config: DEFAULT_CONFIG }])
+  expect(f.messages.some(message => message.type === 'host.request' && message.payload.method === 'servers.inspect')).toBe(false)
+  await f.invoke('servers.inspect')
   await tick()
   const ready = f.messages.findIndex(message => message.type === 'service.ready')
   const inspect = f.messages.findIndex(message => message.type === 'host.request' && message.payload.method === 'servers.inspect')
@@ -74,6 +78,7 @@ test('slow inspection does not block Backend readiness and duplicate reconnects 
   const gate = new Promise<void>(resolve => { release = resolve })
   const f = await fixture({ inspect: () => gate })
   await tick()
+  await f.invoke('servers.inspect')
   expect(await f.invoke('servers.list')).toMatchObject({ ok: true, data: { preparation: { state: 'connecting' } } })
   await Promise.all([f.invoke('servers.inspect', {}), f.invoke('servers.inspect', {})])
   expect(f.messages.filter(message => message.type === 'host.request' && message.payload.method === 'servers.inspect')).toHaveLength(1)
@@ -81,8 +86,9 @@ test('slow inspection does not block Backend readiness and duplicate reconnects 
   expect(await f.invoke('servers.list')).toMatchObject({ ok: true, data: { preparation: { state: 'ready' } } })
 })
 
-test('reports startup failure without blocking configuration and reconnect recovers', async () => {
+test('reports requested inspection failure without blocking configuration and reconnect recovers', async () => {
   const f = await fixture({ failure: '记忆文件不可写' }); await tick()
+  await f.invoke('servers.inspect'); await tick()
   expect(await f.invoke('servers.list')).toMatchObject({ ok: true, data: { preparation: { state: 'failed', error: '记忆文件不可写' } } })
   f.recover()
   await f.invoke('servers.inspect', {}); await tick()
@@ -93,6 +99,7 @@ test('restart rebases the launcher and preserves exclusions and the persistent d
   const config = { ...DEFAULT_CONFIG, command: '/old/node', args: ['/old/cli.mjs', '/old/data'], disabledTools: ['delete_entities'] }
   const f = await fixture({ initial: [{ name: MEMORY, enabled: true, updatedAt: 1, credentialsMissing: false, check: null, config }] })
   await tick()
+  await f.invoke('servers.list')
   expect(f.stored()[0].config).toEqual(memoryConfig(memoryFile, ['delete_entities']))
   const restarted = await fixture({ initial: f.stored() }); await tick()
   expect(restarted.messages.some(message => message.type === 'host.request' && message.payload.method === 'servers.save')).toBe(false)
@@ -102,6 +109,7 @@ test('settings cancel stale inspection and cannot change the managed command or 
   let release!: () => void, calls = 0
   const gate = new Promise<void>(resolve => { release = resolve })
   const f = await fixture({ inspect: () => ++calls === 1 ? gate : Promise.resolve() }); await tick()
+  await f.invoke('servers.inspect'); await tick()
   const input: SaveInput = { disabledTools: ['delete_entities'] }
   expect(await f.invoke('servers.save', input)).toMatchObject({ ok: true })
   await tick(); release(); await tick()

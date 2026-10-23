@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.patsnap-search",
+  "displayName": "智慧芽专利&文献融合检索",
+  "description": "在智慧芽全球专利数据库和文献库中进行融合检索，支持自然语言、语义搜索、关键词检索和多维过滤，并获取专利或文献信息。",
+  "category": "legal",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "keywords": [
+    "patsnap-search",
+    "Patsnap Patent & Literature Search",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "patsnap-search",
+    "source": "patsnap-search",
+    "name": "智慧芽专利&文献融合检索",
+    "nameEn": "Patsnap Patent & Literature Search",
+    "description": "在智慧芽全球专利数据库和文献库中进行融合检索，支持自然语言、语义搜索、关键词检索和多维过滤，并获取专利或文献信息。",
+    "descriptionEn": "Search Patsnap's global patent and literature databases with natural-language, semantic, keyword, and filtered queries, and fetch patent or literature details.",
+    "type": "mcp",
+    "authMode": "token",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "4.23.0",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "帮我检索固态电池电解质相关的专利和论文",
+      "查找近五年 CRISPR 递送系统相关的核心专利和文献",
+      "获取公开号 CN109123456A 的专利基本信息和权利要求",
+      "帮我找宁德时代在钠离子电池方向的专利布局"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": true,
+    "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAASFBMVEVHcEwOznoOzHoOzHoOzHoPzHoPzHoPzHoJPf8JPf8PzHoJrpoJPf8JPf8IPf8OzHoLPP8KPf8JPf8PzHoOzHoJPP8PzHoKPf+8wUEDAAAAFnRSTlMAEa6Ha1Lv2r+Ywwfe8SU5F39iJZhGG+WCowAAAYRJREFUWMPtVtm2gyAMVEBlccGt/v+f3qsgIBahpqdPzpuQGUNCQrLswYMfQHQEI8TRhIvxBrtA5cuiwt1H9By7bAVepPPJmb5JJHox8lcIOIXfla8weB7lF675REjxn4rKiWaezK+Ite1sUCMKxv+q8PNi3BJX6dudnc5Wo9m7EEDa5m3Kxb7bRQOw89ueUUrZII8KJChQHQyGetFoWKsU+LUH2gG0fUi6OGgGGyMUdEDpl1ue2no5gulkTOEDjM4BpM9flj5eQtYBof1vaN+zXWuOCXCb5UG7rcI/K4laRARKm0LFGPYd6X0fL98OHYL1N7MTNnUhmnWBvrlck1+71brcbwLSMWQqJAa1Dik+F/y6TE//mwNJOfcOZASYKyBPAjVUoIEeQekL/FEQXb4IpTG/SGNrIL54kfx2BLjKTjFlt4oJXM7ghnJoaeJOS/Oa6uw0VZnUVLMO2tbBDwv8aQM/rvDnHT5gREYcFOfDh6yLMS99YIUOmvBR9wvD9oMHqfgDDh9co1i4/3IAAAAASUVORK5CYII=",
+    "enabled": true,
+    "credentialSchema": {
+      "title": "填写智慧芽 API Key",
+      "titleEn": "Enter your Patsnap API key",
+      "description": "API Key 仅存储在本机，由 WorkBuddy 在连接 MCP 服务时注入到连接 URL 的 apikey 参数中，不会上传到云端。",
+      "descriptionEn": "The API key is stored only on this device. WorkBuddy injects it into the apikey parameter of the connection URL when connecting to the MCP server and does not upload it to the cloud.",
+      "docUrl": "https://open.zhihuiya.com/dashboard/api-keys",
+      "docLabel": "查看 API Key 获取说明",
+      "docLabelEn": "View API key setup guide",
+      "fields": [
+        {
+          "key": "PATSNAP_API_KEY",
+          "label": "智慧芽 API Key",
+          "labelEn": "Patsnap API key",
+          "placeholder": "粘贴你的智慧芽 API Key",
+          "placeholderEn": "Paste your Patsnap API key",
+          "description": "请从智慧芽开放平台或企业管理员提供的 MCP/API 凭证中获取。",
+          "descriptionEn": "Obtain this from the Patsnap Open Platform or the MCP/API credentials provided by your administrator.",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "patsnap-search"
+    ],
+    "skillName": "patsnap-search",
+    "skillNames": [
+      "patsnap-search"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "patsnap-search": {
+        "type": "http",
+        "url": "https://connect.zhihuiya.com/2b0355/logic-mcp?apikey=${PATSNAP_API_KEY}"
+      }
+    }
+  }
+}

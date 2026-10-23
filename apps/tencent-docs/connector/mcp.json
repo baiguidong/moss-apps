@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "tencent-docs": {
-      "type": "http",
-      "url": "https://docs.qq.com/openapi/mcp"
-    }
-  }
-}

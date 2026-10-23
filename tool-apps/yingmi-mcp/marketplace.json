@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.yingmi-mcp",
+  "summary": "查询基金与市场数据，完成基金研究、组合分析、财富规划及金融内容生成。",
+  "description": "查询基金与市场数据，完成基金研究、组合分析、财富规划及金融内容生成。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/yingmi-mcp",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

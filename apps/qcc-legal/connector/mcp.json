@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "qcc-legal": {
-      "type": "http",
-      "url": "https://agent.qcc.com/mcp/legal/stream"
-    }
-  }
-}

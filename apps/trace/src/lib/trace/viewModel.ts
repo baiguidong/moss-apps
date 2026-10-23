@@ -16,6 +16,7 @@ export type TraceSpan = {
   timestamp: string
   completedAt?: string
   durationMs?: number
+  timingSource?: 'execution' | 'message' | 'unknown'
   turnIndex?: number
   message?: MessageEntry
   call?: TraceCallRecord
@@ -221,9 +222,11 @@ export function buildTraceViewModel(
           title: block.name ?? 'Tool call',
           subtitle: summarizeToolInput(block.input),
           timestamp: message.timestamp,
-          ...spanTimingFromTimestamps(message.timestamp, completion ?? (status === 'pending' ? nowTimestamp : undefined), {
+          ...spanTimingFromTimestamps(message.timestamp, message.timestampSource === 'explicit'
+            ? completion ?? (status === 'pending' ? nowTimestamp : undefined) : undefined, {
             completed: Boolean(completion),
           }),
+          timingSource: message.timestampSource === 'explicit' ? 'message' : 'unknown',
           turnIndex: turn.index,
           message,
           toolUseId: toolId,
@@ -277,7 +280,13 @@ export function buildTraceViewModel(
   for (const event of traceEvents) {
     const turn = findTurnForTimestamp(turns, event.timestamp)
     const callParentId = event.callId ? `llm:${event.callId}` : undefined
-    const parentId = callParentId && spans.has(callParentId) ? callParentId : turn.id
+    const toolUseId = typeof event.metadata?.toolUseId === 'string' ? event.metadata.toolUseId : undefined
+    const toolParentId = toolUseId ? toolSpanIds.get(toolUseId) : undefined
+    const isToolTiming = TOOL_TIMING_PHASES.has(event.phase)
+    const toolSpan = toolParentId ? spans.get(toolParentId) : undefined
+    if (toolSpan && isToolTiming) applyToolExecutionTiming(toolSpan, event, nowTimestamp)
+    const parentId = isToolTiming && toolParentId ? toolParentId
+      : callParentId && spans.has(callParentId) ? callParentId : turn.id
     const spanId = `event:${event.id}`
     addSpan(spans, {
       id: spanId,
@@ -289,7 +298,7 @@ export function buildTraceViewModel(
       timestamp: event.timestamp,
       turnIndex: turn.index,
       event,
-      isLifecycleNoise: isLifecycleNoiseEvent(event),
+      isLifecycleNoise: isLifecycleNoiseEvent(event) || Boolean(isToolTiming && toolSpan),
       raw: event,
     })
     turn.spanIds.push(spanId)
@@ -343,7 +352,7 @@ function buildDiagnosis(
   fallbackTimestamp: string,
 ): TraceDiagnosis {
   const meaningfulSpans = spans.filter((span) => span.id !== rootId)
-  const errorSpans = meaningfulSpans.filter((span) => span.status === 'error')
+  const errorSpans = getTraceErrorSpans(meaningfulSpans)
   const pendingModels = meaningfulSpans.filter((span) => span.kind === 'llm' && span.status === 'pending')
   const pendingTools = meaningfulSpans.filter((span) => span.kind === 'tool' && span.status === 'pending')
   const toolErrors = errorSpans.filter((span) => span.kind === 'tool' || span.kind === 'tool_result')
@@ -410,7 +419,7 @@ function createDiagnosis(
   spans: TraceSpan[],
   fallbackTimestamp: string,
 ): TraceDiagnosis {
-  const errors = spans.filter((span) => span.status === 'error')
+  const errors = getTraceErrorSpans(spans)
   const pendingModels = spans.filter((span) => span.kind === 'llm' && span.status === 'pending')
   const pendingTools = spans.filter((span) => span.kind === 'tool' && span.status === 'pending')
   const lastActivityAt = spans
@@ -549,6 +558,12 @@ function spanTimingFromTimestamps(
 }
 
 function applyToolCompletion(parent: MutableSpan, completedAt: string) {
+  if (parent.timingSource === 'execution') return
+  if (parent.timingSource === 'unknown') {
+    if (Number.isFinite(new Date(completedAt).getTime()) &&
+      (!parent.completedAt || completedAt > parent.completedAt)) parent.completedAt = completedAt
+    return
+  }
   const timing = spanTimingFromTimestamps(parent.timestamp, completedAt, { completed: true })
   if (!timing.completedAt || timing.durationMs === undefined) return
   const currentCompletedTime = parent.completedAt ? new Date(parent.completedAt).getTime() : Number.NEGATIVE_INFINITY
@@ -556,6 +571,65 @@ function applyToolCompletion(parent: MutableSpan, completedAt: string) {
   if (Number.isFinite(currentCompletedTime) && currentCompletedTime > nextCompletedTime) return
   parent.completedAt = timing.completedAt
   parent.durationMs = timing.durationMs
+}
+
+function applyToolExecutionTiming(parent: MutableSpan, event: TraceEventRecord, nowTimestamp?: string) {
+  const startedAt = event.metadata?.startedAt
+  if (typeof startedAt !== 'string' || !Number.isFinite(new Date(startedAt).getTime())) return
+  const completed = event.phase === 'tool_execution_completed'
+  if (!completed && parent.timingSource === 'execution' && parent.completedAt) return
+  const timing = spanTimingFromTimestamps(startedAt, completed ? event.timestamp : nowTimestamp, { completed })
+  if (completed && timing.durationMs === undefined) return
+  parent.timestamp = startedAt
+  parent.timingSource = 'execution'
+  if (completed) {
+    parent.status = event.metadata?.status === 'error' || event.severity === 'error' ? 'error' : 'ok'
+    parent.completedAt = timing.completedAt
+  } else {
+    parent.status = 'pending'
+    delete parent.completedAt
+  }
+  parent.durationMs = timing.durationMs
+}
+
+export function getTraceErrorSpans(spans: readonly TraceSpan[]): TraceSpan[] {
+  const errors = new Map<string, TraceSpan>()
+  for (const span of spans) {
+    if (span.status !== 'error' || span.kind === 'session' || span.kind === 'turn') continue
+    let identity = span.id
+    if (span.kind === 'tool' || span.kind === 'tool_result') {
+      identity = `tool:${span.toolUseId ?? (span.parentId?.startsWith('tool:') ? span.parentId : span.id)}`
+    } else if (span.kind === 'event' && span.event) {
+      const event = span.event
+      if (TOOL_TIMING_PHASES.has(event.phase) && typeof event.metadata?.toolUseId === 'string') {
+        identity = `tool:${event.metadata.toolUseId}`
+      } else if (MODEL_FAILURE_PHASES.has(event.phase) && event.callId) {
+        identity = `llm:${event.callId}`
+      }
+    }
+    if (!errors.has(identity)) errors.set(identity, span)
+  }
+  return [...errors.values()]
+}
+
+export function getToolDurationMs(spans: readonly TraceSpan[]): number | undefined {
+  const tools = spans.filter(span => span.kind === 'tool')
+  if (tools.length === 0) return undefined
+  const intervals: Array<{ start: number; end: number }> = []
+  for (const tool of tools) {
+    const start = new Date(tool.timestamp).getTime()
+    const duration = tool.durationMs
+    if (duration === undefined || !Number.isFinite(duration) || duration < 0 || !Number.isFinite(start)) return undefined
+    intervals.push({ start, end: start + duration })
+  }
+  intervals.sort((left, right) => left.start - right.start)
+  let durationMs = 0
+  let coveredEnd = Number.NEGATIVE_INFINITY
+  for (const interval of intervals) {
+    durationMs += Math.max(0, interval.end - Math.max(interval.start, coveredEnd))
+    coveredEnd = Math.max(coveredEnd, interval.end)
+  }
+  return durationMs
 }
 
 function applyAggregateTiming(parent: MutableSpan, children: MutableSpan[]) {
@@ -749,6 +823,9 @@ const LIFECYCLE_NOISE_PHASES = new Set([
   'upstream_fetch_started',
   'upstream_fetch_completed',
 ])
+
+const TOOL_TIMING_PHASES = new Set(['tool_execution_started', 'tool_execution_completed'])
+const MODEL_FAILURE_PHASES = new Set(['api_call_failed', 'api_call_aborted', 'upstream_fetch_failed'])
 
 function isLifecycleNoiseEvent(event: TraceEventRecord): boolean {
   return event.severity === 'info' && LIFECYCLE_NOISE_PHASES.has(event.phase)

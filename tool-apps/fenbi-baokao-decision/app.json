@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.fenbi-baokao-decision",
+  "displayName": "粉笔",
+  "description": "粉笔AI公考助手，帮你查专业分类、完善报考简历、智能选岗与国考模拟选岗、了解考情与报考条件，还能练易混词与成语辨析积累，提供一站式公考备考服务，让备考更精准、更高效。",
+  "category": "education",
+  "discovery": {
+    "group": "online"
+  },
+  "keywords": [
+    "fenbi-baokao-decision",
+    "Fenbi",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "fenbi-baokao-decision",
+    "source": "fenbi-baokao-decision",
+    "name": "粉笔",
+    "nameEn": "Fenbi",
+    "description": "粉笔AI公考助手，帮你查专业分类、完善报考简历、智能选岗与国考模拟选岗、了解考情与报考条件，还能练易混词与成语辨析积累，提供一站式公考备考服务，让备考更精准、更高效。",
+    "descriptionEn": "Fenbi civil-service exam assistant: We assist you with major classification inquiries, resume optimization, intelligent position‑matching for national civil service exams including simulated position selection, exam overview and eligibility condition checks, as well as practice for confusing vocabulary and idiom accumulation. Our one‑stop civil service exam preparation service enables more targeted and efficient study.",
+    "type": "mcp",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "我是本科计算机科学与技术专业,属于什么学科大类?",
+      "我是本科计算机、党员,在山东能报哪些岗位?帮我推荐几个",
+      "今年国考职位表还没出,我能报什么岗?帮我按近三年国考数据提前选选岗",
+      "帮我完善一下报考简历,我的专业是计算机",
+      "2026 年山东省考什么时候报名和笔试?报考条件是什么?",
+      "「截止」和「截至」怎么区分?给我来几组易混词辨析练习",
+      "帮我积累几个成语,要带释义和真题例句的"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAyNCIgaGVpZ2h0PSIxMDI0IiB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxyZWN0IHdpZHRoPSIxMDI0IiBoZWlnaHQ9IjEwMjQiIGZpbGw9IndoaXRlIi8+CiAgPG1hc2sgaWQ9Im1hc2swXzJfNzA3IiBzdHlsZT0ibWFzay10eXBlOmx1bWluYW5jZSIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeD0iMTQ5IiB5PSIyNjYiIHdpZHRoPSI3MzkiIGhlaWdodD0iNDkyIj4KICAgIDxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNzA2LjQ4NSAzOTUuOTQxQzY5OS45NDEgMzk1Ljk0MSA2OTMuNDgxIDM5Ni4zMDEgNjg3LjEyMiAzOTYuOTc0VjUyOC43ODNDNjkzLjEwMyA1MjYuMzU5IDY5OS42MzcgNTI1LjAxMyA3MDYuNDg1IDUyNS4wMTNDNzM0Ljk5OSA1MjUuMDEzIDc1OC4xMTQgNTQ4LjEyNyA3NTguMTE0IDU3Ni42NDJDNzU4LjExNCA2MDUuMTQ3IDczNC45OTkgNjI4LjI3MSA3MDYuNDg1IDYyOC4yNzFDNjc4LjA5IDYyOC4yNzEgNjU1LjA1OSA2MDUuMzQxIDY1NC44NjUgNTc2Ljk5Mkg2NTQuODU2VjU3NS45MjNWNDAzLjQzNFYzMzEuNDFDNjU0Ljg1NiAyOTUuOTEgNjI1LjgxNiAyNjYuODcgNTkwLjMyNSAyNjYuODdIMzM4LjUxMkMzMzUuNzAyIDI2Ni43NCAzMzIuODcyIDI2Ni42NjcgMzMwLjAzNCAyNjYuNjY3QzIzMC4yMzIgMjY2LjY2NyAxNDkuMzMzIDM0Ny41NjYgMTQ5LjMzMyA0NDcuMzY3QzE0OS4zMzMgNDUxLjUwNSAxNDkuNDggNDU1LjYxNiAxNDkuNzU3IDQ1OS42ODlDMTQ5LjQ5IDQ2Mi4wNjcgMTQ5LjMzMyA0NjQuNDgyIDE0OS4zMzMgNDY2LjkzM1Y2OTIuODAyQzE0OS4zMzMgNzI4LjI5MyAxNzguMzczIDc1Ny4zMzMgMjEzLjg3NCA3NTcuMzMzQzI0OS4zNjUgNzU3LjMzMyAyNzguNDA1IDcyOC4yOTMgMjc4LjQwNSA2OTIuODAyVjYyMS44MUg0MDIuMDk1QzQ0MC41NDQgNjIxLjgxIDQ3Mi4wMDggNTkwLjM1NiA0NzIuMDA4IDU1MS44OTdDNDcyLjAwOCA1MTMuNDQ3IDQ0MC41NDQgNDgxLjk4MyA0MDIuMDk1IDQ4MS45ODNIMjc4LjQwNVY0NjYuOTMzVjQ0OS40ODdIMjc4LjQ2QzI3OC40MzMgNDQ4Ljc4NyAyNzguNDA1IDQ0OC4wNzcgMjc4LjQwNSA0NDcuMzY3QzI3OC40MDUgNDE4Ljg1MyAzMDEuNTE5IDM5NS43MzkgMzMwLjAzNCAzOTUuNzM5SDMzMC41NjhDMzMyLjE3MiAzOTUuODU4IDMzMy43NzUgMzk1Ljk0MSAzMzUuNDA3IDM5NS45NDFINTI1Ljc4NFY1NzUuOTIzQzUyNS43ODQgNTc1Ljk4OCA1MjUuNzkzIDU3Ni4wNjEgNTI1Ljc5MyA1NzYuMTI2QzUyNS43OTMgNTc2LjMwMSA1MjUuNzg0IDU3Ni40NjcgNTI1Ljc4NCA1NzYuNjQyQzUyNS43ODQgNjc2LjQzNCA2MDYuNjgzIDc1Ny4zMzMgNzA2LjQ4NSA3NTcuMzMzQzgwNi4yNzcgNzU3LjMzMyA4ODcuMTg1IDY3Ni40MzQgODg3LjE4NSA1NzYuNjQyQzg4Ny4xODUgNDc2Ljg0MSA4MDYuMjc3IDM5NS45NDEgNzA2LjQ4NSAzOTUuOTQxWiIgZmlsbD0id2hpdGUiLz4KICA8L21hc2s+CiAgPGcgbWFzaz0idXJsKCNtYXNrMF8yXzcwNykiPgogICAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik03MDYuNDg1IDM5NS45NDFDNjk5Ljk0MSAzOTUuOTQxIDY5My40ODEgMzk2LjMwMSA2ODcuMTIyIDM5Ni45NzRWNTI4Ljc4M0M2OTMuMTAzIDUyNi4zNTkgNjk5LjYzNyA1MjUuMDEzIDcwNi40ODUgNTI1LjAxM0M3MzQuOTk5IDUyNS4wMTMgNzU4LjExNCA1NDguMTI3IDc1OC4xMTQgNTc2LjY0MkM3NTguMTE0IDYwNS4xNDcgNzM0Ljk5OSA2MjguMjcxIDcwNi40ODUgNjI4LjI3MUM2NzguMDkgNjI4LjI3MSA2NTUuMDU5IDYwNS4zNDEgNjU0Ljg2NSA1NzYuOTkySDY1NC44NTZWNTc1LjkyM1Y0MDMuNDM0VjMzMS40MUM2NTQuODU2IDI5NS45MSA2MjUuODE2IDI2Ni44NyA1OTAuMzI1IDI2Ni44N0gzMzguNTEyQzMzNS43MDIgMjY2Ljc0IDMzMi44NzIgMjY2LjY2NyAzMzAuMDM0IDI2Ni42NjdDMjMwLjIzMiAyNjYuNjY3IDE0OS4zMzMgMzQ3LjU2NiAxNDkuMzMzIDQ0Ny4zNjdDMTQ5LjMzMyA0NTEuNTA1IDE0OS40OCA0NTUuNjE2IDE0OS43NTcgNDU5LjY4OUMxNDkuNDkgNDYyLjA2NyAxNDkuMzMzIDQ2NC40ODIgMTQ5LjMzMyA0NjYuOTMzVjY5Mi44MDJDMTQ5LjMzMyA3MjguMjkzIDE3OC4zNzMgNzU3LjMzMyAyMTMuODc0IDc1Ny4zMzNDMjQ5LjM2NSA3NTcuMzMzIDI3OC40MDUgNzI4LjI5MyAyNzguNDA1IDY5Mi44MDJWNjIxLjgxSDQwMi4wOTVDNDQwLjU0NCA2MjEuODEgNDcyLjAwOCA1OTAuMzU2IDQ3Mi4wMDggNTUxLjg5N0M0NzIuMDA4IDUxMy40NDcgNDQwLjU0NCA0ODEuOTgzIDQwMi4wOTUgNDgxLjk4M0gyNzguNDA1VjQ2Ni45MzNWNDQ5LjQ4N0gyNzguNDZDMjc4LjQzMyA0NDguNzg3IDI3OC40MDUgNDQ4LjA3NyAyNzguNDA1IDQ0Ny4zNjdDMjc4LjQwNSA0MTguODUzIDMwMS41MTkgMzk1LjczOSAzMzAuMDM0IDM5NS43MzlIMzMwLjU2OEMzMzIuMTcyIDM5NS44NTggMzMzLjc3NSAzOTUuOTQxIDMzNS40MDcgMzk1Ljk0MUg1MjUuNzg0VjU3NS45MjNDNTI1Ljc4NCA1NzUuOTg4IDUyNS43OTMgNTc2LjA2MSA1MjUuNzkzIDU3Ni4xMjZDNTI1Ljc5MyA1NzYuMzAxIDUyNS43ODQgNTc2LjQ2NyA1MjUuNzg0IDU3Ni42NDJDNTI1Ljc4NCA2NzYuNDM0IDYwNi42ODMgNzU3LjMzMyA3MDYuNDg1IDc1Ny4zMzNDODA2LjI3NyA3NTcuMzMzIDg4Ny4xODUgNjc2LjQzNCA4ODcuMTg1IDU3Ni42NDJDODg3LjE4NSA0NzYuODQxIDgwNi4yNzcgMzk1Ljk0MSA3MDYuNDg1IDM5NS45NDFaIiBmaWxsPSIjMUM3Q0ZGIi8+CiAgICA8ZyBmaWx0ZXI9InVybCgjZmlsdGVyMF9mXzJfNzA3KSI+CiAgICAgIDxjaXJjbGUgY3g9IjIzNyIgY3k9IjI5MyIgcj0iMTkyIiBmaWxsPSIjMjc2RkZGIi8+CiAgICA8L2c+CiAgPC9nPgogIDxkZWZzPgogICAgPGZpbHRlciBpZD0iZmlsdGVyMF9mXzJfNzA3IiB4PSItMTI1LjY2NyIgeT0iLTY5LjY2NjciIHdpZHRoPSI3MjUuMzMzIiBoZWlnaHQ9IjcyNS4zMzMiIGZpbHRlclVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgY29sb3ItaW50ZXJwb2xhdGlvbi1maWx0ZXJzPSJzUkdCIj4KICAgICAgPGZlRmxvb2QgZmxvb2Qtb3BhY2l0eT0iMCIgcmVzdWx0PSJCYWNrZ3JvdW5kSW1hZ2VGaXgiLz4KICAgICAgPGZlQmxlbmQgbW9kZT0ibm9ybWFsIiBpbj0iU291cmNlR3JhcGhpYyIgaW4yPSJCYWNrZ3JvdW5kSW1hZ2VGaXgiIHJlc3VsdD0ic2hhcGUiLz4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iODUuMzMzMyIgcmVzdWx0PSJlZmZlY3QxX2ZvcmVncm91bmRCbHVyXzJfNzA3Ii8+CiAgICA8L2ZpbHRlcj4KICA8L2RlZnM+Cjwvc3ZnPgo=",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "fenbi_mcp"
+    ],
+    "skillName": "confuse-word",
+    "skillNames": [
+      "confuse-word",
+      "exam-info",
+      "major-query",
+      "mock-position-select",
+      "position-select",
+      "resume",
+      "word-accumulate"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "fenbi_mcp": {
+        "type": "http",
+        "url": "https://market-api.fenbi.com/workbuddy/mcp"
+      }
+    }
+  }
+}

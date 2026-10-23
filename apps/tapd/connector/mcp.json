@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "tapd": {
-      "type": "http",
-      "url": "https://websocket.tapd.cn/mcp/mcp"
-    }
-  }
-}

@@ -3,7 +3,7 @@
   "id": "moss.transcription",
   "version": "0.1.4",
   "displayName": "语音转写",
-  "category": "knowledge",
+  "category": "creative",
   "keywords": [
     "语音",
     "转写",
@@ -13,7 +13,7 @@
   ],
   "description": "本地录音和视频转文字，播放、校对并导出字幕。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.17.0",
+  "hostApi": "^3.21.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"

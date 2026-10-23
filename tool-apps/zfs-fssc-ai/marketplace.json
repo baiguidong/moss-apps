@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.zfs-fssc-ai",
+  "summary": "财务云 AI 报销助手：用自然语言完成报销申请、发票查询识别、报销单查询与费用审批等操作。",
+  "description": "财务云 AI 报销助手：用自然语言完成报销申请、发票查询识别、报销单查询与费用审批等操作。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/zfs-fssc-ai",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

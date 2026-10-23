@@ -904,8 +904,10 @@ export function createLibraryService(options) {
   const parserPath = path.resolve(options.parserPath);
   const getPythonModulePaths = options.getPythonModulePaths || (() => []);
   const customParseDocument = typeof options.parseDocument === 'function';
-  const parseDocument = options.parseDocument || ((filePath, context = {}) => {
-    if (options.requireManagedRuntime === true && !text(options.pythonPath)) {
+  const parseDocument = options.parseDocument || (async (filePath, context = {}) => {
+    const python = options.getPython ? await options.getPython(context.signal) : null;
+    const pythonPath = python?.available ? python.path : options.pythonPath;
+    if (options.requireManagedRuntime === true && !text(pythonPath)) {
       const error = new Error('The managed Library parser runtime is unavailable.');
       error.code = 'RUNTIME_UNAVAILABLE';
       throw error;
@@ -913,7 +915,7 @@ export function createLibraryService(options) {
     return parseLibraryDocumentWithPython({
       filePath,
       parserPath,
-      pythonPath: options.pythonPath,
+      pythonPath,
       pythonModulePaths: getPythonModulePaths() || [],
       signal: context.signal,
     });
@@ -968,7 +970,9 @@ export function createLibraryService(options) {
         WHERE j.source_id = s.id AND j.status IN ('queued', 'running')
       )
     `).all();
-    for (const source of settledSources) restoreSourceStatus(source.id);
+    for (const source of settledSources) {
+      if (recoverableJobs.some(job => job.source_id === source.id)) restoreSourceStatus(source.id);
+    }
 
   let queue = Promise.resolve();
   let closed = false;

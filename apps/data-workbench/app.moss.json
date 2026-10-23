@@ -3,7 +3,7 @@
   "id": "moss.data-workbench",
   "version": "0.2.2",
   "displayName": "本地数据工作台",
-  "category": "development",
+  "category": "data",
   "discovery": { "group": "local" },
   "keywords": [
     "DuckDB",
@@ -13,7 +13,7 @@
   ],
   "description": "用 DuckDB 查看、查询和导出本地数据文件。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.20.0",
+  "hostApi": "^3.21.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"

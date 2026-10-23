@@ -11,6 +11,7 @@ export type MessageEntry = {
   content: unknown
   toolUseResult?: unknown
   timestamp: string
+  timestampSource?: 'explicit' | 'inherited'
   model?: string
   usage?: MessageUsage
   /**

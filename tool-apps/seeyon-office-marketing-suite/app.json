@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.seeyon-office-marketing-suite",
+  "displayName": "致远互联协同办公服务",
+  "description": "为企业提供协同办公、会议和业务协同能力，支持用户用自然语言完成会议创建与查询、协同发起与跟进、和业务数据分析。",
+  "category": "communication",
+  "discovery": {
+    "group": "online"
+  },
+  "keywords": [
+    "seeyon-office-marketing-suite",
+    "Seeyon Collaborative Office Services",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "seeyon-office-marketing-suite",
+    "source": "seeyon-office-marketing-suite",
+    "name": "致远互联协同办公服务",
+    "nameEn": "Seeyon Collaborative Office Services",
+    "description": "为企业提供协同办公、会议和业务协同能力，支持用户用自然语言完成会议创建与查询、协同发起与跟进、和业务数据分析。",
+    "descriptionEn": "Provides enterprises with collaborative office, meeting, and business collaboration capabilities, enabling users to create and query meetings, initiate and follow up on collaborations, and analyze business data using natural language.",
+    "type": "cli",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "5.0.0",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "查询我本周已经发起的会议",
+      "分析销售订单的发货和回款情况",
+      "把销售分析报告发协同给销售负责人"
+    ],
+    "hasMcp": false,
+    "hasCli": true,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiCiAgICAgdmlld0JveD0iLTIgMCA4NiA3OCIgd2lkdGg9IjI1NiIgaGVpZ2h0PSIyNTYiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgLTIgMCA4NiA3ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgogICAgLnN0MHtmaWxsOiMxRjI3NzQ7fQogICAgLnN0MXtmaWxsOiM5MEJFMjA7fQo8L3N0eWxlPgo8Zz4KICAgIDxnPgogICAgICAgIDxnPgogICAgICAgICAgICA8Zz4KICAgICAgICAgICAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0zNC40LDc2LjVjLTAuMywwLTAuNi0wLjEtMC45LTAuMUMzMy44LDc2LjQsMzQuMSw3Ni41LDM0LjQsNzYuNXoiLz4KICAgICAgICAgICAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01NywzLjhsLTMuMyw2LjhjMTQuOCw2LjIsMjMuOCwyMS42LDIwLjksMzcuN2MtMy4zLDE4LjUtMjEuMywzMC45LTQwLjIsMjguMgogICAgICAgICAgICAgICAgICAgIGMyMS4xLDMuMSw0MS4xLTEwLjcsNDQuOC0zMS4zQzgyLjMsMjcuOCw3Mi44LDExLDU3LDMuOHoiLz4KICAgICAgICAgICAgPC9nPgogICAgICAgICAgICA8Zz4KICAgICAgICAgICAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik00NS4yLDExLjZMNDUuMiwxMS42Yy02LjEtMS4xLTExLjksMi45LTEzLDguOGMzLjctMC44LDcuNi0wLjksMTEuNS0wLjJjMTYsMi43LDI2LjYsMTcuNSwyMy44LDMzLjEKICAgICAgICAgICAgICAgICAgICBjLTIuOCwxNS4zLTE3LjYsMjUuNi0zMy4zLDIzLjNjMTguMSwyLjcsMzUuMi05LjIsMzguNC0yNi44Qzc1LjksMzEuOCw2My42LDE0LjcsNDUuMiwxMS42eiIvPgogICAgICAgICAgICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTQxLjMsMzMuMmMxMi4yLDIuMSwyMC40LDEzLjUsMTguMywyNS40Yy0yLjIsMTEuOS0xMy44LDE5LjktMjYuMSwxNy44bDAsMGMxNSwyLjYsMjkuMy03LjIsMzEuOS0yMS44CiAgICAgICAgICAgICAgICAgICAgQzY4LjEsNDAsNTgsMjYuMSw0My4xLDIzLjZjLTMuOC0wLjYtNy41LTAuNS0xMSwwLjNDMzIuNywyOC40LDM2LjMsMzIuNCw0MS4zLDMzLjJ6Ii8+CiAgICAgICAgICAgIDwvZz4KICAgICAgICA8L2c+CiAgICAgICAgPGc+CiAgICAgICAgICAgIDxnPgogICAgICAgICAgICAgICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTQ2LjMsMC43YzAuMywwLDAuNiwwLjEsMC45LDAuMUM0Ni45LDAuOCw0Ni42LDAuNyw0Ni4zLDAuN3oiLz4KICAgICAgICAgICAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yMy43LDczLjRsMy4zLTYuOEMxMi4yLDYwLjQsMy4xLDQ0LjksNi4xLDI4LjhDOS40LDEwLjMsMjcuMy0yLjEsNDYuMywwLjdDMjUuMi0yLjUsNS4yLDExLjQsMS41LDMxLjkKICAgICAgICAgICAgICAgICAgICBDLTEuNyw0OS40LDcuOSw2Ni4yLDIzLjcsNzMuNHoiLz4KICAgICAgICAgICAgPC9nPgogICAgICAgICAgICA8Zz4KICAgICAgICAgICAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0zNS40LDY1LjZMMzUuNCw2NS42YzYuMSwxLDExLjktMi45LDEzLTguOGMtMy43LDAuOC03LjUsMC45LTExLjUsMC4yQzIxLDU0LjMsMTAuNCwzOS41LDEzLjIsMjQKICAgICAgICAgICAgICAgICAgICBDMTYsOC43LDMwLjctMS42LDQ2LjQsMC43QzI4LjMtMiwxMS4yLDkuOSw4LDI3LjVDNC43LDQ1LjQsMTcsNjIuNSwzNS40LDY1LjZ6Ii8+CiAgICAgICAgICAgICAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMjUuMiwzNS41Yy0zLjYtNC43LTUuMi0xMC43LTQuMS0xNi45YzItMTAuOCwxMS44LTE4LjQsMjIuNy0xOC4xYzEuMSwwLDIuMiwwLjEsMy40LDAuM2wwLDAKICAgICAgICAgICAgICAgICAgICBDMzIuMi0xLjgsMTcuOSw4LDE1LjIsMjIuNmMtMi42LDE0LjYsNy40LDI4LjUsMjIuNCwzMS4xYzMuNywwLjYsNy41LDAuNSwxMC45LTAuM2MtMC42LTQuNi00LjItOC41LTkuMi05LjQKICAgICAgICAgICAgICAgICAgICBDMzMuNSw0MywyOC41LDM5LjgsMjUuMiwzNS41Ii8+CiAgICAgICAgICAgIDwvZz4KICAgICAgICA8L2c+CiAgICA8L2c+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMzgsMUMzOCwxLDQ0LDAuNiw0OCwxLjRjNS4yLDEuMSw5LDIuNCw5LDIuNHMtNC0xLjktNy45LTIuN2MtMy43LTAuNy01LjktMC44LTUuOS0wLjhMMzgsMXoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik00MC4yLDc2LjVjMCwwLTQuMSwwLjItOC4xLTAuNmMtNS4yLTEtOC41LTIuNC04LjUtMi40czQsMS45LDcuOSwyLjdjMy43LDAuNyw1LjksMC44LDUuOSwwLjhMNDAuMiw3Ni41eiIvPgo8L2c+Cjwvc3ZnPgo=",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [],
+    "skillName": "seeyon-collaborative-office-loop-skill",
+    "skillNames": [
+      "seeyon-collaborative-office-loop-skill",
+      "seeyon-marketing-data-analysis-skill"
+    ]
+  },
+  "cli": {
+    "runtime": {
+      "type": "node",
+      "version": ">=22"
+    },
+    "env": {
+      "SEEYON_CONNECTOR_HOME": "$HOME/.workbuddy/connectors-marketplace/connectors/seeyon-office-marketing-suite"
+    },
+    "auth": {
+      "darwin": "node \"$SEEYON_CONNECTOR_HOME/cli/seeyon-connector.js\" auth",
+      "linux": "node \"$SEEYON_CONNECTOR_HOME/cli/seeyon-connector.js\" auth",
+      "win32": "node \"%SEEYON_CONNECTOR_HOME%\\cli\\seeyon-connector.js\" auth"
+    },
+    "unAuth": {
+      "darwin": "node \"$SEEYON_CONNECTOR_HOME/cli/seeyon-connector.js\" logout",
+      "linux": "node \"$SEEYON_CONNECTOR_HOME/cli/seeyon-connector.js\" logout",
+      "win32": "node \"%SEEYON_CONNECTOR_HOME%\\cli\\seeyon-connector.js\" logout"
+    },
+    "status": {
+      "darwin": "node \"$SEEYON_CONNECTOR_HOME/cli/seeyon-connector.js\" status",
+      "linux": "node \"$SEEYON_CONNECTOR_HOME/cli/seeyon-connector.js\" status",
+      "win32": "node \"%SEEYON_CONNECTOR_HOME%\\cli\\seeyon-connector.js\" status"
+    },
+    "statusMatchJson": {
+      "authenticated": "true"
+    },
+    "statusMatch": "\"authenticated\"\\s*:\\s*true",
+    "authWaitForExit": true,
+    "authSuppressBrowser": true
+  }
+}

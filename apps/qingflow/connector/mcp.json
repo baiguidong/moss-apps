@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "qingflow": {
-      "type": "http",
-      "url": "https://mcp.qingflow.com/mcp"
-    }
-  }
-}

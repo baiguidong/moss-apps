@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "tyc-mcp": {
-      "type": "http",
-      "url": "https://mcp.tianyancha.com/v1"
-    }
-  }
-}

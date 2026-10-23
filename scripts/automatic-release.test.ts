@@ -8,7 +8,7 @@ import { publishRelease, collectReleaseAssets } from './publish-release.mjs'
 import { repoRoot, sha256Hex } from './lib.mjs'
 
 const sha = 'a'.repeat(40), other = 'b'.repeat(40)
-const app = (version = '1.0.0', id = 'moss.example') => ({ kind: 'mcp', manifest: { id, version } })
+const app = (version = '1.0.0', id = 'moss.example') => ({ kind: 'tool', manifest: { id, version } })
 const release = (version: string, extra = {}) => ({ tag_name: `moss.example-v${version}`, draft: false, ...extra })
 const planned = (version: string, releases: any[]) => planReleases([app(version)], releases, sha).entries[0]
 

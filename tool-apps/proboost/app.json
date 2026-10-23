@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.proboost",
+  "displayName": "OpenBoost 跨境数据",
+  "description": "支持市场研究、选品分析、竞对监控、VOC洞察、关键词分析、listing生成等跨境电商应用场景",
+  "category": "marketing",
+  "discovery": {
+    "group": "online"
+  },
+  "keywords": [
+    "proboost",
+    "OpenBoost Cross-border Data",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "proboost",
+    "source": "proboost",
+    "name": "OpenBoost 跨境数据",
+    "nameEn": "OpenBoost Cross-border Data",
+    "description": "支持市场研究、选品分析、竞对监控、VOC洞察、关键词分析、listing生成等跨境电商应用场景",
+    "descriptionEn": "Supports cross-border e-commerce scenarios including market research, product selection analysis, competitive monitoring, VOC insights, keyword analysis, listing generation, and more.",
+    "type": "mcp",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "帮我做亚马逊选品",
+      "分析 TikTok 达人",
+      "查专利侵权风险",
+      "挖亚马逊关键词"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/png;base64,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",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "proboost-tiktok-amazon-patent-mcp"
+    ],
+    "skillName": "proboost",
+    "skillNames": [
+      "proboost"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "proboost-tiktok-amazon-patent-mcp": {
+        "type": "sse",
+        "url": "https://mcp.microdata-inc.com/mcp-servers/oauth/proboost-tiktok-amazon-patent-mcp/sse"
+      }
+    }
+  }
+}

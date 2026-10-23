@@ -3,7 +3,7 @@
   "id": "moss.backup",
   "version": "0.1.1",
   "displayName": "备份与恢复",
-  "category": "knowledge",
+  "category": "files",
   "discovery": { "group": "local" },
   "keywords": [
     "备份",
@@ -12,7 +12,7 @@
   ],
   "description": "使用 Restic 备份目录、浏览快照并恢复文件。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.20.0",
+  "hostApi": "^3.21.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"

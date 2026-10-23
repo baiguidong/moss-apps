@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.jiushuyun",
+  "summary": "上传 Excel 或 CSV 表格，一键生成原生的可视化数据分析报告、仪表板、图表。",
+  "description": "上传 Excel 或 CSV 表格，一键生成原生的可视化数据分析报告、仪表板、图表。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/jiushuyun",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

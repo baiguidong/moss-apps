@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.notion",
+  "summary": "创建、搜索和管理 Notion 工作区。用自然语言读取页面、查询数据库、更新内容、整理知识库。",
+  "description": "创建、搜索和管理 Notion 工作区。用自然语言读取页面、查询数据库、更新内容、整理知识库。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/notion",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

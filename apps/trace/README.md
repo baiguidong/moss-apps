@@ -10,6 +10,8 @@ Core 在应用实例数据目录的 `trace/traces/<sessionId>.jsonl` 写入版�
 
 请求中的常见认证字段由 Core 脱敏；对话和提示词保存在本机 App 数据目录。写入失败或队列满会显示在列表顶部。详情采用分块传输，单次结果上限 32 MiB。
 
+错误数按失败调用去重，同一次工具失败的调用与返回结果只计一次，汇总状态不另计错误。工具耗时优先使用 Core 记录的 `tool_execution_started/completed` 执行区间，并对并行区间取并集；历史记录缺少可信开始时间时显示 `--`，不把模型等待算作工具执行。
+
 ```sh
 bun install --frozen-lockfile
 bun run --cwd apps/trace check

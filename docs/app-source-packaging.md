@@ -220,4 +220,4 @@ HTTP Client 仅为临时测试，按用户要求不纳入迁移或发布。迁�
 
 ## 配置型 MCP App 与统一发布
 
-`mcp-apps/<name>/app.json` 与资源也是可编辑源码。导出时补齐共享构建入口、临时 package.json、固定 Core 生成器与 Bun 锁文件，仍使用 v1 source descriptor、签名与独立重建校验。运行部分由 Core 内置 UI 承载；包内 source 不作为 Backend 运行。普通 App 和配置型 App 统一由版本检查 CI 发布，详见[自动发布规则](automatic-app-release.md)。
+`tool-apps/<name>/app.json` 与资源也是可编辑源码，支持 MCP、CLI、Skills 组合。导出时补齐共享构建入口、临时 package.json、固定 Core 生成器与 Bun 锁文件，仍使用 v1 source descriptor、签名与独立重建校验。运行部分由 Core 的内置设置页或统一账号与工具管理承载；包内 source 不作为 Backend 运行。普通应用和声明式工具统一由版本检查 CI 发布，详见[自动发布规则](automatic-app-release.md)。

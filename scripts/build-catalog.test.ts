@@ -44,7 +44,7 @@ test('older release metadata cannot overwrite the latest Chinese display name', 
     expect(detail.latestVersion).toBe('99.0.1')
     // Old release metadata must not reintroduce generic/multiple categories.
     expect(detail.category).toBe('diagnostics')
-    expect(detail.categories).toEqual(['诊断与审计'])
+    expect(detail.categories).toEqual(['诊断与安全'])
     expect(detail.keywords).toContain('Trace')
     const index = JSON.parse(await readFile(path.join(output, 'v1/index.json'), 'utf8'))
     expect(index.apps[0]).toMatchObject({ category: detail.category, categories: detail.categories, keywords: detail.keywords })

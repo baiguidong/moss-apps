@@ -3,7 +3,7 @@
   "id": "moss.drive",
   "version": "0.3.8",
   "displayName": "网盘",
-  "category": "knowledge",
+  "category": "files",
   "keywords": [
     "网盘",
     "文件",
@@ -15,7 +15,7 @@
   ],
   "description": "管理个人云端文件，上传、下载和分享。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.4.0",
+  "hostApi": "^3.21.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"

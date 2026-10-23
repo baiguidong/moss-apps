@@ -47,11 +47,12 @@ describe('App Backend manifest', () => {
   it.each(['backup', 'data-workbench', 'document-converter'])(
     '%s requires the Host release with on-demand recovery and artifact previews', (name) => {
       const source = JSON.parse(readFileSync(new URL(`../apps/${name}/app.moss.json`, import.meta.url), 'utf8'))
-      expect(source.hostApi).toBe('^3.20.0')
+      const expectedHostApi = name === 'document-converter' ? '^3.20.0' : '^3.21.0'
+      expect(source.hostApi).toBe(expectedHostApi)
       expect(source.backend.lifecycle).toBe('on-demand')
       expect(source.host.protocols).toEqual(expect.arrayContaining(['moss.runtime/v1', 'moss.artifacts/v1']))
       expect(() => validateAppManifest(source, { hostApiVersion: '3.19.0' })).toThrow(/requires Host API/)
-      expect(validateAppManifest(source).hostApi).toBe('^3.20.0')
+      expect(validateAppManifest(source).hostApi).toBe(expectedHostApi)
     },
   )
 

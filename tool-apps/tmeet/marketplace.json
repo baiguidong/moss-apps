@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.tmeet",
+  "summary": "通过命令行创建、查询和管理腾讯会议。支持快速发起会议、查看日程安排、管理参会人员。",
+  "description": "通过命令行创建、查询和管理腾讯会议。支持快速发起会议、查看日程安排、管理参会人员。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/tmeet",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

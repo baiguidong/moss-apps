@@ -12,7 +12,13 @@ SDK 源码规则同步维护在 [Core SDK README](../vendor/moss-core/packages/a
 
 当前 SDK 为 3.4.0，新增 App 展示位置与设置分组；显式声明这些字段要求 Host API >=3.4.0。工具范围自 Host API 3.1.0 起支持。SDK 源码由 [Moss Core](https://github.com/baiguidong/moss/tree/main/packages/app-sdk) 统一维护，本仓库通过固定提交的 `vendor/moss-core` Git 子模块直接引用 SDK 和 host-contracts workspace，仅维护接入说明和消费端回归测试。
 
-App 可通过通用 `backend.host.request()` 使用 Desktop 提供的协议。Tasks/Execution 和 MCP 优先使用 `@moss/app-sdk/execution`、`@moss/app-sdk/mcp` 的 typed client，其类型和校验器来自同一份 host-contracts。仓库构建校验采用 Manifest 声明的最低 Host 版本；市场和安装阶段继续按实际运行的 Host 版本判断兼容性。详见 [MCP App](../apps/mcp/README.md)。
+App 可通过通用 `backend.host.request()` 使用 Desktop 提供的协议。Tasks/Execution 和 MCP 优先使用 `@moss/app-sdk/execution`、`@moss/app-sdk/mcp` 的 typed client，其类型和参数校验器来自同一份 host-contracts。仓库构建校验采用 Manifest 声明的最低 Host 版本；市场、安装和启动加载阶段继续按实际 Host 版本判断兼容性。详见 [MCP App](../apps/mcp/README.md)。
+
+### Host 更新兼容
+
+`hostApi: "^3.1.0"` 接受 `>=3.1.0` 且 `<4.0.0`。安装、更新与 Host 重启后首次加载已安装 App 时检查该范围，调用阶段不重复做版本或响应 Schema 兼容性检查。Host 注册表直接返回 handler 结果，共享 SDK 的类型化客户端不执行输出 Schema 校验；参数、协议方法、身份、权限、生命周期、载荷限制及取消检查仍保留。Schema 和生成类型继续用于开发、输入验证与测试，不作为返回值的运行门槛。显式调用的领域数据验证辅助函数仍可用于 App 自身的业务检查。
+
+Host 同一主版本保留既有字段的类型与含义；内部缓存字段不直接进入公开 MCP `check`。这同时兼容尚未重建、携带旧版严格 SDK 的安装包；MCP 管理 `0.1.14` 与其他 App 后续重建均使用新的共享 SDK。不会修改已签名历史版本或用户当前安装包。
 
 ## 源码随包发布
 

@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.tushare",
+  "displayName": "Tushare",
+  "description": "Tushare 金融数据服务，支持 A股、指数、ETF/基金、财务、估值、资金流、公告新闻、板块概念与宏观数据等研究工作。",
+  "category": "finance",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "keywords": [
+    "tushare",
+    "Tushare",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "tushare",
+    "source": "tushare",
+    "name": "Tushare",
+    "nameEn": "Tushare",
+    "description": "Tushare 金融数据服务，支持 A股、指数、ETF/基金、财务、估值、资金流、公告新闻、板块概念与宏观数据等研究工作。",
+    "descriptionEn": "Tushare provides financial data for research, covering A-shares, indices, ETFs/funds, financials, valuations, capital flows, announcements and news, sector concepts, and macroeconomic data.",
+    "type": "mcp",
+    "authMode": "token",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "4.23.0",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "获取沪深300指数最新的行情数据",
+      "帮我查询最近三天涨势最好的10只股票",
+      "看下茅台今年以来涨了多少",
+      "帮我找高 ROE 低负债的公司",
+      "最近哪个板块最强"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": true,
+    "icon": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2Ij4KPHBhdGggZD0iTTAgMCBDMzEuNjggMCA2My4zNiAwIDk2IDAgQzk2IDMxLjY4IDk2IDYzLjM2IDk2IDk2IEM2NC4zMiA5NiAzMi42NCA5NiAwIDk2IEMwIDY0LjMyIDAgMzIuNjQgMCAwIFogIiBmaWxsPSIjRkVGRUZEIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwLDApIi8+CjxwYXRoIGQ9Ik0wIDAgQzcuNTkgMCAxNS4xOCAwIDIzIDAgQzIxLjEzNTM4NzU3IDEuODY0NjEyNDMgMTkuMjYxOTQwNjkgMy43MjA0ODY0NyAxNy4zNzUgNS41NjI1IEMxMy42ODExNjc3OSA5LjM1MzUzODMyIDEzLjg4NjQ1MjI0IDExLjQxODEyODkzIDEzLjkzNzUgMTYuNjI1IEMxMy45NDY1MjM0NCAxNy44MTM1MTU2MyAxMy45NTU1NDY4NyAxOS4wMDIwMzEyNSAxMy45NjQ4NDM3NSAyMC4yMjY1NjI1IEMxMy45NzY0NDUzMSAyMS4xNDE3OTY4NyAxMy45ODgwNDY4OCAyMi4wNTcwMzEyNSAxNCAyMyBDMTcuNjMgMjMgMjEuMjYgMjMgMjUgMjMgQzI1LjMzIDI0LjMyIDI1LjY2IDI1LjY0IDI2IDI3IEMyMi4zNyAyNyAxOC43NCAyNyAxNSAyNyBDMTUuNzg3Njg5OTMgMzAuMDYzNTcyNjggMTYuNTc5OTkyMDIgMzMuMTI1ODI2IDE3LjM3NSAzNi4xODc1IEMxNy41OTY3MTg3NSAzNy4wNTE4MTY0MSAxNy44MTg0Mzc1IDM3LjkxNjEzMjgxIDE4LjA0Njg3NSAzOC44MDY2NDA2MiBDMTkuMTM3MDE2NjMgNDIuOTkwODYwNjkgMjAuMjQyOTE0OTIgNDcuMDM0MjQyNTYgMjIgNTEgQzI4LjE2MzkyNTcxIDUyLjM3OTY1OTgyIDI4LjE2MzkyNTcxIDUyLjM3OTY1OTgyIDMzLjg3NSA1MC4yNSBDMzYuNzk5NDE5MTYgNDUuNzc3MzU4OTMgMzcuODgzMDQ4NjMgNDEuMTg1MTk3MDMgMzkgMzYgQzM2LjM2IDM2IDMzLjcyIDM2IDMxIDM2IEMzMSAzNC42OCAzMSAzMy4zNiAzMSAzMiBDMzQuMyAzMS42NyAzNy42IDMxLjM0IDQxIDMxIEM0Mi4zMiAyNy4wNCA0My42NCAyMy4wOCA0NSAxOSBDNDAuMzggMTkgMzUuNzYgMTkgMzEgMTkgQzMxIDE3LjY4IDMxIDE2LjM2IDMxIDE1IEMzNS45NSAxNSA0MC45IDE1IDQ2IDE1IEM0NC4yMzc1MTI5NyA4Ljk4NjgwODk0IDQyLjQyNTkzMTc5IDUuOTI4MTkyNDcgMzcuNDI1NzgxMjUgMi4xMjg5MDYyNSBDMzYuOTU1MjczNDQgMS43NTYzNjcxOSAzNi40ODQ3NjU2MyAxLjM4MzgyODEzIDM2IDEgQzM2IDAuNjcgMzYgMC4zNCAzNiAwIEM0Mi42IDAgNDkuMiAwIDU2IDAgQzU2LjA5MjE4NjczIDYuMTAyMjQ5MjYgNTYuMTcxNzE3ODEgMTIuMjAyMDUwNzQgNTYuMjE5NzI2NTYgMTguMzA0NDQzMzYgQzU2LjIzOTc1Mzk3IDIwLjM3NzExODExIDU2LjI2Njk4NDExIDIyLjQ0OTczNyA1Ni4zMDE3NTc4MSAyNC41MjIyMTY4IEM1Ni4zNTA2NjggMjcuNTEzNjQ5OTYgNTYuMzczMDU3OTMgMzAuNTA0MzMxNTUgNTYuMzkwNjI1IDMzLjQ5NjA5Mzc1IEM1Ni40MTEyNzAxNCAzNC40MTIwODg0NyA1Ni40MzE5MTUyOCAzNS4zMjgwODMxOSA1Ni40NTMxODYwNCAzNi4yNzE4MzUzMyBDNTYuNDU1ODA4MyA0My45MTE3Njg5MyA1NC41NzA1MTgzIDQ5Ljg3MzY5Mzk2IDQ5LjY4NzUgNTUuODEyNSBDNDIuMzg1OTg4MDcgNjEuNzU1NTkxMTEgMzcuMzYyODkzMDUgNjIuNjM3MDIyMzcgMjguMDYyNSA2Mi41IEMyNy4wMTY0MjU3OCA2Mi41MTU0Njg3NSAyNS45NzAzNTE1NiA2Mi41MzA5Mzc1IDI0Ljg5MjU3ODEyIDYyLjU0Njg3NSBDMTYuNjc2Nzc4MjcgNjIuNTA1NTYzNjIgMTEuMDU4ODU3NDggNjEuMDU4ODU3NDggNS4xODc1IDU1LjE4NzUgQzAuMzQ0OTg2MTcgNDguMTMxMjY1NTcgLTAuNDMwMDE4MzEgNDIuODY1MjE0NzkgLTAuMjkyOTY4NzUgMzQuNDcyNjU2MjUgQy0wLjI4ODcyMzkxIDMzLjQ4MzczODg2IC0wLjI4NDQ3OTA2IDMyLjQ5NDgyMTQ3IC0wLjI4MDEwNTU5IDMxLjQ3NTkzNjg5IEMtMC4yNjM0MDEyOSAyOC4zMzc4Mzk5MSAtMC4yMjU3NjQxNSAyNS4yMDA0MDA3MiAtMC4xODc1IDIyLjA2MjUgQy0wLjE3MjQ0MjUxIDE5LjkyNjQ0MTYxIC0wLjE1ODc1NTk3IDE3Ljc5MDM3MzA5IC0wLjE0NjQ4NDM4IDE1LjY1NDI5Njg4IEMtMC4xMTYwODUwNCAxMC40MzU3NDQ2NiAtMC4wNTczNDcyOCA1LjIxODYwMjkxIDAgMCBaICIgZmlsbD0iI0ZGOTUxRCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAsMjYpIi8+CjxwYXRoIGQ9Ik0wIDAgQzMgMC4xODc1IDMgMC4xODc1IDYgMSBDOCA0IDggNCA4IDcgQzguOTkgNi4zNCA5Ljk4IDUuNjggMTEgNSBDMTMuODU1MTA4OTIgNC42NDMxMTEzOCAxNS4zOTA0OTk5NSA0LjYzNDI5OTk3IDE3Ljg3NSA2LjEyNSBDMTkgOCAxOSA4IDE5LjEyNSAxMC44MTI1IEMxNy41NDU3NTE0MiAxNS4yODcwMzc2NSAxNS4wMDkwMDEzOSAxNy41NDY0OTExNSAxMSAyMCBDNy42MjUgMjAuOTM3NSA3LjYyNSAyMC45Mzc1IDQgMjEgQzMuMjg3MTQ4NDQgMjEuMDIxOTE0MDYgMi41NzQyOTY4OCAyMS4wNDM4MjgxMyAxLjgzOTg0Mzc1IDIxLjA2NjQwNjI1IEMtMy45NjcyOTkzOSAyMC44OTcwNzI3NSAtNy4zNzUzMzA0MSAxOC45MjU3NDkzNSAtMTEuNTI3MzQzNzUgMTQuOTE0MDYyNSBDLTEzIDEzIC0xMyAxMyAtMTMuNjI1IDkuNjg3NSBDLTEzIDcgLTEzIDcgLTExIDUgQy01LjY2NjY2NjY3IDQuNjY2NjY2NjcgLTUuNjY2NjY2NjcgNC42NjY2NjY2NyAtMyA2IEMtMi44NzYyNSA1LjM4MTI1IC0yLjc1MjUgNC43NjI1IC0yLjYyNSA0LjEyNSBDLTIgMiAtMiAyIDAgMCBaICIgZmlsbD0iIzkxRTU0QyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNDYsNCkiLz4KPHBhdGggZD0iTTAgMCBDMS44NzUgMS4xMjUgMS44NzUgMS4xMjUgMyAzIEMzLjE0Mzk5MDI3IDYuMjM5NzgxMTIgMi42OTA0MDk0IDguMTYyMTk5ODIgMC42MDkzNzUgMTAuNjg3NSBDLTMuMzI2NzQ1NzggMTQuMzc1Mzk2OTQgLTYuNDU3MzAyMjQgMTUuODg5MTQ2MDQgLTEyIDE2IEMtMTMgMTUgLTEzIDE1IC0xMy4zMTI1IDEyLjMxMjUgQy0xMi44NDgxOTA1NCA3LjM5MDgxOTY4IC0xMC41NTU1MjcxNSA0LjUwNTM0ODg1IC03LjA2MjUgMS4xMjUgQy00LjQ2MDMyNTQ5IC0wLjI5NDM2NzkyIC0yLjkyMjc3NTg3IC0wLjQ0OTY1NzgzIDAgMCBaICIgZmlsbD0iIzY0RDEzRSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNjIsOSkiLz4KPHBhdGggZD0iTTAgMCBDMyAwLjE4NzUgMyAwLjE4NzUgNSAxLjE4NzUgQzUuMzA4NTkzNzUgMy4wNzgxMjUgNS4zMDg1OTM3NSAzLjA3ODEyNSA1LjQzNzUgNS40Mzc1IEM1Ljc3ODM0NDMxIDkuMzk1MDgxMTkgNi41ODgxODk3IDExLjkzNjc5OTE2IDkgMTUuMTg3NSBDNS43Mjk4NTY2OCAxNS43NTk3NzUwOCAzLjY2NDQ3MDM1IDE1LjU5ODMyODQ0IDAuODIwMzEyNSAxMy44Mzk4NDM3NSBDLTQuNzkwNjI2NDkgOS4yOTcxNzk2MiAtNC43OTA2MjY0OSA5LjI5NzE3OTYyIC01LjYyNSA0Ljg3NSBDLTQuNzMzMjE4NiAxLjA0MDMzOTk5IC0zLjk1NzU4MiAwLjI0NzM0ODg4IDAgMCBaICIgZmlsbD0iI0FCRUU2OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzgsOC44MTI1KSIvPgo8L3N2Zz4K",
+    "enabled": true,
+    "credentialSchema": {
+      "title": "Tushare MCP 对接配置",
+      "titleEn": "Tushare MCP Configuration",
+      "description": "连接您的 Tushare 账号，用于获取 A股、指数、基金、财务、估值等金融数据。 Token 仅存储在本机 ~/.workbuddy",
+      "descriptionEn": "Connect your Tushare account to access A-share, index, fund, financial, and valuation data. Token is stored locally in ~/.workbuddy only.",
+      "docUrl": "https://tushare.pro/weborder/#/login?reg=wb",
+      "docLabel": "如何获取 Tushare Token？",
+      "docLabelEn": "How to get Tushare Token?",
+      "fields": [
+        {
+          "key": "TUSHARE_TOKEN",
+          "label": "Tushare Token",
+          "labelEn": "Tushare Token",
+          "placeholder": "在 Tushare 个人中心 → 账号与TOKEN",
+          "placeholderEn": "Tushare Center → Account & Token",
+          "description": "用于访问 DataAPI 的个人访问令牌。https://tushare.pro/weborder/#/login?reg=wb",
+          "descriptionEn": "Personal access token for DataAPI.https://tushare.pro/weborder/#/login?reg=wb",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "tushare"
+    ],
+    "skillName": "tushare-skill",
+    "skillNames": [
+      "tushare-skill"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "tushare": {
+        "type": "http",
+        "url": "https://api.tushare.pro/mcp/?token=${TUSHARE_TOKEN}"
+      }
+    }
+  }
+}

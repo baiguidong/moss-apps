@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.dingtalk",
+  "displayName": "钉钉",
+  "description": "通过命令行管理钉钉全产品能力：AI 表格、考勤、日历、群聊与机器人、通讯录、开放平台文档、DING 消息、钉钉文档、钉钉云盘、AI 听记、邮箱、OA 审批、日志、待办。",
+  "category": "communication",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "browser"
+    ]
+  },
+  "keywords": [
+    "dingtalk",
+    "DingTalk",
+    "cli",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "dingtalk",
+    "source": "dingtalk",
+    "name": "钉钉",
+    "nameEn": "DingTalk",
+    "description": "通过命令行管理钉钉全产品能力：AI 表格、考勤、日历、群聊与机器人、通讯录、开放平台文档、DING 消息、钉钉文档、钉钉云盘、AI 听记、邮箱、OA 审批、日志、待办。",
+    "descriptionEn": "Manage DingTalk products via CLI: AI Tables, Attendance, Calendar, Group Chats & Bots, Contacts, Open Platform Docs, DING messages, DingTalk Docs, Drive, AI Minutes, Mail, OA Approvals, Reports, and To-Dos.",
+    "type": "cli",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "4.24.0",
+    "visibleIn": [],
+    "examples": [
+      "在钉钉群【产品周会】里用机器人发一条通知：今天 15:00 在 3 楼会议室开周会，记得带上周的进展材料",
+      "查一下我下周的钉钉日程，列出和【客户对接】相关的会议（时间、参会人、会议室），并帮我找出三人都空闲的时段约一次同步会",
+      "在钉钉 AI 表格【任务跟踪】里新增一行：标题=Q2 上线评审、负责人=张三、截止时间=2026-05-20、状态=进行中",
+      "用 KQL 搜索我钉钉邮箱里最近一周来自财务部、主题包含【报销】的邮件，列出发件人、日期和摘要",
+      "把今天的 AI 听记【产品评审会】整理成纪要（摘要 + 待办 + 关键发言人），并按【日报】模版提交到钉钉日志 @ 我的直属领导"
+    ],
+    "hasMcp": false,
+    "hasCli": true,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDI0IDEwMjQiIHdpZHRoPSIyNTAwIiBoZWlnaHQ9IjI1MDAiPjxwYXRoIGZpbGw9IiM0Mjg1RjQiIGQ9Ik0xMDI0IDE1NS43MzNDMTAyNCA3MC40IDk1My42IDAgODY4LjI2NyAwSDE1NS43MzNDNzAuNCAwIDAgNzAuNCAwIDE1NS43MzN2NzEyLjUzNEMwIDk1My42IDcwLjQgMTAyNCAxNTUuNzMzIDEwMjRoNzEyLjUzNEM5NTMuNiAxMDI0IDEwMjQgOTUzLjYgMTAyNCA4NjguMjY3VjE1NS43MzN6Ii8+PHBhdGggZmlsbD0iI0ZGRiIgZD0iTTgxMC42NjcgNDIyLjRjLTIuMTM0IDYuNC00LjI2NyAxNC45MzMtOC41MzQgMjMuNDY3Qzc3NC40IDUwNS42IDcwMS44NjcgNjIwLjggNzAxLjg2NyA2MjAuOGwtMjEuMzM0IDM2LjI2N2gxMDIuNEw1ODguOCA5MTUuMmw0NC44LTE3NC45MzNoLTc4LjkzM2wyNy43MzMtMTE1LjJjLTIzLjQ2NyA2LjQtNDkuMDY3IDEyLjgtODEuMDY3IDIzLjQ2NiAwIDAtNDIuNjY2IDI1LjYtMTIxLjYtNDYuOTMzIDAgMC01My4zMzMtNDYuOTMzLTIzLjQ2Ni01OS43MzMgMTIuOC00LjI2NyA2NC0xMC42NjcgMTA0LjUzMy0xNy4wNjcgNTUuNDY3LTYuNCA4Ny40NjctMTAuNjY3IDg3LjQ2Ny0xMC42NjdzLTE2OC41MzQgMi4xMzQtMjA2LjkzNC00LjI2NmMtNDAuNTMzLTYuNC04OS42LTcyLjUzNC0xMDAuMjY2LTEzMi4yNjcgMCAwLTE3LjA2Ny0zMiAzNi4yNjYtMTcuMDY3czI2OC44IDU5LjczNCAyNjguOCA1OS43MzQtMjgxLjYtODcuNDY3LTMwMC44LTEwOC44Yy0xOS4yLTIxLjMzNC01NS40NjYtMTE1LjItNTEuMi0xNzIuOCAwIDAgMi4xMzQtMTQuOTM0IDE3LjA2Ny0xMC42NjcgMCAwIDIwOS4wNjcgOTYgMzUyIDE0Ny4yIDE0MC44IDUzLjMzMyAyNjQuNTMzIDgxLjA2NyAyNDcuNDY3IDE0Ny4yeiIvPjwvc3ZnPg==",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [],
+    "skillName": "dws",
+    "skillNames": [
+      "dws"
+    ]
+  },
+  "cli": {
+    "runtime": {
+      "type": "node",
+      "version": ">=16"
+    },
+    "init": {
+      "darwin": "npm install -g dingtalk-workspace-cli",
+      "linux": "npm install -g dingtalk-workspace-cli",
+      "win32": "npm install -g dingtalk-workspace-cli"
+    },
+    "versionCheck": {
+      "command": {
+        "darwin": "dws --version",
+        "linux": "dws --version",
+        "win32": "dws.cmd --version"
+      },
+      "minVersion": "1.0.59"
+    },
+    "auth": {
+      "darwin": "dws auth login -y",
+      "linux": "dws auth login -y",
+      "win32": "dws.cmd auth login -y"
+    },
+    "unAuth": {
+      "darwin": "dws auth reset",
+      "linux": "dws auth reset",
+      "win32": "dws.cmd auth reset"
+    },
+    "status": {
+      "darwin": "dws auth status",
+      "linux": "dws auth status",
+      "win32": "dws.cmd auth status"
+    },
+    "statusMatch": "\"authenticated\"\\s*:\\s*true",
+    "statusMatchJson": {
+      "authenticated": "true"
+    },
+    "authUrlDomain": "login.dingtalk.com",
+    "authSuppressBrowser": true,
+    "authWaitForExit": true
+  }
+}

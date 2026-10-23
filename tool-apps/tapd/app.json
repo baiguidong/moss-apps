@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.tapd",
+  "displayName": "TAPD",
+  "description": "管理需求、缺陷、任务和迭代。查询项目进度、拆分需求、流转状态、填写工时，覆盖需求到发布的研发全生命周期。",
+  "category": "development",
+  "discovery": {
+    "group": "online"
+  },
+  "keywords": [
+    "tapd",
+    "TAPD",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "tapd",
+    "source": "tapd",
+    "name": "TAPD",
+    "nameEn": "TAPD",
+    "description": "管理需求、缺陷、任务和迭代。查询项目进度、拆分需求、流转状态、填写工时，覆盖需求到发布的研发全生命周期。",
+    "descriptionEn": "Manage stories, bugs, tasks, and iterations. Track progress, break down requirements, update statuses, and log timesheets across the full R&D lifecycle.",
+    "type": "mcp",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "查看我的待办需求和缺陷",
+      "获取需求【客户反馈】的内容，拆分成子需求并分配处理人",
+      "将迭代【v1.0.0 迭代】内未完成的需求移动到下一个迭代",
+      "流转缺陷【缺陷1】状态到「已解决」，并添加评论说明修复方案",
+      "将需求【客户反馈】流转到完成状态，并填写 2 个工时"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAu4AAALuCAMAAADGw2P4AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAA8UExURf///w1o/zKoU/tPT/y5Af+kACeAP+bu5rPbz3LCif7hwF+b/5m///xva/22tv3SYf2RkTV78I57ZPKIJTsxTwcAABp/SURBVHja7N3betpKtoBRTIwlgTAHv/+7Lh/ilcQGqYTqJDzG1xe9901o+CnPKoRYrQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIDs+t3p4eFh1zeeCu5bu9s9fDr1ng/uN/X+T+ofdp4U7lHzLXW985NSf9d6evgZqVvep06DXde1rR1+pT6OYIZ58UJ160+d5KtbiQJSf+N0JvDP5PoLzdeT+u4hlNxvq/0jec2XTr0PT93wfsMko/mlpi734Gd2PULzdR3ByD3R4q75paT+fiWBpy/AOpzmk+oDj2DknnCW0fwCUpd7qtx/H1VqPt5LMD/1d57JVLk7no+W+u4hFs9m0tyNNjOf+j5e6q4iiHkwo/mKjmDkXjZ3zRdP3SXAmXPXfMnUXTRTInfND+kjHcHIvabcNZ8/dbmXzV3zaU4b5T7LOrmu/cl7qLbPkrprxGrJ/ed+JJUxdblXlfuPG22avKnLPexVWWf2E5ovkLrc68z97pvPcATjkshl5X6vzbfFUpd72Au0Lut+mi+buksiF5H7fTTflhnW5b7I3Bf9jZFKUpf7snJf4vF8U0/qrgAO0a3rs4zmK0td7kvNvf5xvsLUXfC+5Nwrbr4vfwTjGrF7zL2+5ttqU5f7feReTfOZLuOVe0LrBSnYfNvXnrrc7y33Qs1XlPpp1/ch14htD495HQ6N3Jf/kVRTVervD2k89+yxfxTfyH3Jx/M1nTb+9cPYu7Hct4+FLOCzkvWydamKr+i08ctvwI/lXqz2BfS+9NzX6+bOU//20VE7cgVwudofD3JPLu5HifUcrJ9O/eX/acO5F1zcHx+3lefeLj/3iOt7PcP6bnf9XbwbvCSyZO3VL+/3kHsXK/bKjmBueJyvf66L5v4o9/TuqPax1EeG96bsLCP3xUzvfXVHMFcN5X6Q+/IvmUk/zTSnZaQ+PLy3ZUf3x8dG7ovIvV9I6sOPtS88y1jdv3wQ2lWa+6lY6tNHseZ67oVnmdpPIjPn/raKNW3s5mPM7kX2pX0b+cH2j3KvKPc/C1TbdVHfRHO37PmPYGa8SXdyX8IVYl+mjljNrxaWe8hp423D+zl/4JvHzWYj99Ahe37zMWaZZjGpDz7al+yx/+01/YPcA8Kc1XyUw68qj2CmPtrTpmDs715+7ffH5+et3EfDvLH5ONcQ7BaT+sCjPW8Gv3B02L5qmr8fx+v/9fr/O7yJlPun9+orO4ZvCu1UY77/4jylTW2njbcM75dzf8088Dl6D39O7X/l/ll9TYt9U3x0n/+A0i6Y9aU+8ObcbKJco7gN+/bfJiT3fxb70tm3teXeFtmopjqb2e1S3dfrdHl038Q7GRxvflLuVSz2TR071Tm5RxsPdxUewUx7sOdIq/ufPIaS31z0K8z+eCyw2LcV7VRv+9iri/dcLCX1q8P7S+zc31f5Q4rcyyz27eJ3qm3iFbPwEcyUo8jTJkXuV4uPkfvf2WdY7NvF71RjPhlLSf3K8H5Olfvq4jdgY+ae6fSyW/pONepWcLeQ1K881peEuV9Y4lPknnjG6SrbqXbFNqqDl6LcfNOArMP7Jmnur396D7lyT7XYdwvfqXbJJ4SSp43XW790d5BT6ty/jDSXc9//ii/aYt8tfKea58PKRJfx3rjD2F29guBS75Gv2TqM1D568D57sd8uJPcUO9U8H1aWOm38nvrQjXAu1h7963Tbkdz3v5K7fbFf+E61iz4lLDT1z1nmQu/RH0i51X32R1UL36nGPwqp7wjm/a9OwO3NznlW9/8HmvK5T1/sl71T7eK/lKPLe5Wpfx5DZlndf/deTe4TFvtl71TzXWr4z10YSx/BDIzuWVb3j96ry3389LJZ9k4108c3hX7+aNptt8+bfKv7e+/V5n59xmkWvVPtkswOY4N7ptPGqR8B5M19VX/uFxb7ZtE71TRT9Mjyfip3sB4wy1zIPc2z1Gyu+VWn98V+yTvVLlFtJYf3m3/k77TJu7qvDktZ3f9yfnq1flrmTjXV55m7QsP7rF8+O1/NPdVltQtb3f/P/VPa7OPvVJOtsGWG93n3ZH3Jnvt24bn/n/0ydqpdsoliV2Z4n/X1qc1Y7tvP+2t8sb35isPH+8g9TfbRd6rpPu4ZWd5T/cNz7kF8vp57yJ003rKPtbzP3lEeX/eUb97eoNuP/3o87vepc48bfPSdasIN467I8L5Lk/uE3xGbmHzEa8TePhEdu7K92T4f9ylzDwi+e/9PgZ1qygtv2yLD+5zvDm5i5D61+EOM1f3tfHDK38s5zT893dh717X/3Hvt7eZr7dA976LvVJNeunIqchQZY3TfzL5L5KGZN828pAr9r3/4xuLPN/T+GvrgGnU5+ti3mOlS1j5yStJUN82c49U+5Rshtw8zx7lfTtoek6zuX3Lvwl7q77/PEXunmvi6xCLDex9hlonSe+gnsYebVvfjc5QXr3neJ8j9aXLrnw/nn1U+9k419eVZixreT5FrDz2sn577/jnmOjU1+Cm537A3bP4s8pF3qsm/IRp1eO8Dv9EaYZbJ2vt24k1R43/iNS344Ny7m/v6KD72TjX5dyz6WMP7x2W8YX8QdnM/Uo2Xe1DvTXju+0S3xmuOCXKftZi+rfGRd6rdalVyeQ8d3v9cxnua/x4LHN2j/X7HrXvVS7kfE94Pr9lHzn3+5NBEHt0zfIGunzm8f7m2MeXwfkqS+/bG3DffF/bEL9VzvHPIp6cu05czu3o2qqPL+7TUw/8gRBjdo+Uechz5GJJ7+pcqdIIPqX2VSU0b1bFBeuABXLmMN+XwvkmS+2Os3DMsl2EDzfjqvs72vfumrllm+Ft8/aTUEw/vp0S5byPlnuP27UE71nM1S/uknWqmR7WbNLyPfTlj9lsscJb5mbkHDfDnemqfMrpnui1jGx5vwE0D0g3vL9NzP/z+0cntx+9MXv6pyVi5P68q6X0k96x3++zq2qiOLO/tpNSTDu9fZpnN2CWPgxU3b+EvM/fx3odzz3u7rOpmmcHlvf88WA/uM9nwfg7NfcJXON5/de/Wreq+UO6jvZ/rqb2tbKM6staept80IOhhN6lyPySZoIOuAM6W++p4+zlk5lshtvUt7oPL+/SpI9Xw/i23OZf0xsj96+p+zPeC7W9d3XPfpb+rbaM64xw86/B+Gq39kO5oJGh1z5j7cO91nMlMzD3no+oj5v6Q5l88j6zuCWMP/DrTPuMLtr0p9+y1r2qcZVbz7g6QZ3h/Ga496aF3fbkPblev5p699rbCjWrs5b1P8QY7bYZW90PaZ+dQX+5D40wl29Qpuef+u1P78H4eyj3155k15t5Mzj3/KBM+ulfw86VVDe8v13M/JF+1Au8jlvcVe56a+6ri3HM/sCZi7im+wbe5mvsh/ZPzGHbnjcwv2X7aOWRTIPdaZ5moy3uC4f10NfcMta8Cb4o6Oajm4155x49b50U7nalllAkf3Qu8Fase3s/Xcs9RexM/99fGv98Ncj/xrjT7Kat7U3HuJd6Kfc3D++ZK7jlqD77ldVirw3fD2x+bucv7Ocri/na3vDfNjPdJV+lGNfL0Hn14P13Lvakp94CLZkK+frffzlvez7MX9y83yOu6tr3pia54lol5JUEf+987X8k9zxNziJZ7E/Zd09AVfhuce/ji3rRX1uRuevIVzzLz7sx7y0XAu1nHkG+5H8rmvk+Ve/DVlfvQ3INLHRy3u2m3L2hrXtxjLu+x316by7lnel5Cf2syoNHw+2MHNfAcmHsXLdApxbeVHrpHX94jD++ny7lPOcb4/d297eqGpWQTuLofI+Ye2HvgOWTY69GEbS2Dp5qu3o1q3OU98lHk+T/2znUxcRsIo24IlWzwBXj/d20uu5t0g63bjCTL5/RnWwLm8DEzyNJz3X07zR/H2AQe1XT2THcP3UO2evT5NC9+6S47JffdNLjuWkYw3v10vybVMme/3UznzTu3faQfCunuM8cfvNK9F7ZddDPUvut2H++in67ntcw5VXbfLd69dR+FdfdZc+aluxG3XfCASVNOd5t3FJlUy3iMZWaRPcRmQd3DzuKIe8CoWibQdsG9f7uC3Gos3h+Rtcz8unPdPWY9k4fuvbztcsd22JK6X7NO3q+qtcwstCHqq6/uJ3Hd3eW78dDdbZQJtV3u2A5TUveuwuI9ci5jXrV1j1jwPgXq7u5+R7fuRshMjU61L2q7WLwLFu+RpfsspfvZW3cjrrv7IRfnHNKdxFZDd1t/LSMX74LFe9wY0ojth1pU9yX8EcNL9/Cz4cUOmCxsu1S8yxXvtzjdByndB3/dB3ndT8GPeA8u3cPDXaxT7UvrLhXvYttv3ON096tlUsbuMUsih2DdXY9p0nUPt12sUzVdI/EuVryf4wYzs9TRHbOk7uYkXs04dZcfy4h1quXDXSrepYr3lVrmbCrQfcygu7OaGVN171+Kdaq2At0vGUeR19haRijdk+aQMVteh+tuEnV/Eak6dDrVCmyXuotPqHh/RKb7oD+HjFkjdhIv3heH7r1E1aHTqdZQy0jFu1DxvqaacwqSQfeIBe+juu6hc0hbrlM1VehuKyreb9G6z+pzSPUVwF4Pmqp7X6xTrSPcpeJdpHhfK93dv6oO+XUf0T3kO8NWorutp3g/R+uuvfw3y5JID90nh+5WXnehTrXrWop3ib3zVmsZn1v3ZnT30L1Yp9pXo7utpXi/r7tmJHyX1f1UQvclv+4ynarp2op3geL9cU6oZtz1e9rYPccK4PTJjHwxI9Op1hPuQisJ0rffuG2o5rcRwaw4h8yyJDJU93toq6pSutv9NKoeJXWu4v2+5ZrfNjNm0Fr+m0l313Mcs09mZDpV0zUW7+nF+6bu3lvmmXlWmUPWsQJ4TEz3vkynWlMt08ksFEtuizddO4e8nOHn5kqv82yy6x68Atg57Tkl6m7LdKqmLt2vFRTvt23dw3dE/b113uC9idgcpLvCksgpVXeXnaZMp1qX7SILxVI3vr5v634e9C9Dcd1N4NdF+K2qRTpVW5nuEvGeWrw/HLpn2AJ4cw6ZYQWws5aZXOt/nWVDX6JTNbXp3uVaR2Aja5k33efCuj/UdXc+4uLU3aWnkS/d+501qkLxnla83526qx8gvD2H1F8BPAY/3g/b3WoV6FTrC3eJ6j2tmnm4ddcuZ8w5KN3FdR+Cvy3u4boX2Pu3q5D0lQRp22+czx6+6+bEEKa79Apg98dn2N5lxs+t7J2qrVF3U3byfvOxXTnfy+rucYLH4qG7EY13iU7VdG3Ge8odfPezn++a124W130RHEI++/Q80d2m+ynbqfZV2i6wDjilePe0XbVfDdRddgWwx5zHbG+Z52uXES3du13WMhLxnlC8u2uZP77PagH/6ngCmiuAfQ6bnHx096gdTNZOtVLbBeI9/s/c/XXXC/izeLpPkrY7truWP2pD5LFqDXeBeI8v3h8humsF/Dkw3eVWAPsdtHby0t0nTm2+TtV0zcZ7fPF+DtJdR/ghVHepFcB+p6o+aQTuz2z3EqzP1an2Xb3cShXvt1DdNYRX0H0QK2Serzd7qrvcSZMCnaqtWPdrlmUzJq50P/9YwS5cw8+huotseb34Pr1l8wzh4PpBaCsku9NGdWMmrl+8R+n+3rSanLor7AE8eT87c/LW3bOAsBk61b5q3a+FivdbpO6iEa+Q7ttLIpeQ5759QnxUe2h69U7VdE3He+yHKlp3QeOdT0ByBfAyhT3rp98Ta7p7Z6pD+OROte5wT4/32OL9kaD7h/Emg+5jTNk9DNM0Lcv4m2WZpohnu4ToHhCqxvaKnaqtXPcuS/F+E6xmvik/ZE73Jd/b8nyiuWZ7WKquGp/eqdZue2q8R0/e76m2Jzs/BOs+ZntXzPOllfc13YNj1fa9QqfaV697V6h4l/L9c4+NIbBcMO9bdVSs+8pSs1Xbo3pEY/+SPrlTNfXrfslQvHeRd+8FMs/v4r+p/+RJGfOxL8f7f/J69qSY7ms/zm7oHh+sb1fGvon/9k9qp7qDcE+9zSNh77zbXdp3L87n2nVfnd6v256rS9x3o5oe72k3rN5u90du3V+jdT9lsn2M0T2LbHbfjerHSyi98fWq86XT/VxG9/U7ALdsz1I5273XMsnxnr7x9arz1emepRXbuCNqW/cMuvU7b1TT413i1Jqvav5/zh9S9637/7Z1z+D7/muZ1Hi/SP+JL+er030oa/t92/YMvu++UU2Pd5U/8eF8dbpPRW3/le4Fy2fbQC2TGu9CxfsThmE+lu5me5+au8t2bd/t/hvV5Hi/qH2iPj5IwzyXsj1mD2BF231017WubyLc0+7i09P9qwuWdL5a3Z03ut7dtut610Kj6pyLFynefw59jIzzIemedUmke0smP90VfW+hUY0urdWL9yczznTnK9V98Nhe8u5lu556tpFaJi3e1aqZtZF+kvN16u61296/nrq/9Ca37v2ubE9aKHbT+kBtfo5M5NgmRXetNWKeuzHdPW3XCvi+lXBPi3et4t39tRExqqxP98F3m+x//XVXCfhGGtXU6v2q9AcunroEOV+b7oP/nvAhuisIb1ppVBPjXat4v4RY4+n8OUX3U0nZ33QPPSNVVnjbTi2TVL1rFe+3YHncLWyQ7torgAMPlQ/VXVh420qjGv1DUEjxbvR19xjbpOkuac8Udm7ZGy8R9HJ1Rt9QLZMU71rFe/xrWXW+Dt2HcNdPp+UlDiv0rBtqVNPiXat4T/z8PnM+TfdBRPXlFMX0EksvYbxpqpZJWSimVbxLvEl/tbBpuk+Jok/LeIplNC8JpBtvG2pUE+M9du88fd3/Htto6z587JI3fe7/8bnbx/S5i94pkcm+pNGnNa59W+GeEu9KxbtobHw6r627OSkxdqm6J4Z831KjmhbvSsW7/IWcHg/lYkZL90lE9wTl22pU0+LdnXrXi9aXRgifXaKv84+IozfUwj3oOGB3YRPqvGmtlkmJ9+1rd73cFGukEL5V0B7Oj/Xovsjq/iW9r/W2sUY1bnjiFDNWdXXdPzJz0/lHzMFKo47uRkP339L31q193164x9/F97x4twmq6+j+VKU155+WFGV0Xzo93b97/27+G8aaT+z7dqm279v6RTU93n+qfk0+pThojZhfAbpeG/9w/nGqSHeTQ/coul0jcgefhOoqujsOgvzu/OMUp/ui1KhWqnu/b92vqXWHEVJdRXefJYiPD1b+ZSHdh81JYElMd8h4v0irXkz3TTL8idUvFcK9oniXVj16BbBq9JbRfapWd7t33bt/6kFc91GiZcyu+7j9Ow+1TJHhjAJZ5pDBRXRu3adqdd99LZN8WNPRdR90ppB16r7/cE8+i08S4cs5CAVtXt0Xx6/4DN2TsOieoLtRCvcadbct6F5RvAtfzymD7p1SuNeou+mI94p1X/ao+1Ct7n3XEe8VFzOLWNTm0/3PuoWecG893msbuxdYATzVq3vXEe81LyIQzNpcun/9QUuj2ni8G3Sf6tXdNKN79G0eVYe7yaL7ohPu1a2Z6duxvYqVBOIrZiRG4pl1/z4JstQyDS8Uu8i/qCy6iy6a+V4wGBrVZuP9ohEe4950//8gyFDLtLhQ7Ha56ryoSTZu9XX/668ZGtXW4v1yVbyQ6fGedQXwjym/6Qn3dqp3VdXfGTLoLrgk8tkfM7anUd1/vKurLuNizhXAq1PPN+V7GtXdVu+Xa7awMKO27kZlClmZ883VMrlWElwumb8Xh0VX90493Ctw3nTEe8QIpkwJOC170N37qJD8zjcY7srxrjZt9DR+FBqWqOkeeGaxzem8bVF326jqvzIxyngP3UelKWRFzncd8V7VCEbL+Hy6R18lqz6q7NvU3Tas+p/GdZQuMcZi4Z7LedMR7xVNGxWNz7YCWOKQTaXSptFwl4v3alUPHtXk0n2UemkKzttWdZeI98tlF5fHt4z3eCSt9QO1OG+a1f3awAhGtnF9/r+aP6cFj2NV4a7gfLO1TJdyF9+uVPc33vz2+1NvKb9jf2IqMKo0Det+bWUEI9W4jjp+64e7mPNdyxxJ9cjh5I7CXWBUaZvW/Xos1YNHNSpku4gRzpuOeH+v1W/Xpj74U7mIX/I2LEGlTd+27X7xvpNpo8aoZs/hHuF84+Hujvc9jmCqNn4p9mo9nG/d9s14b1n1Yo3rUPYTvul88+G+Gu+3VvrSyowfK3jFa6NKe4B32zY8gqlwVDNV877/cN4e4r2+3g6tet5RzVhZ1n2NKvujvO3mspe1jftvXKcKX/ib8/ZQ77u5Xi6HVj2X8WMHcJjGdeICw3GMN1xdOMyoZuHKwnGMJ9zhOI0r4Q4HMn7ggkLtxos1rkwh4UCjGqaQsBvjCXdgVEO4A40r4Q6HNn7h4sEejY9rXPmJCXbbuI6EOxzKeMIdjkTIqIZGFQ7UuLJ+AI5jPOEOzRjvblz5iQmaalxHwh0OZTzhDkdibVQzMoWENo0fCXc4UuP6w/iFiwKHMR7bof3G9ZfxIz8wAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPzXHhyQAAAAAAj6/7odgQoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHATWKaJ5890MTsAAAAASUVORK5CYII=",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "tapd"
+    ],
+    "skillName": "tapd-skill",
+    "skillNames": [
+      "tapd-skill"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "tapd": {
+        "type": "http",
+        "url": "https://websocket.tapd.cn/mcp/mcp"
+      }
+    }
+  }
+}

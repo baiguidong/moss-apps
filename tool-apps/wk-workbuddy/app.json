@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.wk-workbuddy",
+  "displayName": "威科先行",
+  "description": "威科先行依托全面、准确、及时更新的法规、案例等法律数据研发的MCP服务，支持语义检索、关键词检索等场景。",
+  "category": "legal",
+  "discovery": {
+    "group": "online"
+  },
+  "keywords": [
+    "wk-workbuddy",
+    "WoltersKluwer",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.svg",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "wk-workbuddy",
+    "source": "wk-workbuddy",
+    "name": "威科先行",
+    "nameEn": "WoltersKluwer",
+    "description": "威科先行依托全面、准确、及时更新的法规、案例等法律数据研发的MCP服务，支持语义检索、关键词检索等场景。",
+    "descriptionEn": "Built on Wolters Kluwer China's authoritative and real-time legal database, MCP service facilitates diverse search capabilities such as semantic and keyword retrieval.",
+    "type": "mcp",
+    "authMode": "",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "在北京，根据近三年的案例观点，股权激励纠纷是否属于劳动争议？",
+      "北上深关于\"未约定竞业限制经济补偿时用人单位支付标准\"的规定",
+      "合同里写『甲方可随时单方解除合同且不承担任何责任』，这条款有没有问题？",
+      "查询房屋租赁押金返还相关判例，对比不同法院的裁判倾向。"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": false,
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjMyMCIgdmlld0JveD0iMCAwIDMyMCAzMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjE2MCIgY3k9IjE2MCIgcj0iMTYwIiBmaWxsPSIjMDA3QUMzIi8+CjxtYXNrIGlkPSJtYXNrMF8yMzBfMTA3MzAiIHN0eWxlPSJtYXNrLXR5cGU6bHVtaW5hbmNlIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSIwIiB5PSIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjMyMCI+CjxjaXJjbGUgY3g9IjE2MCIgY3k9IjE2MCIgcj0iMTYwIiBmaWxsPSJ3aGl0ZSIvPgo8L21hc2s+CjxnIG1hc2s9InVybCgjbWFzazBfMjMwXzEwNzMwKSI+CjxyZWN0IHg9IjQ3LjA1ODgiIHk9IjQ3LjA1ODgiIHdpZHRoPSIyMjUuODgyIiBoZWlnaHQ9IjIyNS44ODIiIGZpbGw9IiM4NUJDMjAiLz4KPHJlY3QgeT0iMTIyLjM1MyIgd2lkdGg9IjMyMCIgaGVpZ2h0PSI3NS4yOTQxIiBmaWxsPSIjQTZEMUVBIi8+CjxyZWN0IHg9IjEyMi4zNTMiIHk9IjEyMi4zNTMiIHdpZHRoPSIxOTcuNjQ3IiBoZWlnaHQ9Ijc1LjI5NDEiIGZpbGw9IiM0MDlCRDIiLz4KPHJlY3QgeD0iMTIyLjM1MyIgd2lkdGg9Ijc1LjI5NDEiIGhlaWdodD0iMzIwIiBmaWxsPSIjQTZEMUVBIi8+CjxyZWN0IHg9IjEyMi4zNTMiIHk9IjEyMi4zNTMiIHdpZHRoPSI3NS4yOTQxIiBoZWlnaHQ9IjE5Ny42NDciIGZpbGw9IiM0MDlCRDIiLz4KPHJlY3QgeD0iMTIyLjM1MyIgeT0iMTIyLjM1MyIgd2lkdGg9IjE1MC41ODgiIGhlaWdodD0iMTUwLjU4OCIgZmlsbD0iI0E0Q0Q1OCIvPgo8cmVjdCB4PSI0Ny4wNTg4IiB5PSI0Ny4wNTg4IiB3aWR0aD0iMTUwLjU4OCIgaGVpZ2h0PSIxNTAuNTg4IiBmaWxsPSIjRDRFOEIxIi8+CjxyZWN0IHdpZHRoPSIxMjIuMzUzIiBoZWlnaHQ9IjEyMi4zNTMiIGZpbGw9IiM0MDlCRDIiLz4KPHJlY3QgeD0iMTIyLjM1MyIgeT0iMTIyLjM1MyIgd2lkdGg9Ijc1LjI5NDEiIGhlaWdodD0iNzUuMjk0MSIgZmlsbD0iI0U1MjAyRSIvPgo8cmVjdCB4PSI0Ny4wNTg4IiB5PSI0Ny4wNTg4IiB3aWR0aD0iNzUuMjk0MSIgaGVpZ2h0PSI3NS4yOTQxIiBmaWxsPSIjQTRDRDU4Ii8+CjxyZWN0IHg9IjE5Ny42NDciIHk9IjE5Ny42NDciIHdpZHRoPSI3NS4yOTQxIiBoZWlnaHQ9Ijc1LjI5NDEiIGZpbGw9IiM4NUJDMjAiLz4KPC9nPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTI5OC42ODkgMjk2Ljc1MkgzMDMuNjg1QzMwNC43MDMgMjk2Ljc1MiAzMDUuNTk2IDI5Ni44NzIgMzA2LjI0OCAyOTcuMTE4QzMwOC4zNSAyOTcuNzA5IDMwOS4zNzYgMjk5LjI0MyAzMDkuMzc2IDMwMS4wMDFDMzA5LjM3NiAzMDMuNDkyIDMwNy40MiAzMDQuNzc5IDMwNS41OTYgMzA1LjIwMVYzMDUuMjcyQzMwNi42ODggMzA1Ljc5OSAzMDguMzk0IDMwOC44NjcgMzEwLjMxMyAzMTIuMjUxSDMwNi41NjNDMzA0LjQ1NCAzMDguNTcxIDMwMy4yMDEgMzA2LjEzNyAzMDIuNTA2IDMwNi4wODFIMzAxLjk0OVYzMTIuMjUxSDI5OC42ODlWMjk2Ljc1MkgyOTguNjg5Wk0zMDIuNzMzIDMwMy42MDRDMzA0LjQxIDMwMy42MDQgMzA1Ljg4MiAzMDIuOTY0IDMwNS44ODIgMzAxLjM2N0MzMDUuODgyIDMwMC40MTcgMzA1LjQ1NyAyOTkuNyAzMDQuNTg2IDI5OS40ODJDMzA0LjEwMiAyOTkuMjc4IDMwMy41NjggMjk5LjI0MiAzMDIuODEzIDI5OS4yNDJIMzAxLjk0OVYzMDMuNjA0SDMwMi43MzNaIiBmaWxsPSIjNDc0NzQ3Ii8+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMzIwIDMwNC41MDFDMzIwIDMxMy4wNTkgMzEzLjA1OSAzMjAgMzA0LjUwMSAzMjBDMjk1Ljk0MyAzMjAgMjg5LjAwMyAzMTMuMDU5IDI4OS4wMDMgMzA0LjUwMUMyODkuMDAzIDI5NS45NDMgMjk1Ljk0MyAyODkuMDAzIDMwNC41MDEgMjg5LjAwM0MzMTMuMDU5IDI4OS4wMDMgMzIwIDI5NS45NDMgMzIwIDMwNC41MDFaTTMwNC40OTQgMjkyLjI2OEMyOTcuNzM2IDI5Mi4yNjggMjkyLjI2MSAyOTcuNzUxIDI5Mi4yNjEgMzA0LjUwMkMyOTIuMjYxIDMxMS4yNTIgMjk3Ljc0MyAzMTYuNzM1IDMwNC40OTQgMzE2LjczNUMzMTEuMjUyIDMxNi43MzUgMzE2LjczNSAzMTEuMjUyIDMxNi43MzUgMzA0LjUwMkMzMTYuNzM1IDI5Ny43NTEgMzExLjI1MiAyOTIuMjY4IDMwNC40OTQgMjkyLjI2OFoiIGZpbGw9IiM0NzQ3NDciLz4KPC9zdmc+Cg==",
+    "enabled": true,
+    "credentialSchema": null,
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "wk-mcp"
+    ],
+    "skillName": "connector-wk-workbuddy",
+    "skillNames": [
+      "connector-wk-workbuddy"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "wk-mcp": {
+        "type": "http",
+        "url": "https://mcp.wkinfo.com.cn/mcp-servers/integrated/"
+      }
+    }
+  }
+}

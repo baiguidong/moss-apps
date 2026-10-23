@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { createHash } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import { traceStore, trimTraceCallPreviews, withTraceScope } from './api/traceStore'
 import type { MessageEntry } from '../types/trace-session'
 
@@ -11,6 +11,26 @@ function identity(value: unknown): string {
 }
 export function createTraceStore(dataDir: string) {
   const scope = path.join(dataDir, 'trace')
+  async function summary(sessionId: string) {
+    const snapshotFile = path.join(scope, 'sessions', `${identity(sessionId)}.json`)
+    const summaryFile = path.join(scope, 'session-summaries', `${identity(sessionId)}.json`)
+    const [snapshotStat, summaryStat] = await Promise.all([
+      fs.stat(snapshotFile).catch(() => null), fs.stat(summaryFile).catch(() => null),
+    ])
+    if (summaryStat && (!snapshotStat || summaryStat.mtimeMs >= snapshotStat.mtimeMs)) {
+      return JSON.parse(await fs.readFile(summaryFile, 'utf8')) as { session?: Awaited<ReturnType<typeof metadata>>['session'] }
+    }
+    const { session } = await metadata(sessionId)
+    if (snapshotStat) {
+      await fs.mkdir(path.dirname(summaryFile), { recursive: true })
+      const temporary = `${summaryFile}.${randomUUID()}.tmp`
+      try {
+        await fs.writeFile(temporary, JSON.stringify({ session }), { mode: 0o600 })
+        await fs.rename(temporary, summaryFile)
+      } finally { await fs.rm(temporary, { force: true }) }
+    }
+    return { session }
+  }
   async function metadata(id: string): Promise<{ session?: { id: string; title: string; projectPath: string; workDir: string | null }; messages: MessageEntry[] }> {
     try {
       const value = JSON.parse(await fs.readFile(path.join(scope, 'sessions', `${identity(id)}.json`), 'utf8'))
@@ -26,11 +46,19 @@ export function createTraceStore(dataDir: string) {
       return withTraceScope(scope, async () => {
         if (method === 'traces.list') {
           const query = String(input.query || '').trim().toLowerCase()
-          const { files } = await traceStore.listSessionTraceFiles()
-          const metadataById = new Map(await Promise.all(files.map(async file => [file.sessionId, await metadata(file.sessionId)] as const)))
-          const sessionIds = files.filter(file => !query || [file.sessionId, metadataById.get(file.sessionId)?.session?.title,
-            metadataById.get(file.sessionId)?.session?.projectPath].some(value => value?.toLowerCase().includes(query))).map(file => file.sessionId)
+          const metadataById = new Map<string, Awaited<ReturnType<typeof summary>>>()
+          let sessionIds: string[] | undefined
+          if (query) {
+            const { files } = await traceStore.listSessionTraceFiles()
+            sessionIds = []
+            for (const file of files) {
+              const meta = await summary(file.sessionId)
+              metadataById.set(file.sessionId, meta)
+              if ([file.sessionId, meta.session?.title, meta.session?.projectPath].some(value => value?.toLowerCase().includes(query))) sessionIds.push(file.sessionId)
+            }
+          }
           const result = await traceStore.listSessionTraces({ limit: input.limit ?? 50, offset: input.offset ?? 0, sessionIds })
+          for (const item of result.traces) if (!metadataById.has(item.sessionId)) metadataById.set(item.sessionId, await summary(item.sessionId))
           return { ...result, traces: result.traces.map(item => ({ ...item, session: metadataById.get(item.sessionId)?.session })) }
         }
         const id = identity(input.sessionId)
@@ -53,6 +81,7 @@ export function createTraceStore(dataDir: string) {
         if (method === 'traces.delete') {
           const result = await traceStore.deleteSessionTrace(id)
           await fs.rm(path.join(scope, 'sessions', `${id}.json`), { force: true })
+          await fs.rm(path.join(scope, 'session-summaries', `${id}.json`), { force: true })
           return result
         }
         throw new Error('不支持的 Trace 操作。')

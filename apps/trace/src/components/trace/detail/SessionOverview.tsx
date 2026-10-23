@@ -3,7 +3,7 @@ import { useTraceTarget } from '../TraceTarget'
 // Adapted from cc-haha Trace; retain protocol and timeline semantics.
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@/lib/trace/i18n'
-import type { TraceSpan, TraceViewModel } from '@/lib/trace/viewModel'
+import { getTraceErrorSpans, getToolDurationMs, type TraceSpan, type TraceViewModel } from '@/lib/trace/viewModel'
 import { formatDurationMs, formatTokenCount } from '../../../lib/trace/formatters'
 import { fetchTraceCallDetail } from '../../../lib/trace/callCache'
 import { parseTraceRequestBody } from '../../../lib/trace/requestParse'
@@ -223,7 +223,6 @@ function computeStats(span: TraceSpan, viewModel: TraceViewModel): OverviewStats
   }
   const models = new Set<string>()
   let modelDurationMs = 0
-  let toolDurationMs = 0
   for (const item of scoped) {
     if (item.kind === 'llm') {
       stats.llmCalls += 1
@@ -238,14 +237,13 @@ function computeStats(span: TraceSpan, viewModel: TraceViewModel): OverviewStats
     }
     if (item.kind === 'tool') {
       stats.toolCalls += 1
-      if (item.durationMs !== undefined) toolDurationMs += item.durationMs
     }
-    if (item.status === 'error') stats.errors += 1
   }
+  stats.errors = getTraceErrorSpans(scoped).length
   stats.models = [...models]
   if (span.durationMs !== undefined && span.durationMs > 0) stats.wallDurationMs = span.durationMs
   if (modelDurationMs > 0) stats.modelDurationMs = modelDurationMs
-  if (toolDurationMs > 0) stats.toolDurationMs = toolDurationMs
+  stats.toolDurationMs = getToolDurationMs(scoped)
   return stats
 }
 

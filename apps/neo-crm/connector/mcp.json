@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "neo-crm": {
-      "type": "http",
-      "url": "https://mcp.xiaoshouyi.com/mcp"
-    }
-  }
-}

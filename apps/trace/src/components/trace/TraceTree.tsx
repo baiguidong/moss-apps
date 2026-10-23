@@ -8,7 +8,7 @@ import { IconButton } from '@/components/trace/primitives'
 import { SearchField } from '@/components/trace/primitives'
 import { SegmentedControl } from '@/components/trace/primitives'
 import { useTranslation } from '@/lib/trace/i18n'
-import { previewTraceValue, type TraceSpan, type TraceViewModel } from '@/lib/trace/viewModel'
+import { getTraceErrorSpans, previewTraceValue, type TraceSpan, type TraceViewModel } from '@/lib/trace/viewModel'
 import { formatDurationMs, formatTokenCount } from '../../lib/trace/formatters'
 import { StatusGlyph, TypeIcon, spanDisplayTitle, turnDisplayTitle } from './TraceBadges'
 
@@ -337,8 +337,9 @@ function buildTreeGroups(viewModel: TraceViewModel, filter: TraceTreeFilter, que
     // Depth relative to the turn header: session=0, turn=1, direct child=2.
     const depth = Math.max(0, (depthById.get(span.id) ?? 2) - 2)
     group.rows.push({ span, depth })
-    if (span.status === 'error') group.errorCount += 1
   }
+
+  for (const group of groups) group.errorCount = getTraceErrorSpans(group.rows.map(row => row.span)).length
 
   return groups.filter((group) => group.rows.length > 0 || (!query.trim() && filter === 'all'))
 }

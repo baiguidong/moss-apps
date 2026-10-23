@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "id": "moss.gildata",
+  "displayName": "恒生聚源 MCP",
+  "description": "连接恒生聚源 MCP，查询金融结构化数据、研究报告、公司公告、新闻资讯、条件选股、宏观行业、工商企业数据。支持基金经理观点持仓一致性分析、行业速报生成、金融资讯热点解读。",
+  "category": "finance",
+  "discovery": {
+    "group": "online",
+    "authMethods": [
+      "api-key"
+    ]
+  },
+  "keywords": [
+    "gildata",
+    "Gildata MCP",
+    "mcp",
+    "skills"
+  ],
+  "icon": "assets/icon.png",
+  "toolScope": "session",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "version": "0.1.1",
+  "connector": {
+    "id": "gildata",
+    "source": "gildata",
+    "name": "恒生聚源 MCP",
+    "nameEn": "Gildata MCP",
+    "description": "连接恒生聚源 MCP，查询金融结构化数据、研究报告、公司公告、新闻资讯、条件选股、宏观行业、工商企业数据。支持基金经理观点持仓一致性分析、行业速报生成、金融资讯热点解读。",
+    "descriptionEn": "Connect to Gildata MCP to query structured financial data, research reports, corporate announcements, news, conditional stock selection, macroeconomic & industry data, as well as enterprise business data.",
+    "type": "mcp",
+    "authMode": "token",
+    "providerId": "",
+    "authConfig": null,
+    "minWorkbuddyVersion": "4.23.0",
+    "visibleIn": [
+      "internal",
+      "iOA",
+      "cloudhosted",
+      "selfhosted"
+    ],
+    "examples": [
+      "帮我分析张坤在 2024 年底的观点与持仓一致性",
+      "生成半导体行业的 24 小时速报",
+      "今天有什么重要的金融新闻要闻？",
+      "帮我筛选市盈率低于 15 的沪深 300 成分股",
+      "查询贵州茅台最近的研究报告"
+    ],
+    "hasMcp": true,
+    "hasCli": false,
+    "hasSkills": true,
+    "hasCredentialSchema": true,
+    "icon": "data:image/png;base64,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",
+    "enabled": true,
+    "credentialSchema": {
+      "title": "恒生聚源授权",
+      "titleEn": "Gildata Authorization",
+      "description": "连接您的恒生聚源 MCP，用于查询金融结构化数据、研究报告、公司公告、新闻资讯、条件选股、宏观行业、工商企业数据。Token 与接口地址仅存储在本机 ~/.workbuddy 下。",
+      "descriptionEn": "Connect to Gildata MCP to query structured financial data, research reports, corporate announcements, news, conditional stock selection, macroeconomic & industry data, as well as enterprise business data.Token and API address are stored locally in ~/.workbuddy only.",
+      "docUrl": "https://www.feishu.cn/docx/MeCmd4q0Yo7nmkx9D8IcMYbknob",
+      "docLabel": "如何使用恒生聚源 MCP 并获取授权 token",
+      "docLabelEn": "How to Use Gildata MCP and Get Your Access Token",
+      "fields": [
+        {
+          "key": "GILDATA_TOKEN",
+          "label": "Access Token",
+          "labelEn": "Access Token",
+          "placeholder": "请填写恒生聚源下发的 Access Token",
+          "placeholderEn": "Access Token issued by Gildata",
+          "description": "用于访问恒生聚源 MCP 的个人访问令牌。",
+          "descriptionEn": "Personal access token for accessing Gildata MCP.",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    "requiresCliSetup": false,
+    "mcpServerNames": [
+      "gildata-finance-data"
+    ],
+    "skillName": "jy-fund-consistency-analysis",
+    "skillNames": [
+      "jy-fund-consistency-analysis",
+      "jy-industry-brief",
+      "jy-news-interpretation"
+    ]
+  },
+  "mcp": {
+    "mcpServers": {
+      "gildata-finance-data": {
+        "type": "http",
+        "url": "https://api.gildata.com/mcp-servers/aidata-assistant-srv-tool?token=${GILDATA_TOKEN}"
+      }
+    }
+  }
+}

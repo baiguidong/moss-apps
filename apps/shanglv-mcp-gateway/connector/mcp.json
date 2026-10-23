@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "shanglv-mcp-gateway": {
-      "type": "http",
-      "url": "https://mcp-gateway.yql.net/mcp/finance"
-    }
-  }
-}

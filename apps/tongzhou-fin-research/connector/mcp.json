@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "tongzhou-fin-research": {
-      "type": "http",
-      "url": "https://mcp-gateway.textmind-gz.com/mcp/tongzhou-research"
-    }
-  }
-}

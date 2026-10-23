@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.kuaicha-search",
+  "summary": "查询中国企业工商、股权投资、经营司法风险、知识产权、招投标及新闻舆情数据。",
+  "description": "查询中国企业工商、股权投资、经营司法风险、知识产权、招投标及新闻舆情数据。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/kuaicha-search",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

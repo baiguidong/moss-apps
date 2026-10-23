@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.uupt",
+  "summary": "通过自然语言使用 UU跑腿：同城配送与帮帮服务，支持询价、下单、查单、取消和跑男追踪",
+  "description": "通过自然语言使用 UU跑腿：同城配送与帮帮服务，支持询价、下单、查单、取消和跑男追踪",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/uupt",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}

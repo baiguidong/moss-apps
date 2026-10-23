@@ -3,7 +3,7 @@
   "id": "moss.file-cleaner",
   "version": "0.1.4",
   "displayName": "文件清理",
-  "category": "knowledge",
+  "category": "files",
   "keywords": [
     "文件清理",
     "czkawka",
@@ -11,7 +11,7 @@
   ],
   "description": "扫描重复文件、相似图片和磁盘问题，查看结果并按策略清理。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.14.0",
+  "hostApi": "^3.21.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"

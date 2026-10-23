@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.qq-mail",
+  "summary": "收发、搜索和整理 QQ 邮件。用自然语言读取邮件内容、汇总邮件线程、管理文件夹。",
+  "description": "收发、搜索和整理 QQ 邮件。用自然语言读取邮件内容、汇总邮件线程、管理文件夹。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/tool-apps/qq-mail",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false
+}
