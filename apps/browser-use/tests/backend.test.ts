@@ -58,7 +58,7 @@ test('registers before ready, inspects after ready without any UI request, and r
   expect(compileJsonSchema(schema)(result)).toBe(true)
   await Promise.all([f.invoke('servers.list'), f.invoke('servers.list')])
   expect(f.messages.filter(message => message.type === 'host.request' && message.payload.method === 'servers.save')).toHaveLength(1)
-  expect(manifest.contributes?.tools ?? []).toHaveLength(0)
+  expect((manifest.contributes as { tools?: unknown[] } | undefined)?.tools ?? []).toHaveLength(0)
   expect(manifest.permissions).not.toContain('mcp:auth')
 })
 

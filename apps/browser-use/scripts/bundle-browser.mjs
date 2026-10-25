@@ -1,6 +1,10 @@
 import fs from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
+import { createReadStream, createWriteStream } from 'node:fs'
+import { Readable } from 'node:stream'
+import { pipeline } from 'node:stream/promises'
+import { createGzip } from 'node:zlib'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -15,6 +19,110 @@ const hash = buffer => createHash('sha256').update(buffer).digest('hex')
 function run(command, args, cwd) {
   const result = spawnSync(command, args, { cwd, stdio: 'inherit', timeout: 900000, env: { ...process.env, COPYFILE_DISABLE: '1' } })
   if (result.error || result.status !== 0) throw result.error || new Error(`${command} failed (${result.status})`)
+}
+
+function putString(buffer, offset, length, value) {
+  const bytes = Buffer.from(value)
+  if (bytes.length > length) throw new Error(`Tar header field is too long: ${value}`)
+  bytes.copy(buffer, offset)
+}
+
+function putOctal(buffer, offset, length, value) {
+  const digits = Math.max(0, value).toString(8)
+  if (digits.length > length - 1) throw new Error(`Tar header number is too large: ${value}`)
+  putString(buffer, offset, length, `${digits.padStart(length - 1, '0')}\0`)
+}
+
+function splitTarPath(name) {
+  const slash = name.lastIndexOf('/')
+  if (Buffer.byteLength(name) <= 100) return { base: name, prefix: '' }
+  if (slash > 0 && Buffer.byteLength(name.slice(0, slash)) <= 155 && Buffer.byteLength(name.slice(slash + 1)) <= 100) {
+    return { base: name.slice(slash + 1), prefix: name.slice(0, slash) }
+  }
+  return null
+}
+
+function tarHeader(name, stat, type, linkname = '') {
+  const fields = splitTarPath(name)
+  const base = fields?.base || name.slice(-100)
+  const prefix = fields?.prefix || ''
+  if (Buffer.byteLength(base) > 100) throw new Error(`Tar path is too long: ${name}`)
+  const header = Buffer.alloc(512)
+  putString(header, 0, 100, base)
+  putOctal(header, 100, 8, stat.mode & 0o7777)
+  putOctal(header, 108, 8, 0)
+  putOctal(header, 116, 8, 0)
+  putOctal(header, 124, 12, type === '0' || type === 'x' ? stat.size : 0)
+  putOctal(header, 136, 12, 0)
+  header.fill(0x20, 148, 156)
+  header[156] = type.charCodeAt(0)
+  putString(header, 157, 100, linkname)
+  putString(header, 257, 6, 'ustar\0')
+  putString(header, 263, 2, '00')
+  putString(header, 265, 32, 'root')
+  putString(header, 297, 32, 'root')
+  if (prefix) putString(header, 345, 155, prefix)
+  const checksum = header.reduce((sum, byte) => sum + byte, 0)
+  putString(header, 148, 8, `${checksum.toString(8).padStart(6, '0')}\0 `)
+  return header
+}
+
+function paxPathRecord(name) {
+  const body = `path=${name}\n`
+  let length = Buffer.byteLength(body) + 2
+  while (String(length).length + 1 + Buffer.byteLength(body) !== length) length++
+  return Buffer.from(`${length} ${body}`)
+}
+
+function paxPathHeader(name, stat) {
+  const data = paxPathRecord(name)
+  const header = tarHeader('PaxHeaders.0/entry', { ...stat, size: data.length }, 'x')
+  const padding = (512 - (data.length % 512)) % 512
+  return [header, data, padding ? Buffer.alloc(padding) : null]
+}
+
+async function* tarEntries(root, current = '.') {
+  const directory = current === '.' ? root : path.join(root, current)
+  const entries = (await fs.readdir(directory, { withFileTypes: true })).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
+  for (const entry of entries) {
+    const relative = current === '.' ? entry.name : `${current}/${entry.name}`
+    const file = path.join(root, relative)
+    const stat = await fs.lstat(file)
+    if (stat.isDirectory()) {
+      yield { relative, file, stat, type: '5' }
+      yield* tarEntries(root, relative)
+    } else if (stat.isFile()) yield { relative, file, stat, type: '0' }
+    else if (stat.isSymbolicLink()) yield { relative, file, stat, type: '2', linkname: await fs.readlink(file) }
+    else throw new Error(`Unsupported browser archive entry: ${file}`)
+  }
+}
+
+async function* deterministicTar(root) {
+  const rootStat = await fs.lstat(root)
+  yield tarHeader('.', rootStat, '5')
+  for await (const entry of tarEntries(root)) {
+    if (!splitTarPath(entry.relative)) {
+      const [header, data, padding] = paxPathHeader(entry.relative, entry.stat)
+      yield header
+      yield data
+      if (padding) yield padding
+    }
+    yield tarHeader(entry.relative, entry.stat, entry.type, entry.linkname)
+    if (entry.type !== '0') continue
+    let size = 0
+    for await (const chunk of createReadStream(entry.file)) {
+      size += chunk.length
+      yield chunk
+    }
+    if (size !== entry.stat.size) throw new Error(`Browser archive entry changed while packaging: ${entry.relative}`)
+    const padding = (512 - (size % 512)) % 512
+    if (padding) yield Buffer.alloc(padding)
+  }
+  yield Buffer.alloc(1024)
+}
+
+async function writeDeterministicTarGzip(source, destination) {
+  await pipeline(Readable.from(deterministicTar(source)), createGzip({ level: 9 }), createWriteStream(destination))
 }
 
 export async function bundleBrowser(appRoot, target) {
@@ -44,7 +152,7 @@ export async function bundleBrowser(appRoot, target) {
     run('unzip', ['-q', zip, '-d', extracted], appRoot)
     await fs.access(path.join(extracted, archive[1]))
     const compressed = path.join(temporary, 'browser.tar.gz')
-    run('tar', ['-czf', compressed, '-C', extracted, '.'], appRoot)
+    await writeDeterministicTarGzip(extracted, compressed)
     const parts = []
     const input = await fs.open(compressed, 'r')
     const whole = createHash('sha256')

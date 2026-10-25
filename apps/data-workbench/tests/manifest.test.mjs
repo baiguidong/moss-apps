@@ -14,7 +14,7 @@ test('manifest uses only Host capabilities without cross-App declarations', () =
   assert.deepEqual(validated.host.protocols, ['moss.local-files/v1', 'moss.runtime/v1', 'moss.artifacts/v1'])
   assert.equal(manifest.appCapabilities, undefined)
   assert.equal(validated.appCapabilities, undefined)
-  assert.equal(validated.hostApi, '^3.20.0')
+  assert.equal(validated.hostApi, '^3.21.0')
   assert.equal(validated.backend.lifecycle, 'on-demand')
 })
 
