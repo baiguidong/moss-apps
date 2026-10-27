@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.hyperframes",
+  "summary": "使用本地 HyperFrames 将 HTML 动画渲染为 MP4。",
+  "description": "在 Moss 中编辑 HTML/CSS 场景，使用本地 Chromium 和随包 FFmpeg 生成视频。",
+  "platforms": ["darwin-arm64"],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/hyperframes",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT",
+  "featured": false
+}

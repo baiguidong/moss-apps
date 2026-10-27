@@ -20,6 +20,7 @@ void (async () => { try {
   nativeTheme.themeSource = 'dark'
   let appearance = { themeMode: 'light', cssThemeId: 'grid-theme' }
   let rejectNative = false
+  const requests = []
   let status = { enabled: false, supported: true, phase: 'disabled', permissions: { accessibility: true, screenRecording: false }, apps: [], version: '0.34.0' }
   const preload = path.join(temporary, 'preload.cjs')
   await fs.writeFile(preload, `const {contextBridge,ipcRenderer}=require('electron'); contextBridge.exposeInMainWorld('mossApp', {
@@ -33,6 +34,7 @@ void (async () => { try {
   ipcMain.handle('ui-test:info', () => ({ appearance }))
   ipcMain.handle('ui-test:request', (_event, {protocol, method, input}) => {
     assert.equal(protocol, 'moss.host/v1'); assert.equal(method, 'native.settings')
+    requests.push(input.operation)
     if (rejectNative) return {ok:false,error:{message:'Native adapters require a trusted signature from a Host-approved native publisher'}}
     if (input.operation === 'enable') status = {...status, enabled: input.enabled, phase: input.enabled ? 'ready' : 'disabled'}
     return {ok:true,result:status}
@@ -54,6 +56,7 @@ void (async () => { try {
   }
   await window.loadFile(path.join(uiRoot, 'index.html'))
   await waitFor(`document.getElementById('phase').textContent === '控制已关闭' && document.documentElement.dataset.theme === 'light'`)
+  assert.ok(requests.includes('check'), 'the first render should perform a real permission check')
   assert.equal(await read(`matchMedia('(prefers-color-scheme: dark)').matches`), true)
   const light = await read(`getComputedStyle(document.body).backgroundColor`)
   await capture('settings-light-grid')

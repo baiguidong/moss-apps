@@ -1,0 +1,1 @@
+{"type":"object","properties":{"operation":{"type":"string","enum":["render","validate"],"default":"render"},"projectId":{"type":"string","pattern":"^[a-zA-Z0-9_-]{1,64}$"},"fps":{"type":"number","minimum":1,"maximum":120},"quality":{"type":"string","enum":["fast","balanced","high"]}},"required":["projectId"],"additionalProperties":false}

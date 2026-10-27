@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.hyperframes",
+  "version": "0.3.4",
+  "displayName": "HyperFrames 动画工坊",
+  "category": "creative",
+  "keywords": ["HTML动画", "本地视频", "HyperFrames", "MP4"],
+  "description": "使用本地 HyperFrames 将 HTML 动画渲染为视频。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.21.0",
+  "publisher": { "id": "moss", "name": "Moss" },
+  "toolScope": "session",
+  "navigation": { "location": "more", "viewId": "workspace" },
+  "ui": { "entry": "dist/ui/index.html", "window": { "width": 1280, "height": 860, "resizable": true } },
+  "backend": {
+    "entry": "dist/backend/main.mjs", "runtime": "node", "apiVersion": 1, "lifecycle": "persistent",
+    "actions": [
+      { "name": "composer.list", "inputSchema": "schemas/composer-list.json", "outputSchema": "schemas/composer-list-result.json" },
+      { "name": "composer.resolve", "inputSchema": "schemas/composer-resolve.json", "outputSchema": "schemas/result.json" },
+      { "name": "templates.list", "inputSchema": "schemas/empty.json", "outputSchema": "schemas/result.json" },
+      { "name": "projects.storyboard.save", "inputSchema": "schemas/storyboard-save.json", "outputSchema": "schemas/result.json" },
+      { "name": "projects.scene.save", "inputSchema": "schemas/scene-save.json", "outputSchema": "schemas/result.json" },
+      { "name": "workspace.get", "inputSchema": "schemas/empty.json", "outputSchema": "schemas/result.json" },
+      { "name": "projects.list", "inputSchema": "schemas/empty.json", "outputSchema": "schemas/result.json" },
+      { "name": "tasks.start", "inputSchema": "schemas/render.json", "outputSchema": "schemas/result.json" },
+      { "name": "projects.create", "inputSchema": "schemas/project-create.json", "outputSchema": "schemas/result.json" },
+      { "name": "projects.get", "inputSchema": "schemas/id.json", "outputSchema": "schemas/result.json" },
+      { "name": "projects.save", "inputSchema": "schemas/project-save.json", "outputSchema": "schemas/result.json" },
+      { "name": "projects.validate", "inputSchema": "schemas/id.json", "outputSchema": "schemas/result.json" },
+      { "name": "assets.import", "inputSchema": "schemas/assets-import.json", "outputSchema": "schemas/result.json" },
+      { "name": "tasks.get", "inputSchema": "schemas/id.json", "outputSchema": "schemas/result.json" },
+      { "name": "tasks.cancel", "inputSchema": "schemas/id.json", "outputSchema": "schemas/result.json" },
+      { "name": "artifacts.export", "inputSchema": "schemas/artifact.json", "outputSchema": "schemas/result.json" },
+      { "name": "files.preview", "inputSchema": "schemas/id.json", "outputSchema": "schemas/result.json" }
+    ]
+  },
+  "host": { "protocols": ["moss.local-files/v1"] },
+  "permissions": ["local-files:pick"],
+  "contributes": {
+    "resourceProviders": [{ "id": "video-projects", "title": "HyperFrames 视频项目", "schemes": ["moss-hyperframes"], "listAction": "composer.list", "resolveAction": "composer.resolve" }],
+    "views": [{ "id": "workspace", "title": "HyperFrames 动画工坊", "route": "#/", "order": 275 }, { "id": "moss-conversation", "title": "HyperFrames", "route": "#/workbench" }],
+    "tools": [
+      { "id": "templates-list", "title": "列出视频模板", "description": "列出产品介绍、数据报告、教学讲解和项目汇报的离线模板。", "action": "templates.list", "inputSchema": "schemas/empty.json", "effect": "read" },
+      { "id": "projects-create", "title": "创建视频项目", "description": "按用途、风格、画幅和时长创建持久化项目与中文示例分镜。", "action": "projects.create", "inputSchema": "schemas/project-create.json", "effect": "write" },
+      { "id": "projects-get", "title": "读取视频项目", "description": "读取项目需求、已保存分镜与场景 HTML。", "action": "projects.get", "inputSchema": "schemas/id.json", "effect": "read" },
+      { "id": "projects-list", "title": "列出视频项目", "description": "列出本地持久化视频项目。", "action": "projects.list", "inputSchema": "schemas/empty.json", "effect": "read" },
+      { "id": "storyboard-save", "title": "保存视频分镜", "description": "保存分镜标题、时长、旁白与画面说明；总时长不超过一小时。", "action": "projects.storyboard.save", "inputSchema": "schemas/storyboard-save.json", "effect": "write" },
+      { "id": "scene-save", "title": "保存动画场景", "description": "保存分镜的离线 HTML/CSS 片段。每个场景的 CSS 动画从本镜头 0 秒开始，animation-delay 只表示镜头内延迟，禁止累加前序镜头时长。例如第二镜头在全片第 4 秒开始，入场动画仍使用 0s 延迟。检查返回的 warnings 并修正超出镜头时长的延迟。不接受脚本、外链和嵌入页面。", "action": "projects.scene.save", "inputSchema": "schemas/scene-save.json", "effect": "write" },
+      { "id": "projects-validate", "title": "校验视频项目", "description": "检查分镜、场景完整性和画幅时长，生成项目文件。valid 只表示结构有效；必须检查 warnings 中的动画延迟问题，成片仍需逐镜头检查。", "action": "projects.validate", "inputSchema": "schemas/id.json", "effect": "write" },
+      { "id": "tasks-start", "title": "开始本地视频任务", "description": "用户确认后以 render 操作渲染已保存内容；也可使用 validate 运行引擎检查。不接受任意命令或 argv。", "action": "tasks.start", "inputSchema": "schemas/render.json", "effect": "write" },
+      { "id": "tasks-get", "title": "查看视频任务", "description": "查询任务状态、日志和视频产物。", "action": "tasks.get", "inputSchema": "schemas/id.json", "effect": "read" },
+      { "id": "tasks-cancel", "title": "取消视频任务", "description": "取消指定本地渲染任务。", "action": "tasks.cancel", "inputSchema": "schemas/id.json", "effect": "write" },
+      { "id": "artifacts-export", "title": "导出视频产物", "description": "通过本地目录选择器导出成功任务的指定产物；不会覆盖已有文件。", "action": "artifacts.export", "inputSchema": "schemas/artifact.json", "effect": "write" }
+    ],
+    "skills": [{ "id": "moss-hyperframes", "title": "Agent 视频创作", "description": "在主会话完成需求、模板、分镜、场景、校验、确认渲染和导出。", "path": "resources/skills/moss-hyperframes/SKILL.md", "cli": "dist/backend/cli.mjs" }]
+  },
+  "platforms": ["darwin-arm64"]
+}

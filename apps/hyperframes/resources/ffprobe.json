@@ -1,0 +1,11 @@
+{
+  "id": "ffprobe",
+  "version": "5.0.1",
+  "platform": "darwin-arm64",
+  "url": "https://registry.npmjs.org/@ffprobe-installer/darwin-arm64/-/darwin-arm64-5.0.1.tgz",
+  "sha256": "27069fc32879761968823c3ce5353d3c6573f5df7d83d40b60bc2d878e886d39",
+  "archive": "tar.gz",
+  "executable": "ffprobe",
+  "member": "package/ffprobe",
+  "binarySha256": "c846d5db9d3b5bc33f987725e21f3ea14953931221c191575918e907ad6c18ff"
+}

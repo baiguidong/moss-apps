@@ -84,7 +84,10 @@ async function perform(operation: Operation, input = {}) {
 node('enable').onclick = () => void perform('enable', { enabled: !enabled })
 document.querySelectorAll<HTMLButtonElement>('[data-operation]').forEach(b => { b.onclick = () => void perform(b.dataset.operation as Operation) })
 document.querySelectorAll<HTMLButtonElement>('[data-permission]').forEach(b => { b.onclick = () => void perform('open-settings', { permission: b.dataset.permission }) })
-void perform('status')
+// A freshly loaded native adapter has not probed the host permissions yet.
+// Run the real check for the first render so an already-authorized Moss does
+// not briefly appear as unauthorized until the user clicks “重新检查”.
+void perform('check')
 const timer = setInterval(() => { if (!busy && !document.hidden) void request('status').catch(() => {}) }, 2500)
 const cleanup = () => { disposed = true; clearInterval(timer); stopAppearance(); client?.dispose() }
 window.addEventListener('pagehide', cleanup, { once: true })

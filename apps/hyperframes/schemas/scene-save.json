@@ -1,0 +1,1 @@
+{"type":"object","properties":{"id":{"type":"string","pattern":"^[a-zA-Z0-9_-]{1,64}$"},"sceneId":{"type":"string","pattern":"^[a-zA-Z0-9_-]{1,64}$"},"html":{"type":"string","description":"离线 HTML/CSS 片段。动画从本镜头的 0 秒计时；animation-delay 不包含前序镜头时长。","minLength":1,"maxLength":524288}},"required":["id","sceneId","html"],"additionalProperties":false}

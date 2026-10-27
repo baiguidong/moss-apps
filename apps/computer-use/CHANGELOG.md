@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+- 首屏直接执行真实权限检查，避免已授权环境短暂显示为未授权。
+
 ## 0.2.0
 
 支持 Windows 10/11 x64 和 Mac Intel；按 Windows x64、Mac Apple Silicon、Mac Intel 独立构建及签名。市场自动下载对应平台安装包，安装器校验签名绑定的平台。需要 Host API 3.3。

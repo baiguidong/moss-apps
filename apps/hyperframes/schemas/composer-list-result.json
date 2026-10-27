@@ -1,0 +1,21 @@
+{
+  "type": "array",
+  "maxItems": 20,
+  "items": {
+    "type": "object",
+    "required": ["title", "scope", "ref", "route"],
+    "properties": {
+      "title": { "type": "string" },
+      "description": { "type": "string" },
+      "scope": { "const": "user" },
+      "ref": {
+        "type": "object",
+        "required": ["projectId"],
+        "properties": { "projectId": { "type": "string" } },
+        "additionalProperties": false
+      },
+      "route": { "type": "string" }
+    },
+    "additionalProperties": false
+  }
+}

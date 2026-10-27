@@ -1,0 +1,28 @@
+{
+  "name": "@moss/hyperframes-app",
+  "version": "0.3.4",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "check": "tsc --noEmit && node --check src/backend/engine.mjs",
+    "test": "node --test scripts/agent-contract.test.mjs",
+    "build": "node scripts/build.mjs",
+    "test:ui": "node scripts/verify-ui.mjs",
+    "test:render": "node scripts/verify-render.mjs"
+  },
+  "dependencies": {
+    "@moss/app-sdk": "workspace:*",
+    "@moss/engine-apps": "workspace:*",
+    "hyperframes": "0.8.200",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "5.0.4",
+    "typescript": "5.9.3",
+    "vite": "7.1.10",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "ffmpeg",
+  "version": "8.0.1",
+  "platform": "darwin-arm64",
+  "url": "https://registry.npmjs.org/@drbearzay/ffmpeg-darwin-arm64/-/ffmpeg-darwin-arm64-8.0.1.tgz",
+  "sha256": "81573441322fd08c4f4e560bba4d3dc171669cc801418dc65bc21dbc96eebd38",
+  "archive": "tar.gz",
+  "executable": "ffmpeg",
+  "member": "package/ffmpeg",
+  "binarySha256": "77d2c853f431318d55ec02676d9b2f185ebfdddb9f7677a251fbe453affe025a"
+}

@@ -1,0 +1,1 @@
+{"type":"object","properties":{"projectId":{"type":"string"},"paths":{"type":"array","items":{"type":"string"}}},"required":["projectId"],"additionalProperties":false}

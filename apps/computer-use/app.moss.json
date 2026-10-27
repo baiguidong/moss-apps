@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.computer-use",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "displayName": "电脑操控",
   "category": "automation",
   "keywords": [
