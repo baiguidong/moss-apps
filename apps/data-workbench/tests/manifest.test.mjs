@@ -1,15 +1,14 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
-import { loadJsonSchema } from '@moss/app-sdk'
+import { loadJsonSchema, validateAppManifest } from '@moss/app-sdk'
 import { fileURLToPath } from 'node:url'
-import { validateRepositoryAppManifest } from '../../../scripts/lib.mjs'
 
 const root = new URL('../', import.meta.url)
 const manifest = JSON.parse(await fs.readFile(new URL('app.moss.json', root), 'utf8'))
 
 test('manifest uses only Host capabilities without cross-App declarations', () => {
-  const validated = validateRepositoryAppManifest(manifest)
+  const validated = validateAppManifest(manifest, { requireNavigation: true })
   assert.deepEqual(validated.permissions, ['local-files:pick'])
   assert.deepEqual(validated.host.protocols, ['moss.local-files/v1', 'moss.runtime/v1', 'moss.artifacts/v1'])
   assert.equal(manifest.appCapabilities, undefined)
