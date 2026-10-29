@@ -1,6 +1,6 @@
 # AI 自测
 
-安装后从「设置 → Apps → AI 自测」勾选项目并开始。也可在会话选中 AI 自测 App 后使用自测工具。需要 Moss Host API 3.12。
+安装后从「插件 → AI 自测 → 自测工作台」勾选项目并开始。也可在会话选中 AI 自测 App 后使用自测工具。需要 Moss Host API >=3.22.0。
 
 使用主 Moss 当前真实模型和完全放行授权，启动独立测试实例；已安装 App、配置及个人资源由 Host 复制，业务数据保持隔离。Playwright MCP 随本 App 提供，无需另外安装 Browser Use。
 

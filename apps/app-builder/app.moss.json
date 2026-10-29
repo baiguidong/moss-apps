@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.app-builder",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "displayName": "应用构建",
   "category": "development",
   "keywords": [
@@ -11,7 +11,7 @@
   ],
   "description": "在普通会话里创建、预览和迭代自己的 App。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.6.0",
+  "hostApi": "^3.22.0",
   "ui": {
     "entry": "dist/ui/index.html",
     "window": {
@@ -74,13 +74,6 @@
         "route": "#/projects",
         "icon": "blocks",
         "order": 230
-      },
-      {
-        "id": "moss-settings",
-        "title": "通用设置",
-        "route": "#/moss-settings",
-        "icon": "settings",
-        "order": -1000
       }
     ],
     "tools": [
@@ -151,11 +144,19 @@
     ],
     "settings": [
       {
-        "id": "shared-settings",
-        "title": "通用设置",
-        "viewId": "moss-settings",
-        "group": "apps",
-        "order": -1000
+        "id": "project-workbench",
+        "title": "创建与继续项目",
+        "viewId": "home",
+        "group": "apps"
+      }
+    ],
+    "skills": [
+      {
+        "id": "app-creator",
+        "title": "应用创建与迭代",
+        "description": "在主会话创建、修改、构建、测试和安装 Moss App；保留固定 SDK、已有配置和源码。",
+        "path": "resources/skills/app-creator/SKILL.md",
+        "cli": "resources/authoring/guide.mjs"
       }
     ]
   },
@@ -169,9 +170,17 @@
     "id": "moss",
     "name": "Moss"
   },
-  "toolScope": "session",
+  "toolScope": "global",
   "navigation": {
-    "location": "more",
-    "viewId": "home"
+    "location": "details"
+  },
+  "toolLoading": "on-demand",
+  "overview": {
+    "description": "直接在主会话描述需求，创建、测试、预览和安装自己的 App。可接入工具、技能和成果展示，按用途选择是否需要业务页面；也可继续修改已安装 App 的源码。",
+    "examples": [
+      "创建一个文本统计 App，统计字数和行数，直接在主会话使用，不需要独立页面。",
+      "检查这个 App 的源码和 SDK，保持现有功能，补齐测试并生成可安装的新版本。",
+      "把我选择的技能改造成 App，先梳理依赖，再实现、测试并展示结果。"
+    ]
   }
 }

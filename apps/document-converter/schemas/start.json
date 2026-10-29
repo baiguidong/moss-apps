@@ -1,4 +1,114 @@
 {
   "type": "object",
-  "additionalProperties": true
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "author",
+        "batch",
+        "merge",
+        "inspect",
+        "review"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Markdown 正文"
+    },
+    "to": {
+      "type": "string",
+      "description": "输出格式。创作支持 docx、pdf、html5、gfm、epub3；转换支持 Pandoc 输出格式。"
+    },
+    "options": {
+      "type": "object",
+      "description": "Pandoc 排版选项",
+      "additionalProperties": true
+    },
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "from": {
+      "type": "string"
+    },
+    "query": {
+      "type": "string"
+    },
+    "value": {
+      "type": "string"
+    },
+    "extraArgs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "extractMedia": {
+      "type": "boolean"
+    },
+    "parentId": {
+      "type": "string",
+      "pattern": "^[a-f0-9-]{36}$"
+    },
+    "sourcePath": {
+      "type": "string"
+    },
+    "author": {
+      "type": "string"
+    },
+    "edits": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "properties": {
+          "find": {
+            "type": "string"
+          },
+          "replace": {
+            "type": "string"
+          },
+          "paragraph": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "内容索引中的段落编号；重复文字时必须指定"
+          }
+        },
+        "required": [
+          "find",
+          "replace"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "comments": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "properties": {
+          "find": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "find",
+          "text"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
 }

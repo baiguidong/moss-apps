@@ -29,14 +29,10 @@ for (const method of MCP_METHODS) runtime.registerHostHandler(MCP_PROTOCOL, meth
 try {
   await runtime.initialize()
   await installAppArchive(runtime, join(repo, 'artifacts/moss.mcp', manifest.version, `moss.mcp-${manifest.version}.zip`))
-  const instance = (await runtime.listInstances('moss.mcp'))[0]
+  const instanceId = 'moss.mcp--default'
   await host.refresh()
   assert.equal(host.enabledServers()['playwright-cdp'], undefined)
-  const invoke = async (method, input = {}) => {
-    const result = await runtime.invoke('moss.mcp', instance.id, method, input, { timeoutMs: 65_000 })
-    assert.equal(result.ok, true, result.error?.message)
-    return result.data
-  }
+  const invoke = (method, input = {}) => runtime.requestHostCapability('moss.mcp', instanceId, MCP_PROTOCOL, method, input, { timeoutMs: 65_000, invocation: { surface: 'app', origin: 'ui' } })
   let catalog = await invoke('servers.list')
   assert.equal(catalog.servers.length, 3); assert.deepEqual(legacy.servers, {})
   assert.equal(catalog.servers[0].config.headers.Authorization, '')
@@ -64,7 +60,7 @@ try {
   assert.deepEqual(host.enabledServers(), {})
   const vault = await readFile(join(process.env.MOSS_HOME, 'credentials/app-secrets.json'), 'utf8')
   assert.ok(!vault.includes('http-test-secret') && !vault.includes('local-test-secret'))
-  const report = { passed: true, transports: ['http', 'stdio', 'sse'], checks: ['archive installation', 'no built-in browser registration', 'real backend to Host IPC', 'legacy migration', 'masked and encrypted credentials', 'paginated tool discovery', 'connection failure status', 'service and App lifecycle'], reloads }
+  const report = { passed: true, transports: ['http', 'stdio', 'sse'], checks: ['archive installation', 'no built-in browser registration', 'UI-capable App to Host protocol', 'legacy migration', 'masked and encrypted credentials', 'paginated tool discovery', 'connection failure status', 'service and App lifecycle'], reloads }
   const reportDir = join(repo, 'artifacts/moss.mcp/verification', manifest.version)
   await mkdir(reportDir, { recursive: true }); await writeFile(join(reportDir, 'host.json'), JSON.stringify(report, null, 2))
   console.log('PASS real Core runtime: package, migration, secret storage, service/App lifecycle')

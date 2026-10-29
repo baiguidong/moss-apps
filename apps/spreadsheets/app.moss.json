@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.spreadsheets",
+  "version": "0.2.3",
+  "displayName": "表格",
+  "category": "knowledge",
+  "keywords": [
+    "表格",
+    "创作",
+    "内置"
+  ],
+  "description": "在主会话中创建、读取和修改 Excel 表格，计算公式并预览数据。",
+  "overview": {
+    "description": "在主会话中创建、读取和修改 Excel 表格，计算公式并预览数据。 用自然语言描述需求，成果在主会话和右侧展示。修改会保留原版本。",
+    "examples": [
+      "创建一份带公式的月度预算表，按分类汇总支出。",
+      "分析这份销售表，整理各区域的增长情况。",
+      "修改这份工作簿中的预算金额，保留已有样式和图表。"
+    ]
+  },
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.21.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "toolScope": "global",
+  "toolLoading": "always",
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "on-demand",
+    "actions": [
+      {
+        "name": "workspace.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "catalog.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "engine.prepare",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "paths.pick",
+        "inputSchema": "schemas/pick.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.start",
+        "inputSchema": "schemas/start.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.get",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.cancel",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "artifacts.read",
+        "inputSchema": "schemas/artifact.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "artifacts.export",
+        "inputSchema": "schemas/artifact.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "composer.list",
+        "inputSchema": "schemas/composer-list.json",
+        "outputSchema": "schemas/result.json"
+      },
+      {
+        "name": "composer.resolve",
+        "inputSchema": "schemas/composer-resolve.json",
+        "outputSchema": "schemas/result.json"
+      },
+      {
+        "name": "creation.inspect",
+        "inputSchema": "schemas/inspect.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "creation.verify",
+        "inputSchema": "schemas/verify.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.local-files/v1",
+      "moss.runtime/v1",
+      "moss.artifacts/v1"
+    ]
+  },
+  "permissions": [
+    "local-files:pick"
+  ],
+  "contributes": {
+    "skills": [
+      {
+        "id": "moss-spreadsheets",
+        "title": "表格创作",
+        "description": "在主会话中创建、读取和修改 Excel 表格，计算公式并预览数据。",
+        "path": "resources/skills/moss-spreadsheets/SKILL.md",
+        "cli": "dist/backend/cli.mjs"
+      }
+    ],
+    "tools": [
+      {
+        "id": "spreadsheet_create",
+        "title": "创建或修改表格",
+        "description": "模型根据用户需求生成创作参数。返回任务 ID；查询成功后用 moss_present(result.presentation) 展示，回复使用 result.displayMarkdown。修改时传 parentId 保留旧版本。",
+        "action": "tasks.start",
+        "inputSchema": "schemas/start.json",
+        "effect": "write"
+      },
+      {
+        "id": "spreadsheet_status",
+        "title": "查看任务",
+        "description": "读取任务结果、源文件、原文引用及检查状态。成功后查看实际页图，用 spreadsheet_verify 记录核验；有错误先修改再交付。",
+        "action": "tasks.get",
+        "inputSchema": "schemas/id.json",
+        "effect": "read"
+      },
+      {
+        "id": "spreadsheet_list",
+        "title": "列出作品",
+        "description": "获取此 App 的列出作品信息。",
+        "action": "workspace.get",
+        "inputSchema": "schemas/empty.json",
+        "effect": "read"
+      },
+      {
+        "id": "spreadsheet_read",
+        "title": "读取产物",
+        "description": "获取此 App 的读取产物信息。",
+        "action": "artifacts.read",
+        "inputSchema": "schemas/artifact.json",
+        "effect": "read"
+      },
+      {
+        "id": "spreadsheet_export",
+        "title": "导出作品",
+        "description": "获取此 App 的导出作品信息。",
+        "action": "artifacts.export",
+        "inputSchema": "schemas/artifact.json",
+        "effect": "write"
+      },
+      {
+        "id": "spreadsheet_guide",
+        "title": "获取创作参数",
+        "description": "获取此 App 的获取创作参数信息。",
+        "action": "catalog.get",
+        "inputSchema": "schemas/empty.json",
+        "effect": "read"
+      },
+      {
+        "id": "spreadsheet_inspect",
+        "title": "读取内容与原文引用",
+        "description": "读取已完成作品的段落、幻灯片对象或单元格及可点击的原文引用。局部编辑前先读取对象 ID / 段落号；可按页码、工作表和区域筛选。",
+        "action": "creation.inspect",
+        "inputSchema": "schemas/inspect.json",
+        "effect": "read"
+      },
+      {
+        "id": "spreadsheet_verify",
+        "title": "检查作品与记录核验",
+        "description": "读取核验页图和检查状态；用 render 分批生成或续跑剩余页图，查看实际图片后用 pages 记录逐页观察与问题。",
+        "action": "creation.verify",
+        "inputSchema": "schemas/verify.json",
+        "effect": "write"
+      }
+    ],
+    "resourceProviders": [
+      {
+        "id": "spreadsheets",
+        "title": "表格作品",
+        "schemes": [
+          "moss-spreadsheets"
+        ],
+        "listAction": "composer.list",
+        "resolveAction": "composer.resolve"
+      }
+    ]
+  },
+  "navigation": {
+    "location": "none"
+  }
+}

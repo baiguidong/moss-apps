@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.buddy",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "displayName": "Buddy 伴侣精灵",
   "description": "孵化自己的宠物，和它聊天，了解 Moss 用法并管理桌面、Agent 与项目配置。",
   "category": "ai",
@@ -16,6 +16,7 @@
   "icon": "assets/icon.svg",
   "hostApi": "^3.6.0",
   "toolScope": "global",
+  "toolLoading": "on-demand",
   "ui": {
     "entry": "dist/ui/index.html",
     "window": {
@@ -181,7 +182,7 @@
       {
         "id": "settings_apply",
         "title": "修改 Moss 配置",
-        "description": "Apply explicit user-requested Moss configuration changes with a fresh revision and unique requestId. Supports preview. Respect scope, use exact catalog paths. Report application status from the receipt.",
+        "description": "Carry out requested Moss configuration adjustments or an agreed repair; use catalog paths, current values, allowed ranges, a fresh revision and unique requestId. Do not stop at instructions when the user requested an adjustment. Preview proposals without saving; after a successful commit read back the changed settings and report the receipt's application status.",
         "effect": "write",
         "action": "settings_apply",
         "inputSchema": "schemas/settings_apply.json",
@@ -199,7 +200,7 @@
       {
         "id": "help_search",
         "title": "查询 Moss 使用手册",
-        "description": "Search the bundled Moss user handbook for feature usage and configuration guidance.",
+        "description": "Find Moss onboarding, feature usage, configuration adjustment and troubleshooting guidance using feature keywords or a natural-language question. Check current settings and available tools for live status; no matching article is not evidence that a feature is unavailable. The returned version identifies the bundled Buddy guide, not the running Host version.",
         "effect": "read",
         "action": "help_search",
         "inputSchema": "schemas/help_search.json"

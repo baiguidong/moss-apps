@@ -109,6 +109,8 @@
     p { color: var(--muted-foreground); font-size: 12px; line-height: 1.65; }
     .section { margin-top: 22px; }
     .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 4px 10px; }
+    .section-heading > div { min-width: 0; flex: 1; }
+    .section-heading > button, .section-heading > a { flex-shrink: 0; white-space: nowrap; }
     .section-heading p { margin-top: 3px; }
     .settings-group {
       overflow: hidden;
@@ -208,13 +210,7 @@
 <body>
   <div class="app-shell">
   <main>
-    <nav class="tabs" role="tablist" aria-label="飞书设置导航">
-      <button id="configurationTab" class="tab active" type="button" role="tab" aria-controls="configurationPanel" aria-selected="true">连接与配对</button>
-      <button id="agentTab" class="tab" type="button" role="tab" aria-controls="agentPanel" aria-selected="false">执行权限</button>
-      <button id="guideTab" class="tab" type="button" role="tab" aria-controls="guidePanel" aria-selected="false">配置说明</button>
-    </nav>
-
-    <div id="configurationPanel" role="tabpanel" aria-labelledby="configurationTab">
+    <div id="configurationPanel" aria-label="连接与配对">
     <section class="section" aria-labelledby="connectionTitle">
       <div class="section-heading">
         <div><h2 id="connectionTitle">连接配置</h2><p>配置机器人凭据与运行方式。</p></div>
@@ -244,7 +240,7 @@
     </section>
     </div>
 
-    <div id="agentPanel" role="tabpanel" aria-labelledby="agentTab" hidden>
+    <div id="agentPanel" aria-label="执行权限" hidden>
       <section class="section" aria-labelledby="agentPolicyTitle">
         <div class="section-heading"><div><h2 id="agentPolicyTitle">执行权限</h2><p>飞书私聊始终由 AI 自动回复并复用该私聊的专用固定会话；这里只限制 Agent 可以使用的能力。</p></div><button id="refreshAgent" class="secondary" type="button">刷新</button></div>
         <div class="settings-group">
@@ -267,7 +263,7 @@
       </section>
     </div>
 
-    <section id="guidePanel" class="section" role="tabpanel" aria-labelledby="guideTab" hidden>
+    <section id="guidePanel" class="section" aria-label="配置说明" hidden>
       <div class="section-heading"><div><h2>配置说明</h2><p>按顺序完成以下设置，然后再生成配对码。</p></div><a href="https://open.feishu.cn/app" target="_blank" rel="noreferrer">打开飞书开放平台</a></div>
       <div class="settings-group">
       <details open>
@@ -317,6 +313,8 @@
     let agentCatalog = { tools: [], skills: [], connectors: [] }
     let defaultAgentBinding = null
     const dirtyResourceKinds = new Set()
+    let configDirty = false
+    let agentDirty = false
     let agentBusy = false
     let disposed = false
     let statusRequestVersion = 0
@@ -341,12 +339,18 @@
       $('message').className = `message ${kind}`
     }
 
+    function reportViewState() {
+      void bridge?.view?.setState({ dirty: configDirty || agentDirty, busy: busy || agentBusy }).catch(() => {})
+    }
+
     function setBusy(value) {
       busy = value
+      reportViewState()
       $('save').disabled = value
       $('save').textContent = value ? '处理中…' : '保存配置'
       $('pair').disabled = value
       $('refresh').disabled = value
+      for (const input of $('configurationPanel').querySelectorAll('input')) input.disabled = value
     }
 
     function setAgentMessage(value, kind = '') {
@@ -356,24 +360,20 @@
 
     function setAgentBusy(value) {
       agentBusy = value
+      reportViewState()
       $('saveAgent').disabled = value
       $('refreshAgent').disabled = value
       $('saveAgent').textContent = value ? '处理中…' : '保存执行权限'
+      $('permissionMode').disabled = value
+      $('unrestrictedResources').disabled = value
+      updateResourcePickerState()
     }
 
-    function selectTab(tab) {
-      const guide = tab === 'guide'
-      const agent = tab === 'agent'
-      $('configurationPanel').hidden = guide || agent
+    function selectRoute() {
+      const agent = location.hash === '#/agent'
+      $('configurationPanel').hidden = agent
       $('agentPanel').hidden = !agent
-      $('guidePanel').hidden = !guide
-      $('configurationTab').classList.toggle('active', !guide && !agent)
-      $('agentTab').classList.toggle('active', agent)
-      $('guideTab').classList.toggle('active', guide)
-      $('configurationTab').setAttribute('aria-selected', String(!guide && !agent))
-      $('agentTab').setAttribute('aria-selected', String(agent))
-      $('guideTab').setAttribute('aria-selected', String(guide))
-      if (agent) void refreshAgentSettings()
+      $('guidePanel').hidden = agent
     }
 
     function systemTheme() {
@@ -524,7 +524,7 @@
       const unrestricted = $('unrestrictedResources').checked
       $('resourcePicker').hidden = unrestricted
       for (const input of $('resourcePicker').querySelectorAll('input[type="checkbox"]')) {
-        input.disabled = unrestricted
+        input.disabled = unrestricted || agentBusy
       }
     }
 
@@ -571,6 +571,7 @@
 
     async function refreshAgentSettings() {
       if (agentBusy) return
+      if (agentDirty && !confirm('有未保存的执行权限修改，确定重新读取吗？')) return
       setAgentBusy(true)
       setAgentMessage('')
       const requestVersion = ++agentSettingsRequestVersion
@@ -585,6 +586,8 @@
         agentCatalog = catalog || agentCatalog
         defaultAgentBinding = normalizedBinding || null
         renderAgentPolicy()
+        agentDirty = false
+        reportViewState()
       } catch (error) {
         setAgentMessage(errorMessage(error), 'error')
       } finally {
@@ -633,6 +636,8 @@
         })
         defaultAgentBinding = result
         renderAgentPolicy()
+        agentDirty = false
+        reportViewState()
         setAgentMessage('执行权限已保存。', 'ok')
       } catch (error) {
         setAgentMessage(errorMessage(error), 'error')
@@ -769,6 +774,8 @@
         statusRequestVersion += 1
         adapterConfig = { feishu: activeInstance.config || {} }
         hydrateForm(adapterConfig)
+        configDirty = false
+        reportViewState()
         await refreshStatus()
         setMessage('配置已保存，并已应用到本机 Backend。', 'ok')
       } catch (error) {
@@ -818,7 +825,6 @@
         statusRequestVersion += 1
         adapterConfig = { feishu: activeInstance.config || {} }
         await refreshStatus()
-        await refreshAgentSettings()
         setMessage('已解绑该飞书用户。', 'ok')
       } catch (error) {
         setMessage(errorMessage(error), 'error')
@@ -830,9 +836,12 @@
     $('save').addEventListener('click', () => void save())
     $('refresh').addEventListener('click', () => void refreshStatus())
     $('pair').addEventListener('click', () => void generatePairingCode())
-    $('configurationTab').addEventListener('click', () => selectTab('configuration'))
-    $('agentTab').addEventListener('click', () => selectTab('agent'))
-    $('guideTab').addEventListener('click', () => selectTab('guide'))
+    for (const event of ['input', 'change']) {
+      $('configurationPanel').addEventListener(event, () => { configDirty = true; reportViewState() })
+      $('agentPanel').addEventListener(event, () => { agentDirty = true; reportViewState() })
+    }
+    selectRoute()
+    window.addEventListener('hashchange', selectRoute)
     $('saveAgent').addEventListener('click', () => void saveAgentPolicy())
     $('refreshAgent').addEventListener('click', () => void refreshAgentSettings())
     $('unrestrictedResources').addEventListener('change', updateResourcePickerState)
@@ -883,6 +892,7 @@
     window.addEventListener('beforeunload', () => {
       disposed = true
       clearInterval(statusPollTimer)
+      window.removeEventListener('hashchange', selectRoute)
       window.removeEventListener('focus', handleWindowFocus)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       systemColorScheme.removeEventListener('change', handleSystemThemeChange)

@@ -5,7 +5,7 @@ import './theme.css'
 import './style.css'
 declare global { interface Window { mossApp?: AppUiApi } }
 const root = document.querySelector<HTMLDivElement>('#app')!
-root.innerHTML = `<header><h1>电脑操控</h1><p>读取并操作你允许的桌面应用。</p></header>
+root.innerHTML = `
 <div id="error" role="alert" hidden></div><section class="hero"><div><h2 id="phase" role="status">正在连接 Moss…</h2><p id="detail">在对话中选择此 App，即可使用电脑操控工具。</p></div><button id="enable" class="primary" disabled>开启控制</button></section>
 <div class="grid"><section><h2>系统权限</h2><p id="permission-help">正在检查系统能力。</p><div class="permission"><span id="accessibility-label">辅助功能</span><b id="accessibility">—</b></div><div class="permission"><span id="screen-label">屏幕录制</span><b id="screen">—</b></div><div class="actions"><button data-operation="request-permissions">发起系统授权</button><button data-operation="check">重新检查</button></div><div class="links" id="mac-settings"><button data-permission="accessibility">打开辅助功能设置</button><button data-permission="screen">打开屏幕录制设置</button><button data-operation="reveal-host-app">在访达中显示 Moss</button></div><p id="notice" role="status"></p></section>
 <section><h2>已允许的应用</h2><p>每个目标应用由 Moss 单独询问授权。</p><div id="grants"></div></section></div>
@@ -58,7 +58,7 @@ async function request(operation: Operation, input = {}) {
 }
 async function perform(operation: Operation, input = {}) {
   if (busy) return
-  busy = true; node('error').hidden = true
+  busy = true; void window.mossApp?.view?.setState({ dirty: false, busy: true }).catch(() => {}); node('error').hidden = true
   document.querySelectorAll('button').forEach(b => { b.disabled = true })
   try { await request(operation, input) }
   catch (error) {
@@ -75,6 +75,7 @@ async function perform(operation: Operation, input = {}) {
   }
   finally {
     busy = false
+    void window.mossApp?.view?.setState({ dirty: false, busy: false }).catch(() => {})
     if (!disposed) {
       document.querySelectorAll<HTMLButtonElement>('button').forEach(b => { b.disabled = !connected && b.dataset.operation !== 'check' })
       ;(node('enable') as HTMLButtonElement).disabled = !supported
@@ -84,10 +85,8 @@ async function perform(operation: Operation, input = {}) {
 node('enable').onclick = () => void perform('enable', { enabled: !enabled })
 document.querySelectorAll<HTMLButtonElement>('[data-operation]').forEach(b => { b.onclick = () => void perform(b.dataset.operation as Operation) })
 document.querySelectorAll<HTMLButtonElement>('[data-permission]').forEach(b => { b.onclick = () => void perform('open-settings', { permission: b.dataset.permission }) })
-// A freshly loaded native adapter has not probed the host permissions yet.
-// Run the real check for the first render so an already-authorized Moss does
-// not briefly appear as unauthorized until the user clicks “重新检查”.
-void perform('check')
+// Opening settings reads state. Permission probing remains an explicit action.
+void perform('status')
 const timer = setInterval(() => { if (!busy && !document.hidden) void request('status').catch(() => {}) }, 2500)
 const cleanup = () => { disposed = true; clearInterval(timer); stopAppearance(); client?.dispose() }
 window.addEventListener('pagehide', cleanup, { once: true })

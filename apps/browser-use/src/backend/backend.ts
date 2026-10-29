@@ -1,7 +1,7 @@
 import { AppBackendClient } from '@moss/app-sdk'
 import { createMcpClient, type McpHostInputMap } from '@moss/app-sdk/mcp'
 import { METHODS, type Method, type Preparation, type Result, type SaveInput } from '../contracts'
-import { DEFAULT_CONFIG, PLAYWRIGHT_CDP, browserArgs, migrateLegacyBrowserConfig } from '../browser-config'
+import { DEFAULT_CONFIG, PLAYWRIGHT_CDP, browserArgs, browserFields, configFromFields, migrateLegacyBrowserConfig, type BrowserFields } from '../browser-config'
 import { useBundledPlaywright } from './builtin-config'
 import { createRequire } from 'node:module'
 const loadRuntime = createRequire(import.meta.url)
@@ -27,9 +27,9 @@ export function createBrowserBackend(options: ConstructorParameters<typeof AppBa
       const catalog = await read('servers.list', {}, undefined, 3000)
       const existing = catalog.servers.find(server => server.name === PLAYWRIGHT_CDP)
       const config = useBundledPlaywright(existing ? migrateLegacyBrowserConfig(existing.config) : DEFAULT_CONFIG)
-      if (!existing || !existing.enabled || JSON.stringify(config) !== JSON.stringify(existing.config)) {
+      if (!existing || JSON.stringify(config) !== JSON.stringify(existing.config)) {
         try {
-          await read('servers.save', { name: PLAYWRIGHT_CDP, ...(existing ? { previousName: PLAYWRIGHT_CDP } : {}), enabled: true, config }, undefined, 3000)
+          await read('servers.save', { name: PLAYWRIGHT_CDP, ...(existing ? { previousName: PLAYWRIGHT_CDP } : {}), enabled: existing?.enabled ?? true, config }, undefined, 3000)
         } catch (error) {
           // A timed-out successful create must never overwrite the persisted configuration.
           if (existing || !(await read('servers.list', {}, undefined, 3000)).servers.some(server => server.name === PLAYWRIGHT_CDP)) throw error
@@ -71,10 +71,10 @@ export function createBrowserBackend(options: ConstructorParameters<typeof AppBa
     onInitialize: async (context: unknown) => {
       if (typeof options.onInitialize === 'function') await options.onInitialize(context)
       try { await ensureRegistered() }
-      catch { /* The background preparation reports setup errors and supports retry. */ }
-      // The SDK sends service.ready after onInitialize. Download and tool discovery
-      // run in the background; Chrome opens only when an automation tool needs it.
-      setImmediate(beginInspection)
+      catch { /* A later explicit read/check retries registration and reports errors. */ }
+      // Registration reads persisted configuration only. Viewing settings and
+      // starting Moss must never prepare or inspect the MCP/browser service.
+      preparation = { state: 'idle' }
     },
     onShutdown: async (context: unknown) => {
       closing = true
@@ -95,7 +95,7 @@ export function createBrowserBackend(options: ConstructorParameters<typeof AppBa
           await previous?.promise
           await ensureRegistered()
           await read('servers.save', { ...input, config: useBundledPlaywright(input.config!) }, context.signal)
-          beginInspection()
+          setPreparation({ state: 'idle' })
         })
         mutation = pending.catch(() => {})
         await pending
@@ -105,6 +105,37 @@ export function createBrowserBackend(options: ConstructorParameters<typeof AppBa
       const error = cause as { code?: string; message?: string }
       return { ok: false, error: { code: error.code, message: error.message || '操作失败，请重试。' } }
     }
+  })
+  const readSettings = async () => {
+    await ensureRegistered()
+    const server = (await read('servers.list')).servers.find(server => server.name === PLAYWRIGHT_CDP)!
+    const fields = browserFields(server.config)
+    return { values: { mode: fields.mode, outputDirectory: fields['--output-dir'], extraArguments: fields.extra,
+      managedEndpoint: fields.mode === 'managed' ? fields['--cdp-endpoint'] : '', cdpEndpoint: fields.mode === 'cdp' ? fields['--cdp-endpoint'] : '',
+      executablePath: fields['--executable-path'], userDataDirectory: fields['--user-data-dir'], profileDirectory: fields['--profile-dir-name'] },
+      configuredFields: Object.hasOwn(server.config.env || {}, 'PLAYWRIGHT_MCP_EXTENSION_TOKEN') ? ['extensionToken'] : [] }
+  }
+  backend.registerAction('settings.read', readSettings)
+  backend.registerAction('settings.save', async (raw, context) => {
+    const values = raw as Record<string, string>
+    const pending = mutation.then(async () => {
+      const previous = inspection
+      previous?.controller.abort(); await previous?.promise
+      await ensureRegistered()
+      const server = (await read('servers.list', {}, context.signal)).servers.find(server => server.name === PLAYWRIGHT_CDP)!
+      const fields: BrowserFields = { mode: values.mode as BrowserFields['mode'], '--output-dir': values.outputDirectory || '',
+        '--cdp-endpoint': (values.mode === 'managed' ? values.managedEndpoint : values.mode === 'cdp' ? values.cdpEndpoint : '') || '',
+        '--executable-path': values.executablePath || '', '--user-data-dir': values.userDataDirectory || '', '--profile-dir-name': values.profileDirectory || '',
+        extensionToken: values.extensionToken || '', extra: values.extraArguments || '' }
+      const config = useBundledPlaywright(configFromFields(server.config, fields, server.config.disabledTools?.join('\n') || ''))
+      const before = browserFields(server.config)
+      const unchanged = (Object.keys(fields) as Array<keyof BrowserFields>).every(key => fields[key] === before[key])
+      if (!unchanged) await read('servers.save', { name: PLAYWRIGHT_CDP, previousName: PLAYWRIGHT_CDP, enabled: server.enabled, config }, context.signal)
+      setPreparation({ state: 'idle' })
+    })
+    mutation = pending.catch(() => {})
+    await pending
+    return readSettings()
   })
   return backend
 }

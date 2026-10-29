@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.mcp",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "displayName": "MCP 管理",
   "category": "ai",
   "keywords": [
@@ -13,7 +13,7 @@
   ],
   "description": "管理 MCP 服务连接，让常用工具融入对话。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.8.0",
+  "hostApi": "^3.22.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -40,28 +40,17 @@
         "route": "#/",
         "icon": "plug",
         "order": 220
-      },
-      {
-        "id": "moss-settings",
-        "title": "通用设置",
-        "route": "#/moss-settings",
-        "icon": "settings",
-        "order": -1000
       }
     ],
     "settings": [
       {
         "id": "manage",
-        "title": "管理 MCP 连接",
+        "title": "管理服务",
         "viewId": "connections",
-        "group": "integrations"
-      },
-      {
-        "id": "shared-settings",
-        "title": "通用设置",
-        "viewId": "moss-settings",
-        "group": "apps",
-        "order": -1000
+        "group": "integrations",
+        "presentation": {
+          "width": "wide"
+        }
       }
     ]
   },
@@ -72,8 +61,10 @@
     ]
   },
   "navigation": {
-    "location": "settings",
-    "viewId": "connections"
+    "location": "details"
   },
-  "toolSelection": "services"
+  "toolSelection": "services",
+  "overview": {
+    "description": "管理本地或远程 MCP 服务，添加连接、配置凭据并完成授权。在会话中使用各服务提供的工具。"
+  }
 }

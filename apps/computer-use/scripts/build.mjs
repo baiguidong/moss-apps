@@ -1,4 +1,3 @@
-import { buildAppSettings } from '@moss/app-settings/build'
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -97,5 +96,3 @@ copyNotices('@modelcontextprotocol/sdk', require);
 copyNotices('zod', require);
 fs.writeFileSync(path.join(root, 'dist/native/versions.json'), JSON.stringify(Object.fromEntries(copied), null, 2) + '\n');
 console.log(`Bundled ${copied.size} packages and pinned Cua 0.34.0`);
-
-await buildAppSettings(fileURLToPath(new URL('..', import.meta.url)))

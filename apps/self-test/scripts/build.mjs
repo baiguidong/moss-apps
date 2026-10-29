@@ -1,4 +1,3 @@
-import { buildAppSettings } from '@moss/app-settings/build'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { mkdirSync, cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
@@ -42,5 +41,3 @@ copyPackage('@playwright/mcp', require)
 
 writeFileSync(path.join(target, 'versions.json'), JSON.stringify(Object.fromEntries(copied), null, 2) + '\n')
 console.log('Bundled offline Playwright MCP:', Object.fromEntries(copied))
-
-await buildAppSettings(fileURLToPath(new URL('..', import.meta.url)))

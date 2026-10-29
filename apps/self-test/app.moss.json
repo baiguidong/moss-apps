@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.self-test",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "displayName": "AI 自测",
   "category": "diagnostics",
   "keywords": [
@@ -13,15 +13,14 @@
   ],
   "description": "通过独立 Moss 实例执行 AI 界面测试，保留观察、截图和测试报告。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.13.0",
+  "hostApi": "^3.22.0",
   "toolScope": "session",
   "publisher": {
     "id": "moss",
     "name": "Moss"
   },
   "navigation": {
-    "location": "settings",
-    "viewId": "self-test"
+    "location": "details"
   },
   "ui": {
     "entry": "dist/ui/index.html",
@@ -133,28 +132,17 @@
         "title": "AI 自测",
         "route": "#/self-test",
         "icon": "clipboard-check"
-      },
-      {
-        "id": "moss-settings",
-        "title": "通用设置",
-        "route": "#/moss-settings",
-        "icon": "settings",
-        "order": -1000
       }
     ],
     "settings": [
       {
         "id": "manage",
-        "title": "AI 自测",
+        "title": "自测工作台",
         "viewId": "self-test",
-        "group": "apps"
-      },
-      {
-        "id": "shared-settings",
-        "title": "通用设置",
-        "viewId": "moss-settings",
         "group": "apps",
-        "order": -1000
+        "presentation": {
+          "width": "wide"
+        }
       }
     ],
     "tools": [
@@ -168,5 +156,8 @@
         "inputSchema": "schemas/self-test.json"
       }
     ]
+  },
+  "overview": {
+    "description": "选择检查项目，在独立测试环境中运行自测，查看实时进度、测试窗口和报告。"
   }
 }

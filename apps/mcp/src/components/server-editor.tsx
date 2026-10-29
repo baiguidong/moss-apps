@@ -21,7 +21,7 @@ export function ServerEditor({ server, onClose, onSave }: { server?: McpServer; 
   const [headers, setHeaders] = useState<Row[]>(() => Object.keys(server?.config.headers || {}).map(key => row(key, '', !server?.credentialsMissing)))
   const [clientId, setClientId] = useState(String(server?.config.oauth?.clientId || ''))
   const [redirectUri, setRedirectUri] = useState(String(server?.config.oauth?.redirectUri || ''))
-  const [disabledTools, setDisabledTools] = useState(server?.config.disabledTools?.join('\n') || '')
+  const [disabledTools] = useState(server?.config.disabledTools?.join('\n') || '')
   const [enabled, setEnabled] = useState(server?.enabled ?? true)
   const [busy, setBusy] = useState(false), [error, setError] = useState('')
   const save = async (event: FormEvent) => {
@@ -63,7 +63,6 @@ export function ServerEditor({ server, onClose, onSave }: { server?: McpServer; 
       {transport === 'stdio' ? <>{<label className="field"><span>启动命令 <small>必填</small></span><input value={command} onChange={e => setCommand(e.target.value)} placeholder="例如 npx、uvx 或可执行文件路径" autoComplete="off" spellCheck={false} /></label>}<label className="field"><span>启动参数</span><textarea value={args} onChange={e => setArgs(e.target.value)} placeholder={'每行一个参数\n-y\n@modelcontextprotocol/server-filesystem\n~/workspace'} spellCheck={false} rows={4} /><small>每行一个参数；路径支持 ~/，例如 ~/.moss/artifacts/playwright。启动时会展开为当前用户目录，无需加引号。</small></label><Values title="环境变量" rows={env} onChange={setEnv} /></> : <><label className="field"><span>服务地址 <small>必填</small></span><input value={url} onChange={e => setUrl(e.target.value)} placeholder={transport === 'http' ? 'https://example.com/mcp' : 'https://example.com/sse'} autoComplete="off" spellCheck={false} /></label><Values title="请求头" rows={headers} onChange={setHeaders} /></>}
       <details className="advanced"><summary><ChevronDown size={15} />高级选项<span>工具与授权</span></summary><div>
         {transport !== 'stdio' && <div className="oauth-fields"><label className="field"><span>OAuth Client ID</span><input value={clientId} onChange={e => setClientId(e.target.value)} placeholder="服务要求时填写" /></label><label className="field"><span>OAuth 回调地址</span><input value={redirectUri} onChange={e => setRedirectUri(e.target.value)} placeholder="通常留空，使用自动发现" /></label></div>}
-        <label className="field"><span>不启用的工具</span><textarea rows={2} value={disabledTools} onChange={e => setDisabledTools(e.target.value)} placeholder="每行一个工具名称，可留空" spellCheck={false} /></label>
       </div></details>
       <label className="enable-row"><input type="checkbox" checked={enabled} onChange={e => setEnabled(e.target.checked)} /><span><strong>启用此服务</strong><small>在后续本地对话中提供工具</small></span></label>
       <p className="security-note"><KeyRound size={14} />凭据加密保存，留空可保留已保存的值。</p>

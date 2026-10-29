@@ -14,5 +14,5 @@ test('restored workspace keeps its pinned SDK and exposes the source root', asyn
   assert.deepEqual(methods, ['project.prepare', 'info.get'])
   assert.equal(result.pinnedSdk, true)
   assert.equal(result.sourceRoot, '/workspace')
-  assert.match(result.guidance, /never reconstruct or rewrite/)
+  assert.match(result.guidance, /不能重建或改写/)
 })

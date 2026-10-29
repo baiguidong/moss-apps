@@ -1,0 +1,170 @@
+{
+  "type": "object",
+  "title": "浏览器连接设置",
+  "description": "保存后，下次使用时生效。",
+  "propertyNames": {
+    "enum": [
+      "mode",
+      "outputDirectory",
+      "managedEndpoint",
+      "extensionToken",
+      "profileDirectory",
+      "executablePath",
+      "userDataDirectory",
+      "cdpEndpoint",
+      "extraArguments"
+    ]
+  },
+  "required": [
+    "mode"
+  ],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "title": "浏览器模式",
+      "oneOf": [
+        {
+          "const": "managed",
+          "title": "Moss 专用浏览器（推荐）",
+          "description": "实际操作网页时打开专用浏览器，保留登录状态，复用同一实例；无需扩展。"
+        },
+        {
+          "const": "extension",
+          "title": "日常 Chrome",
+          "description": "沿用已有标签页和登录状态。首次使用请安装 Playwright 扩展，操作网页时在 Chrome 中允许连接。安装地址：https://chromewebstore.google.com/detail/playwright-extension/mmlmfjhmonkocbjadbfplnigmagldckm"
+        },
+        {
+          "const": "cdp",
+          "title": "已有 CDP 服务（高级）",
+          "description": "只连接已经开启的服务。连接失败时不会另开或重启 Chrome。"
+        }
+      ]
+    },
+    "outputDirectory": {
+      "type": "string",
+      "title": "输出目录",
+      "description": "路径支持 ~/；含空格的路径无需加引号。",
+      "maxLength": 8192,
+      "examples": [
+        "~/.moss/artifacts/playwright"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "managed"
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "managedEndpoint": {
+            "type": "string",
+            "title": "专用浏览器 CDP 地址（可选）",
+            "description": "仅在本机端口冲突时修改。每个端口使用固定的专用浏览器配置。",
+            "maxLength": 8192,
+            "examples": [
+              "http://127.0.0.1:9222"
+            ]
+          },
+          "extraArguments": {
+            "type": "string",
+            "title": "其他启动参数",
+            "description": "每行一个参数；连接方式、地址和浏览器路径请使用上面的字段。",
+            "maxLength": 8192,
+            "contentMediaType": "text/plain"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "extension"
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "extensionToken": {
+            "type": "string",
+            "title": "扩展连接令牌（可选）",
+            "description": "由 Moss 凭据存储保管，留空保留已保存的令牌。",
+            "maxLength": 8192,
+            "writeOnly": true
+          },
+          "profileDirectory": {
+            "type": "string",
+            "title": "Chrome 用户配置",
+            "description": "留空使用最近使用且已安装扩展的配置。",
+            "maxLength": 8192,
+            "examples": [
+              "Default 或 Profile 1"
+            ]
+          },
+          "executablePath": {
+            "type": "string",
+            "title": "Chrome 路径",
+            "description": "自定义路径时，需要同时填写下方已有用户目录。",
+            "maxLength": 8192
+          },
+          "userDataDirectory": {
+            "type": "string",
+            "title": "已有 Chrome 用户目录",
+            "description": "填写已存在且安装了扩展的用户目录；留空使用 Chrome 默认目录。",
+            "maxLength": 8192
+          },
+          "extraArguments": {
+            "type": "string",
+            "title": "其他启动参数",
+            "description": "每行一个参数；连接方式、地址和浏览器路径请使用上面的字段。",
+            "maxLength": 8192,
+            "contentMediaType": "text/plain"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "cdp"
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "cdpEndpoint": {
+            "type": "string",
+            "title": "CDP 地址",
+            "description": "支持 http、https、ws、wss；已保存为环境变量的地址留空保留。",
+            "maxLength": 8192,
+            "examples": [
+              "http://127.0.0.1:9222"
+            ]
+          },
+          "extraArguments": {
+            "type": "string",
+            "title": "其他启动参数",
+            "description": "每行一个参数；连接方式、地址和浏览器路径请使用上面的字段。",
+            "maxLength": 8192,
+            "contentMediaType": "text/plain"
+          }
+        }
+      }
+    }
+  ]
+}

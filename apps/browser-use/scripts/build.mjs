@@ -1,4 +1,3 @@
-import { buildAppSettings } from '@moss/app-settings/build'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { mkdirSync, cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
@@ -7,9 +6,9 @@ import path from 'node:path'
 import { bundleBrowser } from './bundle-browser.mjs'
 
 const cwd = fileURLToPath(new URL('..', import.meta.url))
+rmSync(new URL('../dist/ui/', import.meta.url), { recursive: true, force: true })
 mkdirSync(new URL('../dist/backend/', import.meta.url), { recursive: true })
 for (const [command, args] of [
-  ['vite', ['build']],
   ['bun', ['build', 'src/backend/main.ts', '--target=node', '--format=esm', '--outfile=dist/backend/main.mjs']],
 ]) {
   const result = spawnSync(command, args, { cwd, stdio: 'inherit' })
@@ -42,5 +41,3 @@ cpSync(path.join(cwd, 'src/playwright-cdp'), target, { recursive: true })
 writeFileSync(path.join(target, 'versions.json'), JSON.stringify(Object.fromEntries(copied), null, 2) + '\n')
 console.log('Bundled offline Playwright MCP:', Object.fromEntries(copied))
 await bundleBrowser(cwd, target)
-
-await buildAppSettings(fileURLToPath(new URL('..', import.meta.url)))

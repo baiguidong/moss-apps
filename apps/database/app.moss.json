@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.database",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "displayName": "数据库查询",
   "category": "data",
   "keywords": [
@@ -18,7 +18,7 @@
   ],
   "description": "使用 DBHub 查询 SQLite、PostgreSQL、MySQL 等数据库，查看表结构和分析数据。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.21.0",
+  "hostApi": "^3.22.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -85,13 +85,6 @@
         "route": "#/",
         "icon": "plug",
         "order": 220
-      },
-      {
-        "id": "moss-settings",
-        "title": "通用设置",
-        "route": "#/moss-settings",
-        "icon": "settings",
-        "order": -1000
       }
     ],
     "settings": [
@@ -99,14 +92,10 @@
         "id": "manage",
         "title": "数据库连接",
         "viewId": "connections",
-        "group": "integrations"
-      },
-      {
-        "id": "shared-settings",
-        "title": "通用设置",
-        "viewId": "moss-settings",
-        "group": "apps",
-        "order": -1000
+        "group": "integrations",
+        "presentation": {
+          "width": "wide"
+        }
       }
     ]
   },
@@ -117,8 +106,10 @@
     ]
   },
   "navigation": {
-    "location": "settings",
-    "viewId": "connections"
+    "location": "details"
   },
-  "toolScope": "session"
+  "toolScope": "session",
+  "overview": {
+    "description": "配置多个数据库连接，在对话中查询数据。每个连接独立设置只读策略、行数上限和查询超时。"
+  }
 }

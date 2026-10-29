@@ -1,14 +1,42 @@
 {
   "schemaVersion": 2,
   "id": "example.app",
-  "version": "1.0.0",
-  "displayName": "Example App",
-  "category": "other",
-  "keywords": [],
+  "version": "0.1.0",
+  "displayName": "文本统计",
+  "description": "在主会话统计文本字符数和行数。",
+  "category": "development",
+  "keywords": [
+    "文本",
+    "统计"
+  ],
   "hostApi": "^3.4.0",
   "toolScope": "session",
-  "ui": {
-    "entry": "dist/ui/index.html"
+  "navigation": {
+    "location": "none"
   },
-  "permissions": []
+  "permissions": [],
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "on-demand",
+    "actions": [
+      {
+        "name": "text_stats",
+        "inputSchema": "schemas/text.json"
+      }
+    ]
+  },
+  "contributes": {
+    "tools": [
+      {
+        "id": "text_stats",
+        "title": "统计文本",
+        "description": "统计文本的 Unicode 字符数和行数，空文本为零行。",
+        "effect": "read",
+        "action": "text_stats",
+        "inputSchema": "schemas/text.json"
+      }
+    ]
+  }
 }

@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.templates",
+  "version": "0.2.2",
+  "displayName": "模板",
+  "category": "knowledge",
+  "keywords": [
+    "模板",
+    "创作",
+    "内置"
+  ],
+  "description": "从参考文档、表格、演示文稿和内容中保存模板，在主会话复用。",
+  "overview": {
+    "description": "从参考文档、表格、演示文稿和内容中保存模板，在主会话复用。 用自然语言描述需求，成果在主会话和右侧展示。修改会保留原版本。",
+    "examples": [
+      "把这份周报保存为可重复使用的模板。",
+      "使用刚保存的模板，生成本周的项目周报。",
+      "更新这个模板中的公司名称和标题样式。"
+    ]
+  },
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.21.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "toolScope": "global",
+  "toolLoading": "always",
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "on-demand",
+    "actions": [
+      {
+        "name": "workspace.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "catalog.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "engine.prepare",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "paths.pick",
+        "inputSchema": "schemas/pick.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.start",
+        "inputSchema": "schemas/start.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.get",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.cancel",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "artifacts.read",
+        "inputSchema": "schemas/artifact.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "artifacts.export",
+        "inputSchema": "schemas/artifact.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "composer.list",
+        "inputSchema": "schemas/composer-list.json",
+        "outputSchema": "schemas/result.json"
+      },
+      {
+        "name": "composer.resolve",
+        "inputSchema": "schemas/composer-resolve.json",
+        "outputSchema": "schemas/result.json"
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.local-files/v1",
+      "moss.runtime/v1",
+      "moss.artifacts/v1"
+    ]
+  },
+  "permissions": [
+    "local-files:pick"
+  ],
+  "contributes": {
+    "skills": [
+      {
+        "id": "moss-templates",
+        "title": "模板创作",
+        "description": "从参考文档、表格、演示文稿和内容中保存模板，在主会话复用。",
+        "path": "resources/skills/moss-templates/SKILL.md",
+        "cli": "dist/backend/cli.mjs"
+      }
+    ],
+    "tools": [
+      {
+        "id": "template_create",
+        "title": "创建或修改模板",
+        "description": "模型根据用户需求生成创作参数。返回任务 ID；查询成功后用 moss_present(result.presentation) 展示，回复使用 result.displayMarkdown。修改时传 parentId 保留旧版本。",
+        "action": "tasks.start",
+        "inputSchema": "schemas/start.json",
+        "effect": "write"
+      },
+      {
+        "id": "template_status",
+        "title": "查看任务",
+        "description": "读取任务的结果、源内容和资源引用。",
+        "action": "tasks.get",
+        "inputSchema": "schemas/id.json",
+        "effect": "read"
+      },
+      {
+        "id": "template_list",
+        "title": "列出作品",
+        "description": "获取此 App 的列出作品信息。",
+        "action": "workspace.get",
+        "inputSchema": "schemas/empty.json",
+        "effect": "read"
+      },
+      {
+        "id": "template_read",
+        "title": "读取产物",
+        "description": "获取此 App 的读取产物信息。",
+        "action": "artifacts.read",
+        "inputSchema": "schemas/artifact.json",
+        "effect": "read"
+      },
+      {
+        "id": "template_export",
+        "title": "导出作品",
+        "description": "获取此 App 的导出作品信息。",
+        "action": "artifacts.export",
+        "inputSchema": "schemas/artifact.json",
+        "effect": "write"
+      },
+      {
+        "id": "template_guide",
+        "title": "获取创作参数",
+        "description": "获取此 App 的获取创作参数信息。",
+        "action": "catalog.get",
+        "inputSchema": "schemas/empty.json",
+        "effect": "read"
+      }
+    ],
+    "resourceProviders": [
+      {
+        "id": "templates",
+        "title": "模板作品",
+        "schemes": [
+          "moss-templates"
+        ],
+        "listAction": "composer.list",
+        "resolveAction": "composer.resolve"
+      }
+    ]
+  },
+  "navigation": {
+    "location": "none"
+  }
+}

@@ -1,4 +1,3 @@
-import { buildAppSettings } from '@moss/app-settings/build'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { mkdirSync, cpSync, readFileSync, rmSync, writeFileSync, existsSync, realpathSync } from 'node:fs'
@@ -56,5 +55,3 @@ for (const dependency of ['zod', 'proper-lockfile', '@modelcontextprotocol/serve
 cpSync(path.join(cwd, 'src/memory-server'), target, { recursive: true })
 writeFileSync(path.join(target, 'versions.json'), JSON.stringify(Object.fromEntries(copied), null, 2) + '\n')
 console.log(`Bundled Memory MCP and ${copied.size - 1} production dependencies`)
-
-await buildAppSettings(fileURLToPath(new URL('..', import.meta.url)))

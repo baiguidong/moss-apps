@@ -26,13 +26,15 @@ export function syncAppearance() {
   }
   const visible = () => { if (document.visibilityState === 'visible') void refreshAppearance() }
   const systemChanged = () => { if (mode === 'system') apply() }
+  const unsubscribe = window.mossApp?.events?.on('appearance', () => void refreshAppearance())
   apply(); void refreshAppearance()
   const offAppearance = window.mossApp?.events.on('appearance', () => { void refreshAppearance() })
   window.addEventListener('focus', refreshAppearance)
   document.addEventListener('visibilitychange', visible)
   media.addEventListener('change', systemChanged)
   return () => {
-    disposed = true; offAppearance?.()
+    disposed = true
+    unsubscribe?.(); offAppearance?.()
     window.removeEventListener('focus', refreshAppearance)
     document.removeEventListener('visibilitychange', visible)
     media.removeEventListener('change', systemChanged)

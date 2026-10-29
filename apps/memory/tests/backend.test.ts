@@ -51,11 +51,12 @@ async function fixture(options: { initial?: McpServer[]; inspect?: () => Promise
   return { backend, messages, invoke, stored: () => structuredClone(servers), recover: () => { failure = undefined } }
 }
 
-test('initialization is local; first use registers, explicit inspect connects, and registration stays idempotent', async () => {
+test('initialization registers without connecting; reads stay local and explicit inspection connects', async () => {
   const f = await fixture()
   await tick()
-  expect(f.messages.some(message => message.type === 'host.request')).toBe(false)
-  await f.invoke('servers.list')
+  expect(f.stored()).toMatchObject([{ name: MEMORY, enabled: true, config: DEFAULT_CONFIG }])
+  expect(f.messages.some(message => message.type === 'host.request' && message.payload.method === 'servers.inspect')).toBe(false)
+  expect(compileJsonSchema(schema)(await f.invoke('servers.list'))).toBe(true)
   expect(f.stored()).toMatchObject([{ name: MEMORY, enabled: true, config: DEFAULT_CONFIG }])
   expect(f.messages.some(message => message.type === 'host.request' && message.payload.method === 'servers.inspect')).toBe(false)
   await f.invoke('servers.inspect')
@@ -114,9 +115,19 @@ test('settings cancel stale inspection and cannot change the managed command or 
   expect(await f.invoke('servers.save', input)).toMatchObject({ ok: true })
   await tick(); release(); await tick()
   expect(f.messages.some(message => message.type === 'host.cancel')).toBe(true)
+  expect(calls).toBe(1)
   expect(f.stored()[0].config).toEqual(memoryConfig(memoryFile, input.disabledTools))
-  expect(await f.invoke('servers.list')).toMatchObject({ ok: true, data: { preparation: { state: 'ready' }, memoryFile } })
+  expect(await f.invoke('servers.list')).toMatchObject({ ok: true, data: { preparation: { state: 'idle' }, memoryFile } })
   expect(await f.invoke('servers.save', { ...input, config: { command: 'anything' } })).toMatchObject({ ok: false })
   expect(await f.invoke('servers.inspect', { name: 'another-service' })).toMatchObject({ ok: false })
   expect(await f.invoke('servers.save', { disabledTools: [4] })).toMatchObject({ ok: false })
+})
+
+
+test('re-registration preserves an intentionally disabled service and its exclusions', async () => {
+  const f = await fixture({ initial: [{ name: MEMORY, enabled: false, updatedAt: 1, credentialsMissing: false, check: null,
+    config: { ...DEFAULT_CONFIG, command: '/old/node', disabledTools: ['delete_entities'] } }] })
+  expect(f.stored()[0]).toMatchObject({ enabled: false, config: memoryConfig(memoryFile, ['delete_entities']) })
+  await f.invoke('servers.list')
+  expect(f.messages.some(message => message.type === 'host.request' && message.payload.method === 'servers.inspect')).toBe(false)
 })

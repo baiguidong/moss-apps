@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object"
+    },
+    "configuredFields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

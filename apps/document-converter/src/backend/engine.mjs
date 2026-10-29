@@ -1,12 +1,21 @@
+import { reviewDocument } from './review.mjs'
+import { creationEngine } from '@moss/creation-apps'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { ensureBinary, existingPaths, run, argv } from '@moss/engine-apps/runtime'
+import { fileURLToPath } from 'node:url'
+import { ensureBinary, existingPaths, run, argv, TaskStore } from '@moss/engine-apps/runtime'
 import spec from '../../resources/engine.json' with {type:'json'}
 import pdfEngine from '../../resources/pdf-engine.json' with {type:'json'}
 import catalog from '../../resources/catalog.json' with {type:'json'}
 
 const reserved=new Set(['from','read','to','write','output','log','extract-media','help','version'])
 const ext={gfm:'md',commonmark:'md',commonmark_x:'md',markdown:'md',markdown_strict:'md',markdown_phpextra:'md',markdown_github:'md',markdown_mmd:'md',html5:'html',html4:'html',epub2:'epub',epub3:'epub',plain:'txt',latex:'tex',beamer:'tex',revealjs:'html',s5:'html',slidy:'html',dzslides:'html'}
+export function validateAuthor(input) {
+  if (typeof input.content !== 'string' || !input.content.trim() || Buffer.byteLength(input.content) > 1024 * 1024) throw new Error('请输入正文，最多支持 1 MiB 文本')
+  if (typeof input.title !== 'string' || !input.title.trim() || input.title.length > 120) throw new Error('请输入 1–120 字的文档标题')
+  if (!['docx', 'pdf', 'html5', 'gfm', 'epub3'].includes(input.to || 'docx')) throw new Error('请选择支持的创作输出格式')
+  if (input.options && (typeof input.options !== 'object' || Array.isArray(input.options))) throw new Error('排版选项必须是对象')
+}
 export async function buildArgs(input,directory) {
   const paths=await existingPaths(input.paths)
   const from=input.from||'', to=input.to||'html5'
@@ -34,14 +43,39 @@ export async function buildArgs(input,directory) {
   args.push('--output',output,'--log',path.join(directory,'pandoc-log.json'),...paths)
   return {args,paths,output,to}
 }
-export default {
+const engine = {
   id:'pandoc',spec,
+  async register(backend, context) {
+    backend.registerAction('resources.resolve', async input => {
+      const uri = new URL(input.uri)
+      if (uri.protocol !== 'moss-document:' || uri.hostname !== 'files' || uri.search || uri.hash || !/^\/[a-zA-Z0-9_-]{1,100}\/\d{1,4}$/.test(uri.pathname)) throw new Error('文档资源引用无效')
+      const [, id, index] = uri.pathname.split('/'), store = new TaskStore(context.dataDir), task = await store.get(id), file = task.artifacts[Number(index)]
+      if (task.status !== 'succeeded' || !file) throw new Error('文档尚未生成')
+      const target = await fs.realpath(file.path), relative = path.relative(await fs.realpath(store.directory(id)), target)
+      if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) throw new Error('文件不属于当前文档任务')
+      return { kind: 'file', name: file.name, path: target, resourceUri: input.uri }
+    })
+  },
   async catalog({dataDir,prepare}){if(prepare)await ensureBinary(spec,dataDir);return {...catalog,version:spec.version}},
   async validate(input){
+    if(input.mode==='review'){if(!input.sourcePath||(!input.edits?.length&&!input.comments?.length))throw new Error('请提供文档和修订或批注');return}
+    if (input.mode === 'author') { validateAuthor(input); return }
     if(input.mode==='inspect') {if(!/^(list-(input-formats|output-formats|extensions|highlight-languages|highlight-styles)|print-(default-template|default-data-file|highlight-style)|version|help)$/.test(input.query||''))throw new Error('不支持的信息查询');return}
     await buildArgs(input,'/tmp/moss-output-validation')
   },
   async execute(input,ctx){
+    if(input.mode==='review')return reviewDocument(input,ctx)
+    if (input.mode === 'author') {
+      validateAuthor(input)
+      const title = input.title.trim().replace(/[\x00-\x1f<>:"/\\|?*]/g, '_')
+      const source = path.join(ctx.directory, title + '.md')
+      await fs.writeFile(source, input.content, { flag: 'wx' })
+      const target = path.join(ctx.directory, 'output'); await fs.mkdir(target)
+      const result = await this.execute({ mode: 'merge', paths: [source], from: 'markdown', to: input.to || 'docx',
+        options: { ...input.options, standalone: true, metadata: [...(Array.isArray(input.options?.metadata) ? input.options.metadata : input.options?.metadata ? [input.options.metadata] : []), 'title=' + input.title.trim()] } }, { ...ctx, directory: target })
+      result.artifacts.push({ name: '可编辑原稿.md', path: source, kind: 'text' })
+      return { ...result, message: '文档已生成，可继续编辑原稿或导出', result: { ...result.result, authored: true, title: input.title.trim() } }
+    }
     if(input.mode==='batch' && input.paths?.length>1) {
       const artifacts=[],files=[]
       for(let i=0;i<input.paths.length;i++) {
@@ -60,7 +94,10 @@ export default {
       return {argv:args,message:'查询完成',result:{text:r.stdout},artifacts:[{name:'查询结果.txt',path:file,kind:'text'}]}
     }
     const {args,paths,output,to}=await buildArgs(input,ctx.directory)
-    if (to === 'pdf' && !args.some(arg => /^--pdf-engine(?:=|$)/.test(arg))) args.unshift('--pdf-engine=' + await ensureBinary(pdfEngine, ctx.dataDir, ctx.signal))
+    if (to === 'pdf' && !args.some(arg => /^--pdf-engine(?:=|$)/.test(arg))) {
+      args.unshift('--pdf-engine=' + await ensureBinary(pdfEngine, ctx.dataDir, ctx.signal), '--pdf-engine-opt=--font-path=' + fileURLToPath(new URL('../../assets/fonts', import.meta.url)))
+      if (!args.some(arg => /^(?:--variable=)?mainfont[=:]/.test(arg))) args.unshift('--variable=mainfont=Noto Sans SC')
+    }
     await ctx.progress('正在转换文档'); await ctx.record?.({argv:args})
     const r=await run(binary,args,{cwd:path.dirname(paths[0]),signal:ctx.signal,log:ctx.log})
     if(!(await fs.stat(output)).isFile())throw new Error('引擎未生成文档')
@@ -82,3 +119,5 @@ export default {
     return {argv:args,artifacts,result:{format:to,size:(await fs.stat(output)).size,previewError},message:'文档已生成',warnings:r.stderr}
   },
 }
+
+export default creationEngine(engine,{scheme:'moss-document',title:'文档创作',tools:['document_create','document_status','document_read']})

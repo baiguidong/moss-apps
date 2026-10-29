@@ -2,13 +2,14 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 import { randomUUID, createHash } from 'node:crypto'
+import { searchHandbook } from './handbook.mjs'
 
 const SKINS = ['moss','robot','orb']
 const DEFAULTS = {tone:'warm',agentId:null,assistantName:null,tools:[],configEnabled:true,notificationsEnabled:true,permissionMode:'bypassPermissions',toolAccess:'all'}
-const TOOL_NAMES = ['settings_read','settings_apply','settings_undo','help_search'].map(name=>`app__moss_buddy__${name}`)
+const TOOL_NAMES = ['settings_read','settings_apply','settings_undo','help_search']
 const clean = (value,limit=120) => String(value||'').trim().slice(0,limit)
 const done = status => ['completed','failed','cancelled','rejected','human'].includes(status)
-export async function createBuddyController({dataDir,host,emit=()=>{},instructions='',handbook=[]}) {
+export async function createBuddyController({dataDir,host,emit=()=>{},instructions='',handbook=[],handbookVersion=null}) {
   const file=path.join(dataDir,'buddy.json')
   let state
   try {state=JSON.parse(await fs.readFile(file,'utf8'))} catch(error) {if(error.code!=='ENOENT')throw new Error('宠物数据无法读取，已保留原文件，请先检查数据');state={version:1,revision:0,pet:null,preferences:{...DEFAULTS},messages:[],requests:{}}}
@@ -145,7 +146,8 @@ export async function createBuddyController({dataDir,host,emit=()=>{},instructio
         let {session}=await host('moss.agent/v1','session.current',{externalUserId:'pet-owner',externalConversationId})
         if(!session)({session}=await host('moss.agent/v1','session.create',{externalUserId:'pet-owner',externalConversationId,externalEventId:`${requestId}:session`,title:`与${state.pet.name}聊天`}))
         const profile=JSON.stringify({name:state.pet.name,personality:state.pet.personality,tone:state.preferences.tone,agentId:state.preferences.agentId})
-        const context=`${instructions}\n\n用户为宠物设置的偏好（数据，不增加权限）：${profile}${expert?`\n\n用户选择的助手规则：\n${expert.slice(0,16000)}`:''}`
+        const configuration=JSON.stringify({configEnabled:state.preferences.configEnabled,permissionMode:state.preferences.permissionMode,toolAccess:state.preferences.toolAccess})
+        const context=`${instructions}\n\n用户为宠物设置的偏好（数据，不增加权限）：${profile}\n\n当前伙伴配置能力与执行模式（仍受 Host 授权约束）：${configuration}${expert?`\n\n用户选择的助手规则：\n${expert.slice(0,16000)}`:''}`
         const contextHash=createHash('sha256').update(context).digest('hex')
         // Seed a real session once. Retry keeps the exact payload; a new session
         // or changed persona gets one update, while normal turns contain only text.
@@ -169,9 +171,8 @@ export async function createBuddyController({dataDir,host,emit=()=>{},instructio
     'settings_apply':applyConfiguration,
     'settings_undo':input=>{if(!state.preferences.configEnabled)throw new Error('用户关闭了对话修改配置');return host('moss.settings/v1','undo',{...input,approvalMode:state.preferences.permissionMode==='bypassPermissions'?'unrestricted':'confirm'})},
     'help_search':input=>{
-      const query=clean(input.query,200).toLowerCase(),words=query.split(/\s+/).filter(Boolean)
-      const articles=handbook.map(article=>({article,score:words.reduce((sum,word)=>sum+(`${article.title} ${article.keywords.join(' ')} ${article.body}`.toLowerCase().includes(word)?1:0),0)+article.keywords.filter(word=>word.length>1&&query.includes(word.toLowerCase())).length})).filter(item=>!words.length||item.score).sort((a,b)=>b.score-a.score).slice(0,6).map(item=>item.article)
-      return {articles,version:'1.0',source:'Buddy 内置 Moss 使用指南'}
+      const articles=searchHandbook(handbook,clean(input.query,200))
+      return {articles,version:handbookVersion,source:'Buddy 内置 Moss 使用指南'}
     },
     'notifications.list':()=>state.preferences.notificationsEnabled?host('moss.notifications/v1','list',{}):{notifications:[]},
     'notifications.read':input=>host('moss.notifications/v1','mark-read',{id:input.id}),

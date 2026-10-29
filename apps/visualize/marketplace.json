@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.visualize",
+  "summary": "在主会话中生成和展示交互可视化。",
+  "description": "用户描述需求，AI 生成图表和交互讲解，作品直接展示在主会话消息中。无独立 UI，使用 Moss 通用应用信息界面；支持作品历史、继续修改和导出。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/visualize",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT",
+  "featured": true
+}

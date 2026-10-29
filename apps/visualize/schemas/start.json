@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "chart",
+        "html"
+      ]
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "bar",
+        "line",
+        "pie",
+        "scatter",
+        "table"
+      ]
+    },
+    "csv": {
+      "type": "string",
+      "description": "含表头的 CSV：第一列标签（散点图为数值 X），其他列为数值。饼图使用第一个数值列。"
+    },
+    "html": {
+      "type": "string",
+      "description": "模型生成的自包含 HTML 片段，含内联 CSS/JS，最大 1 MiB。可使用 window.mossVisualization 保存状态和请求带上下文的追问。"
+    },
+    "parentId": {
+      "type": "string",
+      "pattern": "^[a-f0-9-]{36}$",
+      "description": "继续修改时填原任务 ID；原版本保留。"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "additionalProperties": false
+}

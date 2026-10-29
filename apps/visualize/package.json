@@ -1,0 +1,16 @@
+{
+  "name": "@moss/visualize-app",
+  "version": "0.1.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/backend/engine.mjs && node --check src/backend/composer.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "build": "node scripts/build.mjs"
+  },
+  "dependencies": {
+    "@moss/app-sdk": "workspace:*",
+    "@moss/engine-apps": "workspace:*"
+  },
+  "devDependencies": {}
+}

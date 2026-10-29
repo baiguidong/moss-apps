@@ -29,5 +29,5 @@ test('all repository Apps explicitly choose navigation; Sequential Thinking stay
     expect(app.manifest.navigation).toEqual(raw.navigation)
   }
   expect(apps.find(app => app.manifest.id === 'moss.sequential-thinking')?.manifest).toMatchObject({ navigation: { location: 'settings', viewId: 'settings' }, toolScope: 'global' })
-  for (const id of ['moss.feishu', 'moss.computer-use']) expect(apps.find(app => app.manifest.id === id)?.manifest.navigation.location).toBe('settings')
+  for (const id of ['moss.feishu', 'moss.computer-use', 'moss.database', 'moss.memory', 'moss.self-test', 'moss.mcp']) expect(apps.find(app => app.manifest.id === id)?.manifest.navigation.location).toBe('details')
 })

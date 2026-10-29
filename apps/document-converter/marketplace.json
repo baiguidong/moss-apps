@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "appId": "moss.document-converter",
-  "summary": "通过 Pandoc 转换文档格式、设置排版与引用，在 Moss 查看和导出结果。",
-  "description": "通过 Pandoc 转换文档格式、设置排版与引用，在 Moss 查看和导出结果。",
+  "appId": "moss.document",
+  "summary": "在主会话中创作、修改和转换文档，生成 Word、PDF、HTML 与电子书。",
+  "description": "在主会话中创作、修改和转换文档，生成 Word、PDF、HTML 与电子书。",
   "platforms": [
     "darwin-arm64",
     "linux-x64"

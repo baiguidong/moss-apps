@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "uri": {
+      "type": "string",
+      "maxLength": 4096
+    }
+  },
+  "required": [
+    "uri"
+  ],
+  "additionalProperties": false
+}

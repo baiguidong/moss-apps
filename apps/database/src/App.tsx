@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Database, Plus, RefreshCw, Pencil, Trash2, PlugZap, X, Settings2, ShieldCheck } from 'lucide-react'
+import { Database, Plus, RefreshCw, Pencil, Trash2, PlugZap, X, ShieldCheck } from 'lucide-react'
 import { request } from './lib/api'
 import { defaults, kinds, type Catalog, type Connection, type Kind, type Settings } from './types'
 
@@ -52,7 +52,9 @@ function RemoveDialog({ connection, busy, remove, close }: { connection: Connect
 export function App() {
   const [catalog, setCatalog] = useState<Catalog | null>(null), [error, setError] = useState('')
   const [busy, setBusy] = useState(''), [editor, setEditor] = useState<Connection | null | undefined>(), [removing, setRemoving] = useState<Connection | null>(null)
-  const [notice, setNotice] = useState('')
+  const [notice, setNotice] = useState(''), [dirty, setDirty] = useState(false)
+  useEffect(() => { if (editor === undefined) setDirty(false) }, [editor])
+  useEffect(() => { void window.mossApp?.view?.setState({ dirty, busy: Boolean(busy) }).catch(() => {}) }, [dirty, busy])
   const controller = useRef<AbortController | null>(null)
   const load = async () => { setError(''); try { setCatalog(await request('list')) } catch (e) { setError((e as Error).message) } }
   useEffect(() => { void load(); return () => controller.current?.abort() }, [])
@@ -76,8 +78,8 @@ export function App() {
     finally { setBusy('') }
     if (test && result.savedId && result.connections.find(c => c.id === result.savedId)?.enabled) await operate('inspect', { id: result.savedId }, result.savedId)
   }
-  return <main className="workspace" aria-label="数据库查询">
-    <header className="page-heading" aria-label="连接操作"><span className="muted">{catalog ? `${catalog.connections.length} 个连接` : '正在读取连接'}</span><div className="actions"><button className="icon" title="通用设置" aria-label="通用设置" onClick={() => { location.hash = '/moss-settings' }}><Settings2 size={18}/></button><button className="icon" aria-label="刷新连接" disabled={!!busy} onClick={() => void load()}><RefreshCw size={17}/></button>{catalog && <button className="button primary" disabled={!!busy} onClick={() => setEditor(null)}><Plus size={16}/>添加连接</button>}</div></header>
+  return <main className="workspace" aria-label="数据库查询" onChangeCapture={() => { if (editor !== undefined) setDirty(true) }}>
+    <header className="page-heading" aria-label="连接操作"><span className="muted">{catalog ? `${catalog.connections.length} 个连接` : '正在读取连接'}</span><div className="actions"><button className="icon" aria-label="刷新连接" disabled={!!busy} onClick={() => void load()}><RefreshCw size={17}/></button>{catalog && <button className="button primary" disabled={!!busy} onClick={() => setEditor(null)}><Plus size={16}/>添加连接</button>}</div></header>
     {error && <div className="error banner" role="alert">{error}{!catalog && <button className="button" onClick={() => void load()}>重新加载</button>}</div>}
     {notice && <p className="notice" role="status">{notice}</p>}
     {!catalog && !error && <p className="empty">正在加载连接…</p>}
@@ -90,7 +92,7 @@ export function App() {
         <div className="connection-bottom"><span className="policy">{!connection.legacy && <><ShieldCheck size={14}/>{connection.readonly ? '只读' : '允许写入'} · 最多 {connection.maxRows} 行</>}</span><div className="actions"><button className="button" disabled={!!busy || !connection.enabled} onClick={() => void operate('inspect', { id: connection.id }, connection.id)}><PlugZap size={15}/>{checking ? '正在测试…' : '测试连接'}</button><button className="icon" aria-label={`编辑 ${connection.title}`} disabled={!!busy} onClick={() => setEditor(connection)}><Pencil size={16}/></button><button className="icon" aria-label={`删除 ${connection.title}`} disabled={!!busy} onClick={() => setRemoving(connection)}><Trash2 size={16}/></button></div></div>
         {checking && <p className="muted">首次连接需要下载运行依赖，可能需要几分钟。<button className="text-button" onClick={() => controller.current?.abort()}>取消测试</button></p>}
         {connection.error && connection.enabled && <p className="error" role="alert">{connection.error}</p>}
-        {connection.tools.length > 0 && <details><summary>可用工具（{connection.tools.length}）</summary>{connection.tools.map(tool => <p key={tool.name}><code>{tool.name}</code> {tool.description}</p>)}</details>}
+
       </section>
     })}</div>
     {editor !== undefined && <Editor connection={editor} busy={!!busy} onClose={() => setEditor(undefined)} onSave={save}/>}

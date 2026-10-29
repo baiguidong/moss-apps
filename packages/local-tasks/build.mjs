@@ -6,9 +6,9 @@ import { spawnSync } from 'node:child_process'
 export function buildApp(root, external = []) {
   const run = (command, args) => { const result = spawnSync(command, args, { cwd: root, stdio: 'inherit' }); if (result.error || result.status) throw result.error || new Error(`${command} failed`) }
   fs.rmSync(path.join(root, 'dist'), { recursive: true, force: true })
-  run('vite', ['build'])
-  for (const name of ['main', 'worker']) run('bun', ['build', `src/backend/${name}.mjs`, '--target=node', '--format=esm', ...external.map(name => `--external=${name}`), `--outfile=dist/backend/${name}.mjs`])
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'app.moss.json')))
+  if (manifest.ui?.entry) run('vite', ['build'])
+  for (const name of ['main', 'worker']) run('bun', ['build', `src/backend/${name}.mjs`, '--target=node', '--format=esm', ...external.map(name => `--external=${name}`), `--outfile=dist/backend/${name}.mjs`])
   const platforms = manifest.platforms || JSON.parse(fs.readFileSync(path.join(root, 'marketplace.json'))).platforms
   const visited = new Map(), target = path.join(root, 'dist/backend/node_modules')
   function copy(name, require, optional = false) {

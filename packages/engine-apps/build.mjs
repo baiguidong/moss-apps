@@ -7,7 +7,9 @@ import { bundleAsset } from './src/bundle-build.mjs'
 import { platformAsset } from './src/platform.mjs'
 export async function buildApp(root) {
   const run=(cmd,args)=>{const r=spawnSync(cmd,args,{cwd:root,stdio:'inherit'});if(r.error||r.status)throw r.error||new Error(`${cmd} failed`)}
-  fs.rmSync(path.join(root,'dist'),{recursive:true,force:true}); run('vite',['build'])
+  fs.rmSync(path.join(root,'dist'),{recursive:true,force:true})
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, 'app.moss.json'), 'utf8'))
+  if (manifest.ui?.entry) run('vite',['build'])
   for(const name of ['main','worker','cli','mcp']) if(fs.existsSync(path.join(root,`src/backend/${name}.mjs`))) run('bun',['build',`src/backend/${name}.mjs`,'--target=node','--format=esm',`--outfile=dist/backend/${name}.mjs`])
   const cache = process.env.MOSS_BUILD_DEPENDENCY_CACHE || path.join(os.homedir(), '.cache/moss-apps-build')
   for (const name of ['engine', 'ffmpeg', 'ffprobe', 'pdf-engine']) {

@@ -1,0 +1,81 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "parentId": {
+      "type": "string",
+      "pattern": "^[a-f0-9-]{36}$"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "save",
+        "use",
+        "update"
+      ]
+    },
+    "sourcePath": {
+      "type": "string"
+    },
+    "templateId": {
+      "type": "string",
+      "pattern": "^[a-f0-9-]{36}$"
+    },
+    "content": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "document",
+        "presentation",
+        "spreadsheet",
+        "pdf",
+        "image",
+        "text"
+      ]
+    },
+    "instructions": {
+      "type": "string"
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "skillName": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "description": "个人模板技能名称，由模型按用途命名；更新时默认沿用原技能名。"
+    },
+    "skillDescription": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "说明何时应使用此模板技能，范围要具体。"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "additionalProperties": false
+}

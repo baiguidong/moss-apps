@@ -124,7 +124,9 @@ export async function exportAppSource(app, destination, { release = false, platf
   await fs.writeFile(path.join(destination, 'README.md'), `# ${app.manifest.id} source\n\nApp edit root: ${appRoot}\n\nToolchain: ${workspace.packageManager}; Node ${process.versions.node}.\n\nFrom this directory run \`bun install --frozen-lockfile\`, then in \`${appRoot}\` run ${rebuildCommands}.\n\nDesktop/Host/browser integration scripts may require a complete Core checkout, browser binaries or explicit test configuration. Those external integrations are separate from the included business tests. Dependencies are downloaded from the pinned lockfile; no original workspace or source cache is needed.\n`)
   if (platform) {
     if (!app.manifest.platforms?.includes(platform)) throw new Error(`App does not declare build target ${platform}`)
-    await writeJson(path.join(destination, appRoot, 'app.moss.json'), { ...app.manifest, platforms: [platform] })
+    // Keep the copied source manifest: an older SDK normalizer may omit newer Host fields.
+    const manifestPath = path.join(destination, appRoot, 'app.moss.json')
+    await writeJson(manifestPath, { ...readJson(manifestPath), platforms: [platform] })
   }
   const spec = await inspectSourceProject(destination, { appRoot })
   const sdkFiles = await sourceFileList(path.join(destination, 'vendor/moss-core'))

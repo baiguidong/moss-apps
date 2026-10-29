@@ -19,7 +19,11 @@
           "enum": [
             "arrange",
             "split",
-            "ocr"
+            "ocr",
+            "extract",
+            "form",
+            "create",
+            "render"
           ],
           "default": "arrange"
         },
@@ -63,14 +67,52 @@
             ],
             "additionalProperties": false
           }
+        },
+        "fields": {
+          "type": "object",
+          "description": "mode=form 时按 metadata.fields 的字段名填写；文字为 string，勾选为 boolean，多选为 string[]。",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 10000
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        },
+        "flatten": {
+          "type": "boolean",
+          "default": false,
+          "description": "展平后不可继续编辑表单，默认保留交互字段。"
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 200000,
+          "description": "创建 PDF 时由模型生成正文，自动换行分页。"
         }
       },
       "required": [],
       "additionalProperties": false
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "parentId": {
+      "type": "string",
+      "pattern": "^[a-f0-9-]{36}$"
     }
   },
-  "required": [
-    "fileIds"
-  ],
+  "required": [],
   "additionalProperties": false
 }

@@ -81,7 +81,7 @@ export default function App() {
   return <div className="shell app-shell">
     <aside className="sidebar">
       <nav><button className={view === 'library' ? 'active' : ''} onClick={() => { location.hash = '#/' }}><Database size={18} />我的资料<ChevronRight size={15} /></button><button className={view === 'settings' ? 'active' : ''} onClick={() => { location.hash = '#/engine-settings' }}><Settings size={18} />设置</button></nav>
-      <div className="sidebar-foot"><span className={`dot ${ready ? 'online' : ''}`} />{labels[status?.state || ''] || '连接中'}<p>资料保存在本机<br />工具使用范围可在顶部设置中调整</p></div>
+      <div className="sidebar-foot"><span className={`dot ${ready ? 'online' : ''}`} />{labels[status?.state || ''] || '连接中'}<p>资料保存在本机</p></div>
     </aside>
     <main>
       <header><div><h1>{view === 'settings' ? '知识库设置' : '我的资料'}</h1><p>{view === 'settings' ? '管理检索服务' : '用关键词或自然语言，找到资料中的线索。'}</p></div>{view === 'library' && <button className="primary" disabled={!ready || indexing || busy} onClick={() => void importFiles()}><Upload size={17} />导入文件</button>}</header>

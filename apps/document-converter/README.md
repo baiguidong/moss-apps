@@ -1,25 +1,20 @@
-# 文档格式转换
+# 文档创作
 
-0.1.2 新增 Linux AMD64 独立包。原生依赖随对应平台包交付；Linux 在 Ubuntu 24.04 验证。浏览器内 App 页面仍依赖 Moss Web Host 的独立适配。
+`moss.document@0.3.0` 是 Moss 内置的主会话创作 App，默认全局常驻，需要 Host API >=3.21。源码保留在 moss-apps，Moss 打包时自动带上。打开 App 显示统一的基本信息、设置、技能、工具和资源详情，没有独立工作台。
 
-`moss.document-converter@0.1.2`，Moss Desktop Host API >=3.14，平台为 macOS Apple Silicon 和 Linux AMD64。使用 Pandoc 3.12.1，转换功能全部由上游提供。
+App ID 为 `moss.document`，与旧版 `moss.document-converter` 独立安装。
+在主会话直接说“写一份项目周报，生成可编辑 Word 并展示”。模型通过 `document_create` 创作、转换或审阅文档，`document_status` 查询结果，`document_read` 读取文本产物，`document_export` 导出。技能提供参数说明，用户无需填写 JSON 或选择 App。
 
-在“更多 → 文档格式转换”选择本地文件，选择输入/输出格式。多个文件可逐个转换，也可按顺序合并。提供结构、样式、模板、引用、数学、电子书、幻灯片与其他参数表单；格式和参数目录从固定版本 CLI 实际输出生成。格式、默认模板和语法信息可在页面查询，无需输入文件。
+创作支持 Markdown 生成 DOCX、PDF、HTML、Markdown 和 EPUB；已有文档支持 Pandoc 格式转换、批量转换、模板、引用及高级参数。DOCX 审阅支持原生修订和批注：修订定位必须唯一且处于同一文字片段；批注定位到唯一段落。不把普通重写当作保真的格式编辑。
 
-结果保存在 App 数据目录，支持内容预览和另存导出，重名文件自动保留。DOCX、ODT、EPUB 等生成后由 Pandoc 回读为 HTML 内容预览；这不等于 Office 精确分页排版。PDF 默认使用随包的 Typst 0.15.1，可在 Moss 内预览；显式选择其他 PDF 引擎、Lua/filter 或模板时，相关自定义文件仍由用户提供。Markdown/HTML/电子书的远程素材是否联网取决于文档和所选参数。
+成果由主会话资源引用及右侧展示。DOCX/EPUB 等由 Pandoc 回读为 HTML 内容预览，可以使用宿主标注；内容预览不是 Office 精确分页排版。PDF 使用宿主原生预览，默认由随包 Typst 和中文字体生成。修改传 `parentId` 创建新版本，保留原稿和原文件，导出同名文件自动改名。
 
-会话选择此 App 后，Agent 使用随包 `moss-document-converter` skill 调用独立 CLI。输入 JSON 文件、实际 argv、运行日志、结果与页面共用；批处理部分失败返回 `partial` 并保留成功产物。引擎由 CI 下载校验并完整放入发布 ZIP，大文件在本机解压并校验，首次使用无需下载；不需要安装 Office 查看内容。
-
-上游：[Pandoc 3.12.1](https://github.com/jgm/pandoc/releases/tag/3.12.1)，版权及许可见 `assets/licenses/COPYRIGHT`。Typst 的 Apache-2.0 许可与声明见 `assets/licenses/TYPST-LICENSE`、`TYPST-NOTICE`。Moss 自有适配代码独立于转换引擎。
-
-## 开发与验证
-
-在仓库根目录执行：
+Pandoc 3.12.1、Typst 0.15.1 随平台包交付，支持 macOS Apple Silicon 和 Linux AMD64。无需用户安装 Codex、Pandoc、Typst 或 Office；显式指定其他引擎、过滤器、模板时仍需提供相关文件。网络素材按转换参数处理。
 
 ```sh
 bun run --cwd apps/document-converter check
 bun run --cwd apps/document-converter test
-node scripts/package-app.mjs --app moss.document-converter
+node scripts/package-app.mjs --app moss.document
 ```
 
-安装包包含可独立重建的源码与固定 SDK。真实引擎和 Moss 容器验证分别由 `scripts/verify-engine-clis.mjs`、`scripts/verify-engine-ui.mjs` 执行；运行依赖、Core 配套变更和测试范围见 [交付记录](../../docs/engine-apps-delivery.md)。
+安装包包含可独立重建的源码和固定依赖。主会话、资源、模板跨 App 流程及通用详情验证在相邻 Moss Core 中运行 `cd ui && bun run test:creation-apps`。上游声明保留在 `assets/licenses`。

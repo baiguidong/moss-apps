@@ -32,10 +32,11 @@ export function browserFields(config: McpConfig): BrowserFields {
 }
 
 export function configFromFields(config: McpConfig, fields: BrowserFields, excluded: string): McpConfig {
+  const keepEndpoint = fields.mode === 'cdp' && !fields['--cdp-endpoint'].trim() && browserFields(config).mode === 'cdp' && Object.hasOwn(config.env || {}, 'PLAYWRIGHT_MCP_CDP_ENDPOINT')
   if (fields.mode === 'extension' && fields['--executable-path'].trim() && !fields['--user-data-dir'].trim()) {
     throw new Error('自定义 Chrome 路径时，请同时填写已安装扩展的现有 Chrome 用户目录。')
   }
-  if (fields.mode === 'cdp') {
+  if (fields.mode === 'cdp' && !keepEndpoint) {
     let endpoint: URL
     try { endpoint = new URL(fields['--cdp-endpoint'].trim()) } catch { throw new Error('请填写有效的 CDP 地址。') }
     if (!['http:', 'https:', 'ws:', 'wss:'].includes(endpoint.protocol)) throw new Error('CDP 地址需要使用 http、https、ws 或 wss。')
@@ -45,7 +46,7 @@ export function configFromFields(config: McpConfig, fields: BrowserFields, exclu
   const env: Record<string, string> = { ...config.env, MOSS_BROWSER_CONNECTION_MODE: fields.mode }
   if (fields.extensionToken.trim()) env.PLAYWRIGHT_MCP_EXTENSION_TOKEN = fields.extensionToken.trim()
   // Switching modes must also clear an old environment-based connection override.
-  delete env.PLAYWRIGHT_MCP_CDP_ENDPOINT
+  if (!keepEndpoint) delete env.PLAYWRIGHT_MCP_CDP_ENDPOINT
   delete env.PLAYWRIGHT_MCP_EXTENSION
   delete env.PLAYWRIGHT_MCP_ISOLATED
   delete env.PLAYWRIGHT_MCP_ENDPOINT

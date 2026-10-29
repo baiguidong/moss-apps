@@ -37,7 +37,7 @@ async function fixture(options: { initial?: McpServer[]; inspect?: () => Promise
     })
   } }, { prepareManagedBrowser: options.prepare || (async () => '/test/Chrome for Testing') })
   await backend.handleMessage(createEnvelope('service.init', { ...identity, protocols: ['moss.host/v1', ...manifest.host.protocols], permissions: manifest.permissions, grants: manifest.permissions }))
-  const invoke = async (name: string, input = {}): Promise<Result> => {
+  const invoke = async (name: string, input = {}): Promise<any> => {
     const envelope = createEnvelope('action.invoke', { name, input })
     await backend.handleMessage(envelope)
     return messages.find(message => message.id === envelope.id && message.type === 'action.result')!.payload.result
@@ -45,16 +45,16 @@ async function fixture(options: { initial?: McpServer[]; inspect?: () => Promise
   return { backend, messages, invoke, stored: () => structuredClone(servers), recover: () => { failure = undefined } }
 }
 
-test('registers before ready, inspects after ready without any UI request, and remains idempotent', async () => {
+test('registers before ready without inspecting and viewing settings remains read-only', async () => {
   const f = await fixture()
   expect(f.stored()).toMatchObject([{ name: PLAYWRIGHT_CDP, enabled: true, config: { command: process.execPath, args: [bundledEntry, ...DEFAULT_CONFIG.args!.slice(1)] } }])
   await tick()
   const ready = f.messages.findIndex(message => message.type === 'service.ready')
   const inspect = f.messages.findIndex(message => message.type === 'host.request' && message.payload.method === 'servers.inspect')
-  expect(inspect).toBeGreaterThan(ready)
+  expect(inspect).toBe(-1)
   expect(f.messages.slice(0, ready).some(message => message.type === 'event.emit')).toBe(false)
   const result = await f.invoke('servers.list')
-  expect(result).toMatchObject({ ok: true, data: { preparation: { state: 'ready' } } })
+  expect(result).toMatchObject({ ok: true, data: { preparation: { state: 'idle' } } })
   expect(compileJsonSchema(schema)(result)).toBe(true)
   await Promise.all([f.invoke('servers.list'), f.invoke('servers.list')])
   expect(f.messages.filter(message => message.type === 'host.request' && message.payload.method === 'servers.save')).toHaveLength(1)
@@ -66,7 +66,7 @@ test('slow inspection does not block Backend readiness and duplicate reconnects 
   let release!: () => void
   const gate = new Promise<void>(resolve => { release = resolve })
   const f = await fixture({ inspect: () => gate })
-  await tick()
+  await f.invoke('servers.inspect', { name: PLAYWRIGHT_CDP }); await tick()
   expect(await f.invoke('servers.list')).toMatchObject({ ok: true, data: { preparation: { state: 'connecting' } } })
   await Promise.all([f.invoke('servers.inspect', { name: PLAYWRIGHT_CDP }), f.invoke('servers.inspect', { name: PLAYWRIGHT_CDP })])
   expect(f.messages.filter(message => message.type === 'host.request' && message.payload.method === 'servers.inspect')).toHaveLength(1)
@@ -78,7 +78,7 @@ test('first-use browser preparation stays visible without timing out Backend ini
   let release!: (path: string) => void
   const preparation = new Promise<string>(resolve => { release = resolve })
   const f = await fixture({ prepare: () => preparation })
-  await tick()
+  await f.invoke('servers.inspect', { name: PLAYWRIGHT_CDP }); await tick()
   expect(await f.invoke('servers.list')).toMatchObject({ ok: true, data: { preparation: { state: 'preparing' } } })
   expect(f.messages.some(message => message.type === 'host.request' && message.payload.method === 'servers.inspect')).toBe(false)
   release('/test/Chrome for Testing'); await tick()
@@ -86,7 +86,8 @@ test('first-use browser preparation stays visible without timing out Backend ini
 })
 
 test('reports startup failure without blocking configuration and reconnect recovers', async () => {
-  const f = await fixture({ failure: '未找到系统 Chrome' }); await tick()
+  const f = await fixture({ failure: '未找到系统 Chrome' })
+  await f.invoke('servers.inspect', { name: PLAYWRIGHT_CDP }); await tick()
   expect(await f.invoke('servers.list')).toMatchObject({ ok: true, data: { preparation: { state: 'failed', error: '未找到系统 Chrome' } } })
   f.recover()
   await f.invoke('servers.inspect', { name: PLAYWRIGHT_CDP }); await tick()
@@ -111,20 +112,41 @@ test('upgrading replaces the old default CDP connection before inspecting, witho
   expect(restarted.messages.some(message => message.type === 'host.request' && message.payload.method === 'servers.save')).toBe(false)
 })
 
-test('save cancels old preparation and only the new configuration check becomes ready', async () => {
+test('saving cancels a pending check without starting a new check', async () => {
   let release!: () => void, calls = 0
   const gate = new Promise<void>(resolve => { release = resolve })
-  const f = await fixture({ inspect: () => ++calls === 1 ? gate : Promise.resolve() }); await tick()
+  const f = await fixture({ inspect: () => ++calls === 1 ? gate : Promise.resolve() })
+  await f.invoke('servers.inspect', { name: PLAYWRIGHT_CDP }); await tick()
   const input: SaveInput = { name: PLAYWRIGHT_CDP, previousName: PLAYWRIGHT_CDP, enabled: true, config: { ...DEFAULT_CONFIG, args: [...DEFAULT_CONFIG.args!, '--timeout-action', '7000'] } }
   expect(await f.invoke('servers.save', input)).toMatchObject({ ok: true })
   await tick(); release(); await tick()
   expect(f.messages.some(message => message.type === 'host.cancel')).toBe(true)
   expect(f.stored()[0].config.args?.at(-1)).toBe('7000')
-  expect(await f.invoke('servers.list')).toMatchObject({ ok: true, data: { preparation: { state: 'ready' } } })
+  expect(calls).toBe(1)
+  expect(await f.invoke('servers.list')).toMatchObject({ ok: true, data: { preparation: { state: 'idle' } } })
 })
 
 test('rejects attempts to manage other services or disable the managed connection separately', async () => {
   const f = await fixture(); await tick()
   expect(await f.invoke('servers.inspect', { name: 'another-service' })).toMatchObject({ ok: false })
   expect(await f.invoke('servers.save', { name: PLAYWRIGHT_CDP, previousName: PLAYWRIGHT_CDP, enabled: false, config: DEFAULT_CONFIG })).toMatchObject({ ok: false })
+})
+
+
+test('declarative settings preserve modes, policy and credentials without inspection', async () => {
+  const config = { ...DEFAULT_CONFIG, env: { PLAYWRIGHT_MCP_EXTENSION_TOKEN: '', CUSTOM: '' }, disabledTools: ['browser_close'] }
+  const f = await fixture({ initial: [{ name: PLAYWRIGHT_CDP, enabled: false, config, check: null, updatedAt: 1, credentialsMissing: false }] })
+  const first = await f.invoke('settings.read')
+  expect(first.values.mode).toBe('managed')
+  expect(first.configuredFields).toEqual(['extensionToken'])
+  const saved = f.messages.filter(message => message.type === 'host.request' && message.payload.method === 'servers.save').length
+  await f.invoke('settings.save', first.values)
+  expect(f.messages.filter(message => message.type === 'host.request' && message.payload.method === 'servers.save')).toHaveLength(saved)
+  await f.invoke('settings.save', { ...first.values, mode: 'extension', profileDirectory: 'Profile 1' })
+  expect(f.stored()[0]).toMatchObject({ enabled: false, config: { disabledTools: ['browser_close'], env: { PLAYWRIGHT_MCP_EXTENSION_TOKEN: '', CUSTOM: '' } } })
+  expect(f.stored()[0].config.args).toContain('--extension')
+  await f.invoke('settings.save', { mode: 'cdp', cdpEndpoint: 'http://localhost:9444', outputDirectory: '~/Output' })
+  expect(f.stored()[0].config.args).toContain('http://localhost:9444')
+  expect(f.stored()[0].config.args).not.toContain('--extension')
+  expect(f.messages.some(message => message.type === 'host.request' && message.payload.method === 'servers.inspect')).toBe(false)
 })

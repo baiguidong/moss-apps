@@ -17,6 +17,7 @@
     "actions": [
       { "name": "composer.list", "inputSchema": "schemas/composer-list.json", "outputSchema": "schemas/composer-list-result.json" },
       { "name": "composer.resolve", "inputSchema": "schemas/composer-resolve.json", "outputSchema": "schemas/result.json" },
+      { "name": "resources.resolve", "inputSchema": "schemas/resource-resolve.json", "outputSchema": "schemas/result.json" },
       { "name": "templates.list", "inputSchema": "schemas/empty.json", "outputSchema": "schemas/result.json" },
       { "name": "projects.storyboard.save", "inputSchema": "schemas/storyboard-save.json", "outputSchema": "schemas/result.json" },
       { "name": "projects.scene.save", "inputSchema": "schemas/scene-save.json", "outputSchema": "schemas/result.json" },
@@ -37,7 +38,7 @@
   "host": { "protocols": ["moss.local-files/v1"] },
   "permissions": ["local-files:pick"],
   "contributes": {
-    "resourceProviders": [{ "id": "video-projects", "title": "HyperFrames 视频项目", "schemes": ["moss-hyperframes"], "listAction": "composer.list", "resolveAction": "composer.resolve" }],
+    "resourceProviders": [{ "id": "video-projects", "title": "HyperFrames 视频项目", "schemes": ["moss-hyperframes", "moss"], "listAction": "composer.list", "resolveAction": "resources.resolve" }],
     "views": [{ "id": "workspace", "title": "HyperFrames 动画工坊", "route": "#/", "order": 275 }, { "id": "moss-conversation", "title": "HyperFrames", "route": "#/workbench" }],
     "tools": [
       { "id": "templates-list", "title": "列出视频模板", "description": "列出产品介绍、数据报告、教学讲解和项目汇报的离线模板。", "action": "templates.list", "inputSchema": "schemas/empty.json", "effect": "read" },
@@ -52,7 +53,7 @@
       { "id": "tasks-cancel", "title": "取消视频任务", "description": "取消指定本地渲染任务。", "action": "tasks.cancel", "inputSchema": "schemas/id.json", "effect": "write" },
       { "id": "artifacts-export", "title": "导出视频产物", "description": "通过本地目录选择器导出成功任务的指定产物；不会覆盖已有文件。", "action": "artifacts.export", "inputSchema": "schemas/artifact.json", "effect": "write" }
     ],
-    "skills": [{ "id": "moss-hyperframes", "title": "Agent 视频创作", "description": "在主会话完成需求、模板、分镜、场景、校验、确认渲染和导出。", "path": "resources/skills/moss-hyperframes/SKILL.md", "cli": "dist/backend/cli.mjs" }]
+    "skills": [{ "id": "moss-hyperframes", "title": "Agent 视频创作", "description": "App 自带的 CLI 工作流说明；不要调用全局 Skill 工具，直接读取 SKILL.md 并调用 HyperFrames App 工具完成需求、模板、分镜、场景、校验、确认渲染和导出。", "path": "resources/skills/moss-hyperframes/SKILL.md", "cli": "dist/backend/cli.mjs" }]
   },
   "platforms": ["darwin-arm64"]
 }

@@ -1,0 +1,217 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "parentId": {
+      "type": "string",
+      "pattern": "^[a-f0-9-]{36}$"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "sourcePath": {
+      "type": "string"
+    },
+    "sheets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "formula": {
+                        "type": "string"
+                      },
+                      "numFmt": {
+                        "type": "string"
+                      },
+                      "font": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "alignment": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "maxItems": 200,
+              "minItems": 0
+            },
+            "maxItems": 10000,
+            "minItems": 0
+          },
+          "widths": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 200,
+            "minItems": 0
+          },
+          "header": {
+            "type": "boolean"
+          },
+          "filter": {
+            "type": "boolean"
+          },
+          "freezeRows": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "charts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "bar",
+                    "line",
+                    "pie"
+                  ]
+                },
+                "title": {
+                  "type": "string"
+                },
+                "labels": {
+                  "type": "string",
+                  "description": "标签单列范围，如 A2:A5"
+                },
+                "series": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "range": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "range"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 8,
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "labels",
+                "series"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 20,
+            "minItems": 0
+          }
+        },
+        "required": [
+          "name",
+          "rows"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 30,
+      "minItems": 1
+    },
+    "edits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string"
+          },
+          "cell": {
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "formula": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sheet",
+          "cell"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "additionalProperties": false
+}

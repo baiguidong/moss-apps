@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.templates",
+  "summary": "从参考文档、表格、演示文稿和内容中保存模板，在主会话复用。",
+  "description": "从参考文档、表格、演示文稿和内容中保存模板，在主会话复用。",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "win32-arm64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/templates",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT",
+  "featured": true
+}

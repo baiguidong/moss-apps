@@ -64,7 +64,7 @@ test('disabled configuration is enforced by the backend and cancelled turns can 
  await a['pet.update']({revision:state.revision,preferences:{configEnabled:false,tools:['Read'],toolAccess:'selected',permissionMode:'default'}})
  await assert.rejects(()=>a.settings_apply({}),/关闭/);assert.throws(()=>a.settings_undo({}),/关闭/)
  await a['chat.send']({text:'hello',requestId:'one'})
- const bound=f.calls.find(c=>c.method==='binding.update').input.patch;assert.ok(bound.resources.tools.includes('Read'));assert.ok(!bound.resources.tools.includes('app__moss_buddy__settings_apply'))
+ const bound=f.calls.find(c=>c.method==='binding.update').input.patch;assert.ok(bound.resources.tools.includes('Read'));assert.ok(!bound.resources.tools.includes('settings_apply'))
  assert.equal((await a['chat.stop']()).pending.length,0);await a['chat.send']({text:'again',requestId:'two'});assert.equal(f.turns.length,2)
 })
 
@@ -89,6 +89,32 @@ test('execution mode is configurable and forwarded to configuration writes',asyn
  state=await a['pet.update']({revision:state.revision,preferences:{permissionMode:'default'}})
  await a.settings_apply({domain:'desktop'});assert.equal(f.calls.at(-1).input.approvalMode,'confirm')
  await assert.rejects(a['pet.update']({revision:state.revision,preferences:{permissionMode:'invalid'}}),/权限模式/)
+})
+
+test('configuration controls refresh existing model context once without resetting the conversation',async t=>{
+ const f=await fixture(t),a=f.controller.actions
+ await a['pet.hatch']({})
+ const send=async(id)=>{
+  await a['chat.send']({text:'帮我调整设置',requestId:id})
+  const turn=f.turns.at(-1);turn.status='completed';turn.resultText='ok';await f.controller.onTurn(turn.id)
+  return f.calls.filter(call=>call.method==='turn.start').at(-1).input
+ }
+ const first=await send('initial')
+ assert.ok(first.text.includes('"configEnabled":true'))
+ let state=await a['pet.get']()
+ await a['pet.update']({revision:state.revision,preferences:{configEnabled:false}})
+ const disabled=await send('disabled')
+ assert.ok(disabled.text.includes('"configEnabled":false'))
+ assert.equal(disabled.externalConversationId,first.externalConversationId)
+ assert.equal((await send('unchanged')).text,'帮我调整设置')
+ state=await a['pet.get']()
+ await a['pet.update']({revision:state.revision,preferences:{configEnabled:true,permissionMode:'default',toolAccess:'selected'}})
+ const enabled=await send('enabled')
+ assert.ok(enabled.text.includes('"configEnabled":true'))
+ assert.ok(enabled.text.includes('"permissionMode":"default"'))
+ assert.ok(enabled.text.includes('"toolAccess":"selected"'))
+ assert.equal(enabled.externalConversationId,first.externalConversationId)
+ assert.equal((await send('unchanged-again')).text,'帮我调整设置')
 })
 
 test('stale configuration retries only if the requested field has not changed',async t=>{

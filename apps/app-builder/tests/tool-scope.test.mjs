@@ -10,8 +10,8 @@ test('Builder exposes an executable default-session template using the current S
   const global = { ...raw, toolScope: 'global' }
   expect(validateAppManifest(global).toolScope).toBe('global')
   expect(() => validateAppManifest({ ...raw, hostApi: '^3.0.0' })).toThrow('3.1.0')
-  expect(result.guidance).toContain("Preserve an existing App's scope")
-  expect(result.templates['README.md']).toContain('every App-owned MCP service inherits')
+  expect(result.guidance).toContain("保留原展示位置与工具范围")
+  expect(result.templates['README.md']).toContain('App 的所有 MCP 服务继承')
 })
 
 
@@ -25,8 +25,8 @@ test('Builder guidance produces a valid generic native subservice contract with 
   const manifest = validateAppManifest(raw)
   expect(manifest.toolSelection).toBe('services')
   expect(manifest.contributes.tools.every(tool => tool.serviceId === 'sales')).toBe(true)
-  expect(result.guidance).toContain('selecting a child must never add its parent as a wildcard')
-  expect(result.templates['README.md']).toContain('Select-all captures current children')
+  expect(result.guidance).toContain('选择子服务不能将父 App 隐式加入为通配选择')
+  expect(result.templates['README.md']).toContain('全选只保存当前子项快照')
   raw.contributes.services = []
   expect(() => validateAppManifest(raw)).toThrow('serviceId')
 })

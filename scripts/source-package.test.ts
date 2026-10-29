@@ -56,3 +56,16 @@ test('Builder source includes its declared Runtime build dependency and verifies
     expect(output).toContain('SDK snapshot verified')
   } finally { await fs.rm(destination, { recursive: true, force: true }) }
 })
+
+test('platform source export preserves newer Host fields from the App manifest', async () => {
+  const destination = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-platform-source-test-'))
+  try {
+    const app = selectApps(['--app', 'moss.document'])[0]
+    const source = JSON.parse(await fs.readFile(path.join(app.root, 'app.moss.json'), 'utf8'))
+    const spec = await exportAppSource(app, destination, { platform: 'darwin-arm64' })
+    const packaged = JSON.parse(await fs.readFile(path.join(destination, spec.appRoot, 'app.moss.json'), 'utf8'))
+    expect(packaged).toEqual({ ...source, platforms: ['darwin-arm64'] })
+    expect(packaged.toolLoading).toBe('always')
+    expect(packaged.overview.examples.length).toBeGreaterThan(0)
+  } finally { await fs.rm(destination, { recursive: true, force: true }) }
+})

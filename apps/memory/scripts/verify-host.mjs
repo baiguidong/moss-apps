@@ -29,7 +29,7 @@ for (const method of MCP_METHODS) runtime.registerHostHandler(MCP_PROTOCOL, meth
   if (method === 'servers.save' && !input.previousName) registrations++
   return host.handle(method, input, context)
 })
-const serverName = 'moss_memory__memory'
+let serverName
 const waitFor = async (predicate, message) => {
   const deadline = Date.now() + 45_000
   while (Date.now() < deadline) { if (await predicate()) return; await new Promise(resolve => setTimeout(resolve, 100)) }
@@ -40,13 +40,19 @@ let browser, uiServer
 try {
   await runtime.initialize()
   await installAppArchive(runtime, join(repo, 'artifacts', manifest.id, manifest.version, `${manifest.id}-${manifest.version}.zip`))
-  await waitFor(() => host.toolCatalog(manifest.id)[0]?.status === 'connected', 'Automatic MCP startup did not complete')
+  await waitFor(() => host.toolCatalog(manifest.id).length > 0, 'Service registration did not complete')
+  assert.equal(inspections, 0, 'registration must not inspect MCP')
+  serverName = host.toolCatalog(manifest.id)[0].runtimeName
   assert.equal(registrations, 1); assert.equal(legacyReads, 0)
   assert.ok(!runtime.installations.get('moss.mcp'))
   const config = host.enabledServers()[serverName]
   assert.equal(config.command, process.execPath)
   const instance = (await runtime.listInstances(manifest.id))[0]
   const invoke = (method, input = {}) => runtime.invoke(manifest.id, instance.id, method, input, { timeoutMs: 65_000 })
+  assert.equal((await invoke('servers.list')).data.preparation.state, 'idle')
+  assert.equal(inspections, 0)
+  await invoke('servers.inspect')
+  await waitFor(() => host.toolCatalog(manifest.id)[0]?.status === 'connected', 'Explicit inspection did not complete')
   const ready = await invoke('servers.list')
   assert.equal(ready.ok, true); assert.equal(ready.data.preparation.state, 'ready')
   const file = ready.data.memoryFile
@@ -102,7 +108,6 @@ try {
     }
   })
   await page.goto(`http://127.0.0.1:${uiServer.address().port}`)
-  await expect(page.getByRole('status')).toContainText('检查通过')
   const canvas = page.locator('[data-engine="antv-g6"]')
   await expect(canvas).toHaveAttribute('data-ready', 'true')
   await expect(canvas).toHaveAttribute('data-node-count', '11')
@@ -120,13 +125,10 @@ try {
   await Promise.all(sessions.splice(0).map(session => session.close()))
   saved = await readFile(file, 'utf8')
   await page.screenshot({ path: join(output, 'installed-app.png'), fullPage: true })
-  await page.getByRole('button', { name: '记忆设置' }).click()
-  await page.getByLabel('不启用的工具').fill('delete_entities')
-  await page.getByRole('button', { name: '保存并连接' }).click()
-  await expect(page.getByRole('dialog')).toHaveCount(0)
-  await expect(page.getByRole('status')).toContainText('检查通过')
-  await page.locator('.memory-tools summary').click()
-  await expect(page.getByRole('heading', { name: 'delete_entities已排除' })).toBeVisible()
+  const beforeSave = inspections
+  await invoke('servers.save', { disabledTools: ['delete_entities'] })
+  assert.equal(inspections, beforeSave, 'saving must not inspect MCP')
+  assert.equal((await invoke('servers.list')).data.preparation.state, 'idle')
   assert.deepEqual(errors, [])
 
   await runtime.setAppEnabled(manifest.id, false)
@@ -134,14 +136,15 @@ try {
   assert.equal(await readFile(file, 'utf8'), saved)
   const before = inspections
   await runtime.setAppEnabled(manifest.id, true)
-  await waitFor(() => inspections > before && host.toolCatalog(manifest.id)[0]?.status === 'connected', 'Re-enable did not discover tools')
+  await waitFor(() => Boolean(host.enabledServers()[serverName]), 'Re-enable did not restore the service')
+  assert.equal(inspections, before, 're-enable must not connect MCP')
   assert.equal(registrations, 1)
   assert.deepEqual(host.enabledServers()[serverName].disabledTools, ['delete_entities'])
   assert.equal((await invoke('servers.list')).data.memoryFile, file)
   sessions.push(await connect(config.args[0], config.args.slice(1), sessionOptions))
   assert.equal((await call(sessions[0].client, 'read_graph', {})).entities.length, 11)
   const report = { passed: true, platform: `${process.platform}-${process.arch}`, version: manifest.version, toolCount: tools.length,
-    checks: ['final ZIP installation without MCP App', 'automatic tool discovery before opening UI', 'offline execution with empty PATH/cache', 'all nine real memory tools', 'concurrent writes across MCP processes', 'installed UI with real Backend', 'G6 graph and real memory details', 'graph refresh after external MCP writes', 'fixed-path read-only graph action', 'tool exclusions', 'App disable/re-enable', 'persistent data preserved across restart'] }
+    checks: ['final ZIP installation without MCP App', 'registration, reads, saves and re-enable without connecting; explicit tool inspection', 'offline execution with empty PATH/cache', 'all nine real memory tools', 'concurrent writes across MCP processes', 'installed UI with real Backend', 'G6 graph and real memory details', 'graph refresh after external MCP writes', 'fixed-path read-only graph action', 'tool exclusions', 'App disable/re-enable', 'persistent data preserved across restart'] }
   await writeFile(join(output, 'host.json'), JSON.stringify(report, null, 2) + '\n')
   console.log(`PASS ${manifest.id}: ${tools.length} tools, concurrent memory, offline package, installed UI and lifecycle`)
 } finally {

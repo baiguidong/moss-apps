@@ -1,8 +1,13 @@
 {
   "schemaVersion": 2,
   "id": "moss.browser-use",
-  "version": "0.1.8",
-  "platforms": ["darwin-arm64", "darwin-x64", "win32-x64", "linux-x64"],
+  "version": "0.1.9",
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "linux-x64"
+  ],
   "displayName": "网页操控",
   "category": "automation",
   "keywords": [
@@ -14,18 +19,10 @@
   ],
   "description": "操作网页时打开保留登录状态的专用浏览器，或连接日常 Chrome 操作网页。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.6.0",
+  "hostApi": "^3.21.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
-  },
-  "ui": {
-    "entry": "dist/ui/index.html",
-    "window": {
-      "width": 1120,
-      "height": 780,
-      "resizable": true
-    }
   },
   "backend": {
     "entry": "dist/backend/main.mjs",
@@ -50,6 +47,18 @@
         "inputSchema": "schemas/servers.inspect.input.json",
         "outputSchema": "schemas/result.json",
         "timeoutMs": 65000
+      },
+      {
+        "name": "settings.read",
+        "inputSchema": "schemas/servers.list.input.json",
+        "outputSchema": "schemas/settings-result.json",
+        "timeoutMs": 65000
+      },
+      {
+        "name": "settings.save",
+        "inputSchema": "schemas/connection.json",
+        "outputSchema": "schemas/settings-result.json",
+        "timeoutMs": 65000
       }
     ],
     "configuration": {
@@ -62,35 +71,16 @@
     "mcp:connect"
   ],
   "contributes": {
-    "views": [
-      {
-        "id": "browser",
-        "title": "网页操控",
-        "route": "#/",
-        "icon": "globe",
-        "order": 210
-      },
-      {
-        "id": "moss-settings",
-        "title": "通用设置",
-        "route": "#/moss-settings",
-        "icon": "settings",
-        "order": -1000
-      }
-    ],
     "settings": [
       {
-        "id": "manage",
+        "id": "connection",
         "title": "浏览器连接设置",
-        "viewId": "browser",
-        "group": "tools"
-      },
-      {
-        "id": "shared-settings",
-        "title": "通用设置",
-        "viewId": "moss-settings",
-        "group": "apps",
-        "order": -1000
+        "group": "tools",
+        "permission": "mcp:manage",
+        "form": {
+          "readAction": "settings.read",
+          "saveAction": "settings.save"
+        }
       }
     ]
   },
@@ -101,7 +91,14 @@
     ]
   },
   "navigation": {
-    "location": "settings",
-    "viewId": "browser"
+    "location": "none"
+  },
+  "overview": {
+    "description": "通过专用浏览器、日常 Chrome 扩展或已有 CDP 服务操作网页。专用浏览器保留登录状态，在操作网页时打开。可读取页面、填写表单、点击操作和截图。",
+    "examples": [
+      "打开网站，帮我查找需要的信息",
+      "读取当前页面，整理成摘要",
+      "填写表单，并截取页面供我检查"
+    ]
   }
 }

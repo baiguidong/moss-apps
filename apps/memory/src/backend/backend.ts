@@ -8,7 +8,7 @@ import type { GraphResult } from '../contracts'
 
 export function createMemoryBackend(options: ConstructorParameters<typeof AppBackendClient>[0] = {}) {
   let initialized = false, closing = false, setup: Promise<void> | undefined, memoryFile = ''
-  let preparation: Preparation = { state: 'configuring' }
+  let preparation: Preparation = { state: 'idle' }
   let inspection: { controller: AbortController; promise: Promise<void> } | undefined
   let mutation = Promise.resolve()
   const read = (method: Method, input: Record<string, unknown> = {}, signal?: AbortSignal, timeoutMs = 60_000) =>
@@ -27,9 +27,9 @@ export function createMemoryBackend(options: ConstructorParameters<typeof AppBac
       if (!memoryFile) throw new Error('未获得 App 数据目录，请重启记忆 App。')
       const existing = (await read('servers.list', {}, undefined, 3000)).servers.find(server => server.name === MEMORY)
       const config = memoryConfig(memoryFile, existing?.config.disabledTools)
-      if (!existing || !existing.enabled || JSON.stringify(config) !== JSON.stringify(existing.config)) {
+      if (!existing || JSON.stringify(config) !== JSON.stringify(existing.config)) {
         try {
-          await read('servers.save', { name: MEMORY, ...(existing ? { previousName: MEMORY } : {}), enabled: true, config }, undefined, 3000)
+          await read('servers.save', { name: MEMORY, ...(existing ? { previousName: MEMORY } : {}), enabled: existing?.enabled ?? true, config }, undefined, 3000)
         } catch (error) {
           // A create may have succeeded before a Host timeout. Preserve that record.
           if (existing || !(await read('servers.list', {}, undefined, 3000)).servers.some(server => server.name === MEMORY)) throw error
@@ -64,7 +64,7 @@ export function createMemoryBackend(options: ConstructorParameters<typeof AppBac
     onInitialize: async (context: { dataDir?: string }) => {
       if (typeof options.onInitialize === 'function') await options.onInitialize(context)
       if (typeof context.dataDir === 'string' && isAbsolute(context.dataDir)) memoryFile = join(context.dataDir, 'memory', 'knowledge-graph.jsonl')
-      // Registration and disk checks must not delay the SDK's service.ready handshake.
+      try { await ensureRegistered() } catch { /* Explicit reads retry registration. */ }
     },
     onShutdown: async (context: unknown) => {
       closing = true
@@ -86,7 +86,7 @@ export function createMemoryBackend(options: ConstructorParameters<typeof AppBac
           if (closing || context.signal.aborted) throw new Error('操作已取消。')
           await ensureRegistered()
           await read('servers.save', { name: MEMORY, previousName: MEMORY, enabled: true, config: memoryConfig(memoryFile, settings.disabledTools) }, context.signal)
-          beginInspection()
+          setPreparation({ state: 'idle' })
         })
         mutation = pending.catch(() => {})
         await pending

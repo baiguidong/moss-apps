@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "intent": {
+      "enum": [
+        "create",
+        "edit",
+        "use"
+      ]
+    },
+    "ref": {
+      "type": "object",
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "maxLength": 3500
+        },
+        "fileId": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uri": {
+      "type": "string",
+      "maxLength": 4096
+    }
+  },
+  "additionalProperties": false,
+  "anyOf": [
+    {
+      "required": [
+        "intent"
+      ]
+    },
+    {
+      "required": [
+        "uri"
+      ]
+    }
+  ]
+}

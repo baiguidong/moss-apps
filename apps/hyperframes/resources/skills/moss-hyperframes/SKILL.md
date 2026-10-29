@@ -5,6 +5,8 @@ description: 在 Moss 主会话通过 HyperFrames 工具制作本地 HTML 动画
 
 # Agent 视频创作
 
+这是 HyperFrames App 自带的 App skill，不是 Moss 全局 Skill。不要调用 `Skill` 工具，也不要把 `moss-hyperframes` 当作全局 skill 名；直接读取本文件后调用当前会话中的 HyperFrames App 工具。若需要预览项目资源，使用 `moss-hyperframes://project/<projectId>` 资源 URI；旧版 `moss://hyperframes/project/<projectId>` 也兼容。
+
 使用 App 提供的独立工具完成创作；将页面作为项目、分镜、任务与视频的预览工作台，不要求用户在页面输入代码，不依赖 API key 或外部模型。
 
 ## 工作流

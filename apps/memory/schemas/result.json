@@ -50,6 +50,7 @@
           "properties": {
             "state": {
               "enum": [
+                "idle",
                 "configuring",
                 "connecting",
                 "ready",

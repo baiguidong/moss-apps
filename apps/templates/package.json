@@ -1,0 +1,16 @@
+{
+  "name": "@moss/templates-app",
+  "version": "0.2.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/backend/engine.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "build": "node scripts/build.mjs"
+  },
+  "dependencies": {
+    "@moss/app-sdk": "workspace:*",
+    "@moss/engine-apps": "workspace:*",
+    "@moss/creation-apps": "workspace:*"
+  }
+}

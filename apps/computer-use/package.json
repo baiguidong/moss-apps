@@ -1,6 +1,6 @@
 {
   "name": "@moss/computer-use-app",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,8 +13,7 @@
     "@moss/app-sdk": "workspace:*",
     "@trycua/cua-driver": "0.34.0",
     "@modelcontextprotocol/sdk": "1.29.0",
-    "zod": "4.1.13",
-    "@moss/app-settings": "workspace:*"
+    "zod": "4.1.13"
   },
   "devDependencies": {
     "@moss/app-runtime": "workspace:*",

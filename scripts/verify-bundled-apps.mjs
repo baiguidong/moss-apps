@@ -14,7 +14,7 @@ import {hash} from '../packages/engine-apps/src/runtime.mjs'
 import {platformAsset} from '../packages/engine-apps/src/platform.mjs'
 import {restoreBundledAsset} from '../packages/engine-apps/src/bundled.mjs'
 const execute=promisify(execFile)
-export const LOCAL_APPS=['moss.image-tools','moss.pdf-tools','moss.transcription','moss.file-cleaner','moss.document-converter','moss.code-map']
+export const LOCAL_APPS=['moss.image-tools','moss.pdf','moss.transcription','moss.file-cleaner','moss.document','moss.code-map']
 const args=process.argv.slice(2)
 const platform = `${process.platform}-${process.arch}`
 if(!['darwin-arm64','linux-x64'].includes(platform))throw new Error(`Bundled native verification is unavailable on ${platform}`)

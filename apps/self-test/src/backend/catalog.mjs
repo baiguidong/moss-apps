@@ -64,7 +64,7 @@ export function buildTestPrompt(run) {
     ] : []),
     `证据目录：${run.evidenceDir}。截图必须保存到该目录下的绝对路径，例如 ${path.join(run.evidenceDir, `${run.cases[0]?.id || 'case'}.png`)}。测试附件：${run.fixturePath}。`,
     '如果页面快照或控制台输出返回了文件链接，使用 Read 读取 evidence 目录内对应文件的绝对路径，再继续操作。Read 仅用于本轮证据。',
-    '按清单顺序执行。每项完成后调用 app__moss_self_test__self_test，action=record，run_id=本轮 ID，case_id=项目 ID。',
+    '按清单顺序执行。每项完成后调用 self_test，action=record，run_id=本轮 ID，case_id=项目 ID。',
     '需要聊天的项目必须真正点击发送并等待 AI 回复结束，不能只输入草稿。新会话在首次发送后才出现在侧栏。根据消息角色区分用户文本和 AI 回复，不能把用户消息中的标记当成 AI 回复。',
     'checks 为 [{index: 0, passed: true/false, actual: "实际观察"}, ...]，index 对应 expected 的下标；evidence 为实际保存的截图路径。',
     'status=passed 必须逐条验证全部 expected 且提供截图；失败用 failed；前置条件不满足用 blocked 并说明原因。不能把推测、工具连接成功或未执行算作通过。',

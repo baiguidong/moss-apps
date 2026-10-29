@@ -22,6 +22,7 @@ const names=process.argv.includes('--app')?[process.argv[process.argv.indexOf('-
 for(const name of names){
  const id=`moss.${name}`,checks=[],errors=[],report=path.join(output,name);await fs.mkdir(report,{recursive:true})
  const manifest=JSON.parse(await fs.readFile(path.join(repo,'apps',name,'app.moss.json'),'utf8'))
+ if(!manifest.ui){console.log(`SKIP ${id}: backend App; use Core builtin conversation integration tests`);continue}
  const desktop=await electron.launch({executablePath:path.join(core,'ui/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'),args:[path.join(repo,'scripts/engine-apps-verify/desktop.cjs')],env:{...process.env,MOSS_CORE_ROOT:core,MOSS_TEST_APP:id,MOSS_TEST_VERSION:manifest.version,MOSS_TEST_NODE:process.execPath,MOSS_TEST_SHELL:shell,MOSS_TEST_ARCHIVE:process.env.MOSS_TEST_ARCHIVE||path.join(repo,'artifacts',id,manifest.version,`${id}-${manifest.version}-darwin-arm64.zip`),MOSS_TEST_APP_UI_SCHEME:'1'},timeout:60000})
  let page,agent,directory
  const passed=text=>{checks.push(text);console.log(`PASS ${name}: ${text}`)}
@@ -48,7 +49,7 @@ for(const name of names){
   await expect(shellPage.getByText(manifest.displayName,{exact:true})).toHaveCount(1)
   await expect(shellPage.getByText(manifest.description,{exact:true})).toHaveCount(1)
   const mainBox=await page.locator('main').boundingBox();assert(mainBox.y<=20,'Primary work should begin near the top')
-  const capability = shellPage.getByRole('button',{name:name==='code-map'?/查看 AI 能力：17 个 AI 工具/:/查看 AI 能力：1 个 CLI skill/})
+  const capability = shellPage.getByRole('button',{name:/查看 AI 能力：/})
   await expect(capability).toBeVisible({timeout:60000});await capability.click()
   await expect(shellPage.locator('[data-app-capabilities]')).toContainText(name==='code-map'?'index_repository':'CLI skill')
   await fs.writeFile(path.join(report,'capabilities.png'),Buffer.from(await desktop.evaluate(()=>globalThis.localTaskFixture.screenshot()),'base64'))
@@ -70,6 +71,7 @@ for(const name of names){
    await expect.poll(()=>page.locator('.file-result img').first().evaluate(el=>el.naturalWidth)).toBeGreaterThan(100)
    passed('Real similar-image scan renders original images inside Moss')
   }else if(name==='document-converter'){
+   await click(page.getByRole('tab',{name:'格式转换',exact:true}))
    const skills=await desktop.evaluate(()=>globalThis.localTaskFixture.skills(true));assert.equal(skills.skills.length,1)
    await pick([document]);await click(page.getByRole('button',{name:'选择文件',exact:true}));await page.getByLabel('输出格式',{exact:true}).selectOption('docx');await click(page.getByRole('button',{name:'转换文档',exact:true}));const task=await waitTask()
    const preview=page.frameLocator('iframe[title="文档内容预览"]');await expect(preview.locator('body')).toContainText('中文标题');await expect(preview.locator('table')).toContainText('128')

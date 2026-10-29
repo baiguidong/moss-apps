@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "appId": "moss.pdf-tools",
-  "summary": "整理 PDF 页面、识别扫描件文字，在 Moss 内查看和导出。",
-  "description": "整理 PDF 页面、识别扫描件文字，在 Moss 内查看和导出。",
+  "appId": "moss.pdf",
+  "summary": "在主会话中创建和整理 PDF，提取文字、识别扫描件、填写表单并检查页面。",
+  "description": "在主会话中创建和整理 PDF，提取文字、识别扫描件、填写表单并检查页面。",
   "platforms": [
     "darwin-arm64",
     "linux-x64"

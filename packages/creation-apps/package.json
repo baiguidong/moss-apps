@@ -1,0 +1,19 @@
+{
+  "name": "@moss/creation-apps",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.mjs",
+    "./office": "./src/office.mjs",
+    "./office-render": "./src/office-render.mjs",
+    "./testing": "./src/testing.mjs",
+    "./pptx": "./src/pptx-edit.mjs",
+    "./workflow": "./src/creation-workflow.mjs"
+  },
+  "dependencies": {
+    "@moss/engine-apps": "workspace:*",
+    "jszip": "3.10.1",
+    "@xmldom/xmldom": "0.9.10"
+  }
+}

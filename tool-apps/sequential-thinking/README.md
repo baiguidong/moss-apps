@@ -1,6 +1,6 @@
 # 分步思考 · Sequential Thinking
 
-配置型 MCP App，由 Moss Core 提供设置页、服务注册、连接检查和运行管理。启用并授予 MCP 权限后，各会话均可按需发现和调用 `sequentialthinking`，无需在会话中选择 App。在“设置 → Apps → 分步思考”查看状态、检查服务、调整工具使用范围或停用服务。
+配置型 MCP App，由 Moss Core 提供设置页、服务注册、连接检查和运行管理。启用并授予 MCP 权限后，各会话均可按需发现和调用 `sequentialthinking`，无需在会话中选择 App。在“插件 → 分步思考”查看工具和使用范围，点击服务行在右侧修改连接设置或检查服务。
 
 ## 配置与状态
 
@@ -25,7 +25,7 @@ node scripts/verify-source-package.mjs --app moss.sequential-thinking --rebuild
 node scripts/verify-sequential-thinking.mjs
 ```
 
-安装包输出到 `artifacts/moss.sequential-thinking/0.1.3/`，包含配置、资源和可独立重建的生成器源码。可在支持 Host API 3.9 的 Moss 中导入 `moss.sequential-thinking-0.1.3.zip`。沿用原 App ID 和服务名称，升级到此版本后由 Core 注册配置中的服务。
+安装包输出到 `artifacts/moss.sequential-thinking/0.1.6/`，包含配置、资源和可独立重建的生成器源码。可在支持 Host API 3.9 的 Moss 中导入 `moss.sequential-thinking-0.1.6.zip`。沿用原 App ID 和服务名称，升级到此版本后由 Core 注册配置中的服务。
 
 真实服务验证使用相邻 Moss 仓库，可通过 `MOSS_CORE_ROOT` 指定。脚本在临时数据目录安装最终 ZIP，验证无需打开页面的全局服务注册、真实步骤/修正/分支、连接隔离、无正文日志、设置持久化和启停，结果保存在安装包目录的 `verification.json`。首次验证需要下载固定版本服务。
 

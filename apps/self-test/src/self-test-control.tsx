@@ -23,6 +23,7 @@ export function SelfTestControl() {
   const [group, setGroup] = React.useState('全部模块');
   const [status, setStatus] = React.useState<SelfTestStatus>({ phase: 'idle', message: '' });
   const [pending, setPending] = React.useState(false);
+  React.useEffect(() => { void window.mossApp?.view?.setState({ dirty: false, busy: pending }).catch(() => {}); }, [pending]);
   const [loaded, setLoaded] = React.useState(false);
   const [error, setError] = React.useState('');
   const [now, setNow] = React.useState(Date.now());

@@ -1,13 +1,11 @@
-// Install the real archive in an isolated Host, then exercise its startup, UI and MCP tools.
+// Install the real archive in an isolated Host; verify Core settings, lazy startup and MCP tools.
 import assert from 'node:assert/strict'
-import { mkdtemp, rm, readFile, mkdir, writeFile } from 'node:fs/promises'
+import { mkdtemp, rm, readFile, mkdir, writeFile, symlink } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { pathToFileURL, fileURLToPath } from 'node:url'
 import { createServer as createNetServer } from 'node:net'
-import { createServer as createHttpServer } from 'node:http'
-import { createRequire } from 'node:module'
-import { chromium, expect } from '@playwright/test'
+import { chromium } from '@playwright/test'
 import { startMcpFixture } from '../tests/http-fixture.mjs'
 
 const root = fileURLToPath(new URL('..', import.meta.url)), repo = resolve(root, '../..')
@@ -22,8 +20,6 @@ const { inspectDesktopMcpServer } = await fromCore('ui/electron-direct.mjs')
 const { Client } = await fromCore('node_modules/@modelcontextprotocol/sdk/dist/esm/client/index.js')
 const { StdioClientTransport } = await fromCore('node_modules/@modelcontextprotocol/sdk/dist/esm/client/stdio.js')
 const manifest = JSON.parse(await readFile(join(root, 'app.moss.json'), 'utf8'))
-const executable = await createRequire(import.meta.url)(join(repo, 'artifacts/moss.browser-use', manifest.version, 'package/dist/playwright-cdp/managed.cjs')).installedExecutable()
-assert.ok(executable, 'Prepare the pinned Chrome for Testing before running browser verification')
 const output = join(repo, 'artifacts/moss.browser-use/verification', manifest.version)
 await mkdir(output, { recursive: true })
 const reservation = createNetServer()
@@ -56,11 +52,12 @@ const waitFor = async (predicate, message) => {
   while (Date.now() < deadline) { if (await predicate()) return; await new Promise(resolve => setTimeout(resolve, 100)) }
   throw new Error(message)
 }
-let client, transport, browser, uiServer
+let client, transport
 try {
   await runtime.initialize()
-  await installAppArchive(runtime, join(repo, 'artifacts/moss.browser-use', manifest.version, `moss.browser-use-${manifest.version}.zip`))
-  await waitFor(() => host.toolCatalog(manifest.id)[0]?.status === 'connected', 'App startup did not inspect the browser without a UI request')
+  await installAppArchive(runtime, join(repo, 'artifacts/moss.browser-use', manifest.version, `moss.browser-use-${manifest.version}-${process.platform}-${process.arch}.zip`))
+  await waitFor(() => Boolean(host.enabledServers()[serverName]), 'App did not register its service')
+  assert.equal(inspections, 0, 'App startup must not inspect')
   assert.equal(registrations, 1)
   assert.equal(legacyReads, 0)
   assert.ok(!runtime.installations.get('moss.mcp'))
@@ -70,13 +67,15 @@ try {
   const invoke = async (method, input = {}) => runtime.invoke(manifest.id, instance.id, method, input, { timeoutMs: 65_000 })
   const ready = await invoke('servers.list')
   assert.equal(ready.ok, true)
-  assert.equal(ready.data.preparation.state, 'ready')
+  assert.equal(ready.data.preparation.state, 'idle')
   assert.equal(ready.data.servers.length, 1)
   await invoke('servers.inspect', { name: 'playwright-cdp' })
   await waitFor(async () => (await invoke('servers.list')).data.preparation.state === 'ready', 'explicit inspection did not finish')
+  const startupInspections = inspections
   await runtime.setAppEnabled(manifest.id, false)
   await runtime.setAppEnabled(manifest.id, true)
-  await waitFor(() => host.toolCatalog(manifest.id)[0]?.status === 'connected', 'App re-enable did not inspect tools')
+  await waitFor(() => Boolean(host.enabledServers()[serverName]), 'App re-enable did not register tools')
+  assert.equal(inspections, startupInspections)
   await assert.rejects(fetch(`${endpoint}/json/version`), undefined, 'Host startup, inspection and App re-enable must not open Chrome')
 
   // Actual browser actions through the packaged MCP, with external network disabled.
@@ -89,7 +88,12 @@ net.Socket.prototype.connect = function (...args) {
   if (options?.port && !['localhost', '127.0.0.1', '::1'].includes(options.host || 'localhost')) throw new Error('External network blocked');
   return connect.apply(this, args);
 };\n`)
-  transport = new StdioClientTransport({ ...config, env: { ...process.env, PATH: '', npm_config_offline: 'true', npm_config_cache: join(temporary, 'empty-cache'), NODE_OPTIONS: '--require=' + JSON.stringify(guard) }, stderr: 'pipe' })
+  // First use now unpacks the bundled browser lazily. Allow the OS archive
+  // extractor while keeping npm/npx and other development tools off PATH.
+  const bin = join(temporary, 'bin')
+  await mkdir(bin)
+  await symlink(process.platform === 'win32' ? join(process.env.SystemRoot, 'System32/tar.exe') : '/usr/bin/tar', join(bin, process.platform === 'win32' ? 'tar.exe' : 'tar'))
+  transport = new StdioClientTransport({ ...config, env: { ...process.env, ...config.env, PATH: bin, npm_config_offline: 'true', npm_config_cache: join(temporary, 'empty-cache'), NODE_OPTIONS: '--require=' + JSON.stringify(guard) }, stderr: 'pipe' })
   client = new Client({ name: 'browser-app-verification', version: manifest.version })
   await client.connect(transport)
   const tools = (await client.listTools()).tools
@@ -97,7 +101,12 @@ net.Socket.prototype.connect = function (...args) {
   await assert.rejects(fetch(`${endpoint}/json/version`), undefined, 'MCP connection and tools/list must not open Chrome')
   const call = async (name, args) => {
     const result = await client.callTool({ name, arguments: args })
-    assert.ok(!result.isError, JSON.stringify(result)); return result
+    if (result.isError) {
+      const endpoint = JSON.stringify(result).match(/http:\/\/127\.0\.0\.1:\d+\/json\/version\//)?.[0]
+      const detail = endpoint ? await fetch(endpoint).then(response => response.text()).catch(() => '') : ''
+      assert.fail(JSON.stringify(result) + '\n' + detail)
+    }
+    return result
   }
   await call('browser_navigate', { url: `${fixture.url}/browser` })
   await call('browser_type', { target: '#name', text: 'Browser Use' })
@@ -116,62 +125,40 @@ net.Socket.prototype.connect = function (...args) {
   await writeFile(screenshot, screenshotBytes)
   await client.close(); client = undefined
 
-  // Render the installed UI and bridge it to the actual Backend, rather than demo data.
-  const pkg = await runtime.getActivePackage(manifest.id)
-  uiServer = createHttpServer(async (request, response) => {
-    try {
-      const name = decodeURIComponent(new URL(request.url, 'http://localhost').pathname)
-      const file = resolve(pkg.root, 'dist/ui', name === '/' ? 'index.html' : `.${name}`)
-      assert.ok(file.startsWith(join(pkg.root, 'dist/ui') + '/'))
-      response.setHeader('Content-Type', file.endsWith('.js') ? 'application/javascript' : file.endsWith('.css') ? 'text/css' : 'text/html')
-      response.end(await readFile(file))
-    } catch { response.writeHead(404); response.end() }
-  })
-  await new Promise(resolve => uiServer.listen(0, '127.0.0.1', resolve))
-  browser = await chromium.launch({ executablePath: executable, headless: true })
-  const page = await browser.newPage({ viewport: { width: 1120, height: 820 } })
-  const errors = []; page.on('pageerror', error => errors.push(error.message))
-  await page.exposeFunction('invokeBackend', invoke)
-  await page.addInitScript(() => {
-    window.mossApp = {
-      app: { getInfo: async () => ({ appearance: { themeMode: 'light', cssThemeId: 'default' } }), getStatus: async () => ({ state: 'running' }), getInstallationState: async () => ({ installation: { enabled: true } }) },
-      actions: { invoke: async (name, input) => ({ ok: true, result: await window.invokeBackend(name, input) }), cancel: async () => {} },
-      events: { on: () => () => {} },
-    }
-  })
-  await page.goto(`http://127.0.0.1:${uiServer.address().port}`)
-  await expect(page.getByRole('status')).toContainText('工具已就绪')
-  await page.screenshot({ path: join(output, 'installed-app.png'), fullPage: true })
-  await page.locator('.browser-tools summary').click()
-  await expect(page.getByRole('heading', { name: 'browser_click', exact: true })).toBeVisible()
-  await page.getByRole('button', { name: '连接设置' }).click()
-  await page.getByLabel('输出目录').fill(join(temporary, 'Updated Output'))
-  await page.getByRole('button', { name: '保存并连接' }).click()
-  await expect(page.getByRole('dialog')).toHaveCount(0)
-  await expect(page.getByRole('status')).toContainText('工具已就绪')
-  assert.ok((await invoke('servers.list')).data.servers[0].config.args.includes(join(temporary, 'Updated Output')))
-  assert.deepEqual(errors, [])
+  // Exercise the Core declarative form endpoint against the real installed Backend.
+  const { registerAppRuntimeIpc } = await fromCore('ui/src/apps/app-runtime-ipc.mjs')
+  const handlers = new Map()
+  registerAppRuntimeIpc({ ipcMain: { handle: (name, fn) => handlers.set(name, fn) }, getRuntime: () => runtime })
+  const settings = (operation, values) => handlers.get('app:settings-form')({}, { appId: manifest.id, version: manifest.version, settingId: 'connection', operation, values })
+  const form = await settings('read')
+  assert.equal(form.values.mode, 'managed')
+  assert.equal((await runtime.getActivePackage(manifest.id)).manifest.ui, undefined)
+  const beforeSave = inspections
+  await settings('save', { ...form.values, outputDirectory: join(temporary, 'Updated Output') })
+  assert.equal((await settings('read')).values.outputDirectory, join(temporary, 'Updated Output'))
+  assert.equal(inspections, beforeSave, 'saving settings must not connect')
 
   await runtime.setAppEnabled(manifest.id, false)
   assert.equal(host.enabledServers()[serverName], undefined)
   assert.ok((await (await fetch(`${endpoint}/json/version`)).json()).webSocketDebuggerUrl, 'disabling must preserve Chrome')
   const previousInspections = inspections
   await runtime.setAppEnabled(manifest.id, true)
-  await waitFor(() => inspections > previousInspections && host.toolCatalog(manifest.id)[0]?.status === 'connected', 're-enabling must inspect again')
+  await waitFor(() => Boolean(host.enabledServers()[serverName]), 're-enabling must register the service')
+  assert.equal(inspections, previousInspections)
+  await invoke('servers.inspect', { name: 'playwright-cdp' })
+  await waitFor(() => host.toolCatalog(manifest.id)[0]?.status === 'connected', 'explicit inspection must refresh the catalog')
   assert.equal(registrations, 1)
   assert.ok(host.enabledServers()[serverName])
   assert.ok(host.toolCatalog(manifest.id)[0].tools.some(tool => tool.name === 'browser_click'))
   const report = { passed: true, platform: `${process.platform}-${process.arch}`, version: manifest.version, toolCount: tools.length,
-    checks: ['archive installation without MCP App', 'Host startup, explicit inspection and App re-enable do not launch Chrome', 'MCP connection and tools/list do not launch Chrome', 'first automation request launches the managed browser', 'real MCP navigation/read/type/click/screenshot', 'empty PATH and npm cache with external network blocked', 'installed UI connected to real Backend and Host', 'configuration save and automatic reconnect', 'App disable/re-enable using existing lifecycle', 'browser preserved after disabling', 'dynamic App tool catalog'],
+    checks: ['archive installation without MCP App', 'Host startup, explicit inspection and App re-enable do not launch Chrome', 'MCP connection and tools/list do not launch Chrome', 'first automation request launches the managed browser', 'real MCP navigation/read/type/click/screenshot', 'PATH contains only OS archive extractor; npm cache empty; external network blocked', 'Core form connected to real Backend and Host', 'configuration save without reconnect', 'App disable/re-enable using existing lifecycle', 'browser preserved after disabling', 'dynamic App tool catalog'],
     testIsolation: 'The packaged App starts its managed browser only on the first automation request. Only the port, headless flag, output directory and MOSS_HOME are overridden for isolation.', screenshot }
   await writeFile(join(output, 'host.json'), JSON.stringify(report, null, 2) + '\n')
-  console.log(`PASS Browser Use ${manifest.version}: ${tools.length} tools, lazy managed browser launch, installed UI and App lifecycle`)
+  console.log(`PASS Browser Use ${manifest.version}: ${tools.length} tools, lazy managed browser launch, Core settings and App lifecycle`)
 } finally {
   await client?.close().catch(() => {})
   await transport?.close().catch(() => {})
-  await browser?.close()
   await runtime.shutdown()
-  if (uiServer) { uiServer.closeAllConnections(); await new Promise(resolve => uiServer.close(resolve)) }
   try {
     const owned = await chromium.connectOverCDP(endpoint)
     const session = await owned.newBrowserCDPSession()

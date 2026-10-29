@@ -40,6 +40,14 @@ test('工具与 Manifest action 及独立对象 schema 对齐', async () => {
     assert.equal(schema.additionalProperties, false)
     ajv.compile(schema)
   }
+  const resourceProvider = manifest.contributes.resourceProviders.find(item => item.id === 'video-projects')
+  assert.deepEqual(resourceProvider.schemes, ['moss-hyperframes', 'moss'])
+  assert.equal(resourceProvider.resolveAction, 'resources.resolve')
+  assert.ok(actions.has(resourceProvider.resolveAction))
+  assert.deepEqual(JSON.parse(await fs.readFile(new URL('../schemas/resource-resolve.json', import.meta.url))), {
+    type: 'object', properties: { uri: { type: 'string', minLength: 1, maxLength: 8192 } },
+    required: ['uri'], additionalProperties: false,
+  })
   const schema = JSON.parse(await fs.readFile(new URL('../schemas/render.json', import.meta.url)))
   const validate = ajv.compile(schema)
   assert.ok(validate({ operation: 'render', projectId: 'project-1' }))
@@ -104,6 +112,18 @@ test('旧版 HTML 项目可以读取与校验', async () => {
   assert.match((await call('projects.get', { id })).html, /旧中文项目/)
   assert.equal((await call('projects.validate', { id })).valid, true)
   assert.match(await fs.readFile(path.join(dir, 'index.html'), 'utf8'), /旧中文项目/)
+})
+
+test('资源 URI 解析返回项目预览文件并兼容旧协议', async () => {
+  const project = await call('projects.create', { name: '资源预览测试', duration: 3 })
+  const canonical = await call('resources.resolve', { uri: `moss-hyperframes://project/${project.id}` })
+  assert.equal(canonical.kind, 'file')
+  assert.equal(canonical.path, path.join(root, 'projects', project.id, 'index.html'))
+  assert.equal(await fs.readFile(canonical.path, 'utf8'), project.html)
+  const legacy = await call('resources.resolve', { uri: `moss://hyperframes/project/${project.id}` })
+  assert.equal(legacy.path, canonical.path)
+  await assert.rejects(call('resources.resolve', { uri: 'moss-hyperframes://project/bad%2Fid' }), /资源 URI 无效/)
+  await assert.rejects(call('resources.resolve', { uri: `moss://other/project/${project.id}` }), /资源 URI 无效/)
 })
 
 test('保存和校验提醒场景内动画误用全片累计延迟', async () => {

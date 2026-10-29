@@ -224,3 +224,9 @@ span.subtle { display:inline-flex; align-items:center; gap:5px; }
 .config-hint { margin-bottom:20px; padding:10px 12px; background:var(--muted); border-radius:6px; color:var(--muted-foreground); font-size:11px; line-height:1.8; }
 .path-hint { margin-top:8px; color:var(--muted-foreground); font-size:10px; font-family:inherit; }
 input[readonly] { color:var(--muted-foreground); background:var(--muted); }
+
+.managed-services { display:flex; flex-direction:column; gap:16px; }
+.managed-service { border:1px solid var(--border); border-radius:8px; background:var(--card); }
+.managed-service .detail-header, .managed-service .connection-controls { flex-wrap:wrap; gap:12px; }
+.managed-service .detail-actions { flex-wrap:wrap; }
+.managed-service .error-message { padding:0 16px 12px; }

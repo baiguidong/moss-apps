@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.feishu",
-  "version": "0.4.14",
+  "version": "0.4.15",
   "displayName": "飞书",
   "category": "communication",
   "keywords": [
@@ -13,7 +13,7 @@
   ],
   "description": "通过飞书私聊连接一个固定 Moss 会话并自动回复。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.4.0",
+  "hostApi": "^3.22.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -62,18 +62,35 @@
       {
         "id": "settings",
         "title": "飞书",
-        "route": "#/settings",
+        "route": "#/configuration",
         "icon": "forum",
         "order": 200
+      },
+      {
+        "id": "execution",
+        "title": "执行权限",
+        "route": "#/agent"
       }
     ],
     "settings": [
       {
         "id": "configuration",
-        "title": "飞书设置",
+        "title": "连接与配对",
         "viewId": "settings",
         "order": 200,
-        "group": "integrations"
+        "group": "integrations",
+        "presentation": {
+          "width": "wide"
+        }
+      },
+      {
+        "id": "execution-policy",
+        "title": "执行权限",
+        "group": "integrations",
+        "viewId": "execution",
+        "presentation": {
+          "width": "wide"
+        }
       }
     ]
   },
@@ -83,7 +100,9 @@
     ]
   },
   "navigation": {
-    "location": "settings",
-    "viewId": "settings"
+    "location": "details"
+  },
+  "overview": {
+    "description": "通过飞书机器人与 Moss 对话。配置机器人凭据、配对用户，并设置这些会话可以使用的资源和执行权限。"
   }
 }

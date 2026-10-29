@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "appId": "moss.sequential-thinking",
   "summary": "为复杂任务提供可修正、可分支的步骤记录工具。",
-  "description": "由 Moss Core 托管的配置型 MCP 应用。启用后各会话可按需使用步骤、修正与分支工具；在设置 → Apps → 分步思考中检查连接、查看工具并调整设置。",
+  "description": "由 Moss Core 统一展示的 MCP 工具应用。在插件详情查看工具，通过右侧面板调整连接或检查服务；各会话可按需使用步骤、修正与分支工具。",
   "platforms": [
     "darwin-arm64",
     "darwin-x64",

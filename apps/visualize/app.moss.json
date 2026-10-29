@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.visualize",
+  "version": "0.1.2",
+  "displayName": "可视化",
+  "category": "data",
+  "keywords": [
+    "图表",
+    "交互",
+    "可视化",
+    "HTML",
+    "SVG",
+    "数据"
+  ],
+  "description": "在主会话和右侧成果区创建、操作、修改交互图表与演示。",
+  "overview": {
+    "description": "直接在主会话里把想法和数据变成交互图表、原理演示与可视化界面。筛选数据、查看细节、对比方案，或拖动滑块观察结果变化。作品可以在会话和右侧成果区操作，也能导出为离线文件。用自然语言描述需求即可。",
+    "examples": [
+      "用可调节的交互演示解释复利，可以改变本金、年利率和投资年限。",
+      "把这组数据做成可筛选的销售图表：华东 120 万、华南 85 万、华北 96 万。",
+      "用交互图演示太阳、地球和月球的运动，支持暂停和调整速度。"
+    ]
+  },
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.21.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "toolScope": "global",
+  "toolLoading": "always",
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "on-demand",
+    "actions": [
+      {
+        "name": "workspace.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "catalog.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "engine.prepare",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "paths.pick",
+        "inputSchema": "schemas/pick.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.start",
+        "inputSchema": "schemas/start.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.get",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.cancel",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "artifacts.read",
+        "inputSchema": "schemas/artifact.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "artifacts.export",
+        "inputSchema": "schemas/artifact.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "composer.list",
+        "inputSchema": "schemas/composer-list.json",
+        "outputSchema": "schemas/result.json"
+      },
+      {
+        "name": "composer.resolve",
+        "inputSchema": "schemas/composer-resolve.json",
+        "outputSchema": "schemas/result.json"
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.local-files/v1",
+      "moss.runtime/v1",
+      "moss.artifacts/v1"
+    ]
+  },
+  "permissions": [
+    "local-files:pick"
+  ],
+  "contributes": {
+    "skills": [
+      {
+        "id": "moss-visualize",
+        "title": "可视化创作",
+        "description": "创建交互图表、数据表或离线 HTML 演示；保存源数据与图形并在 Moss 中预览。",
+        "path": "resources/skills/moss-visualize/SKILL.md",
+        "cli": "dist/backend/cli.mjs"
+      }
+    ],
+    "tools": [
+      {
+        "id": "visualize_create",
+        "title": "创建可视化",
+        "description": "由模型根据自然语言需求创建交互内容，用户无需输入代码。修改时传 parentId，生成保留旧作品的新版本。成功后用 moss_present 展示 result.presentation，并在回复使用 result.displayMarkdown。",
+        "action": "tasks.start",
+        "inputSchema": "schemas/start.json",
+        "effect": "write"
+      },
+      {
+        "id": "visualize_status",
+        "title": "查看可视化任务",
+        "description": "查询作品生成状态和结果。成功后在最终回复原样使用 result.displayMarkdown，直接在主会话展示交互作品。",
+        "action": "tasks.get",
+        "inputSchema": "schemas/id.json",
+        "effect": "read"
+      },
+      {
+        "id": "visualize_list",
+        "title": "列出可视化作品",
+        "description": "列出已保存的作品和任务。用户可在主会话引用或继续修改已有作品。",
+        "action": "workspace.get",
+        "inputSchema": "schemas/empty.json",
+        "effect": "read"
+      },
+      {
+        "id": "visualize_export",
+        "title": "导出作品",
+        "description": "用户要求导出时，打开目录选择器导出指定任务的作品文件。",
+        "action": "artifacts.export",
+        "inputSchema": "schemas/artifact.json",
+        "effect": "write"
+      },
+      {
+        "id": "visualize_templates",
+        "title": "获取可视化模板",
+        "description": "获取可直接改写的交互演示模板及 Moss 展示协议。根据用户目标调整内容后再创建作品。",
+        "action": "catalog.get",
+        "inputSchema": "schemas/empty.json",
+        "effect": "read"
+      }
+    ],
+    "resourceProviders": [
+      {
+        "id": "visualizations",
+        "title": "可视化作品",
+        "schemes": [
+          "moss-visualize"
+        ],
+        "listAction": "composer.list",
+        "resolveAction": "composer.resolve"
+      }
+    ]
+  },
+  "navigation": {
+    "location": "none"
+  }
+}

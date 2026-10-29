@@ -1,8 +1,8 @@
 # 电脑操控 · Computer Use
 
-在 Moss 中安装、启用本 App，在会话中选择“电脑操控”，并打开 App 设置完成系统能力检查。第一次操作目标应用时，Moss 会询问本次会话或持久授权。前台键鼠单独按本次运行授权，可随时使用 Moss 的停止控制按钮。
+在 Moss 中安装、启用本 App，在会话中选择“电脑操控”，并打开「插件 → 电脑操控 → 系统权限与控制」完成系统能力检查。第一次操作目标应用时，Moss 会询问本次会话或持久授权。前台键鼠单独按本次运行授权，可随时使用 Moss 的停止控制按钮。
 
-支持 Windows 10/11 x64 和 macOS 14+（Apple Silicon、Intel），固定 Cua 0.34.0。工具 ID 为 `computer_use`，模型名称为 `app__moss_computer_use__computer_use`。输入形如 `{"request":{"action":"list_apps"}}`。完整动作定义见 `schemas/computer-use.json`，操作指引见 `assets/instructions.md`。
+支持 Windows 10/11 x64 和 macOS 14+（Apple Silicon、Intel），固定 Cua 0.34.0。工具 ID 为 `computer_use`，模型名称为 `computer_use`。输入形如 `{"request":{"action":"list_apps"}}`。完整动作定义见 `schemas/computer-use.json`，操作指引见 `assets/instructions.md`。
 
 App 拥有 Cua 二进制、SDK、策略、窗口/快照适配、工具契约和设置页。Host API 3.3 提供可信原生入口、会话上下文、授权、全局控制占用、停止和生命周期。原生入口在 Electron 主进程加载，是可信执行域；它不具备普通 Backend 的进程隔离。主线程同步挂死或 native crash 无法由同线程定时器恢复。
 
@@ -22,4 +22,4 @@ Windows 使用 UI Automation 与 D3D 屏幕捕获，不显示 macOS 权限按钮
 
 每个平台独立打包和签名：`bun run package -- --app computer-use --platform win32-x64 --require-signature`，Mac 将目标替换成 `darwin-arm64` 或 `darwin-x64`。文件名带平台后缀，互不覆盖；包内源码记录目标平台，可用 `node scripts/verify-source-package.mjs --app computer-use --platform win32-x64 --rebuild --require-signature` 重建核验。CI 在三个平台构建，并在 Windows Electron 中校验原生加载、截图和中文输入；所有任务通过后统一发布。市场按 Host 的 OS/CPU 选择包，手动装错平台也会被拒绝。Windows ARM64 原生包暂未发布。
 
-本版本要求 Moss Host API >=3.4.0，展示入口为设置 → 工具 → 电脑操控。位置由 Manifest 声明；旧安装需要更新后生效。
+本版本要求 Moss Host API >=3.22.0，展示入口为插件 → 电脑操控 → 系统权限与控制。位置由 Manifest 声明；旧安装需要更新后生效。

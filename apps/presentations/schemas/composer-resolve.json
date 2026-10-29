@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "intent": {
+      "enum": [
+        "create",
+        "edit",
+        "use"
+      ]
+    },
+    "ref": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$"
+        },
+        "prompt": {
+          "type": "string",
+          "maxLength": 3500
+        }
+      },
+      "additionalProperties": false
+    },
+    "uri": {
+      "type": "string",
+      "maxLength": 4096
+    }
+  },
+  "additionalProperties": false,
+  "anyOf": [
+    {
+      "required": [
+        "intent"
+      ]
+    },
+    {
+      "required": [
+        "uri"
+      ]
+    }
+  ]
+}
