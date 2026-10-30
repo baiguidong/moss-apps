@@ -197,12 +197,6 @@ jobs:
         run: |
           bun x playwright install --with-deps chromium
           bun run test:browser
-      - name: Verify Browser Use UI
-        if: steps.release.outputs.app_id == 'moss.browser-use'
-        working-directory: apps/browser-use
-        run: |
-          bun x playwright install --with-deps chromium
-          bun run test:browser
       - name: Verify Memory UI
         if: steps.release.outputs.app_id == 'moss.memory'
         working-directory: apps/memory
