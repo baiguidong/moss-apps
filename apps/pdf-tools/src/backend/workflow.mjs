@@ -24,7 +24,7 @@ export function pdfWorkflow(service) {
     const shown=present(task,service.state.files,service.state.tasks)
     const artifacts=await Promise.all(shown.result.downloads.map(async f=>({name:f.name,path:await service.filePath(f),kind:f.kind,purpose:f.kind==='image'?'render':undefined,page:f.metadata?.page})))
     const source=artifacts.find(a=>a.kind==='pdf');if(!source)throw new Error('本任务未生成 PDF；请对生成 PDF 的任务进行检查')
-    const ctx={directory:directory(id),signal:new AbortController().signal,pdfText};await fs.mkdir(ctx.directory,{recursive:true})
+    const ctx={directory:directory(id),sessionId:service.sessionId,signal:service.controller?.signal || new AbortController().signal,pdfText};await fs.mkdir(ctx.directory,{recursive:true})
     const parentId=task.input.parentId,parent=parentId?await get(parentId):null
     const firstInput=(task.input.fileIds||[]).map(fid=>service.state.files.find(f=>f.id===fid)).find(f=>f?.kind==='pdf')
     const sourcePath=firstInput?await service.filePath(firstInput):undefined
@@ -40,7 +40,7 @@ export function pdfWorkflow(service) {
   }
   const get=id=>{if(!pending.has(id)){const promise=initialize(id);pending.set(id,promise);promise.finally(()=>pending.delete(id)).catch(()=>{})}return pending.get(id)}
   registerWorkflow({registerAction:(name,fn)=>actions.set(name,fn)},{get,directory,write:task=>atomic(path.join(directory(task.id),'workflow.json'),task)},'moss-pdf')
-  const value={get,load,invoke:(name,input)=>actions.get(name)(input),async resolve(id,index){
+  const value={get,load,invoke:(name,input,context)=>actions.get(name)(input,context),async resolve(id,index){
     const task=await get(id),file=task.artifacts[index]
     if(!file||!Number.isInteger(index)||!['comparison','comparison-source','inspection'].includes(file.purpose))throw new Error('PDF 核验资源不存在')
     const resolved=await fs.realpath(file.path),relative=path.relative(await fs.realpath(directory(id)),resolved)

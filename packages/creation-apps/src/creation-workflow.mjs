@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { hash, atomic } from '@moss/engine-apps/runtime'
+import { hash, atomic, sessionResourceUri } from '@moss/engine-apps/runtime'
 import { renderOfficeFile, renderingSummary } from './office-render.mjs'
 import { inspectDocument, compareDocuments, citation } from './document-inspection.mjs'
 const native = artifacts => artifacts.find(a=>/\.(docx|pptx|xlsx|pdf)$/i.test(a.path)&&a.purpose!=='render')
@@ -18,7 +18,7 @@ export async function prepareBaseline(input, parent, ctx) {
 export async function finishInspection(output, input, ctx, baseline, scheme, resourceUri) {
   const source=native(output.artifacts);if(!source)return
   if(baseline&&await hash(baseline.source)!==baseline.snapshot.sourceSha256)throw new Error('原文件在修改期间变化，请重新读取后修改')
-  const snapshot=await inspectDocument(source.path,ctx),id=path.basename(ctx.directory),uri=resourceUri||`${scheme}://works/${id}`
+  const snapshot=await inspectDocument(source.path,ctx),id=path.basename(ctx.directory),uri=sessionResourceUri(resourceUri||`${scheme}://works/${id}`,ctx.sessionId)
   const index=output.artifacts.length,file=path.join(ctx.directory,'content-index.json')
   await atomic(file,snapshot);output.artifacts.push({name:'内容索引.json',path:file,kind:'json',purpose:'inspection'})
   const visual=output.result?.visualReview
@@ -34,8 +34,8 @@ export async function finishInspection(output, input, ctx, baseline, scheme, res
   if(baseline){
     const comparison=compareDocuments(baseline.snapshot,snapshot)
     // A source imported from elsewhere is copied into this task so comparison remains reproducible.
-    let beforeUri=baseline.uri
-    if(!beforeUri){const target=path.join(ctx.directory,'before'+path.extname(baseline.source));await fs.copyFile(baseline.source,target);const n=output.artifacts.length;output.artifacts.push({name:'修改前原件'+path.extname(target),path:target,kind:'document',purpose:'comparison-source'});beforeUri=`${scheme}://files/${id}/${n}`}
+    let beforeUri=baseline.uri&&sessionResourceUri(baseline.uri,ctx.sessionId)
+    if(!beforeUri){const target=path.join(ctx.directory,'before'+path.extname(baseline.source));await fs.copyFile(baseline.source,target);const n=output.artifacts.length;output.artifacts.push({name:'修改前原件'+path.extname(target),path:target,kind:'document',purpose:'comparison-source'});beforeUri=sessionResourceUri(`${scheme}://files/${id}/${n}`,ctx.sessionId)}
     const data={schema:'moss.document-comparison/v1',...comparison,before:{uri:beforeUri,sha256:baseline.snapshot.sourceSha256},after:{uri,sha256:snapshot.sourceSha256}}
     const comparePath=path.join(ctx.directory,'comparison.json'),compareIndex=output.artifacts.length
     await atomic(comparePath,data);output.artifacts.push({name:'修改对比',path:comparePath,kind:'json',purpose:'comparison'})
@@ -60,7 +60,7 @@ export function registerWorkflow(backend,store,scheme) {
     const units=snapshot.units.filter(u=>(page===undefined||u.location?.page===page)&&(sheet===undefined||u.location?.sheet===sheet)).filter(u=>{if(!bounds)return true;const cell=rangeOf(u.location.range);return cell.left>=bounds.left&&cell.left<=bounds.right&&cell.top>=bounds.top&&cell.top<=bounds.bottom})
     return {sourceSha256:snapshot.sourceSha256,total:units.length,offset,hasMore:offset+limit<units.length,checks:snapshot.checks,units:units.slice(offset,offset+limit).map(({signature,...u})=>({...u,...(u.location?{citation:citation(task.result.resourceUri,u.location,u.label)}:{})}))}
   })
-  backend.registerAction('creation.verify',input=>{
+  backend.registerAction('creation.verify',(input,context={})=>{
     const previous=locks.get(input.id)||Promise.resolve()
     const pending=previous.catch(()=>{}).then(async()=>{
       const task=await store.get(input.id),snapshot=await indexOf(task),source=native(task.artifacts).path
@@ -71,7 +71,7 @@ export function registerWorkflow(backend,store,scheme) {
         if(input.sourceSha256!==snapshot.sourceSha256)throw new Error('核验版本不匹配')
         if(typeof input.render!=='object'||Array.isArray(input.render))throw new Error('生成页图参数无效')
         if(input.render.startPage&&visual?.pageCount&&input.render.startPage>visual.pageCount)throw new Error('生成页码超出文档范围')
-        const rendered=await renderOfficeFile(source,path.join(store.directory(task.id),'office-preview'),{startPage:input.render.startPage,maxPages:input.render.count??8})
+        const rendered=await renderOfficeFile(source,path.join(store.directory(task.id),'office-preview'),{signal:context.signal,startPage:input.render.startPage,maxPages:input.render.count??8})
         if(await hash(source)!==snapshot.sourceSha256)throw new Error('文件在生成页图期间变化，请重新读取')
         for(const file of rendered.files)if(!task.artifacts.some(a=>a.path===file.path))task.artifacts.push(file)
         visual={...rendered.result,visuallyVerified:visual?.visuallyVerified===true&&rendered.result.status==='rendered'}

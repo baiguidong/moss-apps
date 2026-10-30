@@ -2,7 +2,12 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { TaskStore, executeTask } from './runtime.mjs'
 
-export async function cli(engine) {
+export async function cli(engine, { sessionScoped = false } = {}) {
+  if (sessionScoped) {
+    const command = process.argv.slice(2)[0] || 'help'
+    if (!['help', 'describe'].includes(command)) { process.stdout.write(JSON.stringify({ error: '会话任务请通过 Moss 创作工具调用；CLI 仅提供参数说明。' }) + '\n'); process.exitCode = 1; return }
+    process.stdout.write(JSON.stringify(await engine.catalog({ prepare: false })) + '\n'); return
+  }
   try {
     const args = process.argv.slice(2), position = args.indexOf('--data-dir')
     if (position < 0 || !path.isAbsolute(args[position+1] || '')) throw new Error('Use --data-dir with the App dataDir supplied in the App skill context')

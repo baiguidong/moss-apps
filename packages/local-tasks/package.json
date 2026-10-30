@@ -10,10 +10,13 @@
     "./styles.css": "./src/styles.css",
     "./build": "./build.mjs"
   },
-  "devDependencies": { "@types/react": "19.2.2" },
+  "devDependencies": {
+    "@types/react": "19.2.2"
+  },
   "dependencies": {
     "@moss/app-sdk": "workspace:*",
     "react": "19.2.0",
-    "lucide-react": "0.564.0"
+    "lucide-react": "0.564.0",
+    "@moss/engine-apps": "workspace:*"
   }
 }

@@ -3,10 +3,10 @@ import { startApp } from '@moss/local-tasks/backend'
 import { fileURLToPath } from 'node:url'
 import { inspect, validate } from './engine.mjs'
 import { resourceUri, present, versionOf } from './presentation.mjs'
-startApp({worker:fileURLToPath(new URL('./worker.mjs',import.meta.url)),inspect,validate,
+startApp({sessionScoped:true,worker:fileURLToPath(new URL('./worker.mjs',import.meta.url)),inspect,validate,
  extraActions:{
   'creation.inspect':(service,input)=>pdfWorkflow(service).invoke('creation.inspect',input),
-  'creation.verify':(service,input)=>pdfWorkflow(service).invoke('creation.verify',input),
+  'creation.verify':(service,input,context)=>pdfWorkflow(service).invoke('creation.verify',input,context),
   'tasks.start':async(service,input,context)=>{if(input.parentId&&!service.state.tasks.some(t=>t.id===input.parentId&&t.status==='succeeded'))throw new Error('原 PDF 任务尚未完成');return service.start(input,context.signal)},
   'workspace.get':async service=>{const view=await service.overview();return {...view,tasks:view.tasks.map(t=>present(t,view.files,view.tasks)),files:view.files.map(f=>({...f,resourceUri:resourceUri(f.id),displayMarkdown:`[${f.name.replace(/[\[\]]/g,'')}](${resourceUri(f.id)})`}))}},
   'tasks.get':async(service,{id})=>{const view=await service.overview(),task=view.tasks.find(t=>t.id===id);if(!task)throw new Error('PDF 任务不存在');return task.status==='succeeded'&&task.outputs.some(id=>view.files.some(f=>f.id===id&&f.kind==='pdf'))?pdfWorkflow(service).get(id):present(task,view.files,view.tasks)},

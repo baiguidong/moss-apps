@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { composerActions } from './composer.mjs'
-import { TaskStore } from '@moss/engine-apps/runtime'
+import { TaskStore, sessionResourceUri } from '@moss/engine-apps/runtime'
 
 export const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))
 const colors = ['#2563eb','#16a34a','#ea580c','#9333ea','#0891b2','#db2777','#a16207','#475569']
@@ -106,7 +106,7 @@ export default {
     const file=path.join(ctx.directory,'visualization.html');await fs.writeFile(file,html)
     artifacts.unshift({name:input.title.replace(/[\x00-\x1f<>:"/\\|?*]/g,'_')+'.html',path:file,kind:'html'})
     const source=path.join(ctx.directory,'source.json');await fs.writeFile(source,JSON.stringify(input,null,2));artifacts.push({name:'创作源文件.json',path:source,kind:'json'})
-    const resourceUri='moss-visualize://works/'+taskId
+    const resourceUri=sessionResourceUri('moss-visualize://works/'+taskId,ctx.sessionId)
     return {artifacts,message:'可视化已生成，可在主会话及右侧成果区交互',result:{mode:input.mode||'chart',resourceUri,workId,version,parentId:input.parentId||null,
       presentation:{items:[{resource_uri:resourceUri,title:input.title,role:'primary'}],mode:'auto'},
       displayMarkdown:'```moss-visualization\n'+JSON.stringify({resource_uri:resourceUri,title:input.title})+'\n```'}}

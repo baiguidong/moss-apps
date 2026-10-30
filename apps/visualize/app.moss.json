@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.visualize",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "displayName": "可视化",
   "category": "data",
   "keywords": [
@@ -22,7 +22,7 @@
     ]
   },
   "icon": "assets/icon.svg",
-  "hostApi": "^3.21.0",
+  "hostApi": "^3.23.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -98,14 +98,22 @@
         "name": "composer.resolve",
         "inputSchema": "schemas/composer-resolve.json",
         "outputSchema": "schemas/result.json"
+      },
+      {
+        "name": "session.close",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 30000
       }
-    ]
+    ],
+    "storage": "session"
   },
   "host": {
     "protocols": [
       "moss.local-files/v1",
       "moss.runtime/v1",
-      "moss.artifacts/v1"
+      "moss.artifacts/v1",
+      "moss.session-storage/v1"
     ]
   },
   "permissions": [

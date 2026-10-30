@@ -5,6 +5,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { officeZip, xml, serialize } from '../src/office.mjs'
 import { inspectDocument, compareDocuments } from '../src/document-inspection.mjs'
+import { finishInspection } from '../src/creation-workflow.mjs'
 import JSZip from 'jszip'
 const paragraph = (text,i) => ({key:`paragraph:${i+1}`,paragraph:i+1,text,signature:text,label:`第 ${i+1} 段`,location:{text}})
 const snapshot = lines => ({complete:true,units:lines.map(paragraph)})
@@ -30,6 +31,12 @@ test('real DOCX indexing keeps before/after source positions after insertion',as
  const source=path.join(root,'before.docx'),target=path.join(root,'after.docx');await fs.writeFile(source,await zip.generateAsync({type:'nodebuffer'}))
  const loaded=await officeZip(source),doc=xml(await loaded.file('word/document.xml').async('string')),body=doc.getElementsByTagName('w:body')[0],added=doc.createElement('w:p'),run=doc.createElement('w:r'),text=doc.createElement('w:t');text.textContent='插入内容';run.appendChild(text);added.appendChild(run);body.insertBefore(added,body.lastChild);loaded.file('word/document.xml',serialize(doc));await fs.writeFile(target,await loaded.generateAsync({type:'nodebuffer'}))
  const diff=compareDocuments(await inspectDocument(source),await inspectDocument(target));assert.equal(diff.count,1);assert.equal(diff.changes[0].after.location.text,'插入内容')
+ const output={artifacts:[{name:'after.docx',path:target,kind:'document'}],result:{}}
+ await finishInspection(output,{}, {directory:root,sessionId:'session-a'}, {source,snapshot:await inspectDocument(source),uri:'moss-document://works/parent'},'moss-document')
+ const persisted=JSON.parse(await fs.readFile(path.join(root,'comparison.json'),'utf8'))
+ assert.equal(new URL(persisted.before.uri).searchParams.get('session'),'session-a')
+ assert.equal(new URL(persisted.after.uri).searchParams.get('session'),'session-a')
+ assert.equal(new URL(output.result.references[0].uri).searchParams.get('session'),'session-a')
 })
 
 

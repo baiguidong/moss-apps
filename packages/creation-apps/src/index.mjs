@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { TaskStore } from '@moss/engine-apps/runtime'
+import { TaskStore, sessionResourceUri } from '@moss/engine-apps/runtime'
 import { supportsWorkflow, registerWorkflow, prepareBaseline, finishInspection } from './creation-workflow.mjs'
 import { officeExtensions, renderOfficeFile } from './office-render.mjs'
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]))
@@ -70,7 +70,7 @@ export function creationEngine(engine, { scheme, title, tools }) {
       if(supportsWorkflow(scheme))await finishInspection(output,input,ctx,baseline,scheme)
 
       if(artifacts[previewIndex].kind==='html'&&(await fs.stat(artifacts[previewIndex].path)).size>2*1024**2)throw new Error('预览超过 2 MiB，请缩小内容或图片后重新生成')
-      const resourceUri=`${scheme}://works/${id}`,downloads=artifacts.map((a,index)=>({name:a.name,resourceUri:`${scheme}://files/${id}/${index}`,kind:a.kind}))
+      const resourceUri=sessionResourceUri(`${scheme}://works/${id}`,ctx.sessionId),downloads=artifacts.map((a,index)=>({name:a.name,resourceUri:sessionResourceUri(`${scheme}://files/${id}/${index}`,ctx.sessionId),kind:a.kind}))
       const display=artifacts[previewIndex].kind==='html'?'```moss-visualization\n'+JSON.stringify({resource_uri:resourceUri,title:name})+'\n```':`[${name.replace(/[\[\]]/g,'')}](${resourceUri})`
       return {...output,artifacts,result:{...output.result,title:name,workId,version,parentId:input.parentId||null,previewIndex,resourceUri,downloads,
         presentation:{items:[{resource_uri:resourceUri,title:name,role:'primary'},

@@ -377,7 +377,7 @@ export class WorkerQueue {
     }
   }
 
-  async shutdown() {
+  async shutdown({ waitForExit = false } = {}) {
     if (this.closed) return
     this.closed = true
     this.shutdownController.abort(new Error('任务后台正在关闭'))
@@ -389,7 +389,8 @@ export class WorkerQueue {
     await this.pumpPromise?.catch(() => {})
     await waitUpTo(active.map(entry => entry.done), 3000)
     for (const entry of this.active.values()) entry.child?.kill('SIGKILL')
-    await waitUpTo([...this.active.values()].map(entry => entry.done), 1000)
+    if (waitForExit) await Promise.all([...this.active.values()].map(entry => entry.done))
+    else await waitUpTo([...this.active.values()].map(entry => entry.done), 1000)
     await Promise.all([...this.pending.keys()].map(id => this.endLease(id)))
     this.pending.clear()
   }

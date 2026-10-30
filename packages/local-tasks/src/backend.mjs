@@ -5,6 +5,7 @@ import http from 'node:http'
 import { randomUUID, randomBytes } from 'node:crypto'
 import { fork } from 'node:child_process'
 import { AppBackendClient } from '@moss/app-sdk'
+import { createSessionBackend } from '@moss/engine-apps/session-backend'
 
 const MAX_FILE = 2 * 1024 ** 3
 const ACTIVITY_RENEW_MS = 30_000
@@ -41,9 +42,10 @@ export async function atomicJson(file, value) {
 }
 
 export class LocalTasks {
-  constructor({ dataDir, worker, inspect, validate, onChanged = () => {}, onActivityLog = () => {}, activity = null, artifactUrl = null }) {
-    Object.assign(this, { dataDir, worker, inspect, validate, onChanged, onActivityLog, activity, artifactUrl })
-    this.state = { version: 1, files: [], tasks: [] }
+  constructor({ dataDir, sessionId, worker, inspect, validate, onChanged = () => {}, onActivityLog = () => {}, activity = null, artifactUrl = null }) {
+    Object.assign(this, { dataDir, sessionId, worker, inspect, validate, onChanged, onActivityLog, activity, artifactUrl })
+    this.controller = new AbortController()
+    this.state = { version: 1, ...(sessionId ? { sessionId } : {}), files: [], tasks: [] }
     this.writes = Promise.resolve(); this.running = null; this.closed = false; this.startReservations = 0
     this.admittingTasks = new Set(); this.admissions = new Set(); this.operations = new Set()
     this.activityTimers = new Map()
@@ -398,6 +400,7 @@ export class LocalTasks {
   }
   async close() {
     this.closed = true
+    this.controller.abort(new Error('会话任务已停止'))
     const admissions = Promise.allSettled([...this.admissions])
     const operations = Promise.allSettled([...this.operations])
     for (const lease of this.activityTimers.values()) { lease.ended = true; if (lease.timer) clearTimeout(lease.timer) }
@@ -420,14 +423,15 @@ export class LocalTasks {
   }
 }
 
-export function startApp({ worker, inspect, validate, extraActions = {} }) {
+export function startApp({ worker, inspect, validate, extraActions = {}, sessionScoped = false, Client = AppBackendClient }) {
+  if (sessionScoped) return createSessionBackend(ScopedClient => startApp({ worker, inspect, validate, extraActions, Client: ScopedClient }))
   let service
   const artifactUrl = relativePath => {
     const key = relativePath.split(path.sep).join('/')
     return backend.host.request('moss.artifacts/v1', 'url.get', { relativePath: key }).then(result => result.url)
   }
-  const backend = new AppBackendClient({
-    async onInitialize(context) { service = await new LocalTasks({ dataDir: context.dataDir, worker, inspect, validate,
+  const backend = new Client({
+    async onInitialize(context) { service = await new LocalTasks({ dataDir: context.dataDir, sessionId: context.sessionId, worker, inspect, validate,
       onChanged: data => backend.emit('workspace.changed', data),
       onActivityLog: (level, message, details) => backend.log(level, message, details),
       activity: context.protocols.includes('moss.runtime/v1') ? (operation, id) => backend.host.request('moss.runtime/v1', `activity.${operation}`, { id }, { timeoutMs: 10_000 }) : null,

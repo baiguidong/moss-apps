@@ -153,8 +153,14 @@ async function eachLimited(items, concurrency, visit) {
   }))
 }
 
+export function sessionResourceUri(uri, sessionId) {
+  if (!sessionId) return uri
+  const value = new URL(uri); value.searchParams.set('session', sessionId); return value.href
+}
+
 export class TaskStore {
-  constructor(dataDir) {
+  constructor(dataDir, { cacheDir = process.env.MOSS_ENGINE_CACHE_DIR || dataDir, sessionId = process.env.MOSS_TASK_SESSION_ID } = {}) {
+    this.cacheDir = cacheDir; this.sessionId = sessionId
     this.dataDir = dataDir; this.root = path.join(dataDir, 'jobs')
     this.createdRoot = path.join(this.root, '.created')
     this.pendingRoot = path.join(this.root, '.pending')
@@ -172,7 +178,7 @@ export class TaskStore {
     })
   }
   newTask(input, source) {
-    return { id: randomUUID(), input, source, status: 'queued', createdAt: Date.now(), message: '准备运行', artifacts: [] }
+    return { id: randomUUID(), ...(this.sessionId ? { sessionId: this.sessionId } : {}), input, source, status: 'queued', createdAt: Date.now(), message: '准备运行', artifacts: [] }
   }
   async create(input, source = 'ui') {
     const task = this.newTask(input, source)
@@ -300,7 +306,7 @@ export async function executeTask(engine, store, task, externalSignal) {
   try {
     if (await fs.stat(path.join(directory, 'cancel')).catch(() => null)) cancel()
     controller.signal.throwIfAborted()
-    const result = await engine.execute(task.input, { dataDir: store.dataDir, directory, signal: controller.signal, log,
+    const result = await engine.execute(task.input, { dataDir: store.dataDir, cacheDir: store.cacheDir, sessionId: store.sessionId, directory, signal: controller.signal, log,
       record: async fields => { Object.assign(task, fields); await store.write(task) },
       progress: async message => { task.message = message; await store.write(task) } })
     controller.signal.throwIfAborted()

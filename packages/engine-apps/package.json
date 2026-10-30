@@ -13,7 +13,8 @@
     "./build": "./build.mjs",
     "./download": "./src/download.mjs",
     "./bundled": "./src/bundled.mjs",
-    "./bundle-build": "./src/bundle-build.mjs"
+    "./bundle-build": "./src/bundle-build.mjs",
+    "./session-backend": "./src/session-backend.mjs"
   },
   "dependencies": {
     "@moss/app-sdk": "workspace:*",

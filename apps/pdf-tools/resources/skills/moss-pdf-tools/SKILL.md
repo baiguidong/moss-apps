@@ -30,3 +30,7 @@ pdf_inspect({id,page}) 读取已生成 PDF 的原文和 citation.displayMarkdown
 pdf_status 的 result.visualReview 返回真实页图；逐页查看后调用 pdf_verify，传 id、sourceSha256、pages=[{page,observations,issues:[{severity,message}]}] 记录观察，无问题时 issues=[]。支持分批，缺页保持待核验；错误保持待修复。修复时创建带 parentId 的新任务，再检查新文件，最多连续修复 3 轮，不能以渲染成功代替视觉检查。纯阅读无需执行生成物的完整核验。result.comparison 提供修改前后文字对比，具体版式仍需查看实际页面。
 
 大文件默认先生成 8 页核验图片，原文件和完整 PDF 可先展示。`pdf_verify` 返回 `rendering`、`nextRender`；需要检查其余页面时，用返回的 `nextRender` 参数调用同一工具，或传 `{id,sourceSha256,render:{startPage,count}}`（每批 1–20 页）。先查看该批实际图片，再提交核验记录。超时或中断后可重新查询并续跑；不要重复创建整份文件。`partial` 表示还有页图待生成，不等于生成物损坏。问题可以在右侧核验列表点击定位，继续使用原有局部标注提交修改要求。
+
+## 会话文件归属
+
+通过原生工具执行创作；本次输入副本、产物、预览、源材料和修改版本均属于当前会话 workspace。不要把用户作品写入 App 私有目录。跨会话复用时显式导入文件。用户明确保存为个人模板或技能时，将完整依赖安装到个人库；未安装的模板草稿仍随会话清理。

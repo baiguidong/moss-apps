@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.document",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "displayName": "文档创作",
   "category": "knowledge",
   "keywords": [
@@ -16,7 +16,7 @@
   ],
   "description": "在主会话中创作、修改和转换文档，生成 Word、PDF、HTML 与电子书。",
   "icon": "assets/icon.svg",
-  "hostApi": "^3.21.0",
+  "hostApi": "^3.23.0",
   "publisher": {
     "id": "moss",
     "name": "Moss"
@@ -108,14 +108,22 @@
         "inputSchema": "schemas/verify.json",
         "outputSchema": "schemas/result.json",
         "timeoutMs": 300000
+      },
+      {
+        "name": "session.close",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 30000
       }
-    ]
+    ],
+    "storage": "session"
   },
   "host": {
     "protocols": [
       "moss.local-files/v1",
       "moss.runtime/v1",
-      "moss.artifacts/v1"
+      "moss.artifacts/v1",
+      "moss.session-storage/v1"
     ]
   },
   "permissions": [

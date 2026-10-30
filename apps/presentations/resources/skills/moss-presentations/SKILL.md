@@ -45,3 +45,7 @@ presentation_verify({id}) 返回结构检查和待查看的页图。逐页使用
 导入 PPT 的精确修改：先 presentation_inspect 取得 slide、objectId、detail，传 mode=edit、sourcePath、parentId 和 objectEdits。支持 text、fontSize、x/y/w/h（英寸）、fill、tableEdits=[{row,column,text}]（从 1 开始）、imagePath、chartType=bar/line/pie；可加 expectedText 检查目标未变化。例如将第 2 页的折线图改为柱形图，仅修改该图表 objectId 的 chartType。组合对象、外链图表和复合图表会明确拒绝；不要通过重建整份 PPT 绕过保留原版式的要求。
 
 大文件默认先生成 8 页核验图片，原文件和完整 PDF 可先展示。`presentation_verify` 返回 `rendering`、`nextRender`；需要检查其余页面时，用返回的 `nextRender` 参数调用同一工具，或传 `{id,sourceSha256,render:{startPage,count}}`（每批 1–20 页）。先查看该批实际图片，再提交核验记录。超时或中断后可重新查询并续跑；不要重复创建整份文件。`partial` 表示还有页图待生成，不等于生成物损坏。问题可以在右侧核验列表点击定位，继续使用原有局部标注提交修改要求。
+
+## 会话文件归属
+
+通过原生工具执行创作；本次输入副本、产物、预览、源材料和修改版本均属于当前会话 workspace。不要把用户作品写入 App 私有目录。跨会话复用时显式导入文件。用户明确保存为个人模板或技能时，将完整依赖安装到个人库；未安装的模板草稿仍随会话清理。

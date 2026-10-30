@@ -56,7 +56,7 @@ const engine = {
       return { kind: 'file', name: file.name, path: target, resourceUri: input.uri }
     })
   },
-  async catalog({dataDir,prepare}){if(prepare)await ensureBinary(spec,dataDir);return {...catalog,version:spec.version}},
+  async catalog({dataDir,cacheDir=dataDir,prepare}){if(prepare)await ensureBinary(spec,cacheDir);return {...catalog,version:spec.version}},
   async validate(input){
     if(input.mode==='review'){if(!input.sourcePath||(!input.edits?.length&&!input.comments?.length))throw new Error('请提供文档和修订或批注');return}
     if (input.mode === 'author') { validateAuthor(input); return }
@@ -87,7 +87,7 @@ const engine = {
       const failed=files.filter(file=>file.status==='failed').length
       return {status:failed===files.length?'failed':failed?'partial':'succeeded',artifacts,result:{files},message:`批量转换：${files.length-failed} 成功，${failed} 失败`}
     }
-    await ctx.progress('准备 Pandoc 引擎');const binary=await ensureBinary(spec,ctx.dataDir,ctx.signal)
+    await ctx.progress('准备 Pandoc 引擎');const binary=await ensureBinary(spec,ctx.cacheDir || ctx.dataDir,ctx.signal)
     if(input.mode==='inspect') {
       const args=['--'+input.query+(input.value?'='+input.value:'')],r=await run(binary,args,{signal:ctx.signal,log:ctx.log})
       const file=path.join(ctx.directory,'information.txt');await fs.writeFile(file,r.stdout)
@@ -95,7 +95,7 @@ const engine = {
     }
     const {args,paths,output,to}=await buildArgs(input,ctx.directory)
     if (to === 'pdf' && !args.some(arg => /^--pdf-engine(?:=|$)/.test(arg))) {
-      args.unshift('--pdf-engine=' + await ensureBinary(pdfEngine, ctx.dataDir, ctx.signal), '--pdf-engine-opt=--font-path=' + fileURLToPath(new URL('../../assets/fonts', import.meta.url)))
+      args.unshift('--pdf-engine=' + await ensureBinary(pdfEngine, ctx.cacheDir || ctx.dataDir, ctx.signal), '--pdf-engine-opt=--font-path=' + fileURLToPath(new URL('../../assets/fonts', import.meta.url)))
       if (!args.some(arg => /^(?:--variable=)?mainfont[=:]/.test(arg))) args.unshift('--variable=mainfont=Noto Sans SC')
     }
     await ctx.progress('正在转换文档'); await ctx.record?.({argv:args})

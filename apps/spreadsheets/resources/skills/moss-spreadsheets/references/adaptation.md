@@ -4,4 +4,4 @@
 
 源文件 SHA-256：dd22f4bae5bf3f76457c80eb1f079ba7a47b87db52b144edeb1e5f4585dc8f34。
 
-不依赖 Codex 运行时、artifact session、专属引用指令、遥测脚本或 Google/Excel 连接。文件与预览在 Moss App 数据目录持久化。未适配的云连接操作不声称可用。
+不依赖 Codex 运行时、artifact session、专属引用指令、遥测脚本或 Google/Excel 连接。本次任务的文件、预览、创作源文件和版本记录保存在当前会话 workspace；删除会话会一并清理。工具资源按需只读访问，App 私有目录仅保存引擎缓存。未适配的云连接操作不声称可用。
