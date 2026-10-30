@@ -38,22 +38,33 @@ describe('App Backend manifest', () => {
     expect(() => validateRepositoryAppManifest({ ...source, hostApi: 'invalid' })).toThrow()
   })
   it('advertises Host API 3 and rejects unsupported contracts', () => {
-    expect(APP_HOST_API_VERSION).toBe('3.21.0')
+    expect(APP_HOST_API_VERSION).toBe('3.23.0')
     expect(validateAppManifest({ ...manifest(), hostApi: '^3.0.0' }).hostApi).toBe('^3.0.0')
     expect(() => validateAppManifest({ ...manifest(), hostApi: '^2.9.0' })).toThrow(/requires Host API/)
-    expect(validateAppManifest({ ...manifest(), hostApi: '^3.21.0' }).hostApi).toBe('^3.21.0')
-    expect(() => validateAppManifest({ ...manifest(), hostApi: '^3.22.0' })).toThrow(/requires Host API/)
+    expect(validateAppManifest({ ...manifest(), hostApi: '^3.23.0' }).hostApi).toBe('^3.23.0')
+    expect(() => validateAppManifest({ ...manifest(), hostApi: '^3.24.0' })).toThrow(/requires Host API/)
   })
 
-  it.each(['backup', 'data-workbench', 'document-converter'])(
+  it.each(['backup', 'data-workbench'])(
     '%s requires the Host release with on-demand recovery and artifact previews', (name) => {
       const source = JSON.parse(readFileSync(new URL(`../apps/${name}/app.moss.json`, import.meta.url), 'utf8'))
-      const expectedHostApi = name === 'document-converter' ? '^3.20.0' : '^3.21.0'
+      const expectedHostApi = '^3.21.0'
       expect(source.hostApi).toBe(expectedHostApi)
       expect(source.backend.lifecycle).toBe('on-demand')
       expect(source.host.protocols).toEqual(expect.arrayContaining(['moss.runtime/v1', 'moss.artifacts/v1']))
       expect(() => validateAppManifest(source, { hostApiVersion: '3.19.0' })).toThrow(/requires Host API/)
       expect(validateAppManifest(source).hostApi).toBe(expectedHostApi)
+    },
+  )
+
+  it.each(['visualize', 'document-converter', 'pdf-tools', 'spreadsheets', 'presentations', 'templates'])(
+    '%s requires session storage support and rejects older Hosts', (name) => {
+      const source = JSON.parse(readFileSync(new URL(`../apps/${name}/app.moss.json`, import.meta.url), 'utf8'))
+      expect(source.hostApi).toBe('^3.23.0')
+      expect(source.backend.storage).toBe('session')
+      expect(source.host.protocols).toContain('moss.session-storage/v1')
+      expect(() => validateAppManifest(source, { hostApiVersion: '3.22.0' })).toThrow(/requires Host API/)
+      expect(validateAppManifest(source).backend?.storage).toBe('session')
     },
   )
 
