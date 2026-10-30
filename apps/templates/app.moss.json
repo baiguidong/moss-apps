@@ -122,7 +122,7 @@
       {
         "id": "template_create",
         "title": "创建或修改模板",
-        "description": "模型根据用户需求生成创作参数。返回任务 ID；查询成功后用 moss_present(result.presentation) 展示，回复使用 result.displayMarkdown。修改时传 parentId 保留旧版本。",
+        "description": "保存、应用或更新可复用模板。mode=save 接收 sourcePath 或 content 及复用说明；mode=use 接收 templateId 和 values，替换文本中的 {{变量名}}，Office 参考文件需交给对应创作工具继续生成；mode=update 使用 templateId，并传 parentId=templateId 保留版本关联。返回任务 id，用 template_status 查询；保存和更新会生成待安装的模板技能包。",
         "action": "tasks.start",
         "inputSchema": "schemas/start.json",
         "effect": "write"
@@ -130,7 +130,7 @@
       {
         "id": "template_status",
         "title": "查看任务",
-        "description": "读取任务的结果、源内容和资源引用。",
+        "description": "按任务 id 查询状态、日志、参考文件和模板说明。保存或更新成功后还返回 result.skillBundle，需按其 nextStep 安装后才可作为个人技能使用。展示使用 moss_present(result.presentation)，回复使用 result.displayMarkdown。",
         "action": "tasks.get",
         "inputSchema": "schemas/id.json",
         "effect": "read"
@@ -138,7 +138,7 @@
       {
         "id": "template_list",
         "title": "列出作品",
-        "description": "获取此 App 的列出作品信息。",
+        "description": "列出模板任务的 id、输入参数、状态和产物清单，用于查找可复用模板及历史版本；应用或更新时以原任务 id 作为 templateId。",
         "action": "workspace.get",
         "inputSchema": "schemas/empty.json",
         "effect": "read"
@@ -146,7 +146,7 @@
       {
         "id": "template_read",
         "title": "读取产物",
-        "description": "获取此 App 的读取产物信息。",
+        "description": "按任务 id 和产物 index 读取模板参数 JSON、Markdown 技能说明、文本参考或 HTML 预览，返回 text，单文件最多 2 MiB。Office、PDF、图片和 ZIP 产物应使用文件引用或导出。",
         "action": "artifacts.read",
         "inputSchema": "schemas/artifact.json",
         "effect": "read"
@@ -154,7 +154,7 @@
       {
         "id": "template_export",
         "title": "导出作品",
-        "description": "获取此 App 的导出作品信息。",
+        "description": "将任务 id 和产物 index 指定的参考文件、模板说明或技能 ZIP 复制到用户选择的目录；同名文件自动另取名。返回保存路径 path，取消选择时返回 canceled=true。",
         "action": "artifacts.export",
         "inputSchema": "schemas/artifact.json",
         "effect": "write"
@@ -162,7 +162,7 @@
       {
         "id": "template_guide",
         "title": "获取创作参数",
-        "description": "获取此 App 的获取创作参数信息。",
+        "description": "获取 save/use/update 模式、支持的参考文件格式和完整参数 JSON Schema，用于构造 template_create 的输入。",
         "action": "catalog.get",
         "inputSchema": "schemas/empty.json",
         "effect": "read"

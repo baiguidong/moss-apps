@@ -11,7 +11,12 @@
       "pattern": "^[a-f0-9-]{36}$"
     },
     "mode": {
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "create",
+        "read",
+        "edit"
+      ]
     },
     "sourcePath": {
       "type": "string"

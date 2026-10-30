@@ -108,7 +108,7 @@
       {
         "id": "pdf_import",
         "title": "导入本地文件",
-        "description": "复制指定的本地文件到此 App，返回可用于处理的文件 ID。原文件不修改。",
+        "description": "按 paths 中的本地绝对路径复制导入 PDF，保留原文件。返回成功导入的 files（含文件 id、页数和表单字段 metadata.fields）及逐文件 errors；后续处理使用文件 id。",
         "action": "files.import",
         "inputSchema": "schemas/files.import.json",
         "effect": "write"
@@ -116,7 +116,7 @@
       {
         "id": "pdf_list",
         "title": "查看文件和任务",
-        "description": "查看 PDF 文件、字段、任务和结果。成功文件的 displayMarkdown 可在主会话回复中展示，点击使用 Moss 通用预览。",
+        "description": "列出已导入和已生成的 PDF、文本及图片文件，以及任务状态和输出文件 id。PDF 的页数、表单字段及当前值见 metadata；文件的 displayMarkdown 可用于展示引用。",
         "action": "workspace.get",
         "inputSchema": "schemas/workspace.get.json",
         "effect": "read"
@@ -124,7 +124,7 @@
       {
         "id": "pdf_create",
         "title": "创建和处理 PDF",
-        "description": "整理 PDF 页面、提取文字、离线 OCR 和填写交互表单，在 Moss 内查看和导出。 返回任务 ID，通过 pdf_list 查看进度。表单字段及当前值见文件 metadata.fields。",
+        "description": "创建或处理 PDF：options.mode=create 使用 options.content 生成文字 PDF，无需 fileIds；其他模式使用已有 fileIds，支持合并/重排/旋转页面、拆分、提取文字、离线 OCR、填写表单和渲染页图。options.pages 中原页码从 0 开始，表单字段名先用 pdf_list 查询。返回任务 id，用 pdf_status 查询；关联旧版本时传 parentId。",
         "action": "tasks.start",
         "inputSchema": "schemas/tasks.start.json",
         "effect": "write"
@@ -132,7 +132,7 @@
       {
         "id": "pdf_export",
         "title": "导出 PDF 结果",
-        "description": "用户需要导出时打开目录选择器保存指定文件。",
+        "description": "按文件 ids 将 PDF、提取的文本或页图复制到用户选择的目录；同名文件自动另取名。返回 files 中的保存路径及 canceled 状态。ids 使用 pdf_list 或 pdf_status 返回的文件 id。",
         "action": "files.export",
         "inputSchema": "schemas/files.export.json",
         "effect": "write"
@@ -140,7 +140,7 @@
       {
         "id": "pdf_status",
         "title": "查看 PDF 任务",
-        "description": "查询任务与结果，成功后调用 moss_present(result.presentation) 在右侧展示，回复使用 result.displayMarkdown。",
+        "description": "按任务 id 查询处理状态、进度、错误和输出文件。成功且产物含 PDF 时还返回主 PDF 的内容索引、页图及核验状态；用 pdf_verify 核验。展示使用 moss_present(result.presentation)，回复使用 result.displayMarkdown。",
         "action": "tasks.get",
         "inputSchema": "schemas/tasks.cancel.json",
         "effect": "read"
@@ -148,7 +148,7 @@
       {
         "id": "pdf_inspect",
         "title": "读取 PDF 原文与引用",
-        "description": "按页读取 PDF 原文并返回可点击的页码引用；只对生成 PDF 的成功任务使用。",
+        "description": "按任务 id 读取成功任务中主 PDF 的逐页原文、检查结果和可点击页码引用。page 从 1 开始，支持 offset/limit 分页。仅适用于产物含 PDF 的任务；扫描件的文字识别使用 pdf_create 的 ocr 模式。",
         "action": "creation.inspect",
         "inputSchema": "schemas/inspect.json",
         "effect": "read"
@@ -156,7 +156,7 @@
       {
         "id": "pdf_verify",
         "title": "检查 PDF 与记录核验",
-        "description": "读取核验页图和检查状态；用 render 分批生成或续跑剩余页图，查看实际图片后用 pages 记录逐页观察与问题。",
+        "description": "检查成功任务的主 PDF：仅传任务 id 获取真实页图、文件指纹和核验进度；带 sourceSha256 和 render 分批生成页图；查看图片后带同一指纹及 pages 提交逐页观察和问题。生成页图与提交观察分开调用，发现错误后创建新版本再核验。",
         "action": "creation.verify",
         "inputSchema": "schemas/verify.json",
         "effect": "write"

@@ -125,7 +125,7 @@
       {
         "id": "visualize_create",
         "title": "创建可视化",
-        "description": "由模型根据自然语言需求创建交互内容，用户无需输入代码。修改时传 parentId，生成保留旧作品的新版本。成功后用 moss_present 展示 result.presentation，并在回复使用 result.displayMarkdown。",
+        "description": "根据 CSV 数据生成柱形图、折线图、饼图、散点图或表格，或保存提供的自包含 HTML 交互演示。mode=chart 使用 csv，mode=html 使用 html。返回任务 id，用 visualize_status 查询；修改已有作品时传 parentId 并提供完整新内容，保留旧版本。",
         "action": "tasks.start",
         "inputSchema": "schemas/start.json",
         "effect": "write"
@@ -133,7 +133,7 @@
       {
         "id": "visualize_status",
         "title": "查看可视化任务",
-        "description": "查询作品生成状态和结果。成功后在最终回复原样使用 result.displayMarkdown，直接在主会话展示交互作品。",
+        "description": "按任务 id 查询生成状态、错误和产物。成功后调用 moss_present(result.presentation) 展示作品，并在回复中原样使用 result.displayMarkdown。",
         "action": "tasks.get",
         "inputSchema": "schemas/id.json",
         "effect": "read"
@@ -141,7 +141,7 @@
       {
         "id": "visualize_list",
         "title": "列出可视化作品",
-        "description": "列出已保存的作品和任务。用户可在主会话引用或继续修改已有作品。",
+        "description": "列出可视化任务的 id、输入参数、状态和产物清单，用于查找已有作品或确定后续修改的 parentId。",
         "action": "workspace.get",
         "inputSchema": "schemas/empty.json",
         "effect": "read"
@@ -149,7 +149,7 @@
       {
         "id": "visualize_export",
         "title": "导出作品",
-        "description": "用户要求导出时，打开目录选择器导出指定任务的作品文件。",
+        "description": "将任务 id 和产物 index 指定的文件复制到用户通过目录选择器选择的位置；同名文件自动另取名。返回保存路径 path，取消选择时返回 canceled=true。",
         "action": "artifacts.export",
         "inputSchema": "schemas/artifact.json",
         "effect": "write"
@@ -157,7 +157,7 @@
       {
         "id": "visualize_templates",
         "title": "获取可视化模板",
-        "description": "获取可直接改写的交互演示模板及 Moss 展示协议。根据用户目标调整内容后再创建作品。",
+        "description": "获取支持的图表类型、可改写的 HTML 演示模板，以及交互状态保存和追问接口的使用说明，用于准备 visualize_create 的输入。",
         "action": "catalog.get",
         "inputSchema": "schemas/empty.json",
         "effect": "read"
