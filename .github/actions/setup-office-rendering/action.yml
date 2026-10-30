@@ -1,0 +1,53 @@
+name: Setup Office rendering
+description: Install the rendering tools used by PDF and Office integration tests
+inputs:
+  office:
+    description: Also install LibreOffice for Office documents
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - name: Install Linux rendering tools
+      if: runner.os == 'Linux'
+      shell: bash
+      env:
+        INSTALL_OFFICE: ${{ inputs.office }}
+      run: |
+        sudo apt-get update -qq
+        packages=(poppler-utils)
+        if [[ "$INSTALL_OFFICE" == true ]]; then
+          packages+=(libreoffice-impress libreoffice-writer libreoffice-calc fonts-noto-cjk)
+        fi
+        sudo apt-get install -y -qq "${packages[@]}"
+    - name: Install macOS rendering tools
+      if: runner.os == 'macOS'
+      shell: bash
+      env:
+        INSTALL_OFFICE: ${{ inputs.office }}
+        HOMEBREW_NO_AUTO_UPDATE: '1'
+      run: |
+        command -v pdfinfo >/dev/null || brew install poppler
+        if [[ "$INSTALL_OFFICE" == true && ! -x /Applications/LibreOffice.app/Contents/MacOS/soffice ]]; then
+          brew install --cask libreoffice
+        fi
+    - name: Install Windows rendering tools
+      if: runner.os == 'Windows'
+      shell: pwsh
+      env:
+        INSTALL_OFFICE: ${{ inputs.office }}
+      run: |
+        choco install poppler --yes --no-progress
+        if ($LASTEXITCODE -notin @(0, 1641, 3010)) { throw 'Poppler installation failed' }
+        Get-ChildItem "$env:ProgramData\chocolatey\lib\poppler" -Recurse -Filter pdfinfo.exe |
+          Select-Object -ExpandProperty DirectoryName -Unique |
+          Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        if ($env:INSTALL_OFFICE -eq 'true') {
+          choco install libreoffice-fresh --yes --no-progress
+          if ($LASTEXITCODE -notin @(0, 1641, 3010)) { throw 'LibreOffice installation failed' }
+        }
+        exit 0
+    - name: Verify Poppler installation
+      shell: bash
+      run: |
+        pdfinfo -v
+        pdftoppm -v

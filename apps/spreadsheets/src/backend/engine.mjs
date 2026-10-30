@@ -42,7 +42,10 @@ function formatted(cell,book) {
   const raw=cell.formula?cell.result:cell.value
   const value=raw instanceof Date?raw:display(cell)
   if(typeof value==='number'||value instanceof Date){
-    try{return SSF.format(cell.numFmt||(value instanceof Date?'yyyy-mm-dd':'General'),value,{date1904:book.properties.date1904})}
+    // ExcelJS decodes date serials as UTC. SSF's Date handling uses local time,
+    // so restore the workbook serial before formatting to preserve its date.
+    const serial=value instanceof Date?25569+value.getTime()/86400000-(book.properties.date1904?1462:0):value
+    try{return SSF.format(cell.numFmt||(value instanceof Date?'yyyy-mm-dd':'General'),serial,{date1904:book.properties.date1904})}
     catch {return display(cell)}
   }
   return value

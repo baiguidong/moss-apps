@@ -1,11 +1,33 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
+import path from 'node:path'
 import ExcelJS from 'exceljs'
 import { fixture } from '@moss/creation-apps/testing'
 import { officeZip, xml } from '@moss/creation-apps/office'
 import engine from '../src/backend/engine.mjs'
 const budget = { title:'月度预算', sheets:[{name:'预算',rows:[['项目','金额'],['收入',100],['支出',30],['结余',{formula:'B2-B3',numFmt:'0.00'}]],charts:[{type:'bar',labels:'A2:A3',series:[{name:'金额',range:'B2:B3'}]}]}] }
+test('imported dates preserve workbook dates and times across timezones and date systems', async t => {
+ const f=await fixture(t,engine),originalTimezone=process.env.TZ
+ try {
+  for(const timezone of ['America/Los_Angeles','Asia/Shanghai','UTC']) {
+   process.env.TZ=timezone
+   for(const date1904 of [false,true]) {
+    const book=new ExcelJS.Workbook();book.properties.date1904=date1904
+    const sheet=book.addWorksheet('日期');sheet.addRow(['日期','公式日期'])
+    sheet.addRow([new Date('2026-10-01T00:15:00Z'),{formula:'A2',result:new Date('2026-10-01T00:15:00Z')}])
+    for(const address of ['A2','B2'])sheet.getCell(address).numFmt='yyyy-mm-dd hh:mm'
+    const source=path.join(f.root,'dates.xlsx');await book.xlsx.writeFile(source)
+    const result=await f.run({title:'读取日期',mode:'read',sourcePath:source})
+    const html=await fs.readFile(result.artifacts[1].path,'utf8')
+    assert.equal((html.match(/>2026-10-01 00:15<\/td>/g)||[]).length,2,`${timezone}, date1904=${date1904}`)
+   }
+  }
+ } finally {
+  if(originalTimezone===undefined)delete process.env.TZ
+  else process.env.TZ=originalTimezone
+ }
+})
 test('editable XLSX formulas/charts, import edits, resource persistence and versions', async t => {
  const f=await fixture(t,engine),first=await f.run(budget),source=first.artifacts[0].path,original=await fs.readFile(source)
  assert.deepEqual(first.result.sheets,[{name:'预算',rows:4,columns:2}]);

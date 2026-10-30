@@ -33,6 +33,7 @@ jobs:
           key: ${{ runner.os }}-bun-1.3.10-${{ hashFiles('bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-1.3.10-
       - run: bun install --frozen-lockfile
+      - uses: ./.github/actions/setup-office-rendering
       - run: bun run validate
       - run: bun run check
       - run: bun run test
@@ -105,6 +106,7 @@ jobs:
           key: ${{ runner.os }}-bun-1.3.10-${{ hashFiles('bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-1.3.10-
       - run: bun install --frozen-lockfile
+      - uses: ./.github/actions/setup-office-rendering
       - uses: actions/download-artifact@v4
         with:
           name: source-packages
