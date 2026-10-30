@@ -28,6 +28,8 @@ runs:
       run: |
         command -v pdfinfo >/dev/null || brew install poppler
         if [[ "$INSTALL_OFFICE" == true && ! -x /Applications/LibreOffice.app/Contents/MacOS/soffice ]]; then
+          # Runner images can cache casks whose stable download has been archived.
+          brew update
           brew install --cask libreoffice
         fi
     - name: Install Windows rendering tools
