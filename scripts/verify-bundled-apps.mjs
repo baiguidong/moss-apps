@@ -10,7 +10,7 @@ import {promisify} from 'node:util'
 import {selectApps,repoRoot,optionValue} from './lib.mjs'
 import {unzipSync} from 'fflate'
 import {sourcePath} from '../vendor/moss-core/packages/app-runtime/src/packages/source.mjs'
-import {hash} from '../packages/engine-apps/src/runtime.mjs'
+import {hash,TaskStore,WORKER_READY_MESSAGE,WORKER_START_MESSAGE} from '../packages/engine-apps/src/runtime.mjs'
 import {platformAsset} from '../packages/engine-apps/src/platform.mjs'
 import {restoreBundledAsset} from '../packages/engine-apps/src/bundled.mjs'
 const execute=promisify(execFile)
@@ -100,7 +100,17 @@ async function verify(app){
    await cli({command:'video-optimizer',paths:[scans],options:{},subcommand:'transcode',suboptions:{}});checks.push('Packaged Czkawka and FFmpeg/ffprobe run duplicate and video scans')
   }else if(name==='document-converter'){
    const file=path.join(temporary,'中文.md');await fs.writeFile(file,'# OFFLINE PANDOC\n\n本地文档\n')
-   const task=await cli({paths:[file],to:'docx'});assert.match(await fs.readFile(task.artifacts.find(a=>a.kind==='html').path,'utf8'),/OFFLINE PANDOC/);const pdf=await cli({paths:[file],to:'pdf'});assert.equal((await fs.readFile(pdf.artifacts.find(a=>a.kind==='pdf').path)).subarray(0,5).toString(),'%PDF-');checks.push('Packaged Pandoc creates DOCX with preview; bundled Typst creates PDF')
+   // Exercise bundled Pandoc directly for DOCX/HTML, without starting a desktop
+   // Office renderer. Session Apps deliberately no longer expose CLI run.
+   const spec=platformAsset(JSON.parse(await fs.readFile(path.join(pkg,'resources/engine.json'))))
+   const pandoc=await restoreBundledAsset(path.join(pkg,'dist/engines',spec.id,spec.version,spec.executable),path.join(dataDir,'pandoc'),spec.binarySha256);await fs.chmod(pandoc,0o755)
+   const docx=path.join(outputDir,'document.docx'),html=path.join(outputDir,'preview.html')
+   await execute(pandoc,[file,'--to=docx','--output',docx],{timeout:180000})
+   await execute(pandoc,[docx,'--to=html5','--standalone','--output',html],{timeout:180000})
+   assert.match(await fs.readFile(html,'utf8'),/OFFLINE PANDOC/)
+   const pdf=await sessionTask(pkg,manifest,temporary,{paths:[file],to:'pdf'})
+   assert.equal((await fs.readFile(pdf.artifacts.find(a=>a.kind==='pdf').path)).subarray(0,5).toString(),'%PDF-')
+   checks.push('Packaged Pandoc creates DOCX with HTML preview; session worker uses bundled Typst to create PDF in its workspace')
   }else if(name==='code-map'){
    const testRequire=createRequire(path.join(repoRoot,'packages/engine-apps/package.json'))
    const {Client}=testRequire('@modelcontextprotocol/sdk/client/index.js'),{StdioClientTransport}=testRequire('@modelcontextprotocol/sdk/client/stdio.js')
@@ -118,4 +128,26 @@ async function verify(app){
   // The MCP process may still be closing its index when its transport exits.
   await fs.rm(temporary,{recursive:true,force:true,maxRetries:20,retryDelay:100})
  }
+}
+
+async function sessionTask(pkg,manifest,temporary,input){
+ const sessionId='offline-check',directory=path.join(temporary,'workspace','artifacts',manifest.id,sessionId),cacheDir=path.join(temporary,'empty-data')
+ const store=new TaskStore(directory,{cacheDir,sessionId}),task=await store.create(input,'offline-verification')
+ // Use the shipped worker's parent handshake and session environment, just as
+ // the Backend queue does. Host lifecycle/storage isolation has separate tests.
+ await new Promise((resolve,reject)=>{
+  const child=fork(path.join(pkg,'dist/backend/worker.mjs'),[directory,task.id],{cwd:pkg,stdio:['ignore','pipe','pipe','ipc'],env:{...process.env,NODE_PATH:'',MOSS_ENGINE_CACHE_DIR:cacheDir,MOSS_TASK_SESSION_ID:sessionId}})
+  let tail='',error,killTimer
+  const timer=setTimeout(()=>{error=new Error('Session worker timeout');child.kill('SIGTERM');killTimer=setTimeout(()=>child.kill('SIGKILL'),2000)},180000)
+  child.stdout.on('data',chunk=>{tail=(tail+chunk).slice(-6000)});child.stderr.on('data',chunk=>{tail=(tail+chunk).slice(-6000)})
+  child.once('error',value=>{error=value})
+  child.on('message',message=>{if(message.type===WORKER_READY_MESSAGE)child.send({type:WORKER_START_MESSAGE},value=>{if(value){error=value;child.kill('SIGTERM')}})})
+  child.once('close',(code,signal)=>{clearTimeout(timer);clearTimeout(killTimer);if(error||code!==0)reject(error||new Error(`Session worker ${code??signal}: ${tail}`));else resolve()})
+ })
+ const result=await store.get(task.id)
+ assert.equal(result.status,'succeeded',result.message)
+ assert.equal(result.sessionId,sessionId)
+ assert(result.artifacts.every(file=>file.path.startsWith(directory+path.sep)),'outputs must belong to the session workspace')
+ assert.equal(new URL(result.result.resourceUri).searchParams.get('session'),sessionId)
+ return result
 }
