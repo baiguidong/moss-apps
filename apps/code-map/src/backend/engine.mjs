@@ -43,7 +43,7 @@ export function unpack(result){
 export default {
   id:'codebase-memory-mcp',spec,
   async catalog({dataDir}){const {instance}=await client(dataDir);const {tools}=await instance.listTools();return {version:spec.version,tools}},
-  async register(backend,context){
+  async activate(backend,context){
     // Start the shared upstream daemon before exposing a second MCP client to
     // Host discovery. Simultaneous cold starts can leave one client waiting.
     await client(context.dataDir)

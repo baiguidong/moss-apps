@@ -27,7 +27,7 @@ async function mapLimited(items, limit, visit) {
 
 export function startBackend(engine, worker, { sessionScoped = false, Client = AppBackendClient } = {}) {
   if (sessionScoped) return createSessionBackend(ScopedClient => startBackend(engine, worker, { Client: ScopedClient }), { catalog: options => engine.catalog(options) })
-  let store, queue, server, base, context, stopping, activationTask, activationError, ready = false, registrationError = '', catalog
+  let store, queue, server, base, context, stopping, activationTask, activationError, registrationTask, ready = false, registrationError = '', catalog
   let hostArtifactUrls = false
   const signedUrls = new Map()
   let resolveActivation
@@ -35,13 +35,22 @@ export function startBackend(engine, worker, { sessionScoped = false, Client = A
   const token = randomBytes(32).toString('hex')
   function shutdown() {
     return stopping ??= (async () => {
-      try { await queue?.shutdown({ waitForExit: Boolean(context?.sessionId) }); await activationTask?.catch(() => {}) }
+      try { await queue?.shutdown({ waitForExit: Boolean(context?.sessionId) }); await Promise.allSettled([activationTask, registrationTask]) }
       finally {
         server?.closeAllConnections()
         await new Promise(resolve => server ? server.close(resolve) : resolve())
         await engine.close?.()
       }
     })()
+  }
+  function activateEngine() {
+    return registrationTask ??= Promise.resolve().then(() => engine.activate(backend, context))
+      .then(() => { registrationError = '' })
+      .catch(error => { registrationError = error.message; throw error })
+      .finally(() => {
+        registrationTask = null
+        if (!stopping) backend.emit('workspace.changed', {})
+      })
   }
   const backend = new Client({
     onInitialize: async ctx => {
@@ -60,10 +69,13 @@ export function startBackend(engine, worker, { sessionScoped = false, Client = A
       })
       await engine.register?.(backend, ctx)
       setImmediate(() => {
+        if (stopping) { resolveActivation(); return }
         activationTask = queue.restore({ start: false }).then(() => {
           if (!queue.closed) { ready = true; queue.pump() }
-        }).catch(error => { activationError = error; registrationError = error.message }).finally(resolveActivation)
-
+        }).catch(error => { activationError = error }).finally(resolveActivation)
+        // Actions must exist before ready; external services may be unavailable
+        // and must not prevent the Host handshake or access to saved work.
+        if (engine.activate) void activateEngine().catch(() => {})
       })
     },
     onShutdown: shutdown,
@@ -150,9 +162,9 @@ export function startBackend(engine, worker, { sessionScoped = false, Client = A
     await sendArtifact(req, res, target)
   }
   backend.registerAction('workspace.get', async () => ({ tasks: await Promise.all((await store.list()).map(task => view(task, { urls: !hostArtifactUrls }))),
-    artifactUrlsDeferred: hostArtifactUrls, engine: { id:engine.id, version:engine.spec.version }, registrationError }))
+    artifactUrlsDeferred: hostArtifactUrls, engine: { id:engine.id, version:engine.spec.version }, registrationError: activationError?.message || registrationError }))
   backend.registerAction('catalog.get', async () => catalog ??= await engine.catalog({ dataDir: context.dataDir, cacheDir: context.cacheDir }))
-  backend.registerAction('engine.prepare', async () => { catalog = await engine.catalog({ dataDir: context.dataDir, cacheDir: context.cacheDir, prepare: true }); if (engine.register) { await engine.register(backend, context); registrationError = '' } return catalog })
+  backend.registerAction('engine.prepare', async () => { catalog = await engine.catalog({ dataDir: context.dataDir, cacheDir: context.cacheDir, prepare: true }); if (engine.register) await engine.register(backend, context); if (engine.activate) await activateEngine(); return catalog })
   backend.registerAction('paths.pick', (input, ctx) => backend.host.request('moss.local-files/v1','pick',input,{ signal:ctx.signal }))
   backend.registerAction('tasks.start', (input, ctx) => startTask(input, ctx.source?.surface === 'tool' ? 'agent-tool' : 'ui', ctx.signal))
   backend.registerAction('tasks.cancel', ({id}) => tasks.cancelTask(id))

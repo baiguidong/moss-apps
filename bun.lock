@@ -95,7 +95,7 @@
     },
     "apps/code-map": {
       "name": "@moss/code-map-app",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "@moss/app-sdk": "workspace:*",
