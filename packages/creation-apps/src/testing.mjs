@@ -9,9 +9,14 @@ export async function fixture(t, engine) {
   const store = new TaskStore(root)
   const actions = new Map()
   await engine.register({ registerAction: (name, fn) => actions.set(name, fn) }, { dataDir: root })
+  // Content tests must not discover or launch an installed desktop Office app.
+  // Keep native file generation and inspection real; page rendering is tested separately.
+  const testEngine = { ...engine, execute(input, ctx) {
+    return engine.execute(input, { ...ctx, executables: { soffice: '' } })
+  } }
   return { root, store, actions, async run(input, success = true) {
     const task = await store.create(input)
-    await executeTask(engine, store, task)
+    await executeTask(testEngine, store, task)
     const result = await store.get(task.id)
     assert.equal(result.status, success ? 'succeeded' : 'failed', result.message)
     return result

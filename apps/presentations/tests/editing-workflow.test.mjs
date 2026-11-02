@@ -1,12 +1,30 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
+import path from 'node:path'
 import { fixture } from '@moss/creation-apps/testing'
 import { officeZip,xml,serialize } from '@moss/creation-apps/office'
+import { renderingSummary } from '@moss/creation-apps/office-render'
 import engine from '../src/backend/engine.mjs'
 const deck={title:'原始演示',slides:[{title:'保留封面',body:'第一页不能修改'},{title:'季度数据',elements:[{type:'chart',chartType:'line',x:.5,y:1.5,w:6,h:4,series:[{name:'收入',labels:['一月','二月'],values:[10,20]}]},{type:'table',x:7,y:1.5,w:5,h:2,rows:[['指标','金额'],['收入','100']]}]}]}
+// Review state transitions need persisted page artifacts, not a desktop converter.
+// These small fixture images do not represent or validate the slide layout.
+async function seedRenderedPages(f, task) {
+ const directory=path.join(f.store.directory(task.id),'office-preview');await fs.mkdir(directory,{recursive:true})
+ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAACAAAAAQCAIAAAD4YuoOAAAAHUlEQVR4nGNQmulCU8QwasGoBaMWjFowasFQsAAADKb+EItl8DgAAAAASUVORK5CYII=','base64')
+ const pages=[]
+ for(const page of [1,2]){
+  const file=path.join(directory,`page-${page}.png`);await fs.writeFile(file,png)
+  pages.push({page,path:file});task.artifacts.push({name:`第 ${page} 页.png`,path:file,kind:'image',purpose:'render',page})
+ }
+ task.result.visualReview={status:'rendered',sourcePath:task.artifacts[0].path,sourceSha256:task.result.inspection.sourceSha256,visuallyVerified:false,pages,pageCount:2,directory,nextPage:null}
+ task.result.rendering=renderingSummary(task.result.visualReview);task.result.quality.totalPages=2
+ await f.store.write(task)
+}
 test('native chart/table/font edits, source citations, structured comparisons and review versions',async t=>{
  const f=await fixture(t,engine),first=await f.run(deck),before=await officeZip(first.artifacts[0].path)
+ assert.equal(first.result.visualReview.status,'unavailable');assert.deepEqual(first.result.visualReview.pages,[])
+ assert.equal(first.artifacts.some(file=>file.purpose==='render'),false)
  const inspect=f.actions.get('creation.inspect'),verify=f.actions.get('creation.verify')
  const objects=(await inspect({id:first.id,page:2})).units,chart=objects.find(u=>u.detail.type==='chart'),table=objects.find(u=>u.detail.type==='table'),title=objects.find(u=>u.detail.type==='text')
  assert.match(chart.citation.uri,/#page=2/)
@@ -20,11 +38,13 @@ test('native chart/table/font edits, source citations, structured comparisons an
  assert.equal(second.result.comparison.count,3)
  const comparison=await f.actions.get('composer.resolve')({uri:second.result.comparison.resourceUri});assert.equal(comparison.presentation.type,'document-comparison')
  const data=JSON.parse(await fs.readFile(comparison.path,'utf8'));assert.equal(data.before.uri,first.result.resourceUri);assert.equal(data.after.uri,second.result.resourceUri)
+ await seedRenderedPages(f,second)
  const pending=await verify({id:second.id});assert.equal(pending.quality.state,'pending');assert.equal(pending.pages.length,2)
  await assert.rejects(verify({id:second.id,sourceSha256:'wrong',pages:[{page:1,observations:'检查文字',issues:[]}]}),/版本/)
  const partial=await verify({id:second.id,sourceSha256:pending.sourceSha256,pages:[{page:1,observations:'封面文字与原版一致',issues:[]}]});assert.equal(partial.quality.state,'pending');assert.equal(partial.remainingPages.length,1)
  const broken=await verify({id:second.id,sourceSha256:pending.sourceSha256,pages:[{page:2,observations:'图表标题遮挡，需调整位置',issues:[{severity:'error',message:'标题遮挡'}]}]});assert.equal(broken.quality.state,'needs-repair');assert.equal((await f.store.get(second.id)).result.visualReview.visuallyVerified,false)
  const third=await f.run({title:'修正版',mode:'edit',sourcePath:second.artifacts[0].path,parentId:second.id,objectEdits:[{slide:2,objectId:title.objectId,y:.25}]});assert.equal(third.result.quality.reviewedPages,0)
+ await seedRenderedPages(f,third)
  const check=await verify({id:third.id}),passed=await verify({id:third.id,sourceSha256:check.sourceSha256,pages:check.pages.map(p=>({page:p.page,observations:'测试夹具记录：验证核验状态流转，不代表真实模型视觉判断',issues:[]}))});assert.equal(passed.quality.state,'reviewed')
  await fs.appendFile(third.artifacts[0].path,'external change');await assert.rejects(verify({id:third.id}),/文件已变化/)
 })

@@ -9,7 +9,7 @@ import type { GraphInput } from '../src/contracts'
 import { selectGraph, type GraphRecords } from '../src/lib/graph-data'
 
 const screenshots = path.resolve(import.meta.dirname, '../../..', `artifacts/moss.memory/screenshots/${manifest.version}`)
-async function fixture(page: Page, failed = false, empty = false) {
+async function fixture(page: Page, { empty = false, graphFailure: initialGraphFailure = false } = {}) {
   const calls: (Method | 'graph.read')[] = []
   const graph: GraphRecords = { entities: empty ? [] : [
     { name: '小林', entityType: '人物', observations: ['项目负责人', '<script>只是记忆文字</script>'] },
@@ -19,30 +19,15 @@ async function fixture(page: Page, failed = false, empty = false) {
     { from: '小林', to: '咖啡店网站', relationType: '负责' },
     { from: '咖啡店网站', to: '菜单页面', relationType: '包含' },
   ] }
-  let graphFailure = false
-  const catalog: Catalog = { memoryFile: '/tmp/Moss Data/memory/knowledge-graph.jsonl', preparation: failed ? { state: 'failed', error: '记忆文件无法写入，请检查数据目录权限。' } : { state: 'ready' }, servers: [{
+  let graphFailure = initialGraphFailure
+  const catalog: Catalog = { memoryFile: '/tmp/Moss Data/memory/knowledge-graph.jsonl', preparation: { state: 'idle' }, servers: [{
     name: MEMORY, enabled: true, credentialsMissing: false, updatedAt: 1, config: structuredClone(DEFAULT_CONFIG),
-    check: { state: failed ? 'failed' : 'connected', checkedAt: 1, tools: [{ name: 'delete_entities', description: '点击网页元素', disabled: false }] },
+    check: { state: 'unchecked', checkedAt: 1, tools: [{ name: 'delete_entities', description: '点击网页元素', disabled: false }] },
   }] }
-  let polling = 0, rejectReconnect = false
   await page.exposeFunction('memoryInvoke', async (method: Method | 'graph.read', input: Input & GraphInput) => {
     calls.push(method)
     if (method === 'graph.read') return graphFailure ? { ok: false, error: { message: '读取图谱失败，请重试。' } } : { ok: true, data: selectGraph(graph, input) }
-    if (method === 'servers.inspect' && rejectReconnect) {
-      rejectReconnect = false
-      return { ok: false, error: { message: '重连请求失败，请重试。' } }
-    }
-    if (method === 'servers.save') {
-      catalog.servers[0].config = { ...catalog.servers[0].config, disabledTools: input.disabledTools! }
-      catalog.servers[0].updatedAt++
-    }
-    if (method !== 'servers.list') { catalog.preparation = { state: 'connecting' }; polling = 2 }
-    else if (polling && --polling === 0) {
-      catalog.preparation = { state: 'ready' }
-      catalog.servers[0].check!.state = 'connected'
-      catalog.servers[0].check!.checkedAt = Date.now()
-      catalog.servers[0].check!.tools[0].disabled = catalog.servers[0].config.disabledTools?.includes('delete_entities') || false
-    }
+    if (method !== 'servers.list') throw new Error(`Unexpected write from the graph page: ${method}`)
     return { ok: true, data: structuredClone(catalog) }
   })
   await page.addInitScript(() => {
@@ -52,76 +37,66 @@ async function fixture(page: Page, failed = false, empty = false) {
       events: { on: () => () => {} },
     } as any
   })
-  return { calls, catalog, graph, setGraphFailure: (value: boolean) => { graphFailure = value }, rejectNextReconnect: () => { rejectReconnect = true } }
+  return { calls, catalog, graph, setGraphFailure: (value: boolean) => { graphFailure = value } }
 }
 
-test('shows memory settings and refreshes excluded tools', async ({ page }) => {
+test('graph reads saved memory and its location without connecting or configuring MCP', async ({ page }) => {
   const host = await fixture(page)
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message))
   await page.goto('/')
-  await expect(page.getByRole('status')).toContainText('检查通过')
+  await expect(page.getByRole('main', { name: '记忆图谱', exact: true })).toBeVisible()
+  await expect(page.getByRole('region', { name: '记忆图谱', exact: true })).toContainText('共 3 条记忆 · 2 条关系')
+  await expect(page.getByText(`存储位置：${host.catalog.memoryFile}`, { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: '添加服务' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: '记忆设置' })).toHaveCount(0)
   await expect(page.getByRole('switch')).toHaveCount(0)
-  await page.getByRole('button', { name: '记忆设置' }).click()
-  const dialog = page.getByRole('dialog', { name: '记忆设置' })
-  await expect(dialog.getByLabel('记忆文件')).toHaveAttribute('readonly')
-  await dialog.getByLabel('不启用的工具').fill('x'.repeat(129))
-  await dialog.getByRole('button', { name: '保存并连接' }).click()
-  await expect(dialog.getByRole('alert')).toContainText('有效的工具名称')
-  await dialog.getByLabel('不启用的工具').fill('delete_entities')
-  await dialog.getByRole('button', { name: '保存并连接' }).click()
-  await expect(dialog).toHaveCount(0)
-  await expect(page.getByRole('status')).toContainText('检查通过')
-  expect(host.calls.filter(name => name === 'servers.save')).toHaveLength(1)
-  await page.locator('.memory-tools summary').click()
-  await expect(page.getByRole('heading', { name: 'delete_entities已排除' })).toBeVisible()
+  expect(host.calls).toContain('servers.list')
+  expect(host.calls).toContain('graph.read')
+  expect(host.calls.every(method => method === 'servers.list' || method === 'graph.read')).toBe(true)
   expect(errors).toEqual([])
 })
 
-test('startup failure exposes configuration and retry while polling is bounded to preparation', async ({ page }) => {
-  const host = await fixture(page, true)
+test('initial graph failure offers retry and recovers without connecting MCP', async ({ page }) => {
+  const host = await fixture(page, { graphFailure: true })
   await page.goto('/')
-  await expect(page.getByRole('alert')).toContainText('记忆文件无法写入')
-  await expect(page.getByRole('button', { name: '记忆设置' })).toBeEnabled()
-  host.rejectNextReconnect()
-  await page.getByRole('button', { name: '重新连接' }).click()
-  await expect(page.getByRole('alert')).toContainText('重连请求失败')
-  await expect(page.getByRole('button', { name: '重新连接' })).toBeEnabled()
-  await expect(page.getByRole('alert')).toContainText('重连请求失败')
-  await page.getByRole('button', { name: '重新连接' }).click()
-  await expect(page.getByRole('status')).toContainText('正在连接')
-  await expect(page.getByRole('status')).toContainText('检查通过')
-  expect(host.calls.filter(name => name === 'servers.inspect')).toHaveLength(2)
+  await expect(page.getByRole('alert')).toContainText('读取图谱失败，请重试。')
+  await expect(page.getByRole('heading', { name: '暂时无法读取图谱' })).toBeVisible()
+  await expect(page.locator('[data-engine="antv-g6"]')).toHaveCount(0)
+  host.setGraphFailure(false)
+  await page.getByRole('button', { name: '重新读取', exact: true }).click()
+  await expect(page.locator('[data-engine="antv-g6"]')).toHaveAttribute('data-ready', 'true')
   await expect(page.getByRole('alert')).toHaveCount(0)
+  expect(host.calls.filter(method => method === 'graph.read')).toHaveLength(2)
+  expect(host.calls).not.toContain('servers.inspect')
 })
 
-for (const theme of ['light', 'dark'] as const) test(`${theme} page and settings fit narrow windows`, async ({ page }) => {
+for (const theme of ['light', 'dark'] as const) test(`${theme} graph and list fit narrow windows`, async ({ page }) => {
   await fixture(page)
   await page.emulateMedia({ colorScheme: theme })
   await page.goto('/')
-  await expect(page.getByRole('status')).toContainText('检查通过')
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
   await expect(page.locator('[data-engine="antv-g6"]')).toHaveAttribute('data-ready', 'true')
   await mkdir(screenshots, { recursive: true })
   await page.screenshot({ path: path.join(screenshots, `${theme}.png`), fullPage: true })
-  await page.getByRole('button', { name: '记忆设置' }).click()
-  await page.screenshot({ path: path.join(screenshots, `${theme}-settings.png`), fullPage: true })
-  await page.keyboard.press('Escape')
   for (const width of [600, 390, 320]) {
     await page.setViewportSize({ width, height: 844 })
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-    await expect(page.getByRole('button', { name: '重新连接' })).toBeInViewport()
+    await expect(page.getByRole('button', { name: '刷新记忆' })).toBeInViewport()
+    await page.getByRole('button', { name: '列表', exact: true }).click()
+    await expect(page.getByLabel('记忆列表').getByRole('button')).toHaveCount(3)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    await page.getByRole('button', { name: '图谱', exact: true }).click()
+    await expect(page.locator('[data-engine="antv-g6"]')).toHaveAttribute('data-ready', 'true')
   }
   await page.screenshot({ path: path.join(screenshots, `${theme}-narrow.png`), fullPage: true })
 })
 
-
-test('browser demo is visible and never suggests real data was saved', async ({ page }) => {
+test('browser demo identifies its data and provides read-only graph browsing', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByText('演示模式', { exact: false })).toBeVisible()
-  await expect(page.getByRole('main', { name: '记忆', exact: true })).toBeVisible()
-  await page.getByRole('button', { name: '记忆设置' }).click()
-  await expect(page.getByLabel('记忆文件')).toHaveValue(/演示数据/)
+  await expect(page.getByRole('main', { name: '记忆图谱', exact: true })).toBeVisible()
+  await expect(page.getByText('存储位置：演示数据 / memory / knowledge-graph.jsonl', { exact: true })).toBeVisible()
+  await expect(page.locator('[data-engine="antv-g6"]')).toHaveAttribute('data-node-count', '6')
+  await expect(page.getByRole('button', { name: /保存|创建|删除/ })).toHaveCount(0)
 })
 
 test('graph shows real facts, directed relations and linked node details', async ({ page }) => {
@@ -168,7 +143,7 @@ test('search and type filters can be cleared, and graph refresh reflects externa
 })
 
 test('empty installed memory has a useful first-use state without demo nodes', async ({ page }) => {
-  const host = await fixture(page, false, true)
+  const host = await fixture(page, { empty: true })
   await page.goto('/')
   await expect(page.getByText('第一段记忆，从一句话开始')).toBeVisible()
   await expect(page.locator('[data-engine="antv-g6"]')).toHaveCount(0)

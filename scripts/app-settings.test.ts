@@ -6,9 +6,11 @@ import { listApps, repoRoot } from './lib.mjs';
 import { exportAppSource, parseLock } from './source-package.mjs';
 import { execFileSync } from 'node:child_process';
 
-test('ordinary tool Apps build their shared settings page; configuration Apps use Core settings', async () => {
+test('Apps that retain shared settings declare and build their page; configuration Apps use Core settings', async () => {
   const apps = listApps().filter(app => app.kind === 'app' && app.manifest.contributes?.views?.some(view => view.route === '#/moss-settings'));
-  expect(apps.length).toBeGreaterThanOrEqual(10);
+  expect(apps.map(app => app.manifest.id).sort()).toEqual([
+    'moss.buddy', 'moss.knowledge-rag', 'moss.library', 'moss.takt', 'moss.workflow',
+  ]);
   for (const app of apps) {
     const view = app.manifest.contributes.views.find(view => view.route === '#/moss-settings');
     expect(view).toBeTruthy();
@@ -28,7 +30,7 @@ test('ordinary tool Apps build their shared settings page; configuration Apps us
 test('source exports carry the shared module and its pinned dependencies for independent rebuilds', async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-settings-source-'));
   try {
-    const app = listApps().find(app => app.manifest.id === 'moss.mcp');
+    const app = listApps().find(app => app.manifest.id === 'moss.buddy');
     await exportAppSource(app, root);
     const pkg = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'));
     expect(pkg.workspaces).toContain('packages/app-settings');
@@ -47,7 +49,7 @@ test('shared settings builds identical production bundles regardless of caller e
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-settings-build-'));
   try {
     const buildUrl = new URL('../packages/app-settings/build.mjs', import.meta.url).href;
-    const app = listApps().find(app => app.manifest.id === 'moss.app-builder');
+    const app = listApps().find(app => app.manifest.id === 'moss.buddy');
     for (const mode of ['development', 'production']) {
       const code = `import { buildAppSettings } from ${JSON.stringify(buildUrl)}; await buildAppSettings(${JSON.stringify(app.root)}, {outputDir:${JSON.stringify(path.join(root, mode))},html:'<html><body></body></html>'});`;
       execFileSync('node', ['--input-type=module', '-e', code], { env: { ...process.env, NODE_ENV: mode }, timeout: 30000 });

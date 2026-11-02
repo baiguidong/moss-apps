@@ -66,6 +66,8 @@ bun run test
 bun run build
 ```
 
+默认 Office 内容测试不启动 LibreOffice：测试辅助代码禁用 Office 页面转换，继续验证生成文件、公式、原文保留和版本管理；审阅状态测试使用固定页图夹具，不作为真实排版核验。正式 App 的 Office 转换功能不受影响，原生 PDF 渲染测试仍使用 Poppler。
+
 只操作一个 App：
 
 ```bash

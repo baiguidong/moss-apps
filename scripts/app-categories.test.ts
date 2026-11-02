@@ -1,5 +1,6 @@
 import { expect, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
+import semver from 'semver'
 import { APP_CATEGORIES, getAppCategoryForApp, validateAppManifest } from '@moss/app-sdk'
 import { listApps, validateMarketplaceMetadata } from './lib.mjs'
 
@@ -48,13 +49,16 @@ test('legacy installed categories use display-only migration without rewriting m
   expect(getAppCategoryForApp({ id: 'external.custom', category: 'other' }).id).toBe('other')
 })
 
-test('extended categories require a compatible Host and old categories keep existing ranges', () => {
+test('extended categories require a compatible Host and allow stricter App requirements', () => {
   const manifest = listApps().find(app => app.manifest.id === 'moss.database')!.manifest
-  expect(manifest.hostApi).toBe('^3.21.0')
+  expect(semver.subset(manifest.hostApi, '>=3.21.0')).toBe(true)
   expect(() => validateAppManifest({ ...manifest, hostApi: '^3.20.0' })).toThrow('Extended App categories')
   expect(() => validateAppManifest(manifest, { hostApiVersion: '3.20.0' })).toThrow('requires Host API')
-  expect(listApps().find(app => app.manifest.id === 'moss.filesystem')!.manifest.hostApi).toBe('^3.21.0')
-  expect(listApps().find(app => app.manifest.id === 'moss.tencent-map')!.manifest.hostApi).toBe('^3.21.0')
+  for (const id of ['moss.filesystem', 'moss.tencent-map']) {
+    const app = listApps().find(app => app.manifest.id === id)!
+    expect(semver.subset(app.manifest.hostApi, '>=3.21.0'), id).toBe(true)
+    expect(() => validateAppManifest({ ...app.manifest, hostApi: '^3.20.0' })).toThrow('Extended App categories')
+  }
 })
 
 test('conflicting legacy marketplace categories and keywords cannot override the Manifest', () => {
@@ -67,6 +71,6 @@ test('conflicting legacy marketplace categories and keywords cannot override the
 
 test('the Builder template exposes category and preserves it with the pinned SDK', () => {
   const template = JSON.parse(readFileSync(new URL('../apps/app-builder/resources/authoring/app.moss.json', import.meta.url), 'utf8'))
-  expect(template.category).toBe('other')
+  expect(validateAppManifest(template).category).toBe('development')
   expect(validateAppManifest({ ...template, category: 'knowledge', keywords: ['资料'] })).toMatchObject({ category: 'knowledge', keywords: ['资料'] })
 })
