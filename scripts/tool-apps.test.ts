@@ -74,7 +74,10 @@ test('DBX launches the pinned upstream service offline and carries every platfor
   const definition = JSON.parse(await fs.readFile(path.join(root, 'app.json'), 'utf8'))
   expect(definition.mcpServers.dbx.command).toBe('node')
   expect(definition.mcpServers.dbx.args).toEqual(['@app/runtime/node_modules/@dbx-app/mcp-server/bin/dbx-mcp-server.js', '--stdio'])
-  expect(definition.mcpServers.dbx.env).toBeUndefined()
+  expect(definition.mcpServers.dbx.env).toEqual({
+    DBX_DATA_DIR: '${MOSS_APP_DATA_DIR}/dbx',
+    DBX_SECRET_KEY_FILE: '${MOSS_APP_DATA_DIR}/dbx/.dbx/secret.key',
+  })
   const pkg = JSON.parse(await fs.readFile(path.join(root, 'runtime/package.json'), 'utf8'))
   expect(pkg.mossBundleAllPlatforms).toBe(true)
   const lock = JSON.parse(await fs.readFile(path.join(root, 'runtime/package-lock.json'), 'utf8'))
