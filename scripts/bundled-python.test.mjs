@@ -17,7 +17,12 @@ test('packaged launcher uses only App libraries and rejects incompatible or miss
     await fs.copyFile(new URL('./bundled-python-launch.py', import.meta.url), path.join(root, 'launch.py'))
     const libraries = path.join(root, 'site-packages')
     await fs.mkdir(libraries)
+    await fs.mkdir(path.join(libraries, 'extra'))
+    await fs.writeFile(path.join(libraries, 'extra', 'pth_dependency.py'), 'value = 42\n')
+    await fs.writeFile(path.join(libraries, 'app.pth'), 'extra\n')
     await fs.writeFile(path.join(libraries, 'fixture.py'), `import sys, json, importlib.util
+import pth_dependency
+assert pth_dependency.value == 42
 assert sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode
 assert importlib.util.find_spec('pip') is None
 print(json.dumps(sys.argv[1:]))
@@ -27,7 +32,8 @@ print(json.dumps(sys.argv[1:]))
     const args = ['-I', '-S', '-B', path.join(root, 'launch.py'), 'directory with spaces', '中文']
     await write(manifest)
     assert.deepEqual(JSON.parse(execFileSync(python, args, { encoding: 'utf8' })), args.slice(-2))
-    assert.deepEqual(await fs.readdir(libraries), ['fixture.py'], 'launch must not write caches into App code')
+    assert.deepEqual((await fs.readdir(libraries)).sort(), ['app.pth', 'extra', 'fixture.py'], 'launch must not write caches into App code')
+    assert.deepEqual(await fs.readdir(path.join(libraries, 'extra')), ['pth_dependency.py'])
     await write({ ...manifest, python: '0.0' })
     assert.match(spawnSync(python, args, { encoding: 'utf8' }).stderr, /requires Moss Python/)
     await write({ ...manifest, platform: 'foreign-platform' })

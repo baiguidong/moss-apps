@@ -3,6 +3,7 @@ import json
 import pathlib
 import platform
 import runpy
+import site
 import sys
 
 root = pathlib.Path(__file__).resolve().parent
@@ -17,5 +18,8 @@ if not libraries.is_dir():
     raise SystemExit('App dependencies are missing; reinstall the App package.')
 # -I -S excludes user/global packages, -B keeps installed App files read-only.
 sys.path.insert(0, str(libraries))
+# Process only this App's .pth files (not the Host/user site). Windows wheels
+# such as pywin32 use them to expose modules and register bundled DLL paths.
+site.addsitedir(str(libraries))
 sys.argv = [bundle['module'], *sys.argv[1:]]
 runpy.run_module(bundle['module'], run_name='__main__', alter_sys=True)
