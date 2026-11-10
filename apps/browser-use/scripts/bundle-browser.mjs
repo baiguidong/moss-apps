@@ -138,11 +138,29 @@ export async function bundleBrowser(appRoot, target) {
   const zip = path.join(cache, `chrome-${chrome.browserVersion}-${platform}.zip`)
   if (!(await fs.stat(zip).then(stat => stat.size > 100_000_000, () => false))) {
     const downloaded = `${zip}.${process.pid}.tmp`
-    const url = `https://cdn.npmmirror.com/binaries/playwright/builds/cft/${chrome.browserVersion}/${archive[0]}`
+    const urls = [
+      `https://storage.googleapis.com/chrome-for-testing-public/${chrome.browserVersion}/${archive[0]}`,
+      `https://cdn.npmmirror.com/binaries/playwright/builds/cft/${chrome.browserVersion}/${archive[0]}`,
+    ]
+    let failure
     try {
-      run('curl', ['-fL', '--retry', '12', '--retry-all-errors', '--continue-at', '-', '--silent', '--show-error', '-o', downloaded, url], appRoot)
-      run('unzip', ['-tq', downloaded], appRoot)
-      await fs.rename(downloaded, zip)
+      for (const url of urls) {
+        try {
+          console.log(`Downloading pinned Chrome for Testing from ${new URL(url).hostname}`)
+          run('curl', ['-fL', '--connect-timeout', '15', '--max-time', '90', '--retry', '2', '--retry-max-time', '90',
+            '--retry-delay', '2', '--retry-all-errors', '--continue-at', '-', '--silent', '--show-error', '-o', downloaded, url], appRoot)
+          run('unzip', ['-tq', downloaded], appRoot)
+          await fs.rename(downloaded, zip)
+          failure = undefined
+          break
+        } catch (error) {
+          failure = error
+          console.warn(`Chrome download failed from ${new URL(url).hostname}: ${error.message}`)
+          // A mirror may serve different archive bytes; never resume across sources.
+          await fs.rm(downloaded, { force: true })
+        }
+      }
+      if (failure) throw failure
     } finally { await fs.rm(downloaded, { force: true }) }
   }
   const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-bundled-browser-'))
