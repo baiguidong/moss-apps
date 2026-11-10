@@ -47,6 +47,7 @@ jobs:
         run: |
           case "$APP_ID" in
             moss.excel|moss.markitdown|moss.git) bun install --frozen-lockfile --filter moss-apps ;;
+            moss.browser-use) bun install --frozen-lockfile --filter moss-apps --filter @moss/browser-use-app ;;
             *) bun install --frozen-lockfile ;;
           esac
       - id: target
@@ -63,6 +64,9 @@ jobs:
       - name: Call portable MCP service on the target OS
         if: steps.target.outputs.supported == 'true' && contains(fromJSON('["moss.database","moss.excel","moss.markitdown","moss.git"]'), inputs.app)
         run: node scripts/verify-portable-services.mjs --app "${{ inputs.app }}"
+      - name: Verify packaged Browser Use storage and real automation
+        if: inputs.app == 'moss.browser-use' && matrix.platform == 'darwin-arm64'
+        run: node apps/browser-use/scripts/verify-managed-browser.mjs
       - name: Upload verified App packages
         if: steps.target.outputs.supported == 'true'
         uses: actions/upload-artifact@v4

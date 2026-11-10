@@ -74,7 +74,7 @@
     },
     "apps/browser-use": {
       "name": "@moss/browser-use-app",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "dependencies": {
         "@moss/app-sdk": "workspace:*",
         "@playwright/mcp": "0.0.83",

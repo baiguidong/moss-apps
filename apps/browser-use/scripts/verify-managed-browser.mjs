@@ -2,22 +2,21 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:net'
 import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
-import { createRequire } from 'node:module'
 import { tmpdir, homedir } from 'node:os'
 import { join, resolve, dirname } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { fileURLToPath } from 'node:url'
+import { Client } from '@modelcontextprotocol/sdk/client/index.js'
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { chromium } from '@playwright/test'
 import { startMcpFixture } from '../tests/http-fixture.mjs'
 
 const app = fileURLToPath(new URL('..', import.meta.url)), repo = resolve(app, '../..')
-const core = process.env.MOSS_CORE_ROOT || resolve(repo, '../moss')
-const { Client } = await import(pathToFileURL(join(core, 'node_modules/@modelcontextprotocol/sdk/dist/esm/client/index.js')))
-const { StdioClientTransport } = await import(pathToFileURL(join(core, 'node_modules/@modelcontextprotocol/sdk/dist/esm/client/stdio.js')))
 const manifest = JSON.parse(await readFile(join(app, 'app.moss.json'), 'utf8'))
-const packageRoot = join(repo, 'artifacts/moss.browser-use', manifest.version, 'package')
-const require = createRequire(import.meta.url)
-const { installedExecutable } = require(join(packageRoot, 'dist/playwright-cdp/managed.cjs'))
+const packageIndex = process.argv.indexOf('--package')
+const packageRoot = packageIndex >= 0 ? resolve(process.argv[packageIndex + 1])
+  : join(repo, 'artifacts/moss.browser-use', manifest.version, `package-${process.platform}-${process.arch}`)
 const temporary = await mkdtemp(join(tmpdir(), 'moss-managed-browser-'))
+const appData = process.env.MOSS_VERIFY_APP_DATA_DIR || join(temporary, 'apps-data/moss.browser-use/instances/moss.browser-use--default')
 const fixture = await startMcpFixture(), clients = []
 const reserve = createServer()
 await new Promise(resolve => reserve.listen(0, '127.0.0.1', resolve))
@@ -33,7 +32,7 @@ async function connect() {
   const client = new Client({ name: 'managed-browser-test', version: manifest.version })
   const transport = new StdioClientTransport({ command: process.execPath,
     args: [join(packageRoot, 'dist/playwright-cdp/cli.cjs'), '--moss-managed-browser', '--cdp-endpoint', endpoint, '--headless', '--output-dir', temporary],
-    env: { ...process.env, MOSS_HOME: temporary }, stderr: 'pipe' })
+    env: { ...process.env, MOSS_HOME: temporary, MOSS_APP_DATA_DIR: appData }, stderr: 'pipe' })
   clients.push(client)
   await client.connect(transport)
   return client
@@ -60,14 +59,6 @@ async function closeOwnedBrowser() {
   throw new Error('Test browser still listening')
 }
 try {
-  const executable = await installedExecutable()
-  assert.ok(executable, 'Prepare the pinned Playwright chromium before running this test')
-  let bundleId
-  if (process.platform === 'darwin') {
-    bundleId = execFileSync('plutil', ['-extract', 'CFBundleIdentifier', 'raw', '-o', '-', resolve(dirname(executable), '../Info.plist')], { encoding: 'utf8' }).trim()
-    assert.notEqual(bundleId, 'com.google.Chrome', 'managed Chrome must have a different application identity')
-    assert.equal(bundleId, 'com.google.chrome.for.testing')
-  }
   const [first, second] = await Promise.all([connect(), connect()])
   await assertBrowserClosed('MCP initialization must not launch Chrome')
   const toolCount = (await first.listTools()).tools.length
@@ -75,10 +66,20 @@ try {
   assert.equal((await second.listTools()).tools.length, toolCount)
   const idle = await connect(); await idle.listTools(); await idle.close()
   await assertBrowserClosed('tool discovery and idle reconnect must not launch Chrome')
-  assert.ok(!(await readdir(temporary)).includes('browser-profiles'), 'discovery must not create a managed profile')
+  assert.ok(!(await readdir(join(appData, 'browser-profiles')).catch(() => [])).includes(`playwright-cdp-${new URL(endpoint).port}`), 'discovery must not create a managed profile')
   const starts = await Promise.all([first, second].map(client => client.callTool({ name: 'browser_tabs', arguments: { action: 'list' } })))
   for (const result of starts) assert.ok(!result.isError, JSON.stringify(result))
   websocket = (await (await fetch(`${endpoint}/json/version`)).json()).webSocketDebuggerUrl
+  const profile = join(appData, 'browser-profiles', `playwright-cdp-${new URL(endpoint).port}`)
+  const state = JSON.parse(await readFile(join(profile, 'moss-browser.json'), 'utf8'))
+  const executable = state.executable
+  assert.ok(executable.startsWith(join(appData, 'browser-binaries') + (process.platform === 'win32' ? '\\' : '/')), 'browser binary must live in App data')
+  let bundleId
+  if (process.platform === 'darwin') {
+    bundleId = execFileSync('plutil', ['-extract', 'CFBundleIdentifier', 'raw', '-o', '-', resolve(dirname(executable), '../Info.plist')], { encoding: 'utf8' }).trim()
+    assert.notEqual(bundleId, 'com.google.Chrome', 'managed Chrome must have a different application identity')
+    assert.equal(bundleId, 'com.google.chrome.for.testing')
+  }
   const firstSocket = websocket
   assert.equal((await (await fetch(`${endpoint}/json/list`)).json()).filter(tab => tab.type === 'page').length, 1, 'concurrent starts must create only one browser window')
   observer = await chromium.connectOverCDP(endpoint)
@@ -130,7 +131,9 @@ try {
   await fourth.close()
   assert.deepEqual(chromePids(), normalPids, 'the user Chrome must neither restart nor be used as the managed browser')
   if (bookmarksBefore) assert.deepEqual(await readFile(bookmarks), bookmarksBefore)
-  const report = { passed: true, toolCount, bundleId, checks: ['no browser launch on MCP initialization, tool discovery or idle reconnect', 'no profile creation before automation', 'first automation request launches Chrome', 'separate application identity', 'one instance for concurrent starts', 'same instance on MCP reconnect', 'same profile on browser restart', 'persistent login cookie and localStorage survive restart', 'same MCP client recovers only on automation after the browser quits', 'recovered actions execute once', 'user Chrome process unchanged', 'user bookmarks unchanged'] }
+  const topLevel = await readdir(temporary)
+  assert.ok(!topLevel.includes('browser-binaries') && !topLevel.includes('browser-profiles'), 'Moss root must not contain browser storage')
+  const report = { appData, executable, passed: true, toolCount, bundleId, checks: ['binary and persistent profile are stored in App data', 'no browser directories at Moss root', 'no browser launch on MCP initialization, tool discovery or idle reconnect', 'no profile creation before automation', 'first automation request launches Chrome', 'separate application identity', 'one instance for concurrent starts', 'same instance on MCP reconnect', 'same profile on browser restart', 'persistent login cookie and localStorage survive restart', 'same MCP client recovers only on automation after the browser quits', 'recovered actions execute once', 'user Chrome process unchanged', 'user bookmarks unchanged'] }
   const output = join(repo, 'artifacts/moss.browser-use/verification', manifest.version)
   await mkdir(output, { recursive: true }); await writeFile(join(output, 'managed-browser.json'), JSON.stringify(report, null, 2) + '\n')
   console.log(JSON.stringify(report))
@@ -140,5 +143,6 @@ try {
   if (!websocket) { try { websocket = (await (await fetch(`${endpoint}/json/version`)).json()).webSocketDebuggerUrl } catch {} }
   await closeOwnedBrowser()
   await fixture.close()
+  if (process.env.MOSS_VERIFY_APP_DATA_DIR) await rm(join(appData, 'browser-profiles', `playwright-cdp-${new URL(endpoint).port}`), { recursive: true, force: true, maxRetries: 20, retryDelay: 100 })
   await rm(temporary, { recursive: true, force: true, maxRetries: 20, retryDelay: 100 })
 }

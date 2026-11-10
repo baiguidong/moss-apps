@@ -15,7 +15,7 @@
 
 专用模式随平台安装包提供固定版本的 Chrome for Testing，首次实际使用时离线解包，后续复用。启动 Moss、加载工具目录、打开设置或重新连接均不会启动 Chrome，实际网页操作才建立浏览器连接。Playwright MCP 0.0.83 及生产依赖随包提供，无需 npx 或运行时安装 JavaScript 依赖。
 
-默认专用 CDP 为 `http://127.0.0.1:9222`，配置保存在 `~/.moss/browser-profiles/playwright-cdp-9222`。每个端口保留固定目录，重连和浏览器重新打开仍使用同一份登录数据；网站自身过期或要求重新认证时仍需登录。专用模式只启动受管 Chrome for Testing，不启动系统 Google Chrome。
+默认专用 CDP 为 `http://127.0.0.1:9222`。浏览器内核和登录配置保存在此 App 实例数据目录下的 `browser-binaries/` 与 `browser-profiles/playwright-cdp-9222/`。每个端口保留固定目录，重连和浏览器重新打开仍使用同一份登录数据；网站自身过期或要求重新认证时仍需登录。专用模式只启动受管 Chrome for Testing，不启动系统 Google Chrome。
 
 手动退出专用浏览器后，原对话下一次网页操作会自动重新打开相同配置。恢复只发生在 CDP 建立连接时，不自动重试已发送的点击或提交；端口被其他服务占用时停止连接并报错。
 
