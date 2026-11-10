@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "moss.git",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "displayName": "Git 仓库",
   "description": "默认在当前会话目录查看 Git 改动、提交和管理分支，也可显式选择公共仓库。",
   "category": "development",
@@ -21,17 +21,10 @@
   },
   "mcpServers": {
     "git": {
-      "command": "python3",
+      "command": "node",
       "args": [
-        "-I",
-        "-m",
-        "mcp_server_git"
+        "@app/runtime/launch.cjs"
       ],
-      "python": {
-        "requirements": [
-          "mcp-server-git==2026.8.18"
-        ]
-      },
       "roots": {
         "includeWorkspace": true,
         "delivery": "roots",

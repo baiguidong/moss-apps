@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "moss.markitdown",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "displayName": "文档转换",
   "description": "使用 MarkItDown 将 PDF、Word、PowerPoint、Excel 和网页转换为 Markdown。",
   "category": "knowledge",
@@ -26,17 +26,10 @@
   },
   "mcpServers": {
     "markitdown": {
-      "command": "python3",
+      "command": "node",
       "args": [
-        "-I",
-        "-m",
-        "markitdown_mcp"
+        "@app/runtime/launch.cjs"
       ],
-      "python": {
-        "requirements": [
-          "markitdown-mcp==0.0.1a7"
-        ]
-      },
       "env": {
         "MARKITDOWN_ENABLE_PLUGINS": "false"
       }
@@ -49,7 +42,7 @@
       "读取这份 PDF，整理其中的主要内容",
       "将这个网页转换为 Markdown，并列出关键链接"
     ],
-    "usage": "在会话中选择文档转换后使用。本地文件需要完整 file URI，网页使用 HTTP(S) 地址；首次连接自动准备 Python 依赖。上游服务可读取当前用户有权限的文件，没有按会话目录隔离。基础文档转换在本机完成，网页读取需要联网。"
+    "usage": "在会话中选择文档转换后使用。本地文件需要完整 file URI，网页使用 HTTP(S) 地址；Python 依赖随 App 提供，使用 Moss 内置 Python。上游服务可读取当前用户有权限的文件，没有按会话目录隔离。基础文档转换在本机完成，网页读取需要联网。"
   },
   "discovery": {
     "group": "local"

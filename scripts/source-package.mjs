@@ -50,6 +50,7 @@ export function run(command, args, cwd) {
     if (!path.isAbsolute(process.env.MOSS_BUILD_DEPENDENCY_CACHE)) throw new Error('Build dependency cache must be an absolute path')
     env.MOSS_BUILD_DEPENDENCY_CACHE = process.env.MOSS_BUILD_DEPENDENCY_CACHE
   }
+  if (process.env.MOSS_BUILD_PYTHON) env.MOSS_BUILD_PYTHON = process.env.MOSS_BUILD_PYTHON
   // PowerShell/CIM and Python need these Windows system locations even in an
   // isolated build. Keep the allowlist explicit so signing keys never enter it.
   for (const key of ['SystemRoot', 'SystemDrive', 'WINDIR', 'ComSpec', 'PATHEXT', 'TEMP', 'TMP', 'USERPROFILE', 'HOMEDRIVE', 'HOMEPATH', 'APPDATA', 'LOCALAPPDATA', 'ProgramData', 'ProgramFiles', 'ProgramFiles(x86)', 'ProgramW6432', 'PSModulePath']) {
@@ -111,6 +112,7 @@ export async function exportAppSource(app, destination, { release = false, platf
     await fs.mkdir(path.join(destination, 'scripts'), { recursive: true })
     await fs.copyFile(path.join(repoRoot, 'scripts/build-tool-app.mjs'), path.join(destination, 'scripts/build-tool-app.mjs'))
     await fs.copyFile(path.join(repoRoot, 'scripts/npm-command.mjs'), path.join(destination, 'scripts/npm-command.mjs'))
+    for (const name of ['bundled-python.mjs', 'bundled-python-launch.py']) await fs.copyFile(path.join(repoRoot, 'scripts', name), path.join(destination, 'scripts', name))
   }
   const workspace = { name: rootPackage.name, version: rootPackage.version, private: true, type: 'module', packageManager: rootPackage.packageManager,
     workspaces: localPaths, devDependencies: rootPackage.devDependencies }

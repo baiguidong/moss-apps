@@ -32,6 +32,36 @@ test('concurrent managed starts share one browser and persistent profile, and re
   expect(state.kind).toBe('chrome-for-testing')
 })
 
+test.each([true, false])('managed storage belongs to App data, with Host context: %s', async (hostContext) => {
+  const root = await temporary()
+  const previous = process.env.MOSS_APP_DATA_DIR
+  const previousHome = process.env.MOSS_HOME
+  process.env.MOSS_HOME = root
+  const appData = hostContext ? path.join(root, 'custom-instance') : path.join(root, 'apps-data/moss.browser-use/instances/moss.browser-use--default')
+  if (hostContext) process.env.MOSS_APP_DATA_DIR = appData
+  else delete process.env.MOSS_APP_DATA_DIR
+  try {
+    let ready: any = null
+    let profile = ''
+    await ensureManagedBrowser(['--moss-managed-browser', '--cdp-endpoint', 'http://127.0.0.1:19712'], {
+      probe: async () => ready,
+      prepare: async () => '/test/Chrome for Testing',
+      spawn: (_executable: string, args: string[]) => {
+        profile = args.find(arg => arg.startsWith('--user-data-dir='))!.slice('--user-data-dir='.length)
+        ready = { webSocketDebuggerUrl: 'ws://127.0.0.1:19712/devtools/browser/test' }
+        return Object.assign(new EventEmitter(), { pid: process.pid, unref() {} })
+      },
+    })
+    expect(profile).toBe(path.join(appData, 'browser-profiles/playwright-cdp-19712'))
+    expect(await readdir(root)).not.toContain('browser-profiles')
+  } finally {
+    if (previous === undefined) delete process.env.MOSS_APP_DATA_DIR
+    else process.env.MOSS_APP_DATA_DIR = previous
+    if (previousHome === undefined) delete process.env.MOSS_HOME
+    else process.env.MOSS_HOME = previousHome
+  }
+})
+
 test('never takes over another browser or launches the customer Chrome as a fallback', async () => {
   const options = { root: await temporary(), probe: async () => ({ webSocketDebuggerUrl: 'ws://127.0.0.1/devtools/browser/customer' }),
     prepare: async () => { throw new Error('Must not install or launch') } }

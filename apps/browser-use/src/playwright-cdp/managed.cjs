@@ -9,7 +9,10 @@ const { promisify } = require('node:util')
 const http = require('node:http')
 const exec = promisify(execFile)
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
-const root = () => process.env.MOSS_HOME || path.join(homedir(), '.moss')
+const mossRoot = () => process.env.MOSS_HOME || path.join(homedir(), '.moss')
+// Browser binaries and persistent profiles always belong to this App.
+// Direct launches use the default instance when no Host context is supplied.
+const root = () => process.env.MOSS_APP_DATA_DIR || path.join(mossRoot(), 'apps-data', 'moss.browser-use', 'instances', 'moss.browser-use--default')
 
 function option(args, name) {
   let value

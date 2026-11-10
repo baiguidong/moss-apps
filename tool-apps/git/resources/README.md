@@ -4,4 +4,4 @@
 
 公共仓库可留空，最多 32 个仓库根目录，支持 `~/`。Git 默认从 PATH 查找，也可在设置中指定程序完整路径。提交身份沿用 Git 配置。
 
-需要 Host API 3.11。首次连接会在 Moss 独立 Python 环境中下载官方 mcp-server-git 2026.8.18，后续复用。上游结果和部分 Git 配置行为与旧版适配不同，详见源码 README。
+需要 Host API 3.11。官方 mcp-server-git 2026.8.18 及依赖随 App 安装包提供，使用 Moss 内置 Python 3.13，启动无需下载。上游结果和部分 Git 配置行为与旧版适配不同，详见源码 README。

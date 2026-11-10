@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+- Python 服务及第三方依赖随平台 App 安装包提供，使用 Moss Core 内置 Python，启动不再创建虚拟环境或联网安装。
+
 ## 0.1.1
 
 - 同一签名 ZIP 支持 macOS、Windows 和 Linux，Python 依赖由 Host 在目标系统分别准备。

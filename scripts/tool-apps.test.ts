@@ -102,5 +102,6 @@ test('platform jobs include universal Apps and build native packages only on sup
   expect(selectApps(['--platform-packages', '--supported-platform', 'darwin-arm64']).map(app => app.manifest.id)).toContain('moss.computer-use')
   const linuxNative = selectApps(['--platform-packages', '--supported-platform', 'linux-x64']).map(app => app.manifest.id)
   expect(linuxNative).toContain('moss.openim')
+  for (const appId of ['moss.excel', 'moss.markitdown', 'moss.git']) expect(linuxNative).toContain(appId)
   expect(linuxNative).not.toContain('moss.computer-use')
 })

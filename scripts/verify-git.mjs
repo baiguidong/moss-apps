@@ -10,7 +10,7 @@ const repo = fileURLToPath(new URL('..', import.meta.url))
 const core = process.env.MOSS_CORE_ROOT || path.resolve(repo, '../moss')
 const definition = JSON.parse(await fs.readFile(path.join(repo, 'tool-apps/git/app.json'), 'utf8'))
 const output = path.join(repo, 'artifacts', definition.id, definition.version)
-const archive = path.join(output, `${definition.id}-${definition.version}.zip`)
+const archive = path.join(output, `${definition.id}-${definition.version}-${process.platform}-${process.arch}.zip`)
 const previousIndex = process.argv.indexOf('--previous-archive')
 const previousArchive = previousIndex < 0 ? undefined : process.argv[previousIndex + 1]
 if (previousIndex >= 0 && !previousArchive) throw new Error('--previous-archive requires a ZIP path')
@@ -55,7 +55,7 @@ try {
   assert.equal(installed.manifest.hostApi, '^3.11.0')
   assert.deepEqual(host.enabledServers([]), {})
   let server = (await invoke('servers.list')).servers[0]
-  assert.equal(server.config.command, 'python3')
+  assert.equal(server.config.command, 'node')
   assert.deepEqual(server.config.python, definition.mcpServers.git.python)
   assert.deepEqual(server.config.args, definition.mcpServers.git.args)
   if (previousArchive) {
