@@ -1,3 +1,7 @@
+## 0.2.7
+
+- Rebuild against Moss Core 0.1.23 and refresh the shared appearance/runtime snapshot.
+
 ## 0.2.6
 
 - 同步 Moss Core 外观设置、字体和主题变量。

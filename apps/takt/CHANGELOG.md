@@ -1,3 +1,7 @@
+## 0.3.10
+
+- Rebuild against Moss Core 0.1.23 and refresh the shared appearance/runtime snapshot.
+
 # 更新记录
 
 ## 0.3.9

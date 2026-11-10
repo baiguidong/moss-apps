@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.workflow",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "displayName": "工作流",
   "category": "automation",
   "keywords": [

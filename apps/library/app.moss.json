@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.library",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "displayName": "知识库",
   "category": "knowledge",
   "keywords": [
@@ -31,7 +31,9 @@
     "runtime": "node",
     "apiVersion": 1,
     "lifecycle": "persistent",
-    "configuration": { "schema": "schemas/config.json" },
+    "configuration": {
+      "schema": "schemas/config.json"
+    },
     "actions": [
       {
         "name": "collections.list",

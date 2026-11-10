@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.memory",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "displayName": "记忆",
   "category": "ai",
   "keywords": [
