@@ -163,7 +163,7 @@ for (const theme of ['light', 'dark']) test(`${theme} appearance and responsive 
   await page.screenshot({ path: path.join(directory, `http-${theme}-narrow.png`) })
   expect(errors).toEqual([])
 })
-test('host errors remain visible and appearance failure falls back without clearing inputs', async ({ page }) => {
+test('host errors remain visible and appearance failure preserves the last style without clearing inputs', async ({ page }) => {
   await setup(page)
   await page.getByRole('textbox', { name: '请求地址' }).fill(`${target}/echo`)
   await page.evaluate(() => { (window.mossApp as any).fail = true; (window.mossApp as any).update('dark', 'dot-theme') })
@@ -172,7 +172,7 @@ test('host errors remain visible and appearance failure falls back without clear
   await expect(page.getByRole('alert')).toContainText('暂时无法连接本地服务')
   await expect(page.getByRole('textbox', { name: '响应正文' })).toHaveCount(0)
   await page.evaluate(() => { window.mossApp!.app.getInfo = async () => { throw new Error('unavailable') }; window.dispatchEvent(new Event('focus')) })
-  await expect(page.locator('html')).toHaveAttribute('data-background-style', 'grid-theme')
+  await expect(page.locator('html')).toHaveAttribute('data-background-style', 'dot-theme')
   await expect(page.getByRole('textbox', { name: '请求地址' })).toHaveValue(`${target}/echo`)
 })
 test('ordinary browser remains usable for editing and does not fake network responses', async ({ page }) => {

@@ -18,7 +18,9 @@ export function syncAppearance() {
       const value = info?.appearance as { themeMode?: string; cssThemeId?: string } | undefined
       mode = ['light', 'dark', 'system'].includes(value?.themeMode || '') ? value!.themeMode! : 'system'
       background = ['default', 'grid-theme', 'dot-theme', 'gradient-theme'].includes(value?.cssThemeId || '') ? value!.cssThemeId! : 'default'
-    } catch { mode = 'system'; background = 'default' }
+    } catch {
+      // Keep the last known Core appearance when a transient host refresh fails.
+    }
     finally {
       pending = false; apply()
       if (again && !disposed) { again = false; void refreshAppearance() }
