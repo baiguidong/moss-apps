@@ -17,10 +17,11 @@ test('scaffold builds a backend without a UI, preserves existing files and runs 
     // Exercise the running SDK supplied to the scaffold, independently of a
     // source repository checkout. Moss normally creates these links through
     // its developer catalog export.
-    const sdkSource = fileURLToPath(new URL('../../../vendor/moss-core/packages/app-sdk', import.meta.url))
-    const contractsSource = fileURLToPath(new URL('../../../vendor/moss-core/packages/host-contracts', import.meta.url))
     const appsRepo = fileURLToPath(new URL('../../../', import.meta.url))
     const mossRepo = path.resolve(appsRepo, '../moss')
+    const sdkRoot = await fs.access(path.join(appsRepo, '.moss-sdk/packages/app-sdk')).then(() => path.join(appsRepo, '.moss-sdk/packages')).catch(() => path.join(appsRepo, 'vendor/moss-core/packages'))
+    const sdkSource = path.join(sdkRoot, 'app-sdk')
+    const contractsSource = path.join(sdkRoot, 'host-contracts')
     await fs.mkdir(path.join(root, '.moss-sdk/packages'), { recursive: true })
     const sdkFilter = source => !source.split(path.sep).includes('node_modules')
     await fs.cp(sdkSource, path.join(root, '.moss-sdk/packages/app-sdk'), { recursive: true, filter: sdkFilter })

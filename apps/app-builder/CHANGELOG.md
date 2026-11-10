@@ -1,3 +1,7 @@
+## 0.1.12
+
+- Rebuild against Moss Core 0.1.25 and fix source rebuilds to use the supplied SDK snapshot.
+
 ## 0.1.11
 
 - Rebuild against Moss Core 0.1.25 and refresh the shared appearance/runtime snapshot.

@@ -3,6 +3,8 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
+import { existsSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { pathToFileURL } from 'node:url'
 import type { AppUiApi } from '@moss/app-sdk'
 import { send } from '../../src/http/lib/host'
@@ -10,7 +12,10 @@ import { emptyRequest } from '../../src/http/contracts'
 import { createTestServer } from './fixtures.mjs'
 import manifest from '../../app.moss.json'
 
-const core = path.resolve(process.env.MOSS_CORE_ROOT || '../../vendor/moss-core')
+const sourceRoot = path.resolve(fileURLToPath(new URL('../../../../', import.meta.url)))
+const core = process.env.MOSS_CORE_ROOT || (existsSync(path.join(sourceRoot, '.moss-sdk/packages/app-runtime/src/index.mjs'))
+  ? path.join(sourceRoot, '.moss-sdk')
+  : path.join(sourceRoot, 'vendor/moss-core'))
 const { AppRuntimeHost, writePackageChecksums, defaultInstanceId } = await import(pathToFileURL(path.join(core, 'packages/app-runtime/src/index.mjs')).href)
 const appId = 'moss.devtools', instanceId = defaultInstanceId(appId)
 const deferred = () => { let resolve!: () => void; const promise = new Promise<void>(r => { resolve = r }); return { promise, resolve } }
