@@ -12,7 +12,7 @@ import "@/styles.css";
 function applyAppearance(appearance: MossAppearance | null | undefined, prefersDark: boolean) {
   const theme = resolvedTheme(appearance, prefersDark);
   document.documentElement.dataset.theme = theme;
-  document.documentElement.dataset.cssTheme = appearanceCssThemeId(appearance);
+  document.documentElement.dataset.backgroundStyle = appearanceCssThemeId(appearance);
   document.documentElement.style.colorScheme = theme;
 }
 

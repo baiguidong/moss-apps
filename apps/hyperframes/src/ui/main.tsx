@@ -58,7 +58,7 @@ function useTheme() {
       try {
         const info = await window.mossApp?.app.getInfo()
         if (disposed) return
-        mode = info?.appearance?.themeMode || 'system'; backgroundStyle = typeof info?.appearance?.cssThemeId === 'string' ? info.appearance.cssThemeId : 'default'; apply()
+        mode = info?.appearance?.themeMode || 'system'; const id = info?.appearance?.cssThemeId; backgroundStyle = ['default', 'grid-theme', 'dot-theme', 'gradient-theme', 'takt-theme'].includes(id || '') ? id! : 'default'; apply()
       } catch { if (!disposed) apply() }
     }
     apply(); void sync()

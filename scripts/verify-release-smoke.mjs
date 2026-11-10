@@ -34,7 +34,10 @@ try {
   invoke('bun', ['install', '--frozen-lockfile'])
   const env = { MOSS_APP_SIGNING_PRIVATE_KEY: '', MOSS_APP_SIGNING_PRIVATE_KEY_FILE: privateFile, MOSS_APP_SIGNING_KEY_ID: 'release-1', GITHUB_REPOSITORY: 'test/apps' }
   invoke('node', ['scripts/package-app.mjs', '--app', 'moss.drawio', '--require-signature'], root, env)
-  invoke('node', ['scripts/verify-source-package.mjs', '--app', 'moss.drawio', '--rebuild', '--require-signature'], root, env)
+  // Declarative MCP Apps have no editable source attachment; runtime and
+  // signature validation still run, while source rebuild is reserved for
+  // ordinary Apps.
+  invoke('node', ['scripts/verify-source-package.mjs', '--app', 'moss.drawio', '--require-signature'], root, env)
   await fs.writeFile(path.join(root, 'artifacts/check-publication.mjs'), `
     import { execFileSync } from 'node:child_process';
     import { selectApps, repoRoot } from '../scripts/lib.mjs';
@@ -43,7 +46,7 @@ try {
     const sha = execFileSync('git', ['rev-parse','HEAD'], {encoding:'utf8'}).trim();
     const files = await collectReleaseAssets(app, repoRoot + '/artifacts/moss.drawio/' + app.manifest.version, sha, 'test/apps');
     if (files.size !== 3) throw new Error('Incomplete assets');
-    console.log('Signed MCP source archive and publication inputs verified offline');
+    console.log('Signed MCP configuration archive and publication inputs verified offline');
   `)
   invoke('node', ['artifacts/check-publication.mjs'], root, env)
 } finally { await fs.rm(root, { recursive: true, force: true }) }

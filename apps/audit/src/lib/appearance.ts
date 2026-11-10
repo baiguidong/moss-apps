@@ -1,6 +1,6 @@
 export function syncAppearance() {
   const media = matchMedia('(prefers-color-scheme: dark)')
-  let mode = 'system', background = 'grid-theme', disposed = false, pending = false, again = false
+  let mode = 'system', background = 'default', disposed = false, pending = false, again = false
   const apply = () => {
     if (disposed) return
     const theme = mode === 'system' ? (media.matches ? 'dark' : 'light') : mode
@@ -18,8 +18,8 @@ export function syncAppearance() {
       const info = await window.mossApp?.app.getInfo()
       const value = info?.appearance as { themeMode?: string; cssThemeId?: string } | undefined
       mode = ['light', 'dark', 'system'].includes(value?.themeMode || '') ? value!.themeMode! : 'system'
-      background = ['default', 'grid-theme', 'dot-theme', 'gradient-theme'].includes(value?.cssThemeId || '') ? value!.cssThemeId! : 'grid-theme'
-    } catch { mode = 'system'; background = 'grid-theme' }
+      background = ['default', 'grid-theme', 'dot-theme', 'gradient-theme'].includes(value?.cssThemeId || '') ? value!.cssThemeId! : 'default'
+    } catch { mode = 'system'; background = 'default' }
     finally {
       pending = false; apply()
       if (again && !disposed) { again = false; void refreshAppearance() }

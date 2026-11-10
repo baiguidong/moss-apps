@@ -2,7 +2,7 @@ import { test } from 'bun:test'
 import assert from 'node:assert/strict'
 import { createBuilderActions } from '../src/backend/actions.mjs'
 
-test('restored workspace keeps its pinned SDK and exposes the source root', async () => {
+test('restored workspace keeps its SDK snapshot metadata and exposes the source root', async () => {
   const methods = []
   const actions = createBuilderActions(async (_protocol, method) => {
     methods.push(method)

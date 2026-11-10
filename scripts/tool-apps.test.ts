@@ -48,6 +48,8 @@ test.each(['drawio', 'sequential-thinking', 'filesystem', 'git', 'markitdown', '
   try {
     const app = selectApps(['--app', `moss.${directory}`])[0]
     const spec = await exportAppSource(app, root)
+    expect(await fs.access(path.join(root, '.moss-sdk')).then(() => true, () => false)).toBe(true)
+    expect(await fs.access(path.join(root, 'vendor/moss-core')).then(() => true, () => false)).toBe(false)
     expect(spec.appRoot).toBe(`tool-apps/${directory}`)
     const pkg = JSON.parse(await fs.readFile(path.join(root, spec.appRoot, 'package.json'), 'utf8'))
     expect(pkg.scripts.build).toBe('node ../../scripts/build-tool-app.mjs')

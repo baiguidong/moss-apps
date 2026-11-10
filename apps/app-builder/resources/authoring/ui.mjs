@@ -8,7 +8,7 @@ const applyAppearance = () => {
   const mode = appearance.themeMode
   const theme = mode === 'dark' || mode === 'light' ? mode : media.matches ? 'dark' : 'light'
   document.documentElement.dataset.theme = theme
-  document.documentElement.dataset.backgroundStyle = appearance.cssThemeId || 'default'
+  document.documentElement.dataset.backgroundStyle = ['default', 'grid-theme', 'dot-theme', 'gradient-theme', 'takt-theme'].includes(appearance.cssThemeId) ? appearance.cssThemeId : 'default'
   document.documentElement.style.colorScheme = theme
 }
 const refreshAppearance = async () => {

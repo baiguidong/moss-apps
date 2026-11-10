@@ -24,7 +24,7 @@ spreadsheet_guide 返回完整参数。spreadsheet_create 提交任务，spreads
 实际数据、假设、计算和输出职责清晰；简单任务优先少量工作表，按需增加。用户指定的工作簿结构优先，不强制额外封面或审计页。
 公式计算必须成功，出现 #REF!、#VALUE!、循环依赖或不支持的函数时先修复，不以伪造缓存值交付。数值格式与单位相符，日期、百分比和货币不混淆。
 源数据的含义与历史数值保持不变；预测条件集中管理，汇总可追溯到明细。交付前核对合计、边界值、公式引用和图表数据。
-预览最多展示前 300 行、40 列；完整内容在 XLSX 中。需要云端 Google Sheets 或连接中的 Excel 时使用对应连接能力，不声称本地 XLSX 已上传或同步。
+交互表格预览支持排序、搜索、分页和列显隐，入口为 result.interactivePreview.resourceUri，已包含在 result.presentation 与 result.displayMarkdown 中。预览数据按体积限额载入，页面会显示受限范围；搜索和排序仅作用于载入数据，不修改 XLSX，也不能代替原生排版核验。完整内容在 XLSX 中。需要云端 Google Sheets 或连接中的 Excel 时使用对应连接能力，不声称本地 XLSX 已上传或同步。
 
 适配范围与原始插件版本见 [adaptation.md](references/adaptation.md)。
 

@@ -5,6 +5,8 @@ import path from 'node:path'
 import os from 'node:os'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
+import { fileURLToPath } from 'node:url'
+import { createRequire } from 'node:module'
 import { AppProcessSupervisor } from '@moss/app-runtime'
 import { scaffold } from '../resources/authoring/scaffold.mjs'
 
@@ -12,10 +14,39 @@ test('scaffold builds a backend without a UI, preserves existing files and runs 
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'builder-scaffold-'))
   const supervisor = new AppProcessSupervisor({ nodeExecutable: 'node', processesDir: path.join(root, 'processes') })
   try {
-    // Exercise the running SDK supplied to the scaffold, independently of a Core checkout.
-    const sdk = path.join(root, '.moss-sdk/packages/app-sdk/src')
-    await fs.mkdir(sdk, { recursive: true })
-    await fs.writeFile(path.join(sdk, 'index.mjs'), `export * from ${JSON.stringify(import.meta.resolve('@moss/app-sdk'))}\n`)
+    // Exercise the running SDK supplied to the scaffold, independently of a
+    // source repository checkout. Moss normally creates these links through
+    // its developer catalog export.
+    const sdkSource = fileURLToPath(new URL('../../../vendor/moss-core/packages/app-sdk', import.meta.url))
+    const contractsSource = fileURLToPath(new URL('../../../vendor/moss-core/packages/host-contracts', import.meta.url))
+    const appsRepo = fileURLToPath(new URL('../../../', import.meta.url))
+    const mossRepo = path.resolve(appsRepo, '../moss')
+    await fs.mkdir(path.join(root, '.moss-sdk/packages'), { recursive: true })
+    const sdkFilter = source => !source.split(path.sep).includes('node_modules')
+    await fs.cp(sdkSource, path.join(root, '.moss-sdk/packages/app-sdk'), { recursive: true, filter: sdkFilter })
+    await fs.cp(contractsSource, path.join(root, '.moss-sdk/packages/host-contracts'), { recursive: true, filter: sdkFilter })
+    await fs.mkdir(path.join(root, '.moss-sdk/node_modules'), { recursive: true })
+    const resolve = createRequire(path.join(mossRepo, 'package.json'))
+    const copied = new Set()
+    const copyDependency = async name => {
+      if (copied.has(name)) return
+      copied.add(name)
+      let resolved
+      try { resolved = resolve.resolve(`${name}/package.json`) } catch { resolved = resolve.resolve(name) }
+      let packageRoot = path.dirname(resolved), metadata
+      while (true) {
+        metadata = JSON.parse(await fs.readFile(path.join(packageRoot, 'package.json'), 'utf8'))
+        if (metadata.name === name) break
+        packageRoot = path.dirname(packageRoot)
+      }
+      const dependencyFilter = source => !path.relative(packageRoot, source).split(path.sep).includes('node_modules')
+      await fs.cp(packageRoot, path.join(root, '.moss-sdk/node_modules', name), { recursive: true, dereference: true, filter: dependencyFilter })
+      for (const dependency of Object.keys({ ...metadata.dependencies, ...metadata.optionalDependencies })) await copyDependency(dependency)
+    }
+    for (const name of ['ajv', 'proper-lockfile', 'semver']) await copyDependency(name)
+    await fs.mkdir(path.join(root, 'node_modules/@moss'), { recursive: true })
+    await fs.symlink(path.join(root, '.moss-sdk/packages/app-sdk'), path.join(root, 'node_modules/@moss/app-sdk'), 'dir')
+    await fs.symlink(path.join(root, '.moss-sdk/packages/host-contracts'), path.join(root, 'node_modules/@moss/host-contracts'), 'dir')
     const result = await scaffold({ dest: root, id: 'test.statistics', name: '文本统计测试' })
     assert.ok(result.files.includes('package-lock.json'))
     await assert.rejects(scaffold({ dest: root, id: 'test.statistics', name: '覆盖' }), /overwrite/)

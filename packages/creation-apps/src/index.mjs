@@ -71,10 +71,11 @@ export function creationEngine(engine, { scheme, title, tools }) {
 
       if(artifacts[previewIndex].kind==='html'&&(await fs.stat(artifacts[previewIndex].path)).size>2*1024**2)throw new Error('预览超过 2 MiB，请缩小内容或图片后重新生成')
       const resourceUri=sessionResourceUri(`${scheme}://works/${id}`,ctx.sessionId),downloads=artifacts.map((a,index)=>({name:a.name,resourceUri:sessionResourceUri(`${scheme}://files/${id}/${index}`,ctx.sessionId),kind:a.kind}))
+      const interactivePreview = downloads.find((_, index) => artifacts[index].purpose === 'interactive-preview')
       const display=artifacts[previewIndex].kind==='html'?'```moss-visualization\n'+JSON.stringify({resource_uri:resourceUri,title:name})+'\n```':`[${name.replace(/[\[\]]/g,'')}](${resourceUri})`
-      return {...output,artifacts,result:{...output.result,title:name,workId,version,parentId:input.parentId||null,previewIndex,resourceUri,downloads,
+      return {...output,artifacts,result:{...output.result,title:name,workId,version,parentId:input.parentId||null,previewIndex,resourceUri,downloads,...(interactivePreview?{interactivePreview}:{}),
         presentation:{items:[{resource_uri:resourceUri,title:name,role:'primary'},
-          ...downloads.flatMap((file,index)=>index!==previewIndex&&file.kind!=='json'&&!artifacts[index].purpose&&file.kind!=='html'?[{resource_uri:file.resourceUri,title:file.name,role:'supporting'}]:[])],mode:'auto'},displayMarkdown:display}}
+          ...downloads.flatMap((file,index)=>index!==previewIndex&&(artifacts[index].purpose==='interactive-preview'||file.kind!=='json'&&!artifacts[index].purpose&&file.kind!=='html')?[{resource_uri:file.resourceUri,title:file.name,role:'supporting'}]:[])],mode:'auto'},displayMarkdown:display+(interactivePreview?`\n\n[交互表格预览](${interactivePreview.resourceUri})`:'')}}
     },
   }
 }

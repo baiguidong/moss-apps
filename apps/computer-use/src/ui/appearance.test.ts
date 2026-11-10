@@ -46,7 +46,7 @@ test('Host theme overrides OS and appearance events update all background preset
 test('system mode follows OS changes and validates unknown background values', async () => {
   stop = syncAppearance(api); await flush()
   hostEvent?.({ themeMode: 'system', cssThemeId: 'invalid' })
-  expect(root.dataset).toEqual({ theme: 'dark', backgroundStyle: 'grid-theme' })
+  expect(root.dataset).toEqual({ theme: 'dark', backgroundStyle: 'default' })
   media.matches = false; media.dispatchEvent(new Event('change'))
   expect(root.dataset.theme).toBe('light')
 })

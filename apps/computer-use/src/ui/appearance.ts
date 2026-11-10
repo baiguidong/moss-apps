@@ -12,7 +12,7 @@ export function syncAppearance(api: AppUiApi | undefined = window.mossApp) {
     const background = String(appearance.cssThemeId || '')
     const root = document.documentElement
     root.dataset.theme = theme
-    root.dataset.backgroundStyle = ['default', 'grid-theme', 'dot-theme', 'gradient-theme'].includes(background) ? background : 'grid-theme'
+    root.dataset.backgroundStyle = ['default', 'grid-theme', 'dot-theme', 'gradient-theme'].includes(background) ? background : 'default'
     root.style.colorScheme = theme
   }
   const refresh = async () => {

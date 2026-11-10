@@ -7,6 +7,8 @@ import { createHash } from 'node:crypto'
 const appsRepo = fileURLToPath(new URL('../../..', import.meta.url))
 const core = path.resolve(process.env.MOSS_CORE_ROOT || path.join(appsRepo, '../moss'))
 const vendor = path.join(appsRepo, 'vendor/moss-core')
+const shared = path.join(appsRepo, '.moss-sdk')
+const snapshotRoot = await fs.stat(path.join(shared, 'packages/app-sdk')).then(() => shared).catch(() => vendor)
 async function snapshot(root) {
   const hash = createHash('sha256')
   async function visit(source) {
@@ -24,7 +26,7 @@ async function snapshot(root) {
 const provenanceFile = new URL('../assets/core-sdk-provenance.json', import.meta.url)
 if (process.argv.includes('--check')) {
   const provenance = JSON.parse(await fs.readFile(provenanceFile, 'utf8'))
-  if (await snapshot(vendor) !== provenance.snapshotSha256) throw new Error('The vendored SDK differs from the recorded Core snapshot. Run scripts/sync-core-sdk.mjs before building.')
+  if (await snapshot(snapshotRoot) !== provenance.snapshotSha256) throw new Error('The shared SDK differs from the recorded Core snapshot. Refresh the Moss SDK before building.')
   console.log(`SDK snapshot verified: ${provenance.snapshotSha256}`)
 } else {
 async function sync(source, destination) {

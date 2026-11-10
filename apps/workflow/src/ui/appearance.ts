@@ -1,7 +1,7 @@
 export function syncAppearance() {
   const media = matchMedia('(prefers-color-scheme: dark)')
   let mode = 'system',
-    background = 'grid-theme',
+    background = 'default',
     disposed = false,
     pending = false,
     again = false
@@ -36,10 +36,10 @@ export function syncAppearance() {
         'gradient-theme',
       ].includes(value?.cssThemeId || '')
         ? value!.cssThemeId!
-        : 'grid-theme'
+        : 'default'
     } catch {
       mode = 'system'
-      background = 'grid-theme'
+      background = 'default'
     } finally {
       pending = false
       apply()

@@ -3,13 +3,33 @@ import path from 'node:path'
 import os from 'node:os'
 import { pathToFileURL } from 'node:url'
 import { unzipSync } from 'fflate'
-import { copySourceTree, validateSourcePackage, sourcePath, runtimeFileList, restoreSourceModes } from '../vendor/moss-core/packages/app-runtime/src/packages/source.mjs'
+import { copySourceTree, validateSourcePackage, sourcePath, runtimeFileList, restoreSourceModes, sourceFileList, excludeSourceEntry, SHARED_SDK_WORKSPACES } from '../vendor/moss-core/packages/app-runtime/src/packages/source.mjs'
 import { validateAppPackage, DEFAULT_PACKAGE_LIMITS } from '../vendor/moss-core/packages/app-runtime/src/packages/index.mjs'
 import { verifyPackageRuntime } from '../vendor/moss-core/packages/app-runtime/src/packages/verify-runtime.mjs'
-import { repoRoot, selectApps, optionValue } from './lib.mjs'
+import { repoRoot, selectApps, optionValue, sha256Hex } from './lib.mjs'
 import { run } from './source-package.mjs'
 
-export async function verifySourceArchive(archive, { rebuild = false, requireSignature = false } = {}) {
+async function stageSharedSdk(workspace) {
+  const coreRoot = path.join(repoRoot, 'vendor/moss-core')
+  for (const [relative, source] of [
+    [SHARED_SDK_WORKSPACES[0], path.join(coreRoot, 'packages/app-sdk')],
+    [SHARED_SDK_WORKSPACES[1], path.join(coreRoot, 'packages/host-contracts')],
+    [SHARED_SDK_WORKSPACES[2], path.join(coreRoot, 'packages/app-runtime')],
+  ]) await copySourceTree(source, sourcePath(workspace, relative))
+}
+
+async function sharedSdkHash() {
+  const coreRoot = path.join(repoRoot, 'vendor/moss-core')
+  const files = []
+  for (const [relative, source] of [
+    [SHARED_SDK_WORKSPACES[0], path.join(coreRoot, 'packages/app-sdk')],
+    [SHARED_SDK_WORKSPACES[1], path.join(coreRoot, 'packages/host-contracts')],
+    [SHARED_SDK_WORKSPACES[2], path.join(coreRoot, 'packages/app-runtime')],
+  ]) for (const file of await sourceFileList(source, { filter: (name, entry) => entry.name !== 'node_modules' && !excludeSourceEntry(entry.name, name) })) files.push({ path: `${relative}/${file.path}`, size: file.size, sha256: file.sha256 })
+  return sha256Hex(Buffer.from(JSON.stringify(files)))
+}
+
+export async function verifySourceArchive(archive, { rebuild = false, requireSignature = false, requireSource = false } = {}) {
   const temp = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'moss-zip-source-')))
   const root = path.join(temp, 'package')
   try {
@@ -39,15 +59,23 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
     // Validate the signed target on publication hosts, which may use another OS.
     const manifest = JSON.parse(await fs.readFile(path.join(root, 'app.moss.json'), 'utf8'))
     const platform = manifest.platforms?.length === 1 ? manifest.platforms[0] : undefined
-    const pkg = await validateAppPackage(root, { platform, requireSource: true, requireTrustedPublisher: requireSignature, trustedPublishers })
-    const source = await validateSourcePackage(root, { required: true })
+    const pkg = await validateAppPackage(root, { platform, requireSource, requireTrustedPublisher: requireSignature, trustedPublishers })
+    const hasSource = await fs.access(path.join(root, 'source-manifest.json')).then(() => true, () => false)
+    if (requireSource && !hasSource) throw new Error('Archive does not contain the required editable source')
+    const source = hasSource ? await validateSourcePackage(root, { required: true }) : null
+    if (source?.descriptor.sdk?.sdkHash) {
+      const actualSdkHash = await sharedSdkHash()
+      if (source.descriptor.sdk.sdkHash !== actualSdkHash || (source.descriptor.sdk.coreHash && source.descriptor.sdk.coreHash !== actualSdkHash)) throw new Error('Source was built against a different Moss SDK/Core snapshot')
+    }
     const currentPlatform = `${process.platform}-${process.arch}`
     const canRun = !pkg.manifest.platforms?.length || pkg.manifest.platforms.includes(currentPlatform)
-    if (rebuild && !canRun) throw new Error(`Source rebuild requires a supported platform: ${pkg.manifest.platforms.join(', ')}; current ${currentPlatform}`)
+    if (rebuild && source && !canRun) throw new Error(`Source rebuild requires a supported platform: ${pkg.manifest.platforms.join(', ')}; current ${currentPlatform}`)
     const runtime = canRun ? await verifyPackageRuntime(root, { nodeExecutable: process.execPath }) : { backend: 'not-run-foreign-platform', currentPlatform }
-    if (rebuild) {
+    const rebuilt = Boolean(rebuild && source)
+    if (rebuilt) {
       const workspace = path.join(temp, 'workspace')
       await copySourceTree(source.root, workspace, { includeSdk: true })
+      await stageSharedSdk(workspace)
       await restoreSourceModes(workspace, source.descriptor)
       for (const phase of ['install', 'check', 'test', 'build']) {
         const command = source.descriptor.commands[phase]
@@ -73,7 +101,7 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
         throw new Error(`ZIP source rebuild does not match shipped runtime files: ${[...changed, ...added].slice(0, 20).join(', ')}`)
       }
     }
-    return { appId: pkg.manifest.id, version: pkg.manifest.version, sourceHash: source.descriptor.sourceHash, platforms: pkg.manifest.platforms, publisherId: signature?.publisherId, keyId: signature?.keyId, origin: source.descriptor.origin, sdk: source.descriptor.sdk, rebuild, runtime }
+    return { appId: pkg.manifest.id, version: pkg.manifest.version, sourceHash: source?.descriptor.sourceHash || null, platforms: pkg.manifest.platforms, publisherId: signature?.publisherId, keyId: signature?.keyId, origin: source?.descriptor.origin || null, sdk: source?.descriptor.sdk || null, rebuild: rebuilt, runtime }
   } finally { await fs.rm(temp, { recursive: true, force: true }) }
 }
 

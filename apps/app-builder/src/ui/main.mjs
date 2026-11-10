@@ -212,7 +212,7 @@ function applyAppearance(value = appearance) {
   appearance = { ...appearance, ...value }
   const theme = appearance.themeMode === 'system' ? media.matches ? 'dark' : 'light' : appearance.themeMode
   document.documentElement.dataset.theme = theme
-  document.documentElement.dataset.backgroundStyle = appearance.cssThemeId || 'default'
+  document.documentElement.dataset.backgroundStyle = ['default', 'grid-theme', 'dot-theme', 'gradient-theme', 'takt-theme'].includes(appearance.cssThemeId) ? appearance.cssThemeId : 'default'
   document.documentElement.style.colorScheme = theme
 }
 const systemChanged = () => applyAppearance()

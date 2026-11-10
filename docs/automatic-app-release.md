@@ -5,7 +5,7 @@
 ## 实施清单
 
 - [x] 两类 App 共用应用发现、配置校验、版本比较和发布计划。
-- [x] 配置型 App 使用 Core 生成器，保留完整源码、依赖锁、签名及独立重建门禁。
+- [x] 配置型 App 使用共享 Core 生成器，只保留运行配置、资源、必要 runtime 和签名校验。
 - [x] 发布绑定源码提交，使用可重试的草稿；已发布版本不可覆盖。
 - [x] main 提交、每 6 小时检查和手动执行共用一个工作流；App 独立构建，最后统一更新市场。
 - [x] 本地验证版本边界、分页、失败重试、包重建和市场生成。
@@ -17,7 +17,7 @@
 | 普通 App | `apps/<name>/app.moss.json`、`package.json`、源码、资源、`marketplace.json` | 原有 App check/test/build |
 | 声明式工具包（MCP / CLI / Skills） | `tool-apps/<name>/app.json`、可选资源与技能、`marketplace.json`、`CHANGELOG.md` | 共用 `scripts/build-tool-app.mjs` 调用固定 Core 生成器 |
 
-配置型 App 不需要手写 package.json、构建脚本或 UI。导出源码包时自动补齐这些构建入口，随包携带生成器及锁定的 SDK/runtime 源码。运行内容仍是配置和资源，UI 与 MCP 进程生命周期由 Moss Core 提供。`source/` 中的构建代码不会作为 App Backend 执行，Core 要求它通过完整源码描述与摘要验证。
+配置型 App 不需要手写 package.json、构建脚本或 UI。打包时使用 Moss 共享 Core 生成器，ZIP 只包含定义、配置、资源和必要的 MCP runtime；SDK/Core 源码只在用户迭代普通 App 时由 Moss 临时提供。UI 与 MCP 进程生命周期由 Moss Core 提供。
 
 App 的版本就是发布意图，不根据代码差异自动提升版本。普通 App 同时更新 manifest 与 package.json；MCP App 更新 app.json。Draw.io 本次是 0.1.4，0.1.3 的本地产物保持原样。
 

@@ -9,7 +9,7 @@
     (() => {
       const theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
       document.documentElement.dataset.theme = theme
-      document.documentElement.dataset.backgroundStyle = 'grid-theme'
+      document.documentElement.dataset.backgroundStyle = 'default'
       document.documentElement.style.colorScheme = theme
     })()
   </script>
@@ -384,7 +384,7 @@
       const input = value && typeof value === 'object' ? value : {}
       return {
         themeMode: THEME_MODES.has(input.themeMode) ? input.themeMode : 'system',
-        cssThemeId: BACKGROUNDS.has(input.cssThemeId) ? input.cssThemeId : 'grid-theme',
+        cssThemeId: BACKGROUNDS.has(input.cssThemeId) ? input.cssThemeId : 'default',
       }
     }
 

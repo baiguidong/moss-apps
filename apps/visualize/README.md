@@ -1,6 +1,6 @@
 # 可视化
 
-`moss.visualize@0.1.2` 是在主会话中使用的后台 App，没有独立业务 UI。新版 Moss 从“常用”和应用列表“打开”进入同一通用详情页，展示 App 介绍、自然语言试用示例、技能说明、版本、启停和使用范围。页面由 Core 提供，App 在 manifest 的 `overview` 中声明介绍和示例。
+`moss.visualize@0.1.4` 是在主会话中使用的后台 App，没有独立业务 UI。新版 Moss 从“常用”和应用列表“打开”进入同一通用详情页，展示 App 介绍、自然语言试用示例、技能说明、版本、启停和使用范围。页面由 Core 提供，App 在 manifest 的 `overview` 中声明介绍和示例。
 
 默认全局常驻，工具直接进入模型初始工具集合，启用后不必在会话中选择 App。点击示例回到主会话并填入自然语言，保留已有草稿，不自动发送。详情页可切换全局按需 / 全局常驻 / 按会话选择；停用后仍可打开查看信息和重新启用。Core 的详情页更新需要重启 Moss 生效，已安装旧版 App 可通过本地 ZIP 更新示例内容。
 
@@ -17,3 +17,7 @@ App 携带全局 skill、运行说明和交互模板；`visualize_templates` 返
 验证：`bun run --cwd apps/visualize test`，`node scripts/package-app.mjs --app moss.visualize`；真实打包后端与生产版组件集成验证：在 Moss 的 `ui` 目录运行 `bun run test:visualization`。此验证使用浏览器和测试传输，不冒充真实模型完整会话。
 
 技能保留 Codex visualize 的主要创作规范，使用中文并适配 Moss 接口；并非逐字翻译。能力差异明确记录在 skill 的 references/adaptation.md。
+
+折线图与散点图使用 uPlot 1.6.32：拖动选择 X 轴区间、重置缩放、悬停查看数值，系列开关与筛选状态可在消息和右侧同步。图表运行代码及 MIT 许可内嵌到 HTML，无 CDN 或独立服务。其他图表继续使用现有 SVG 渲染。
+
+浏览器验证：`bun run --cwd apps/visualize test:preview`（需要 Playwright Chromium）；覆盖离线交互、状态同步、浅深色及窄窗口。

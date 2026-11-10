@@ -140,11 +140,15 @@ async function packageApp(app, options) {
     if (crossPlatform) await installTargetSharp(packageRoot, platform, temporary)
   }
 
-  const sourceDescriptor = await attachSourcePackage(packageRoot, frozenSource, { appRoot: spec.appRoot, origin: spec.origin, sdk: spec.sdk })
+  // Declarative MCP/connector Apps are complete after their generated output
+  // is copied. Their editable definitions live in the repository and do not
+  // belong in the runtime ZIP. Ordinary Apps keep their own source, while the
+  // shared Moss SDK/Core snapshot is omitted by attachSourcePackage.
+  const sourceDescriptor = app.kind === 'tool' ? null : await attachSourcePackage(packageRoot, frozenSource, { appRoot: spec.appRoot, origin: spec.origin, sdk: spec.sdk })
   const verification = crossPlatform
     ? { backend: 'cross-platform-runtime-check-required' }
     : await verifyPackageRuntime(packageRoot, { nodeExecutable: process.execPath })
-  await validateSourcePackage(packageRoot, { required: true })
+  if (sourceDescriptor) await validateSourcePackage(packageRoot, { required: true })
   const checksums = await createChecksums(packageRoot)
   await writeJson(path.join(packageRoot, 'checksums.json'), checksums)
 
@@ -188,7 +192,7 @@ async function packageApp(app, options) {
   const zipPath = path.join(outputDir, fileName)
   const checksum = sha256Hex(archive)
   await fsp.writeFile(zipPath, archive)
-  await verifySourceArchive(zipPath, { requireSignature: options.requireSignature })
+  await verifySourceArchive(zipPath, { requireSignature: options.requireSignature, requireSource: Boolean(sourceDescriptor) })
   await fsp.writeFile(path.join(outputDir, `${stem}.sha256`), `${checksum}  ${fileName}\n`, 'utf8')
 
   const repository = String(process.env.GITHUB_REPOSITORY || 'baiguidong/moss-apps').trim()
@@ -219,7 +223,7 @@ async function packageApp(app, options) {
       publishedAt: process.env.MOSS_APP_PUBLISHED_AT || execFileSync('git', ['show', '-s', '--format=%cI', spec.origin.commit], { cwd: repoRoot, encoding: 'utf8' }).trim(),
       releaseNotes: releaseNotesForVersion(app.root, manifest.version),
       artifact: {
-        sourceIncluded: true, sourceFormat: 1, sourceHash: sourceDescriptor.sourceHash,
+        sourceIncluded: Boolean(sourceDescriptor), ...(sourceDescriptor ? { sourceFormat: 1, sourceHash: sourceDescriptor.sourceHash } : {}),
         fileName,
         downloadUrl: `https://github.com/${repository}/releases/download/${tag}/${fileName}`,
         sha256: checksum,
@@ -236,7 +240,7 @@ async function packageApp(app, options) {
   }
   const releasePath = path.join(outputDir, `${stem}.release.json`)
   await writeJson(releasePath, release)
-  console.log(JSON.stringify({ appId: manifest.id, version: manifest.version, zipPath, releasePath, sha256: checksum, sourceHash: sourceDescriptor.sourceHash, verification }))
+  console.log(JSON.stringify({ appId: manifest.id, version: manifest.version, zipPath, releasePath, sha256: checksum, sourceHash: sourceDescriptor?.sourceHash || null, verification }))
   return release
   } finally { await fsp.rm(temporary, { recursive: true, force: true }) }
 }

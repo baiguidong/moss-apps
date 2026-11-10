@@ -96,7 +96,7 @@ artifacts/<app-id>/<version>/<app-id>-<version>.release.json
 - `https://baiguidong.github.io/moss-apps/v1/index.json`
 - `https://baiguidong.github.io/moss-apps/v1/apps/<app-id>.json`
 
-后续所有新发布版本必须在同一个 ZIP 内携带与运行产物对应的完整、可重建源码，包括构建脚本、依赖锁文件、必要的 workspace 文件和固定版本 SDK。缺源码、只有编译产物或依赖本机仓库才能构建的包，不符合发布要求。具体规则、包结构、CI 门禁和 Core 接入说明见 [App 源码随包发布规范](docs/app-source-packaging.md)。
+后续普通 App 版本必须在同一个 ZIP 内携带与运行产物对应的完整、可重建自有源码，包括构建脚本、依赖锁文件和必要的 workspace 文件；Moss 在迭代或重建时临时提供共享 SDK/Core。配置型 MCP/connector App 只携带运行所需配置、资源和必要 runtime。具体规则、包结构、CI 门禁和 Core 接入说明见 [App 源码随包发布规范](docs/app-source-packaging.md)。
 
 App Builder 创建或修改的 App，每次本机安装也必须在该安装版本目录内携带完整源码，采用相同的 `source/` 与 `source-manifest.json` 格式；不以发布市场或导出 ZIP 为前提。源码不能只保存在原会话工作区、构建缓存或临时快照中，删除这些目录、重启或换会话后，仍须能从已安装版本恢复工程继续迭代。本地版本按本地构建记录和 checksums 校验，不冒用市场发布者签名。
 
@@ -172,7 +172,7 @@ App 声明页面名称和路由，导航位置由 Moss 决定，不再声明 `co
 
 发布 ZIP 根目录直接包含 `app.moss.json`，不额外嵌套整个 App 目录。运行产物位于 `dist/` 等原有目录；可重建工程统一放入 `source/`，由根目录 `source-manifest.json` 记录入口、版本、构建环境与摘要，具体格式见 [源码发布规范](docs/app-source-packaging.md)。源码、测试、构建配置和开发依赖的声明及锁文件必须随包；完整 `node_modules`、缓存、凭据、私钥和用户实例数据不得进入源码目录。
 
-Backend 应优先编译为独立 JavaScript；无法内联的原生模块及其运行时依赖可以放在 `dist/backend/node_modules`，但不得复制完整开发依赖树。运行产物必须自行包含所需 SDK 和其他运行依赖，不得依赖包内 `source/`、开发工作区或全局安装的模块才能启动。
+Backend 应优先编译为独立 JavaScript；无法内联的原生模块及其运行时依赖可以放在 `dist/backend/node_modules`，但不得复制完整开发依赖树。运行产物必须自行包含所需协议客户端和其他运行依赖，不得依赖包内 `source/`、共享 SDK 源码、开发工作区或全局安装的模块才能启动。
 
 ## Moss 安装
 
@@ -193,7 +193,7 @@ App ZIP 与 Moss 桌面安装包分开。纯 JavaScript App 可以用同一个�
 
 ## SDK
 
-SDK 源码只在 Moss Core 的 `packages/app-sdk` 维护。本仓库通过 Git 子模块 `vendor/moss-core` 固定引用 Core 提交，将其中的 SDK 纳入 Bun workspace；App 和构建脚本统一通过 `@moss/app-sdk` 包导入，不手工维护另一套 SDK。发布时由打包流程从固定提交自动导出所需 SDK、host-contracts 及本地构建依赖到源码快照，供该版本独立重建；这份不可变发布快照不是新的 SDK 维护分支。
+SDK 源码只在 Moss Core 的 `packages/app-sdk` 维护。本仓库通过 Git 子模块 `vendor/moss-core` 固定构建所用的 Core 提交，将其中的 SDK 纳入 Bun workspace；App 和构建脚本统一通过 `@moss/app-sdk` 包导入，不手工维护另一套 SDK。发布时由打包流程记录 SDK/Core 的版本、提交和 hash；源码 ZIP 不复制 SDK，Moss 在用户迭代或重建时临时导出共享快照。
 
 当前开发快照包含 Host API 3.16；各 App 按自身功能声明最低 Host 版本。正式发布须将已推送的 Core 提交固定到子模块；Tasks/Execution 与 MCP 的契约由同一 Core 提交中的 `packages/host-contracts` 提供。UI 使用 `@moss/app-sdk/ui` 自动绑定当前 App，普通调用不传实例 ID。通用文件、截图和外链使用 `moss.platform/v1`，审计中心使用通用 `moss.session-source/v1` 和 `moss.notifications/v1`。接入方式见 [SDK 接入说明](docs/app-sdk.md)。SDK 会忽略 Manifest 的未知字段；本仓库的构建与发布校验仍会在规范化前拒绝 `backend.targets`、`backend.serverOwnerScope` 和 `moss.remote/v1` 声明。
 
@@ -203,7 +203,7 @@ SDK 源码只在 Moss Core 的 `packages/app-sdk` 维护。本仓库通过 Git �
 
 升级 SDK 时，在 Core 提交修改并推送到远端后更新 `vendor/moss-core` 指向的提交并运行 `bun install`，然后执行本仓库的校验、类型检查、测试和构建。提交子模块引用与锁文件即可，不复制或单独修改 SDK 源码。未推送的 Core 提交只能在持有该提交的本地仓库中验证，CI 无法检出。
 
-SDK 会编入 App Backend；构建内容变化时应同步提升相应 App 的版本。未来发布 npm 包后，可以改为包版本依赖，App 的 import 无需改变。
+构建时需要的 SDK 协议客户端会被编译进 App Backend，或作为最小运行依赖放在 `dist/backend`；运行时不读取共享 SDK 源码。构建内容变化时应同步提升相应 App 的版本。未来发布 npm 包后，可以改为包版本依赖，App 的 import 无需改变。
 
 应用市场支持通过 `build-catalog.mjs --mirror-apps moss.library` 在目录同域托管指定 App 的签名 ZIP。构建目录时会验证原始 release 的大小与 SHA-256，只改分发地址，签名包和不可变 GitHub Release 保持原样。发布及手动目录部署使用同一配置；目前为知识库启用，以减少 GitHub 下载链路超时。
 

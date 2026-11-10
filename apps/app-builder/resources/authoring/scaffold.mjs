@@ -17,8 +17,8 @@ export async function scaffold({ dest, id, name }) {
     'package.json': json(pkg),
     'package-lock.json': json({ name: id, version: pkg.version, lockfileVersion: 3, requires: true, packages: { '': { name: id, version: pkg.version } } }),
     'schemas/text.json': json({ type: 'object', properties: { text: { type: 'string', maxLength: 100000 } }, required: ['text'], additionalProperties: false }),
-    'src/main.mjs': `import { AppBackendClient } from '../sdk/packages/app-sdk/src/index.mjs'\nconst backend = new AppBackendClient()\nbackend.registerAction('text_stats', async ({ text }) => {\n  if (typeof text !== 'string' || text.length > 100000) throw new Error('text must be a string of at most 100000 characters')\n  return { characters: [...text].length, lines: text ? text.split(/\\r\\n|\\r|\\n/).length : 0 }\n})\nbackend.start()\n`,
-    'build.mjs': `import fs from 'node:fs/promises'\nawait fs.mkdir('dist/backend', { recursive: true })\nawait fs.cp('.moss-sdk', 'dist/sdk', { recursive: true })\nawait fs.copyFile('src/main.mjs', 'dist/backend/main.mjs')\n`,
+    'src/main.mjs': `import { AppBackendClient } from '@moss/app-sdk'\nconst backend = new AppBackendClient()\nbackend.registerAction('text_stats', async ({ text }) => {\n  if (typeof text !== 'string' || text.length > 100000) throw new Error('text must be a string of at most 100000 characters')\n  return { characters: [...text].length, lines: text ? text.split(/\\r\\n|\\r|\\n/).length : 0 }\n})\nbackend.start()\n`,
+    'build.mjs': `import fs from 'node:fs/promises'\nimport { spawnSync } from 'node:child_process'\nawait fs.mkdir('dist/backend', { recursive: true })\nconst result = spawnSync('bun', ['build', 'src/main.mjs', '--target=node', '--format=esm', '--outfile=dist/backend/main.mjs'], { stdio: 'inherit' })\nif (result.error || result.status !== 0) throw result.error || new Error('Backend build failed')\n`,
   }
   // Preflight all targets before writing; exclusive writes also catch races.
   for (const file of Object.keys(files)) {

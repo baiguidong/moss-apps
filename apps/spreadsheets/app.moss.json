@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.spreadsheets",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "displayName": "表格",
   "category": "knowledge",
   "keywords": [
@@ -150,7 +150,7 @@
       {
         "id": "spreadsheet_status",
         "title": "查看任务",
-        "description": "按任务 id 查询状态、日志和产物；成功后返回工作表概况、文件引用及核验状态。交付前用 spreadsheet_verify 检查实际页图；展示使用 moss_present(result.presentation)，回复使用 result.displayMarkdown。",
+        "description": "按任务 id 查询状态、日志和产物；成功后返回工作表概况、文件引用及核验状态。交付前用 spreadsheet_verify 检查实际页图；展示使用 moss_present(result.presentation)，回复使用 result.displayMarkdown。 同时返回可排序、搜索、分页的交互表格预览链接 interactivePreview，操作仅改变预览。",
         "action": "tasks.get",
         "inputSchema": "schemas/id.json",
         "effect": "read"

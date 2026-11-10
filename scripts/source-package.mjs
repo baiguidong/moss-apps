@@ -3,7 +3,7 @@ import path from 'node:path'
 import os from 'node:os'
 import { execFileSync, spawnSync } from 'node:child_process'
 import { repoRoot, readJson, writeJson, sha256Hex } from './lib.mjs'
-import { copySourceTree, sourceFileList, inspectSourceProject } from '../vendor/moss-core/packages/app-runtime/src/packages/source.mjs'
+import { copySourceTree, sourceFileList, inspectSourceProject, SHARED_SDK_WORKSPACES } from '../vendor/moss-core/packages/app-runtime/src/packages/source.mjs'
 
 // Bun's text lockfile uses JSON with trailing commas, no executable expressions.
 export const parseLock = text => JSON.parse(text.replace(/,\s*([}\]])/g, '$1'))
@@ -64,7 +64,10 @@ export async function exportAppSource(app, destination, { release = false, platf
   const bunVersion = execFileSync('bun', ['--version'], { encoding: 'utf8' }).trim()
   if (rootPackage.packageManager !== `bun@${bunVersion}`) throw new Error(`Expected ${rootPackage.packageManager}, found bun@${bunVersion}`)
   const appRoot = path.relative(repoRoot, app.root).split(path.sep).join('/')
-  const localPaths = [appRoot, 'vendor/moss-core/packages/app-sdk', 'vendor/moss-core/packages/host-contracts']
+  // The source workspace refers to Moss's shared SDK snapshot. The snapshot is
+  // staged only in this temporary build directory and is filtered out before
+  // the App source is attached to the package.
+  const localPaths = [appRoot, ...SHARED_SDK_WORKSPACES]
   const appPackage = app.kind === 'tool' ? {
     name: `@moss/config-${app.directoryName}`, version: app.manifest.version, private: true, type: 'module',
     scripts: { check: 'node ../../scripts/build-tool-app.mjs --check', build: 'node ../../scripts/build-tool-app.mjs' },
@@ -86,22 +89,22 @@ export async function exportAppSource(app, destination, { release = false, platf
     localPaths.push(local.relative)
     pending.push(...Object.keys(dependencies(local.pkg)))
   }
-  if (appDependencies['@moss/app-runtime']) localPaths.push('vendor/moss-core/packages/app-runtime')
-  const appFiles = await sourceFileList(app.root, { filter: (name, entry) => !['node_modules', 'dist', '.git'].includes(entry.name) })
-  for (const file of appFiles.filter(file => /\.[cm]?[jt]sx?$/.test(file.path))) {
-    if ((await fs.readFile(path.join(app.root, file.path), 'utf8')).includes('packages/app-runtime/')) {
-      if (!localPaths.includes('vendor/moss-core/packages/app-runtime')) localPaths.push('vendor/moss-core/packages/app-runtime')
-      break
-    }
-  }
   const coreRoot = path.join(repoRoot, 'vendor/moss-core')
+  const sdkSources = new Map([
+    [SHARED_SDK_WORKSPACES[0], path.join(coreRoot, 'packages/app-sdk')],
+    [SHARED_SDK_WORKSPACES[1], path.join(coreRoot, 'packages/host-contracts')],
+    [SHARED_SDK_WORKSPACES[2], path.join(coreRoot, 'packages/app-runtime')],
+  ])
   const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repoRoot, encoding: 'utf8' }).trim()
   const coreCommit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: coreRoot, encoding: 'utf8' }).trim()
   const coreDirty = Boolean(execFileSync('git', ['status', '--porcelain', '--', 'packages'], { cwd: coreRoot, encoding: 'utf8' }).trim())
   const dirty = Boolean(execFileSync('git', ['status', '--porcelain'], { cwd: repoRoot, encoding: 'utf8' }).trim())
   if (release && (dirty || coreDirty)) throw new Error('Signed releases require committed App source and a clean pinned Core submodule; local packages record dirty content hashes.')
   await fs.mkdir(destination, { recursive: true })
-  for (const relative of localPaths) await copySourceTree(path.join(repoRoot, relative), path.join(destination, relative))
+  for (const relative of localPaths) {
+    const source = sdkSources.get(relative) || path.join(repoRoot, relative)
+    await copySourceTree(source, path.join(destination, relative))
+  }
   if (app.kind === 'tool') {
     await writeJson(path.join(destination, appRoot, 'package.json'), appPackage)
     await writeJson(path.join(destination, appRoot, 'app.moss.json'), app.manifest)
@@ -109,19 +112,21 @@ export async function exportAppSource(app, destination, { release = false, platf
     await fs.copyFile(path.join(repoRoot, 'scripts/build-tool-app.mjs'), path.join(destination, 'scripts/build-tool-app.mjs'))
     await fs.copyFile(path.join(repoRoot, 'scripts/npm-command.mjs'), path.join(destination, 'scripts/npm-command.mjs'))
   }
-  for (const name of ['LICENSE', 'LICENSE.md']) {
-    try { await fs.copyFile(path.join(coreRoot, name), path.join(destination, 'vendor/moss-core', name)) }
-    catch (error) { if (error.code !== 'ENOENT') throw error }
-  }
   const workspace = { name: rootPackage.name, version: rootPackage.version, private: true, type: 'module', packageManager: rootPackage.packageManager,
     workspaces: localPaths, devDependencies: rootPackage.devDependencies }
   await writeJson(path.join(destination, 'package.json'), workspace)
   const workspaces = { '': workspace }
-  for (const relative of localPaths) workspaces[relative] = readJson(path.join(destination, relative, 'package.json'))
+  for (const relative of localPaths) {
+    // SDK workspaces are present in the temporary build source. They are
+    // intentionally absent from the published source tree and are restored by
+    // Moss before a user build.
+    const packagePath = path.join(destination, relative, 'package.json')
+    workspaces[relative] = readJson(packagePath)
+  }
   const lock = focusedLock(parseLock(await fs.readFile(path.join(repoRoot, 'bun.lock'), 'utf8')), workspaces)
   await writeJson(path.join(destination, 'bun.lock'), lock)
   const rebuildCommands = ['check', 'test', 'build'].filter(name => appPackage.scripts?.[name]).map(name => `\`bun run ${name}\``).join(', ')
-  await fs.writeFile(path.join(destination, 'README.md'), `# ${app.manifest.id} source\n\nApp edit root: ${appRoot}\n\nToolchain: ${workspace.packageManager}; Node ${process.versions.node}.\n\nFrom this directory run \`bun install --frozen-lockfile\`, then in \`${appRoot}\` run ${rebuildCommands}.\n\nDesktop/Host/browser integration scripts may require a complete Core checkout, browser binaries or explicit test configuration. Those external integrations are separate from the included business tests. Dependencies are downloaded from the pinned lockfile; no original workspace or source cache is needed.\n`)
+  await fs.writeFile(path.join(destination, 'README.md'), `# ${app.manifest.id} source\n\nApp edit root: ${appRoot}\n\nToolchain: ${workspace.packageManager}; Node ${process.versions.node}.\n\nMoss supplies the shared SDK/Core snapshot in .moss-sdk when this source is opened for editing or rebuilding. From the prepared workspace run \`bun install --frozen-lockfile\`, then in \`${appRoot}\` run ${rebuildCommands}.\n\nDesktop/Host/browser integration scripts may require a complete Core checkout, browser binaries or explicit test configuration. Those external integrations are separate from the included business tests. Dependencies are downloaded from the pinned lockfile; no original workspace or source cache is needed.\n`)
   if (platform) {
     if (!app.manifest.platforms?.includes(platform)) throw new Error(`App does not declare build target ${platform}`)
     // Keep the copied source manifest: an older SDK normalizer may omit newer Host fields.
@@ -129,7 +134,13 @@ export async function exportAppSource(app, destination, { release = false, platf
     await writeJson(manifestPath, { ...readJson(manifestPath), platforms: [platform] })
   }
   const spec = await inspectSourceProject(destination, { appRoot })
-  const sdkFiles = await sourceFileList(path.join(destination, 'vendor/moss-core'))
+  const sdkFiles = []
+  for (const relative of SHARED_SDK_WORKSPACES) {
+    for (const file of await sourceFileList(path.join(destination, relative))) sdkFiles.push({ path: `${relative}/${file.path}`, size: file.size, sha256: file.sha256 })
+  }
+  const sdkHash = sha256Hex(Buffer.from(JSON.stringify(sdkFiles)))
+  const sdkVersion = readJson(path.join(coreRoot, 'packages/app-sdk/package.json')).version
+  const coreVersion = readJson(path.join(coreRoot, 'packages/app-runtime/package.json')).version
   return { ...spec, origin: { kind: 'repository', repository: app.marketplace.repository, commit, appRoot, dirty, ...(platform ? { platform } : {}) },
-    sdk: { coreCommit, dirty: coreDirty, path: 'vendor/moss-core/packages', sha256: sha256Hex(Buffer.from(JSON.stringify(sdkFiles))) } }
+    sdk: { provider: 'moss', sdkVersion, coreVersion, coreCommit, dirty: coreDirty, path: '.moss-sdk/packages', sdkHash, coreHash: sdkHash } }
 }

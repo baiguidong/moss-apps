@@ -3,11 +3,14 @@ import path from 'node:path'
 import os from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { npmInvocation } from './npm-command.mjs'
-import { ensureSafeRelativePath } from '../vendor/moss-core/packages/app-sdk/src/schemas/index.mjs'
-import { createToolAppManifest, generateToolApp } from '../vendor/moss-core/packages/app-runtime/src/packages/generate-tool-app.mjs'
+import { pathToFileURL } from 'node:url'
 
 // The same script ships in each source snapshot. No per-App executable code.
 const root = process.cwd()
+const sourceRoot = path.resolve(root, '../..')
+const coreRoot = await fs.stat(path.join(sourceRoot, '.moss-sdk')).then(() => path.join(sourceRoot, '.moss-sdk')).catch(() => path.join(sourceRoot, 'vendor/moss-core'))
+const { ensureSafeRelativePath } = await import(pathToFileURL(path.join(coreRoot, 'packages/app-sdk/src/schemas/index.mjs')))
+const { createToolAppManifest, generateToolApp } = await import(pathToFileURL(path.join(coreRoot, 'packages/app-runtime/src/packages/generate-tool-app.mjs')))
 const definition = JSON.parse(await fs.readFile(path.join(root, 'app.json'), 'utf8'))
 const manifest = createToolAppManifest(definition)
 const recorded = await fs.readFile(path.join(root, 'app.moss.json'), 'utf8').then(JSON.parse, error => {

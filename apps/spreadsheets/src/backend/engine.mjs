@@ -3,8 +3,9 @@ import path from 'node:path'
 import ExcelJS from 'exceljs'
 import SSF from 'ssf'
 import { HyperFormula } from 'hyperformula'
-import { creationEngine, validateTitle, inputFile, safeName, escapeHtml as h, htmlDocument } from '@moss/creation-apps'
+import { creationEngine, validateTitle, inputFile, safeName, escapeHtml as h } from '@moss/creation-apps'
 import { JSZip, officeZip, xml, serialize } from '@moss/creation-apps/office'
+import { workbookPreview } from './preview.mjs'
 const columnName=number=>{let result='';for(let n=number;n>0;n=Math.floor((n-1)/26))result=String.fromCharCode(65+(n-1)%26)+result;return result}
 const NS='http://schemas.openxmlformats.org/spreadsheetml/2006/main'
 const primitive=v=>v===null||['string','number','boolean'].includes(typeof v)
@@ -58,9 +59,6 @@ function renderCharts(sheet, charts = []) {
     else {shapes+=`<path d="M40,${y(0)}H570" stroke="#94a3b8"/>`;series.forEach((s,j)=>{if(chart.type==='line')shapes+=`<polyline points="${s.values.map((v,i)=>x(i)+','+y(v)).join(' ')}" fill="none" stroke="${colors[j%4]}" stroke-width="3"/>`;else s.values.forEach((v,i)=>{const w=400/labels.length/series.length;shapes+=`<rect x="${x(i)-200/labels.length+j*w}" y="${Math.min(y(0),y(v))}" width="${w*.85}" height="${Math.abs(y(v)-y(0))}" fill="${colors[j%4]}"/>`})});labels.forEach((v,i)=>shapes+=`<text x="${x(i)}" y="270" font-size="12" text-anchor="middle" fill="currentColor">${h(v)}</text>`)}
     return `<figure><figcaption>${h(chart.title||sheet.name)}</figcaption><svg role="img" aria-label="${h(chart.title||sheet.name)}" viewBox="0 0 600 300" style="width:100%;max-width:800px">${shapes}</svg></figure>`
   }).join('')
-}
-function render(book, specs = []) {
-  return htmlDocument(book.title||'表格',`<h1>${h(book.title||'表格')}</h1><label>工作表 <select id="sheet">${book.worksheets.map((s,i)=>`<option value="${i}">${h(s.name)}</option>`).join('')}</select></label>${book.worksheets.map((sheet,i)=>`<section data-sheet="${i}" ${i?'hidden':''}><h2>${h(sheet.name)}</h2>${renderCharts(sheet,specs[i]?.charts)}<div style="overflow:auto"><table><tbody>${Array.from({length:Math.min(sheet.rowCount,300)},(_,r)=>`<tr>${Array.from({length:Math.min(sheet.columnCount,40)},(_,c)=>`<${r===0?'th':'td'} title="${h(sheet.getCell(r+1,c+1).value?.formula||'')}">${h(formatted(sheet.getCell(r+1,c+1),book))}</${r===0?'th':'td'}>`).join('')}</tr>`).join('')}</tbody></table></div>${sheet.rowCount>300||sheet.columnCount>40?'<p>预览显示前 300 行、40 列，完整数据保存在工作簿中。</p>':''}</section>`).join('')}<script>(()=>{const select=document.getElementById('sheet'),api=window.mossVisualization;function show(value){select.value=String(Math.max(0,Math.min(select.options.length-1,Number(value)||0)));document.querySelectorAll('[data-sheet]').forEach(el=>el.hidden=el.dataset.sheet!==select.value)}show(api?.getState()?.sheet);select.onchange=()=>{show(select.value);api?.setState({sheet:Number(select.value)})};addEventListener('moss:state',e=>show(e.detail?.sheet));})();</script>`)
 }
 function rangeValues(sheet,range) {
   const match=/^([A-Z]{1,3})([1-9]\d*):([A-Z]{1,3})([1-9]\d*)$/.exec(range||'')
@@ -136,7 +134,7 @@ const engine={id:'spreadsheets',spec:{version:'0.1.1'},validate,
   validate(input);ctx.signal.throwIfAborted();const book=new ExcelJS.Workbook();book.title=input.title
   let source
   if(input.sourcePath){source=await inputFile(input.sourcePath,['.xlsx','.csv','.tsv']);if(path.extname(source).toLowerCase()==='.xlsx'){await officeZip(source);await book.xlsx.readFile(source)}else await book.csv.readFile(source,{parserOptions:{delimiter:path.extname(source).toLowerCase()==='.tsv'?'\t':','}})}
-  else for(const spec of input.sheets){const sheet=book.addWorksheet(spec.name);sheet.pageSetup={paperSize:9,orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0};for(const row of spec.rows)sheet.addRow(row.map(v=>primitive(v)?v:v.formula?{formula:String(v.formula).replace(/^=/,'')}:v.value));sheet.columns.forEach((col,i)=>col.width=spec.widths?.[i]||18);sheet.views=[{state:'frozen',ySplit:spec.freezeRows??1}];if(spec.header!==false){sheet.getRow(1).font={bold:true,color:{argb:'FFFFFFFF'}};sheet.getRow(1).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF176B45'}}}if(spec.filter!==false&&sheet.columnCount)sheet.autoFilter={from:{row:1,column:1},to:{row:Math.max(sheet.rowCount,1),column:sheet.columnCount}};sheet.pageSetup.printArea=`A1:${columnName(Math.max(sheet.columnCount,spec.charts?.length?sheet.columnCount+10:1))+Math.max(1,sheet.rowCount,(spec.charts?.length||0)*18)}`;spec.rows.forEach((row,r)=>row.forEach((value,c)=>{if(value&&typeof value==='object'){const cell=sheet.getCell(r+1,c+1);if(value.numFmt)cell.numFmt=value.numFmt;if(value.font)cell.font=value.font;if(value.alignment)cell.alignment=value.alignment}}))}
+  else for(const spec of input.sheets){const sheet=book.addWorksheet(spec.name);sheet.pageSetup={paperSize:9,orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0};for(const row of spec.rows)sheet.addRow(row.map(v=>primitive(v)?v:v.formula?{formula:String(v.formula).replace(/^=/,'')}:v.value));sheet.columns?.forEach((col,i)=>col.width=spec.widths?.[i]||18);sheet.views=[{state:'frozen',ySplit:spec.freezeRows??1}];if(spec.header!==false){sheet.getRow(1).font={bold:true,color:{argb:'FFFFFFFF'}};sheet.getRow(1).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF176B45'}}}if(spec.filter!==false&&sheet.columnCount)sheet.autoFilter={from:{row:1,column:1},to:{row:Math.max(sheet.rowCount,1),column:sheet.columnCount}};sheet.pageSetup.printArea=`A1:${columnName(Math.max(sheet.columnCount,spec.charts?.length?sheet.columnCount+10:1))+Math.max(1,sheet.rowCount,(spec.charts?.length||0)*18)}`;spec.rows.forEach((row,r)=>row.forEach((value,c)=>{if(value&&typeof value==='object'){const cell=sheet.getCell(r+1,c+1);if(value.numFmt)cell.numFmt=value.numFmt;if(value.font)cell.font=value.font;if(value.alignment)cell.alignment=value.alignment}}))}
   book.title=input.title
   if(book.worksheets.some(s=>s.rowCount>10000||s.columnCount>200)||book.worksheets.reduce((n,s)=>n+s.rowCount*s.columnCount,0)>100000)throw new Error('工作簿超出 100000 单元格的处理上限')
   const edits=input.edits||[]
@@ -147,8 +145,8 @@ const engine={id:'spreadsheets',spec:{version:'0.1.1'},validate,
   const output=path.join(ctx.directory,safeName(input.title)+'.xlsx'),preview=path.join(ctx.directory,'preview.html')
   if(source&&path.extname(source).toLowerCase()==='.xlsx')await fs.writeFile(output,input.mode==='read'?await fs.readFile(source):await patchImported(source,book,edits))
   else await fs.writeFile(output,await addCharts(await book.xlsx.writeBuffer(),book,input.sheets||[]))
-  await fs.writeFile(preview,render(book,input.sheets))
+  await fs.writeFile(preview,await workbookPreview(book,input.sheets||[],formatted,renderCharts))
   const data=path.join(ctx.directory,'workbook.json');await fs.writeFile(data,JSON.stringify(book.worksheets.map(s=>({name:s.name,rows:Array.from({length:s.rowCount},(_,r)=>Array.from({length:s.columnCount},(_,c)=>cellValue(s.getCell(r+1,c+1))))})),null,2))
-  return {artifacts:[{name:path.basename(output),path:output,kind:'document'},{name:'表格预览',path:preview,kind:'html'},{name:'工作簿数据.json',path:data,kind:'json'}],result:{sheets:book.worksheets.map(s=>({name:s.name,rows:s.rowCount,columns:s.columnCount})),previewIndex:1},message:'工作簿已生成'}
+  return {artifacts:[{name:path.basename(output),path:output,kind:'document'},{name:'交互表格预览',path:preview,kind:'html',purpose:'interactive-preview'},{name:'工作簿数据.json',path:data,kind:'json'}],result:{sheets:book.worksheets.map(s=>({name:s.name,rows:s.rowCount,columns:s.columnCount})),previewIndex:1},message:'工作簿已生成'}
  }}
 export default creationEngine(engine,{scheme:'moss-spreadsheets',title:'表格',tools:['spreadsheet_create','spreadsheet_status','spreadsheet_read']})

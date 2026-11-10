@@ -5,8 +5,8 @@
   --surface: oklch(0.995 0.008 126);
   --sidebar-surface: oklch(0.975 0.01 126);
   --soft: oklch(0.945 0.018 145);
-  --muted: oklch(0.48 0.01 150);
-  --accent: oklch(0.62 0.16 151);
+  --takt-muted: oklch(0.48 0.01 150);
+  --takt-accent: oklch(0.62 0.16 151);
   --on-accent: #fff;
   --line: oklch(0.88 0.01 145);
   --grid: color-mix(in oklab, var(--text) 8%, transparent);
@@ -21,8 +21,8 @@
   --surface: oklch(0.22 0.012 155);
   --sidebar-surface: oklch(0.125 0.008 155);
   --soft: oklch(0.28 0.012 155);
-  --muted: oklch(0.72 0.01 145);
-  --accent: oklch(0.68 0.15 151);
+  --takt-muted: oklch(0.72 0.01 145);
+  --takt-accent: oklch(0.68 0.15 151);
   --on-accent: #fff;
   --line: oklch(0.31 0.012 155);
   --grid: rgb(255 255 255 / 6%);
@@ -37,8 +37,8 @@
   --surface: #fff;
   --sidebar-surface: #fff;
   --soft: #f0f5ef;
-  --muted: #64766a;
-  --accent: #376b4d;
+  --takt-muted: #64766a;
+  --takt-accent: #376b4d;
   --on-accent: #fff;
   --line: #e4eae4;
   --grid: #dfe6df;
@@ -49,8 +49,8 @@
   --surface: #202a23;
   --sidebar-surface: #202a23;
   --soft: #28372d;
-  --muted: #9eada2;
-  --accent: #8cbe99;
+  --takt-muted: #9eada2;
+  --takt-accent: #8cbe99;
   --on-accent: #19201c;
   --line: #344239;
   --grid: #344239;
@@ -76,15 +76,15 @@
   background-size: var(--page-size);
 }
 .sidebar { background: var(--sidebar-surface); }
-.brand-icon, .primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-.primary:hover { background: color-mix(in oklab, var(--accent) 88%, var(--text)); }
-button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline-color: var(--accent); }
+.brand-icon, .primary { background: var(--takt-accent); color: var(--on-accent); border-color: var(--takt-accent); }
+.primary:hover { background: color-mix(in oklab, var(--takt-accent) 88%, var(--text)); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline-color: var(--takt-accent); }
 .react-flow { background: transparent; --xy-attribution-background-color-default: var(--surface); }
-.react-flow__handle { background: var(--muted); }
-.react-flow__attribution a { color: var(--muted); }
-.flow-node.completed { border-color: color-mix(in oklab, var(--accent) 55%, var(--line)); }
+.react-flow__handle { background: var(--takt-muted); }
+.react-flow__attribution a { color: var(--takt-muted); }
+.flow-node.completed { border-color: color-mix(in oklab, var(--takt-accent) 55%, var(--line)); }
 .flow-node.running { border-color: #b39444; }
-.event-dot, .status-dot, footer i { background: var(--accent); }
+.event-dot, .status-dot, footer i { background: var(--takt-accent); }
 .status-dot.running { background: #b39444; }
 .status-dot.failed { background: #b57456; }
 .badge.running, .badge.paused, .badge.pausing { background: color-mix(in oklab, #b39444 15%, var(--surface)); color: #806119; }

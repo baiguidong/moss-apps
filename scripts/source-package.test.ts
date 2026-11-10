@@ -49,9 +49,10 @@ test('Builder source includes its declared Runtime build dependency and verifies
   try {
     const spec = await exportAppSource(selectApps(['--app', 'moss.app-builder'])[0], destination)
     const workspace = JSON.parse(await fs.readFile(path.join(destination, 'package.json'), 'utf8'))
-    expect(workspace.workspaces).toContain('vendor/moss-core/packages/app-runtime')
+    expect(workspace.workspaces).toContain('.moss-sdk/packages/app-runtime')
+    expect(workspace.workspaces).not.toContain('vendor/moss-core/packages/app-runtime')
     const lock = parseLock(await fs.readFile(path.join(destination, 'bun.lock'), 'utf8'))
-    expect(lock.packages['@moss/app-runtime']).toEqual(['@moss/app-runtime@workspace:vendor/moss-core/packages/app-runtime'])
+    expect(lock.packages['@moss/app-runtime']).toEqual(['@moss/app-runtime@workspace:.moss-sdk/packages/app-runtime'])
     const output = execFileSync('node', ['scripts/sync-core-sdk.mjs', '--check'], { cwd: path.join(destination, spec.appRoot), encoding: 'utf8' })
     expect(output).toContain('SDK snapshot verified')
   } finally { await fs.rm(destination, { recursive: true, force: true }) }

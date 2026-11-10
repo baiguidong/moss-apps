@@ -2,7 +2,7 @@
 
 日期：2026-10-10。
 
-规则已确定：后续所有新发布的 App 版本，以及 App Builder 创建或修改后每次本机安装的版本，都必须随安装内容携带完整、可重建、与版本绑定的源码。本文定义已接入的包格式、打包器、CI、Core 与 Builder 安装规则。每个版本是否发布及其验证结果，以不可变 Release 和应用市场元数据为准。
+规则已确定：普通 App 版本，以及 App Builder 创建或修改后每次本机安装的版本，都必须随安装内容携带完整、可重建、与版本绑定的源码。配置型 MCP/connector App 只发布运行所需的定义、资源和必要 runtime，不携带可重建源码。本文定义已接入的包格式、打包器、CI、Core 与 Builder 安装规则。
 
 目标是让用户安装 App 后，点击“迭代”即可在对应版本的真实工程上修改，保留原有功能、构建方式和测试。一次增加请求模板的操作应只涉及相关业务文件。
 
@@ -25,7 +25,7 @@
 | 仓库 workspace | App 使用 `workspace:*` SDK 和根目录 `bun.lock` | 包内恢复后仍能解析全部本地依赖，锁定第三方依赖 |
 | Core 安装链路 | 市场安装将运行包再次存成 `sources/<version>.tar.gz`；Builder 另存源码快照 | 将完整源码与描述文件保存到安装版本内，统一处理来源与恢复入口 |
 | Core `source.inspect/project.prepare` | 按单个目录根部的 manifest/package.json 判断源码 | 支持带 workspace 的源码快照，并保持项目绑定和未提交修改 |
-| Core `build.start` | 当前构建入口固定使用 npm；源码复制排除生成的 SDK | 按声明选择受管包管理器，支持 Bun workspace 与固定 SDK 输入 |
+| Core `build.start` | 当前构建入口按声明选择受管包管理器；源码复制排除共享 SDK | 按声明选择受管包管理器，支持 Bun workspace 与 Moss 临时导出的 SDK |
 | Builder 迭代 | 缺源码可能引发重复查找、重建工程和反复试错 | 明确处理源码缺失，直接恢复真实工程，返回具体构建/启动错误 |
 
 
@@ -59,9 +59,11 @@ ZIP 解包根与 `.moss/apps/<app-id>/versions/<version>/` 使用相同布局。
     │   ├── schemas/
     │   └── ...                   # Vite/TS 配置、HTML、许可证等
     ├── scripts/                  # 本 App 依赖的共享构建代码
-    └── vendor/moss-core/packages/
+    # Moss 在用户迭代或重建前临时提供，不进入 ZIP
+    └── .moss-sdk/packages/
         ├── app-sdk/
-        └── host-contracts/
+        ├── host-contracts/
+        └── app-runtime/
 ```
 
 保持原有目录之间的相对关系，不为了导出而改写业务源码或重写 UI/Backend。非 workspace 的独立 App 可将工程直接放在 `source/`，其 `appRoot` 为 `.`。其他被构建或测试引用的本地包按依赖关系一同收录。
@@ -78,7 +80,7 @@ ZIP 解包根与 `.moss/apps/<app-id>/versions/<version>/` 使用相同布局。
 | `toolchain` | Node 版本、包管理器名称和精确版本、支持的构建平台 |
 | `lockfile` | 相对源码根的锁文件路径；无第三方依赖也声明包管理器和确定的构建入口 |
 | `commands` | install/check/test/build 的工作目录与参数数组；外部 Host 集成验证单独记录 |
-| `sdk` | Core 提交、SDK 版本、SDK/contract 摘要和包内路径；存在其他本地依赖时记录对应清单 |
+| `sdk` | Moss provider、Core/SDK 版本、提交、内容 hash 和临时 workspace 路径；存在其他本地依赖时记录对应清单 |
 | `files` | 按相对路径排序的源码文件清单，含 SHA-256、大小与必要的可执行权限 |
 | `sourceHash` | 规范化源码文件清单的摘要；排除时间、机器绝对路径等易变信息 |
 | `runtimeHash` | 运行文件清单摘要，排除 `source/`、本描述文件、checksums 和签名，避免循环引用 |
@@ -93,7 +95,7 @@ ZIP 解包根与 `.moss/apps/<app-id>/versions/<version>/` 使用相同布局。
 2. `app.moss.json`、`package.json`、有效锁文件、构建配置、生成代码的输入与生成脚本。
 3. 构建和测试引用的图片、样式、HTML、schemas、静态资源、第三方许可与说明文件。
 4. workspace 根配置、必要的共享脚本和本地包。保留原相对布局，禁止剩余 `file:` 或 import 指向包外路径。
-5. 固定 Core 提交导出的公共 SDK 和 host-contracts。若 App 构建依赖其他 Core 代码，先迁移到公共入口，或明确纳入可分发的构建依赖并完成隔离验证；不能把整个 Core 仓库作为隐藏前置条件。
+5. App 自有源码不得携带 `moss-core`。`source-manifest.json.sdk` 记录 Moss SDK/Core 的版本和内容 hash；用户迭代或重建时由安装的 Moss 提供匹配的共享快照。若 App 构建依赖其他 Core 代码，先迁移到公共入口。
 6. 简短的 `source/README.md`，说明 App 入口、安装/构建/测试命令及需要外部 Host 的集成验证，方便 Agent 按入口执行。
 
 ### 不收录
@@ -102,13 +104,13 @@ ZIP 解包根与 `.moss/apps/<app-id>/versions/<version>/` 使用相同布局。
 
 ### Bun workspace 与 SDK
 
-只复制 App 的 `src/` 和 `package.json` 不满足要求。当前 App 通过 `workspace:*` 引用 SDK，构建及部分校验脚本也会读取 `vendor/moss-core`，而依赖解析来自仓库根锁文件。
+只复制 App 的 `src/` 和 `package.json` 不满足要求。当前 App 通过 `workspace:*` 引用 SDK，源码 workspace 使用 `.moss-sdk` 占位路径；Moss 在临时构建目录导出共享 SDK，发布 ZIP 不包含 Core 源码。
 
 导出器必须生成仅包含目标 App 和必要本地包的 workspace，并从原锁文件保留对应依赖版本及 integrity。导出后执行 `bun install --frozen-lockfile` 验证；若无法保持锁定结果，必须失败，不能退回非锁定安装或顺便升级依赖，也不能把全部其他 App 的源码和依赖都带入。
 
-第三方依赖通过锁文件安装，源码随包不等于承诺首次构建完全离线。固定 SDK 源码快照由打包器自动生成，不在 moss-apps 手工维护第二套 SDK；导出时保留其本地依赖关系和所需许可证。
+第三方依赖通过锁文件安装，源码随包不等于承诺首次构建完全离线。SDK/Core 只在 Moss 中维护；打包器只记录 `provider`、版本、提交和内容 hash，不在每个 App 中复制第二份。
 
-历史重建使用包内固定 SDK。后续迭代先检查当前 Core 能力；需要更新 SDK 时在草稿中明确迁移并更新依赖与锁文件，保留原快照，不静默覆盖发布时的 SDK。Core 现有 `.moss-sdk` 是生成目录，不能因其被源码复制规则排除而丢失历史构建输入。
+历史重建和后续迭代使用当前 Moss 提供的共享 SDK，并按 `sdkHash/coreHash` 做兼容性检查；不把 SDK 文件写入 App 运行包或源码附件。
 
 ## 5. 打包与 CI 门禁
 
@@ -126,7 +128,7 @@ Builder 本机安装走同等完整性流程：固定源码及 SDK 输入 → �
 | UI 与 Action | UI 实际加载、现有关键交互和 Action 通过；沿用各 App 已有浏览器/Host 验证 | 返回具体错误和对应阶段 |
 | 最终 ZIP | 验证源码清单、checksums、签名及快照/运行产物一致性；验包工具支持从 ZIP 独立重建 | 不依赖 staging 目录存在来判定合格 |
 
-运行目录必须能脱离 `source/` 启动，防止开发依赖在源码树内“碰巧可用”。Backend SDK 应编入产物；确需外置的运行模块按现有 `dist/backend/node_modules` 规则打包。
+运行目录必须能脱离 `source/` 和共享 SDK 源码启动，防止开发依赖在源码树内“碰巧可用”。Backend 所需协议客户端应编入产物；确需外置的运行模块按现有 `dist/backend/node_modules` 规则打包。
 
 打包器保留 `--skip-build` 参数的调用兼容性，但仍执行完整源码快照构建，不复用原工作区的 `dist`，不能跳过源码门禁。本地 `release.commit` 可复用该 artifact 的已完成验证，不必再次全量构建，但必须复核摘要与安装基准。正式仓库发布不接受 SDK 未提交快照冒充固定 Core 提交；Builder 本地安装按运行 Core 导出的实际 SDK 内容摘要保存来源。
 
@@ -172,11 +174,11 @@ P0–P4 已完成，10 个应用均已逐个经 CI 构建并发布。Release 工
 
 HTTP Client 仅为临时测试，按用户要求不纳入迁移或发布。迁移范围为当前其余 10 个 App；展示名称统一包括「应用构建」「MCP 管理」「调用追踪」。
 
-每个发布版本通过 Git 子模块固定 Core 提交，写入 `source-manifest.json` 的 SDK 来源记录。首批使用 `8867f94880a2182c3f5a2d1d39db5e0d576f06d2`；后续 Windows 兼容修复使用 `810b42e89dc1bce48f6257f113acc2308f813582`。构建只校验包内 SDK 内容，不读取相邻开发仓库；SDK 版本相同也核对内容摘要。
+每个发布版本通过 Git 子模块固定构建使用的 Core 提交，写入 `source-manifest.json` 的 SDK 来源记录。SDK 源码不进入 App ZIP；Moss 在用户迭代或重建时提供共享快照，构建校验其版本和内容摘要。
 
 ## 9. 验收清单
 
-- [x] 未来发布包同时包含运行产物、完整源码、构建入口、锁文件和固定 SDK；缺任一必要输入即失败。
+- [x] 普通 App 发布包包含运行产物、完整自有源码、构建入口和锁文件；SDK/Core 由 Moss 共享提供并由版本/hash 记录。
 - [x] Builder 首次创建并直接安装的版本目录同时包含运行产物与完整源码，不要求先导出 ZIP 或发布市场。
 - [x] Builder 每次迭代安装保存与该版本产物匹配的源码；提交失败、进程中断、回滚时两者保持一致。
 - [x] 源码、描述文件均被 checksums 覆盖；市场包同时受发布者签名保护，本地 Builder 安装同时纳入 artifactHash/安装回执；篡改任意一项会被发现。
@@ -216,8 +218,8 @@ HTTP Client 仅为临时测试，按用户要求不纳入迁移或发布。迁�
 | 调用追踪 | [0.1.4](https://github.com/baiguidong/moss-apps/releases/tag/moss.trace-v0.1.4) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38038954853) |
 | 工作流 | [0.1.15](https://github.com/baiguidong/moss-apps/releases/tag/moss.workflow-v0.1.15) | [构建记录](https://github.com/baiguidong/moss-apps/actions/runs/38038959277) |
 
-应用市场索引：<https://baiguidong.github.io/moss-apps/v1/index.json>。所有本批版本的 `artifact.sourceIncluded` 为 `true`，格式为 v1，均提供签名 ZIP、SHA-256 和 release.json。历史版本及失败构建标签保持不变。
+应用市场索引：<https://baiguidong.github.io/moss-apps/v1/index.json>。普通 App 的 `artifact.sourceIncluded` 为 `true`；配置型 MCP/connector App 为 `false`，只提供签名运行包、SHA-256 和 release.json。历史版本及失败构建标签保持不变。
 
 ## 配置型 MCP App 与统一发布
 
-`tool-apps/<name>/app.json` 与资源也是可编辑源码，支持 MCP、CLI、Skills 组合。导出时补齐共享构建入口、临时 package.json、固定 Core 生成器与 Bun 锁文件，仍使用 v1 source descriptor、签名与独立重建校验。运行部分由 Core 的内置设置页或统一账号与工具管理承载；包内 source 不作为 Backend 运行。普通应用和声明式工具统一由版本检查 CI 发布，详见[自动发布规则](automatic-app-release.md)。
+`tool-apps/<name>/app.json` 与资源是仓库输入，支持 MCP、CLI、Skills 组合。打包时由共享 Core 生成器生成配置、资源和必要 runtime；运行部分由 Core 的内置设置页或统一账号与工具管理承载，发布 ZIP 不携带 source。普通应用和声明式工具统一由版本检查 CI 发布，详见[自动发布规则](automatic-app-release.md)。

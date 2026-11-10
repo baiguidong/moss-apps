@@ -10,7 +10,7 @@ export const useColorMode = () => useSyncExternalStore(subscribe, colorMode)
 // App windows and conversation guests share the Host's persisted appearance.
 export function syncAppearance(api: AppUiApi | undefined = window.mossApp) {
   const media = matchMedia('(prefers-color-scheme: dark)')
-  let appearance: Partial<AppAppearance> = { themeMode: 'light', cssThemeId: 'grid-theme' }
+  let appearance: Partial<AppAppearance> = { themeMode: 'light', cssThemeId: 'default' }
   let disposed = false, revision = 0, pending = false, again = false
   const apply = () => {
     if (disposed) return
@@ -19,7 +19,7 @@ export function syncAppearance(api: AppUiApi | undefined = window.mossApp) {
     const background = String(appearance.cssThemeId || '')
     const root = document.documentElement
     root.dataset.theme = theme
-    root.dataset.backgroundStyle = backgrounds.has(background) ? background : 'grid-theme'
+    root.dataset.backgroundStyle = backgrounds.has(background) ? background : 'default'
     root.style.colorScheme = theme
     for (const listener of subscribers) listener()
   }

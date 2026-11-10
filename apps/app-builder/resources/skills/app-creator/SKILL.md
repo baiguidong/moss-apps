@@ -1,6 +1,6 @@
 ---
 name: app-creator
-description: 创建或迭代 Moss App，接入工具、技能、MCP、资源和成果展示，使用绑定源码、固定 SDK、构建预览与安装回执。只编写技能说明时改用内置 skill-creator。
+description: 创建或迭代 Moss App，接入工具、技能、MCP、资源和成果展示，使用绑定源码、Moss 共享 SDK、构建预览与安装回执。只编写技能说明时改用内置 skill-creator。
 ---
 
 # 应用创建与迭代
@@ -9,7 +9,7 @@ description: 创建或迭代 Moss App，接入工具、技能、MCP、资源和�
 
 读取 builder_inspect operation=guidance 的当前指引和模板，再查询 Host info 与相关 contracts。判断用户需求是否需要 App；纯流程说明使用内置 skill-creator，安装技能使用 skill-installer。
 
-默认通过主会话使用工具、在右侧成果区展示结果。只需介绍、配置和能力目录时采用 Core 通用详情，无需自建 UI；真实业务工作台才声明页面。保留已有 App 的业务 UI、数据、凭据、身份与固定 SDK。
+默认通过主会话使用工具、在右侧成果区展示结果。只需介绍、配置和能力目录时采用 Core 通用详情，无需自建 UI；真实业务工作台才声明页面。保留已有 App 的业务 UI、数据、凭据和身份；SDK/Core 由 Moss 在构建时提供。
 
 新建用 builder_prepare operation=project、intent=create；编辑恢复 targetRef/draftRef 或已有 projectRef，不重建丢失的源码。文件操作在返回的绑定项目中进行。使用导出 SDK，不下载 latest 或依赖 Core 私有模块。
 

@@ -13,8 +13,8 @@ App 向模型提供说明时用 contributes.skills，技能文件放在包内并
 ## 新建与编辑
 
 1. 新建先选未使用的 ID，调用 builder_prepare operation=project、intent=create、稳定 projectId。Core 返回 path、sourceRoot、appRoot、sdkPath、contractHash/sdkHash。只在绑定项目中写文件。
-2. 用 builder_inspect operation=guidance 取得模板；新项目可将 scaffold.mjs 和 app.moss.json 保存到同一临时目录并运行 `node scaffold.mjs --dest <path> --id <appId> --name <名称>`。要求 path 内已导出 .moss-sdk。脚本生成可构建的文本统计示例、完整 Manifest、Schema、Backend、锁文件和构建脚本，拒绝覆盖文件。它是验证工具链的起点，需继续实现用户所需功能。可按用途改用 operational/settings/backend 示例，声明的路径必须实际存在。
-3. 编辑先 source.inspect/project.prepare，恢复完整源码和固定 SDK。普通编辑保留原展示位置与工具范围。 保留 App ID、数据、配置、稳定服务 ID、锁文件与无关功能。源码缺失时请求匹配源码；未明确要求重写时，不能重建或改写已安装 App。新字段需要明确迁移固定 SDK，不静默覆盖历史版本。
+2. 用 builder_inspect operation=guidance 取得模板；新项目可将 scaffold.mjs 和 app.moss.json 保存到同一临时目录并运行 `node scaffold.mjs --dest <path> --id <appId> --name <名称>`。Moss 会在项目中导出共享 `.moss-sdk`。脚本生成可构建的文本统计示例、完整 Manifest、Schema、Backend、锁文件和构建脚本，拒绝覆盖文件。它是验证工具链的起点，需继续实现用户所需功能。可按用途改用 operational/settings/backend 示例，声明的路径必须实际存在。
+3. 编辑先 source.inspect/project.prepare，恢复完整自有源码并使用当前 Moss SDK。普通编辑保留原展示位置与工具范围。保留 App ID、数据、配置、稳定服务 ID、锁文件与无关功能。源码缺失时请求匹配源码；未明确要求重写时，不能重建或改写已安装 App。新字段需要明确迁移 SDK，不静默覆盖用户修改。
 4. schemaVersion 使用 2，hostApi 按实际能力声明最低范围。category/keywords 从当前 Manifest Schema 选择，不自己编造分类。Backend 使用 AppBackendClient.registerAction；UI 如有则从 @moss/app-sdk/ui 引入 createAppClient。只申请实际需要的权限；工具名使用业务名称，Host 负责来源与重名检查，不手工添加 app_moss 前缀。
 5. 所有声明的文件、Schema、技能资源和入口都必须包含在包内。工具输入 Schema 根节点为 object，顶层不用 oneOf/anyOf/allOf；跨字段约束由 Backend 校验。不放 TODO、空动作或未实现的成功返回。最终用户功能需要自己的代表性验证。
 
@@ -26,7 +26,7 @@ App 根级 toolScope=session/global；App 的所有 MCP 服务继承相同范围
 
 ## 验证与安装
 
-修改后 source.inspect；传当前 sourceHash、contractHash/sdkHash 给 builder_build start。同一操作重试复用 submissionKey；读取操作回执到终态，queued 不代表成功。固定 artifact 上调用 builder_preview test 验证真实 Backend 的成功、非法输入和依赖失败。有业务 UI 才打开预览，并按导出 SDK 的 ui-layout.md 检查普通/窄宽、浅/深色、加载/空/错误状态。layout-check.mjs 用于测试，不打包进产品 UI。无 UI 的 App 要验证主会话工具结果和详情能力展示，无需生成空白页面。
+修改后 source.inspect；传当前 sourceHash、contractHash/sdkHash 给 builder_build start。同一操作重试复用 submissionKey；读取操作回执到终态，queued 不代表成功。构建 artifact 上调用 builder_preview test 验证真实 Backend 的成功、非法输入和依赖失败。有业务 UI 才打开预览，并按共享 SDK 的 ui-layout.md 检查普通/窄宽、浅/深色、加载/空/错误状态。layout-check.mjs 用于测试，不打包进产品 UI。无 UI 的 App 要验证主会话工具结果和详情能力展示，无需生成空白页面。
 
 用户已要求安装时完成 release.prepare/commit/get，携带 baseVersion、installationRevision、dataCompatibility 和迁移证据；仅创建/讨论时交付可审阅产物。重试查看原回执，避免重复安装。更新递增版本，保留可重建源码和固定工具链；冲突保留工作区并处理当前版本差异。本 App 不发布公共市场。
 

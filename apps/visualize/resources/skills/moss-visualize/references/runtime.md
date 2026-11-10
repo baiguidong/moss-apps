@@ -35,3 +35,5 @@ render();
 导出文件独立打开时仍可操作；宿主 API 不存在，隐藏或禁用“继续询问”按钮。代码需要用可选链检查 API。不要把空白页或未实现的交互描述为完成。
 
 创建返回的 `result.presentation` 可以直接传给 Moss 的 moss_present 工具。它负责当前会话右侧动态展示，用户关闭跟随或固定成果时应尊重 deferred 返回。仅在最终回复渲染引用不意味着右侧已经打开。
+
+内置 `mode=chart` 的 line/scatter 使用随包 uPlot，无需额外配置或外部脚本。支持拖动 X 轴缩放、重置、悬停图例与系列切换，交互状态字段为 filter、hiddenSeries、zoom。HTML 导出包含所需代码，SVG 导出仍为静态图。

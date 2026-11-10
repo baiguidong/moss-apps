@@ -1,6 +1,11 @@
 import fs from 'node:fs/promises'
-import { contracts } from '../../../vendor/moss-core/packages/host-contracts/src/index.mjs'
+import path from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { toolRoutes } from '../src/backend/actions.mjs'
+
+const sourceRoot = fileURLToPath(new URL('../../..', import.meta.url))
+const coreRoot = await fs.stat(path.join(sourceRoot, '.moss-sdk')).then(() => path.join(sourceRoot, '.moss-sdk')).catch(() => path.join(sourceRoot, 'vendor/moss-core'))
+const { contracts } = await import(pathToFileURL(path.join(coreRoot, 'packages/host-contracts/src/index.mjs')))
 
 const extra = {
   guidance: { type: 'object', properties: {}, required: [] },

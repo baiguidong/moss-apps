@@ -21,18 +21,20 @@ export async function collectReleaseAssets(app, root, sourceSha, repository, ver
     const artifact = platform ? record.version?.artifacts?.[platform] : record.version?.artifact
     const expectedPlatforms = platform ? [platform] : app.marketplace.platforms
     if (record.app?.id !== id || record.version?.version !== version || JSON.stringify(record.version.platforms) !== JSON.stringify(expectedPlatforms)) throw new Error('Release identity or platforms mismatch')
-    if (!artifact?.signed || artifact.sourceIncluded !== true || artifact.sourceFormat !== 1 || artifact.fileName !== `${stem}.zip`
+    const sourceIncluded = artifact?.sourceIncluded === true
+    if (!artifact?.signed || typeof artifact.sourceIncluded !== 'boolean' || (sourceIncluded && (artifact.sourceFormat !== 1 || !artifact.sourceHash)) || artifact.fileName !== `${stem}.zip`
         || artifact.publisherId !== app.manifest.publisher?.id || record.app.publisher?.id !== artifact.publisherId
-        || artifact.downloadUrl !== `https://github.com/${repository}/releases/download/${tag}/${stem}.zip`) throw new Error('Release must describe the signed source archive and correct download URL')
+        || artifact.downloadUrl !== `https://github.com/${repository}/releases/download/${tag}/${stem}.zip`) throw new Error('Release must describe the signed archive and correct download URL')
     const zip = await fs.readFile(path.join(root, artifact.fileName))
     if (zip.length !== artifact.size || sha256Hex(zip) !== artifact.sha256) throw new Error('Release archive bytes mismatch')
     const checksum = await fs.readFile(path.join(root, `${stem}.sha256`))
     if (checksum.toString().trim() !== `${artifact.sha256}  ${artifact.fileName}`) throw new Error('SHA-256 asset mismatch')
-    const checked = await verifyArchive(path.join(root, artifact.fileName), { requireSignature: true })
-    if (checked.appId !== id || checked.version !== version || checked.sourceHash !== artifact.sourceHash
+    const checked = await verifyArchive(path.join(root, artifact.fileName), { requireSignature: true, requireSource: sourceIncluded })
+    if (checked.appId !== id || checked.version !== version
         || checked.publisherId !== artifact.publisherId || checked.keyId !== artifact.keyId
-        || checked.origin?.commit !== sourceSha || checked.origin.dirty !== false || checked.sdk?.dirty !== false
-        || (platform && JSON.stringify(checked.platforms) !== JSON.stringify([platform]))) throw new Error('Signed source identity, target or commit mismatch')
+        || (platform && JSON.stringify(checked.platforms) !== JSON.stringify([platform]))) throw new Error('Signed package identity, target or source mismatch')
+    if (sourceIncluded && (checked.sourceHash !== artifact.sourceHash
+        || checked.origin?.commit !== sourceSha || checked.origin.dirty !== false || checked.sdk?.dirty !== false)) throw new Error('Signed source identity, target or commit mismatch')
     files.set(artifact.fileName, zip)
     files.set(`${stem}.sha256`, checksum)
     files.set(metadataName, metadataBytes)

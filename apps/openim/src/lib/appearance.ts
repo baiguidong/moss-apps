@@ -1,9 +1,18 @@
 export type MossThemeMode = "light" | "dark" | "system";
-export type MossCssThemeId = "default" | "grid-theme" | "dot-theme" | "gradient-theme";
+export type MossCssThemeId = "default" | "grid-theme" | "dot-theme" | "gradient-theme" | string;
 
 export type MossAppearance = {
   themeMode?: MossThemeMode;
   cssThemeId?: MossCssThemeId;
+  accent?: string;
+  background?: string;
+  foreground?: string;
+  uiFontSize?: number;
+  codeFontSize?: number;
+  uiFont?: string;
+  contentFont?: string;
+  codeFont?: string;
+  [key: string]: unknown;
 };
 
 const THEME_MODES = new Set<MossThemeMode>(["light", "dark", "system"]);

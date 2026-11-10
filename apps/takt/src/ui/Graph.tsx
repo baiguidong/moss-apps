@@ -54,7 +54,7 @@ export default function Graph({ graph, run, onSelect, selectedId }: any) {
         right = Math.max(right, node.position.x + 106 + loopOffset(lane) + 70)
         top = Math.min(top, node.position.y - 32); bottom = Math.max(bottom, node.position.y + 98)
       }
-      return { id: edge.id, source: edge.source, target: edge.target, label: edge.label, type: loop ? 'loop' : 'smoothstep', data: { lane }, animated: run?.activeNodes.includes(edge.target), markerEnd: { type: MarkerType.ArrowClosed, width: 15, height: 15, color: 'var(--muted)' }, style: { stroke: run?.routes.some((r: any) => r.nodeId === (edge.logicalSource ?? edge.source) && r.target === edge.target) ? 'var(--accent)' : 'var(--muted)', strokeWidth: 1.5 }, labelStyle: { fill: 'var(--muted)', fontSize: 11 }, labelBgStyle: { fill: 'var(--surface)' }, labelBgPadding: [5, 4] as [number, number] }
+      return { id: edge.id, source: edge.source, target: edge.target, label: edge.label, type: loop ? 'loop' : 'smoothstep', data: { lane }, animated: run?.activeNodes.includes(edge.target), markerEnd: { type: MarkerType.ArrowClosed, width: 15, height: 15, color: 'var(--takt-muted)' }, style: { stroke: run?.routes.some((r: any) => r.nodeId === (edge.logicalSource ?? edge.source) && r.target === edge.target) ? 'var(--takt-accent)' : 'var(--takt-muted)', strokeWidth: 1.5 }, labelStyle: { fill: 'var(--takt-muted)', fontSize: 11 }, labelBgStyle: { fill: 'var(--surface)' }, labelBgPadding: [5, 4] as [number, number] }
     })
     return { nodes, edges, bounds: { x: left, y: top, width: right - left, height: bottom - top } }
   }, [graph, run, selectedId])

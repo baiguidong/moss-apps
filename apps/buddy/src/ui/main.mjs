@@ -15,11 +15,11 @@ function messageBody(text){
  fragment.append(document.createTextNode(text.slice(start)));return fragment;
 }
 const systemTheme=matchMedia('(prefers-color-scheme: dark)')
-let currentAppearance={themeMode:'system',cssThemeId:'grid-theme'}
+let currentAppearance={themeMode:'system',cssThemeId:'default'}
 function appearance(value={}){
  currentAppearance={...currentAppearance,...value};const html=document.documentElement
  const theme=currentAppearance.themeMode==='system'?(systemTheme.matches?'dark':'light'):currentAppearance.themeMode
- html.dataset.theme=theme;html.style.colorScheme=theme;html.dataset.backgroundStyle=currentAppearance.cssThemeId
+ html.dataset.theme=theme;html.style.colorScheme=theme;html.dataset.backgroundStyle=['default','grid-theme','dot-theme','gradient-theme','takt-theme'].includes(currentAppearance.cssThemeId)?currentAppearance.cssThemeId:'default'
  for(const [key,variable,min,max,unit] of [['chatFontSize','--b-chat-font-size',12,18,'px'],['chatLineHeight','--b-chat-line-height',1.3,2,''],['chatMessageSpacing','--b-chat-spacing',4,24,'px']]){
   const number=currentAppearance[key];if(typeof number==='number'&&Number.isFinite(number))html.style.setProperty(variable,`${Math.max(min,Math.min(max,number))}${unit}`)
  }
