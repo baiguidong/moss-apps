@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.8
+
+- 同步 Moss Core 外观设置、字体和主题变量，重新验证 App 创建与源码重建。
+
 ## 0.1.6
 
 - 更新随包 Core SDK 快照来源，确保安装包源码与 SDK provenance 一致。

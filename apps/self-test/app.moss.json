@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.self-test",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "displayName": "AI 自测",
   "category": "diagnostics",
   "keywords": [

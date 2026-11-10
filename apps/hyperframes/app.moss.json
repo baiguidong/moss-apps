@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.hyperframes",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "displayName": "HyperFrames 动画工坊",
   "category": "creative",
   "keywords": ["HTML动画", "本地视频", "HyperFrames", "MP4"],

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.18
+
+- 同步 Moss Core 外观设置、字体和主题变量。
+
 ## 0.1.17
 
 - 新增 Linux AMD64 支持；由 Linux CI 执行检查、测试、构建、源码独立重建及 Backend 验证。
