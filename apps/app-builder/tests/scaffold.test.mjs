@@ -18,7 +18,6 @@ test('scaffold builds a backend without a UI, preserves existing files and runs 
     // source repository checkout. Moss normally creates these links through
     // its developer catalog export.
     const appsRepo = fileURLToPath(new URL('../../../', import.meta.url))
-    const mossRepo = path.resolve(appsRepo, '../moss')
     const sdkRoot = await fs.access(path.join(appsRepo, '.moss-sdk/packages/app-sdk')).then(() => path.join(appsRepo, '.moss-sdk/packages')).catch(() => path.join(appsRepo, 'vendor/moss-core/packages'))
     const sdkSource = path.join(sdkRoot, 'app-sdk')
     const contractsSource = path.join(sdkRoot, 'host-contracts')
@@ -27,12 +26,12 @@ test('scaffold builds a backend without a UI, preserves existing files and runs 
     await fs.cp(sdkSource, path.join(root, '.moss-sdk/packages/app-sdk'), { recursive: true, filter: sdkFilter })
     await fs.cp(contractsSource, path.join(root, '.moss-sdk/packages/host-contracts'), { recursive: true, filter: sdkFilter })
     await fs.mkdir(path.join(root, '.moss-sdk/node_modules'), { recursive: true })
-    const resolve = createRequire(path.join(mossRepo, 'package.json'))
     const copied = new Set()
-    const copyDependency = async name => {
+    const copyDependency = async (name, fromRoot = sdkSource) => {
       if (copied.has(name)) return
       copied.add(name)
       let resolved
+      const resolve = createRequire(path.join(fromRoot, 'package.json'))
       try { resolved = resolve.resolve(`${name}/package.json`) } catch { resolved = resolve.resolve(name) }
       let packageRoot = path.dirname(resolved), metadata
       while (true) {
@@ -42,7 +41,7 @@ test('scaffold builds a backend without a UI, preserves existing files and runs 
       }
       const dependencyFilter = source => !path.relative(packageRoot, source).split(path.sep).includes('node_modules')
       await fs.cp(packageRoot, path.join(root, '.moss-sdk/node_modules', name), { recursive: true, dereference: true, filter: dependencyFilter })
-      for (const dependency of Object.keys({ ...metadata.dependencies, ...metadata.optionalDependencies })) await copyDependency(dependency)
+      for (const dependency of Object.keys({ ...metadata.dependencies, ...metadata.optionalDependencies })) await copyDependency(dependency, packageRoot)
     }
     for (const name of ['ajv', 'proper-lockfile', 'semver']) await copyDependency(name)
     await fs.mkdir(path.join(root, 'node_modules/@moss'), { recursive: true })
