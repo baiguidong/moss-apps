@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.database",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "displayName": "数据库查询",
   "category": "data",
   "keywords": [

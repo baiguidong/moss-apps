@@ -1,3 +1,7 @@
+## 0.1.25
+
+- Rebuild against Moss Core 0.1.25 and refresh the shared appearance/runtime snapshot.
+
 ## 0.1.24
 
 - Rebuild against Moss Core 0.1.24 and refresh the shared appearance/runtime snapshot.

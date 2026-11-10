@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.openim",
-  "version": "0.2.18",
+  "version": "0.2.19",
   "displayName": "即时消息",
   "category": "communication",
   "keywords": [
