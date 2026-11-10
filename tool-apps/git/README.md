@@ -1,6 +1,6 @@
 # Git 仓库
 
-配置型 MCP App。Moss Core 提供页面、注册、Python 环境和调用前的目录校验；Git 操作来自官方 `mcp-server-git==2026.8.18`。App 不包含独立 UI、Backend、MCP 服务或依赖复制代码。需要 **Host API 3.11**。
+配置型 MCP App。Moss Core 提供页面、注册、Python 环境和调用前的目录校验；Git 操作来自官方 `mcp-server-git==2026.8.18`。App 不包含独立 UI 或 Backend；官方服务和依赖随平台安装包提供。需要 **Host API 3.11**。
 
 默认只操作当前会话的 workspace。`repo_path` 可省略；显式提供相对路径时在 workspace 内解析，也可提供公共仓库的绝对路径。workspace 不是仓库时返回 Git 错误，不自动回退公共仓库；可显式选择 workspace 内的子仓库。没有会话目录时必须显式指定已授权的公共仓库。空范围可以检查和列出工具，不能操作仓库。
 
@@ -8,7 +8,7 @@
 
 ## 运行与兼容性
 
-`app.json` 声明 `python3 -I -m mcp_server_git`。Core 优先使用内置 Python，未启用时使用配置的 Python 命令；首次连接创建独立 venv 并下载固定版本的服务，之后复用。不会安装到用户的全局 Python。`MOSS_MCP_PYTHON_HOME` 可覆盖缓存目录，默认位于 Moss 数据目录的 `mcp/python`。无需 uv/uvx。
+`app.json` 启动包内 `runtime/launch.cjs`，由它调用 Moss 内置 Python 3.13 运行 `runtime/site-packages/` 内的官方 Git 服务。运行时不创建 venv、不调用 pip、不下载依赖，App 安装包不包含 Python 解释器。构建机需要 Python 3.13，可用 `MOSS_BUILD_PYTHON` 指定；实际依赖版本记录在 `runtime/python-bundle.json`。
 
 `roots` 保存范围，`pathBindings` 将 `repo_path` 绑定到会话默认目录，并在每次工具调用前检查真实路径和仓库根目录。官方服务的 Roots 不承担权限校验，Core 在 SDK 请求边界执行检查。公共仓库必须显式选择；不同会话使用独立连接。
 
@@ -22,6 +22,6 @@ node scripts/verify-source-package.mjs --app moss.git --rebuild
 node scripts/verify-git.mjs --previous-archive artifacts/moss.git/0.1.1/moss.git-0.1.1.zip
 ```
 
-安装包位于 `artifacts/moss.git/0.1.2/moss.git-0.1.2.zip`。相邻 Core 仓库提供 `MOSS_TEST_GIT_MCP=1 bun test src/services/mcp/git.integration.test.ts`，验证实际工具、范围和重连。开发期间 vendor/moss-core 的包源码需与 Core 同步。
+安装包位于 `artifacts/moss.git/0.1.5/moss.git-0.1.5-<platform>.zip`。相邻 Core 仓库提供 `MOSS_TEST_GIT_MCP=1 bun test src/services/mcp/git.integration.test.ts`，验证实际工具、范围和重连。开发期间 vendor/moss-core 的包源码需与 Core 同步。
 
 上游：https://pypi.org/project/mcp-server-git/2026.8.18/ 。许可证原文位于 `resources/assets/licenses/mcp-server-git-LICENSE.txt`。

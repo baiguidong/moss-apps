@@ -4,6 +4,7 @@ import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import semver from 'semver'
+import { pythonBundleManifest } from './bundled-python.mjs'
 import { loadJsonSchema, validateAppManifest, validateAppToolInputSchema } from '@moss/app-sdk'
 import { getAppCategory } from '@moss/app-sdk/categories'
 import { createToolAppManifest } from '../vendor/moss-core/packages/app-runtime/src/packages/generate-tool-app.mjs'
@@ -166,7 +167,7 @@ export function listApps({ root: repositoryRoot = repoRoot, onError } = {}) {
         ids.add(appId)
       }
       try {
-        const rawManifest = kind === 'tool' ? createToolAppManifest(input) : input
+        const rawManifest = kind === 'tool' ? pythonBundleManifest(createToolAppManifest(input), root) : input
         if (!rawManifest.category) throw new Error(`App must declare category in ${manifestPath}`)
         if (!rawManifest.navigation) throw new Error(`App must declare navigation by intended use in ${manifestPath}`)
         const manifest = validateRepositoryAppManifest(rawManifest)

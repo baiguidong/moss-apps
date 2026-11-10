@@ -1,10 +1,8 @@
 # 文档转换 · MarkItDown
 
-配置型 App `moss.markitdown@0.1.1`。固定使用微软 [`markitdown-mcp==0.0.1a7`](https://pypi.org/project/markitdown-mcp/0.0.1a7/)，由 Moss Core 提供设置页、Python 环境、MCP 连接和生命周期，不包含独立 Backend。
+配置型 App `moss.markitdown@0.1.3`。固定使用微软 [`markitdown-mcp==0.0.1a7`](https://pypi.org/project/markitdown-mcp/0.0.1a7/)，由 Moss Core 提供设置页、Python 环境、MCP 连接和生命周期，不包含独立 Backend。
 
-需要 Host API >=3.11 和 Python >=3.10。首次检查或调用时，Core 在独立虚拟环境下载上游依赖，后续复用缓存；不向系统 Python 安装包。固定的是顶层 MCP 包，传递依赖由上游版本约束解析。首次依赖准备需要联网。上游当前版本为预发布版。
-
-本轮 Core 已将 Python 包安装等待时间延长至 240 秒、服务检查等待时间延长至 300 秒，以覆盖首次依赖准备；配套修改见 [交付记录](../../docs/office-mcp-app-delivery.md)。旧 Core 的较短等待时间可能中断首次下载，需更新 Core。
+需要 Moss 内置 Python 3.13。构建时下载服务与第三方依赖，随平台 App 安装包放入 `runtime/site-packages/`。运行时使用 Core Python 和包内依赖，不创建 venv、不调用 pip、不联网安装。安装包不包含 Python 解释器。上游服务是固定的预发布版本。
 
 ## 使用
 
@@ -24,6 +22,6 @@ node scripts/verify-source-package.mjs --app moss.markitdown --rebuild
 node scripts/verify-office-mcp.mjs --app moss.markitdown
 ```
 
-包位于 `artifacts/moss.markitdown/0.1.1/`，携带配置源码、资源、固定 Core 生成器和构建锁文件。MCP 服务及其运行依赖在首次连接时下载，不在 ZIP 中预装。真实服务验证使用临时文件和独立配置，不读取用户文档；发布任务在 macOS Apple Silicon、Windows x64 和 Linux x64 检查实际 MCP 调用。macOS Intel 上依赖安装超过 Host 的四分钟上限，暂不声明支持。
+包位于 `artifacts/moss.markitdown/0.1.3/`，按 macOS Apple Silicon、Windows x64 和 Linux x64 分别构建。构建机需要 Python 3.13，可通过 `MOSS_BUILD_PYTHON` 指定。实际依赖版本记录在包内 `runtime/python-bundle.json`。首次连接也直接使用包内依赖。
 
 上游：[Microsoft MarkItDown MCP](https://github.com/microsoft/markitdown/tree/main/packages/markitdown-mcp)。许可证原文位于 `resources/assets/licenses/markitdown-mcp-LICENSE.txt`。

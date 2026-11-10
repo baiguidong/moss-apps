@@ -106,7 +106,7 @@ try {
   for (const name of apps) {
     const definition = JSON.parse(await fs.readFile(path.join(repo, 'tool-apps', name, 'app.json'), 'utf8'))
     const output = path.join(repo, 'artifacts', definition.id, definition.version)
-    const archive = path.join(output, `${definition.id}-${definition.version}.zip`)
+    const archive = path.join(output, `${definition.id}-${definition.version}-${process.platform}-${process.arch}.zip`)
     const checks = []
     const record = value => { checks.push(value); console.log(`PASS ${definition.id}: ${value}`) }
     let connection, database
@@ -166,7 +166,7 @@ try {
       record(`ZIP installation, settings navigation, session selection and ${tools.length} upstream tools`)
       if (name === 'markitdown') {
         assert(toolNames.includes('convert_to_markdown'))
-        await execute(connection.command, ['-I', '-c', fixturePython, workspace], { timeout: 30_000 })
+        await execute(process.env.MOSS_PYTHON_PATH, ['-I', '-S', '-B', '-c', 'import sys; sys.path.insert(0, sys.argv.pop(1));\n' + fixturePython, path.join(path.dirname(selected[runtimeName].args[0]), 'site-packages'), workspace], { timeout: 30_000 })
         for (const [file, expected] of [['文档 #1.docx', 'Moss document fixture 中文内容'], ['文档 #1.pdf', 'Moss PDF fixture 42'], ['演示 #1.pptx', 'Moss presentation fixture'], ['表格 #1.xlsx', 'Moss spreadsheet fixture']]) {
           const uri = pathToFileURL(path.join(workspace, file)).href
           assert(text(await call(connection.client, 'convert_to_markdown', { uri })).includes(expected), file)

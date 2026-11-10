@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5
+
+- Python 服务及第三方依赖随平台 App 安装包提供，使用 Moss Core 内置 Python，启动不再创建虚拟环境或联网安装。
+
 ## 0.1.3
 
 - 新增 Linux AMD64 支持，沿用 Host 管理的跨平台 MCP 运行环境。

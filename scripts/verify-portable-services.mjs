@@ -6,11 +6,11 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
-import { prepareMcpPython } from '../vendor/moss-core/packages/app-sdk/src/mcp/python-runtime.mjs'
+import { execFileSync } from 'node:child_process'
 import { DatabaseService, defaults } from '../apps/database/src/backend/service.mjs'
 
 const appId = process.argv[process.argv.indexOf('--app') + 1]
-const supported = new Set(['moss.database', 'moss.excel', 'moss.markitdown'])
+const supported = new Set(['moss.database', 'moss.excel', 'moss.markitdown', 'moss.git'])
 if (!supported.has(appId)) throw new Error(`Unsupported portable service: ${appId}`)
 const root = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-portable-service-'))
 let client
@@ -33,13 +33,19 @@ try {
     assert.equal(config.command, process.platform === 'win32' ? 'cmd' : 'npx')
   } else {
     const name = appId.slice('moss.'.length)
-    const manifest = JSON.parse(await fs.readFile(new URL(`../tool-apps/${name}/app.json`, import.meta.url), 'utf8'))
-    config = structuredClone(manifest.mcpServers[name])
+    const definition = JSON.parse(await fs.readFile(new URL(`../tool-apps/${name}/app.json`, import.meta.url), 'utf8'))
+    const packageFlag = process.argv.indexOf('--package')
+    const packageRoot = path.resolve(packageFlag >= 0 ? process.argv[packageFlag + 1]
+      : `artifacts/${appId}/${definition.version}/package-${process.platform}-${process.arch}`)
+    config = Object.values(JSON.parse(await fs.readFile(path.join(packageRoot, 'mcp.json'), 'utf8')).mcpServers)[0]
+    assert.equal(config.python, undefined, 'Packaged App must not request a runtime pip install')
+    config.args = config.args.map(arg => arg.startsWith('@app/') ? path.join(packageRoot, arg.slice(5)) : arg)
     if (name === 'excel') config.args[config.args.indexOf('--allow-dir') + 1] = root
-    const env = { ...process.env, ...config.env,
-      MOSS_HOME: root, MOSS_MCP_PYTHON_HOME: path.join(root, 'python'),
-      MOSS_PYTHON_PATH: process.env.MOSS_PYTHON_PATH || 'python' }
-    config.command = await prepareMcpPython(config, { env })
+    config.command = process.execPath
+    config.env = { ...config.env, MOSS_HOME: root, MOSS_MCP_PYTHON_HOME: path.join(root, 'python'),
+      MOSS_PYTHON_PATH: process.env.MOSS_PYTHON_PATH || process.env.MOSS_BUILD_PYTHON || (process.platform === 'win32' ? 'python' : 'python3'),
+      PIP_NO_INDEX: '1', HTTP_PROXY: 'http://127.0.0.1:1', HTTPS_PROXY: 'http://127.0.0.1:1' }
+    if (name === 'git') execFileSync('git', ['init', '-q', root])
   }
   const transport = new StdioClientTransport({ command: config.command, args: config.args,
     env: { ...process.env, ...config.env }, cwd: root, stderr: 'pipe' })
@@ -62,11 +68,14 @@ try {
     await call('create_workbook', { path: 'portable.xlsx', sheets: ['Sheet1'] })
     await call('write_range', { path: 'portable.xlsx', sheet: 'Sheet1', at: 'A1', rows: [[42]] })
     assert.match(await call('read_range', { path: 'portable.xlsx', sheet: 'Sheet1', range: 'A1' }), /42/)
+  } else if (appId === 'moss.git') {
+    assert.match(await call('git_status', { repo_path: root }), /branch|commit|working/i)
   } else {
     const file = path.join(root, 'portable.txt')
     await fs.writeFile(file, 'Moss portable conversion 42\n')
     assert.match(await call('convert_to_markdown', { uri: pathToFileURL(file).href }), /Moss portable conversion 42/)
   }
+  if (appId !== 'moss.database') await assert.rejects(fs.stat(path.join(root, 'python')), { code: 'ENOENT' })
   console.log(`PASS ${appId}: ${process.platform}-${process.arch}, ${names.size} tools, real MCP call`)
 } finally {
   await client?.close().catch(error => console.warn(`MCP cleanup: ${error.message}`))

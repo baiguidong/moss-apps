@@ -1,0 +1,13 @@
+{
+  "python": "3.13",
+  "module": "mcp_server_git",
+  "requirements": [
+    "mcp-server-git==2026.8.18"
+  ],
+  "platforms": [
+    "darwin-arm64",
+    "darwin-x64",
+    "win32-x64",
+    "linux-x64"
+  ]
+}
