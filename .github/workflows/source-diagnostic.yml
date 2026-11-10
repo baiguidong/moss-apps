@@ -40,7 +40,15 @@ jobs:
           path: ~/.bun/install/cache
           key: ${{ runner.os }}-bun-1.3.10-${{ hashFiles('bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-1.3.10-
-      - run: bun install --frozen-lockfile
+      - name: Install build dependencies
+        shell: bash
+        env:
+          APP_ID: ${{ inputs.app }}
+        run: |
+          case "$APP_ID" in
+            moss.excel|moss.markitdown|moss.git) bun install --frozen-lockfile --filter moss-apps ;;
+            *) bun install --frozen-lockfile ;;
+          esac
       - id: target
         shell: bash
         env:
