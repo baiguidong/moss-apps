@@ -41,7 +41,7 @@ test('real Host turns bind the default assistant, deduplicate replies and keep c
  const f=await fixture(t),a=f.controller.actions;await a['pet.hatch']({})
  const first=await a['chat.send']({text:'你好',requestId:'first'});assert.equal(first.pending.length,1)
  await a['chat.send']({text:'你好',requestId:'first'});assert.equal(f.turns.length,1)
- const binding=f.calls.find(c=>c.method==='binding.update').input.patch;assert.equal(binding.permissionMode,'bypassPermissions');assert.deepEqual(binding.resources,{tools:null,skills:null,connectors:null})
+ const binding=f.calls.find(c=>c.method==='binding.update').input.patch;assert.equal(binding.contextScope,'app');assert.equal(binding.permissionMode,'bypassPermissions');assert.deepEqual(binding.resources.skills,[]);assert.deepEqual(binding.resources.connectors,[]);assert.ok(binding.resources.tools.includes('help_search'));assert.ok(binding.resources.tools.includes('Bash'));assert.ok(!binding.resources.tools.includes('Skill'))
  f.turns[0].status='completed';f.turns[0].resultText='模型的真实返回'
  await f.controller.onTurn(f.turns[0].id);await f.controller.onTurn(f.turns[0].id)
  const result=await a['pet.get']();assert.equal(result.messages.filter(m=>m.role==='assistant').length,1);assert.equal(result.messages.at(-1).text,'模型的真实返回');assert.equal(result.pending.length,0)
@@ -134,3 +134,19 @@ test('stale configuration retries only if the requested field has not changed',a
  await assert.rejects(actions.settings_apply({domain:'desktop',revision:'two',requestId:'conflict',changes:[{path:'enabled',value:false}]}),/核对当前值/)
  assert.equal(attempts.length,3)
 })
+
+test('legacy all access and explicit plugin selections stay confined to Buddy and Core tools',async t=>{
+ const f=await fixture(t),a=f.controller.actions;let state=await a['pet.hatch']({})
+ state=await a['pet.update']({revision:state.revision,preferences:{tools:['Read','Skill','foreign_tool','connector_mcp_authenticate'],agentId:'foreign-agent',toolAccess:'selected'}})
+ assert.deepEqual(state.preferences.tools,['Read']);assert.equal(state.preferences.agentId,null)
+ await a['chat.send']({text:'hello',requestId:'isolated'})
+ const policy=f.calls.find(c=>c.method==='binding.update').input.patch
+ assert.deepEqual(policy.resources,{tools:['settings_read','settings_apply','settings_undo','help_search','AskUserQuestion','ToolSearch','Read'],skills:[],connectors:[]})
+ assert.equal(policy.agentId,null)
+ await a['chat.stop']()
+ state=await a['pet.get']();await a['pet.update']({revision:state.revision,preferences:{toolAccess:'all',configEnabled:false}})
+ const restarted=await f.restart();await restarted.actions['chat.send']({text:'hello again',requestId:'legacy-all'})
+ const legacy=f.calls.filter(c=>c.method==='binding.update').at(-1).input.patch
+ assert.deepEqual(legacy.resources.skills,[]);assert.deepEqual(legacy.resources.connectors,[])
+ assert.ok(Array.isArray(legacy.resources.tools));assert.ok(!legacy.resources.tools.includes('settings_apply'));assert.ok(!legacy.resources.tools.includes('settings_undo'))
+ })

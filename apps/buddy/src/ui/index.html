@@ -24,8 +24,8 @@
 <label class="b-setting">执行权限<select id="permission-mode"><option value="bypassPermissions">全部权限（默认）</option><option value="default">需要时向我确认</option><option value="acceptEdits">自动批准文件编辑</option><option value="dontAsk">只执行已授权操作</option></select></label><p class="b-setting-note">全部权限会直接执行可用工具和设置修改；可随时切回确认模式，下一轮生效。</p>
 <label class="b-label">性格<textarea id="personality" class="b-field" rows="2" maxlength="500"></textarea></label>
 <label class="b-setting-check"><input id="config-enabled" type="checkbox">允许修改 Moss 设置</label><label class="b-setting-check"><input id="notifications-enabled" type="checkbox">接收重要消息提醒</label>
-<label class="b-setting">可用能力<select id="tool-access"><option value="all">Moss 全部可用工具（默认）</option><option value="selected">只使用我选择的工具</option></select></label><div id="tool-selection" hidden><p class="b-setting-note">始终保留手册和已开启的设置工具，可再选择其他能力。</p><div id="tool-picker"></div></div>
-<p class="b-setting-note">聊天保存在这个 App 中。换外形不会清空记录；模型跟随 Moss 默认配置。选择其他 Agent 后，可用工具还受该 Agent 的范围限制。</p><button class="b-primary" type="submit">保存伙伴设置</button></form></details>
+<label class="b-setting">可用能力<select id="tool-access"><option value="all">Moss 基础工具（默认）</option><option value="selected">选择 Moss 基础工具</option></select></label><div id="tool-selection" hidden><p class="b-setting-note">始终保留手册、提问和已开启的设置工具，可再选择 Moss 基础工具。Buddy 使用独立的工具范围。</p><div id="tool-picker"></div></div>
+<p class="b-setting-note">聊天保存在这个 App 中。换外形不会清空记录；模型跟随 Moss 默认配置。可选择助手规则调整回复方式。</p><button class="b-primary" type="submit">保存伙伴设置</button></form></details>
 </div></section>
 <section id="page-notifications" class="b-main" hidden><h2>重要消息</h2><div id="notifications"></div></section>
 <section id="page-help" class="b-main" hidden><h2>Moss 使用手册</h2><form id="help-form" class="b-composer"><input id="help-query" class="b-field" placeholder="搜索模型、项目、记忆、hooks…" aria-label="搜索使用手册"><button class="b-primary" type="submit">搜索</button></form><div id="articles"></div></section>

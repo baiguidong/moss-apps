@@ -7,6 +7,7 @@ import { searchHandbook } from './handbook.mjs'
 const SKINS = ['moss','robot','orb']
 const DEFAULTS = {tone:'warm',agentId:null,assistantName:null,tools:[],configEnabled:true,notificationsEnabled:true,permissionMode:'bypassPermissions',toolAccess:'all'}
 const TOOL_NAMES = ['settings_read','settings_apply','settings_undo','help_search']
+const CORE_TOOLS = ['AskUserQuestion','ToolSearch','Bash','Read','Write','Edit','Glob','Grep','WebSearch','WebFetch','CronCreate','CronDelete','CronList','TodoWrite','moss_browser_open']
 const clean = (value,limit=120) => String(value||'').trim().slice(0,limit)
 const done = status => ['completed','failed','cancelled','rejected','human'].includes(status)
 export async function createBuddyController({dataDir,host,emit=()=>{},instructions='',handbook=[],handbookVersion=null}) {
@@ -14,7 +15,8 @@ export async function createBuddyController({dataDir,host,emit=()=>{},instructio
   let state
   try {state=JSON.parse(await fs.readFile(file,'utf8'))} catch(error) {if(error.code!=='ENOENT')throw new Error('宠物数据无法读取，已保留原文件，请先检查数据');state={version:1,revision:0,pet:null,preferences:{...DEFAULTS},messages:[],requests:{}}}
   if(state.version!==1||!Array.isArray(state.messages)||!state.requests)throw new Error('不支持的宠物数据版本')
-  state.preferences={...DEFAULTS,...state.preferences}
+  state.preferences={...DEFAULTS,...state.preferences,agentId:null}
+  state.preferences.tools=state.preferences.tools.filter(name=>CORE_TOOLS.includes(name))
   state.sessionContexts ||= {}
   let durableState=structuredClone(state)
   let queue=Promise.resolve()
@@ -59,9 +61,9 @@ export async function createBuddyController({dataDir,host,emit=()=>{},instructio
   async function bind(){
     const externalConversationId=conversation()
     const existing=await host('moss.agent/v1','binding.get',{externalConversationId})
-    const tools=[...new Set([...TOOL_NAMES,...state.preferences.tools])].filter(name=>state.preferences.configEnabled||(!name.endsWith('settings_apply')&&!name.endsWith('settings_undo')))
-    const all=state.preferences.toolAccess==='all'
-    const patch={replyMode:'ai_auto',agentId:state.preferences.agentId||null,permissionMode:state.preferences.permissionMode,resources:all?{tools:null,skills:null,connectors:null}:{tools:[...tools,'ToolSearch'],skills:[],connectors:[]},session:{mode:'fixed',rotateAfterTurns:1000},proactive:{enabled:false,maxConsecutiveReplies:1,cooldownMs:60000}}
+    const selected=state.preferences.toolAccess==='all'?CORE_TOOLS:state.preferences.tools.filter(name=>CORE_TOOLS.includes(name))
+    const tools=[...new Set([...TOOL_NAMES,'AskUserQuestion','ToolSearch',...selected])].filter(name=>state.preferences.configEnabled||(!name.endsWith('settings_apply')&&!name.endsWith('settings_undo')))
+    const patch={contextScope:'app',replyMode:'ai_auto',agentId:null,permissionMode:state.preferences.permissionMode,resources:{tools,skills:[],connectors:[]},session:{mode:'fixed',rotateAfterTurns:1000},proactive:{enabled:false,maxConsecutiveReplies:1,cooldownMs:60000}}
     if(JSON.stringify(existing.binding?.policy)!==JSON.stringify(patch))await host('moss.agent/v1','binding.update',{externalConversationId,expectedRevision:existing.binding?.revision||0,patch})
   }
   const configurationReads=new Map()
@@ -121,8 +123,9 @@ export async function createBuddyController({dataDir,host,emit=()=>{},instructio
         for(const key of ['permissionMode','toolAccess'])if(p[key]!==undefined)state.preferences[key]=p[key]
         if(p.tone!==undefined){if(!['warm','playful','concise'].includes(p.tone))throw new Error('未知聊天口吻');state.preferences.tone=p.tone}
         for(const key of ['configEnabled','notificationsEnabled'])if(typeof p[key]==='boolean')state.preferences[key]=p[key]
-        for(const key of ['agentId','assistantName'])if(p[key]!==undefined)state.preferences[key]=p[key]===null?null:clean(p[key])
-        if(p.tools!==undefined)state.preferences.tools=[...new Set(p.tools)]
+        if(p.assistantName!==undefined)state.preferences.assistantName=p.assistantName===null?null:clean(p.assistantName)
+        state.preferences.agentId=null
+        if(p.tools!==undefined)state.preferences.tools=[...new Set(p.tools.filter(name=>CORE_TOOLS.includes(name)))]
       }
       await persist();return publicState()
     }),
@@ -164,8 +167,8 @@ export async function createBuddyController({dataDir,host,emit=()=>{},instructio
     }),
     'chat.stop':()=>serial(async()=>{for(const r of Object.values(state.requests).filter(r=>r.turnId&&!['completed','failed','cancelled','rejected'].includes(r.status)))await host('moss.agent/v1','turn.abort',{turnId:r.turnId});return refresh()}),
     'assistants.list':async()=>{
-      const [agents,config]=await Promise.all([host('moss.agent/v1','catalog.list',{kinds:['agents','tools']}),host('moss.settings/v1','catalog',{domain:'assistants'}).catch(()=>({domains:[]}))])
-      return {agents:agents.agents||[],tools:(agents.tools||[]).filter(t=>!TOOL_NAMES.includes(t.id)&&t.id!=='ToolSearch'),assistants:config.domains?.[0]?.targets||[]}
+      const [agents,config]=await Promise.all([host('moss.agent/v1','catalog.list',{contextScope:'app',kinds:['agents','tools']}),host('moss.settings/v1','catalog',{domain:'assistants'}).catch(()=>({domains:[]}))])
+      return {agents:[],tools:(agents.tools||[]).filter(t=>CORE_TOOLS.includes(t.id)&&!['ToolSearch','AskUserQuestion'].includes(t.id)&&t.source!=='app'),assistants:config.domains?.[0]?.targets||[]}
     },
     'settings_read':readConfiguration,
     'settings_apply':applyConfiguration,

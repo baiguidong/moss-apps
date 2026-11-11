@@ -1,3 +1,9 @@
+## 0.1.12
+
+- Buddy 工具仅在自己的 UI 会话或用户显式选中 Buddy 的普通会话中加载。
+- Buddy 在 App 内声明独立会话范围与 Core/自身工具白名单，不再继承连接器、技能、全局 App 工具或主助手记忆。
+- 保留宠物与自定义助手提示词，复用已有聊天记录。
+
 ## 0.1.10
 
 - Rebuild against Moss Core 0.1.25 and refresh the shared appearance/runtime snapshot.

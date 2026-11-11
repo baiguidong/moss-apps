@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.buddy",
-  "version": "0.1.10",
+  "version": "0.1.12",
   "displayName": "Buddy 伴侣精灵",
   "description": "孵化自己的宠物，和它聊天，了解 Moss 用法并管理桌面、Agent 与项目配置。",
   "category": "ai",
@@ -15,7 +15,7 @@
   ],
   "icon": "assets/icon.svg",
   "hostApi": "^3.6.0",
-  "toolScope": "global",
+  "toolScope": "session",
   "toolLoading": "on-demand",
   "ui": {
     "entry": "dist/ui/index.html",
