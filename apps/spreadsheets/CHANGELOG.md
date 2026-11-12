@@ -1,3 +1,7 @@
+## 0.2.10
+
+- 更新 Moss Core 会话存储边界处理，确保会话产物保存到当前 workspace 的 App artifact 目录。
+
 ## 0.2.9
 
 - Rebuild against Moss Core 0.1.25 and refresh the shared appearance/runtime snapshot.

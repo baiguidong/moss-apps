@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.document",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "displayName": "文档创作",
   "category": "knowledge",
   "keywords": [
