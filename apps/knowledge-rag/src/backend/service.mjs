@@ -41,7 +41,19 @@ async function processCommand(pid) {
     try { return (await fs.readFile(`/proc/${pid}/cmdline`, 'utf8')).replaceAll('\0', ' ').trim() || null }
     catch { /* Fall through to ps for environments without procfs. */ }
   }
-  if (process.platform === 'win32') return null
+  if (process.platform === 'win32') {
+    // `process.kill(pid, 0)` only tells us that a PID exists on Windows. Ask
+    // the process table for its command line so a reused PID can be separated
+    // from the Python engine. PowerShell is present on the hosted runners and
+    // avoids relying on the removed `wmic` utility.
+    const filter = `ProcessId = ${pid}`
+    return await new Promise(resolve => {
+      execFile('powershell.exe', [
+        '-NoProfile', '-NonInteractive', '-Command',
+        `(Get-CimInstance Win32_Process -Filter '${filter}').CommandLine`,
+      ], { timeout: 1000, windowsHide: true }, (_error, stdout) => resolve(stdout?.trim() || null))
+    })
+  }
   return await new Promise(resolve => {
     execFile('ps', ['-p', String(pid), '-o', 'command='], { timeout: 1000 }, (_error, stdout) => resolve(stdout?.trim() || null))
   })
