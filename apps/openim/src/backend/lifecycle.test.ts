@@ -34,7 +34,7 @@ new OpenIMSDK(${JSON.stringify(library)}, () => {});
 new AppBackendClient({ onShutdown: shutdown }).start();
 setInterval(() => {}, 1000);
 `);
-  const result = await Bun.build({ entrypoints: [entry], outdir: root, target: "node" });
+  const result = await Bun.build({ entrypoints: [entry], outdir: root, target: "node", format: "cjs" });
   if (!result.success) throw new Error(result.logs.join("\n"));
   fixture = result.outputs[0]!.path;
 });
