@@ -15,8 +15,40 @@ const nativeFile = process.platform === "darwin" ? "libopenimsdk.dylib" : proces
 const library = path.join(path.dirname(sdkPackage), "assets", nativeFolder, nativeFile);
 let root: string;
 let fixture: string;
+let nativeAddonPath: string | undefined;
+let nativeAddonBackup: Buffer | undefined;
+
+async function disableLinuxExecutableStack() {
+  if (process.platform !== "linux") return;
+  nativeAddonPath = path.join(
+    path.dirname(require.resolve("koffi/package.json")),
+    "build",
+    "koffi",
+    `linux_${process.arch}`,
+    "koffi.node",
+  );
+  const bytes = await fs.readFile(nativeAddonPath);
+  if (bytes.readUInt32LE(0) !== 0x464c457f || bytes[5] !== 1) return;
+
+  const is64 = bytes[4] === 2;
+  const programHeaderOffset = is64 ? Number(bytes.readBigUInt64LE(32)) : bytes.readUInt32LE(28);
+  const programHeaderSize = is64 ? bytes.readUInt16LE(54) : bytes.readUInt16LE(42);
+  const programHeaderCount = is64 ? bytes.readUInt16LE(56) : bytes.readUInt16LE(44);
+  const flagsOffset = is64 ? 4 : 24;
+  for (let index = 0; index < programHeaderCount; index += 1) {
+    const offset = programHeaderOffset + index * programHeaderSize;
+    if (bytes.readUInt32LE(offset) !== 0x6474e551) continue; // PT_GNU_STACK
+    const flags = bytes.readUInt32LE(offset + flagsOffset);
+    if (!(flags & 1)) return;
+    nativeAddonBackup = Buffer.from(bytes);
+    bytes.writeUInt32LE(flags & ~1, offset + flagsOffset);
+    await fs.writeFile(nativeAddonPath, bytes);
+    return;
+  }
+}
 
 beforeAll(async () => {
+  await disableLinuxExecutableStack();
   root = await fs.mkdtemp(path.join(os.tmpdir(), "moss-openim-lifecycle-"));
   const entry = path.join(root, "fixture.ts");
   await fs.writeFile(entry, `
@@ -39,7 +71,10 @@ setInterval(() => {}, 1000);
   fixture = result.outputs[0]!.path;
 });
 
-afterAll(async () => { if (root) await fs.rm(root, { recursive: true, force: true }); });
+afterAll(async () => {
+  if (root) await fs.rm(root, { recursive: true, force: true });
+  if (nativeAddonPath && nativeAddonBackup) await fs.writeFile(nativeAddonPath, nativeAddonBackup);
+});
 
 async function withBackend(
   run: (child: ChildProcess, output: () => string) => Promise<void>,
