@@ -3,7 +3,7 @@ import { constants, existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import net from 'node:net'
 import { createHash, randomBytes, randomUUID } from 'node:crypto'
-import { spawn } from 'node:child_process'
+import { execFile, spawn } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
 import { connectEngine } from './mcp.mjs'
 import { engineEnvironment } from './proxy.mjs'
@@ -23,6 +23,61 @@ export function relativeDocument(root, source) {
   if (!relative || relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) throw new Error('文档不属于此知识库')
   return relative.split(path.sep).join('/')
 }
+
+const ENGINE_PROCESS_MARKERS = ['run_engine.py', 'mcp_server']
+
+function processIsAlive(pid) {
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch (error) {
+    if (error?.code === 'ESRCH') return false
+    return null
+  }
+}
+
+async function processCommand(pid) {
+  if (process.platform === 'linux') {
+    try { return (await fs.readFile(`/proc/${pid}/cmdline`, 'utf8')).replaceAll('\0', ' ').trim() || null }
+    catch { /* Fall through to ps for environments without procfs. */ }
+  }
+  if (process.platform === 'win32') return null
+  return await new Promise(resolve => {
+    execFile('ps', ['-p', String(pid), '-o', 'command='], { timeout: 1000 }, (_error, stdout) => resolve(stdout?.trim() || null))
+  })
+}
+
+function isKnowledgeRagProcess(command) {
+  const normalized = String(command || '').toLowerCase()
+  return ENGINE_PROCESS_MARKERS.some(marker => normalized.includes(marker))
+}
+
+/**
+ * Remove a PID file left behind by a crashed engine when its PID was later
+ * reused by an unrelated process. The upstream lock also has an OS guard,
+ * so an actual running engine remains protected while we repair this legacy
+ * diagnostic file before the next child starts.
+ */
+export async function clearStaleEngineLock(dataDir) {
+  const lockPath = path.join(dataDir, 'engine', 'data', 'knowledge-rag.lock')
+  let contents
+  try { contents = await fs.readFile(lockPath, 'utf8') } catch { return false }
+  const pid = Number.parseInt(contents.trim().split(/\s+/)[0], 10)
+  if (!Number.isSafeInteger(pid) || pid <= 0) return false
+  const alive = processIsAlive(pid)
+  if (alive === null) return false
+  if (alive) {
+    const command = await processCommand(pid)
+    if (!command || isKnowledgeRagProcess(command)) return false
+  }
+  try {
+    // Do not remove a new owner's PID file if it changed while ps was running.
+    if ((await fs.readFile(lockPath, 'utf8')) !== contents) return false
+    await fs.unlink(lockPath)
+    return true
+  } catch { return false }
+}
+
 async function freePort() {
   const server = net.createServer()
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve) })
@@ -187,6 +242,7 @@ export class KnowledgeService {
     }
     await fs.mkdir(this.engineRoot, { recursive: true })
     await fs.writeFile(path.join(this.engineRoot,'config.yaml'), JSON.stringify(config, null, 2), { mode: 0o600 })
+    await clearStaleEngineLock(this.dataDir)
     this.logs = ''
     const env = await engineEnvironment()
     this.controller.signal.throwIfAborted()

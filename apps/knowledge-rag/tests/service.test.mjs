@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { KnowledgeService, pageContent, relativeDocument } from '../src/backend/service.mjs'
+import { KnowledgeService, clearStaleEngineLock, pageContent, relativeDocument } from '../src/backend/service.mjs'
 import { decodeToolResult } from '../src/backend/mcp.mjs'
 
 test('MCP structured failures propagate and successful JSON text is decoded', () => {
@@ -27,6 +27,18 @@ test('canonical storage paths accept Python sources through a directory alias', 
     const source = path.join(await fs.realpath(root), 'actual/engine/documents/note.md')
     assert.equal(service.normalizeDocument({ source }).filepath, 'note.md')
     assert.throws(() => service.normalizeDocument({ source: path.join(root, 'outside.md') }))
+  } finally { await fs.rm(root, { recursive: true, force: true }) }
+})
+test('stale engine PID files from dead or unrelated processes are recoverable', async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-rag-lock-'))
+  const lockDir = path.join(root, 'engine', 'data')
+  const lockPath = path.join(lockDir, 'knowledge-rag.lock')
+  try {
+    await fs.mkdir(lockDir, { recursive: true })
+    // The current Node test process is alive, but it is not the Python engine.
+    await fs.writeFile(lockPath, `${process.pid}\n`)
+    assert.equal(await clearStaleEngineLock(root), true)
+    await assert.rejects(fs.access(lockPath))
   } finally { await fs.rm(root, { recursive: true, force: true }) }
 })
 test('installation is reusable only with a complete matching dependency lock', async () => {

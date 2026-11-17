@@ -1,3 +1,9 @@
+# Changelog
+
+## 0.1.9
+
+- 修复检索引擎异常退出后，PID 被其他系统进程复用导致无法重新启动的问题。
+
 ## 0.1.8
 
 - Rebuild against Moss Core 0.1.25 and refresh the shared appearance/runtime snapshot.
@@ -9,8 +15,6 @@
 ## 0.1.6
 
 - Rebuild against Moss Core 0.1.23 and refresh the shared appearance/runtime snapshot.
-
-# Changelog
 
 ## 0.1.5
 
