@@ -4,6 +4,7 @@ import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import assert from 'node:assert/strict'
 import { KnowledgeService, EMBEDDING_MODEL } from '../src/backend/service.mjs'
 import { connectEngine } from '../src/backend/mcp.mjs'
@@ -11,7 +12,9 @@ import { render, markdown } from './report.mjs'
 
 const app = fileURLToPath(new URL('..', import.meta.url)), repo = path.resolve(app, '../..')
 const { createLibraryService } = await import(path.join(repo, 'apps/library/src/backend/store.mjs'))
-const cache = path.join(repo, '.cache/knowledge-rag'), output = path.join(repo, 'artifacts/moss.knowledge-rag/comparison')
+const cache = process.env.MOSS_RAG_TEST_CACHE || path.join(repo, '.cache/knowledge-rag')
+const modelsCache = process.env.MOSS_RAG_TEST_MODELS || path.join(cache, 'models')
+const output = path.join(repo, 'artifacts/moss.knowledge-rag/comparison')
 await fs.mkdir(output, { recursive: true })
 const corpusText = await fs.readFile(path.join(app,'tests/comparison-corpus.json'),'utf8'), corpus = JSON.parse(corpusText)
 const hash = createHash('sha256').update(corpusText).digest('hex')
@@ -20,10 +23,19 @@ const run = await fs.mkdtemp(path.join(output,'run-')), documents = path.join(ru
 await fs.mkdir(documents)
 for (const doc of corpus.documents) await fs.writeFile(path.join(documents,doc.file), doc.content)
 await fs.copyFile(path.join(app,'tests/comparison-corpus.json'), path.join(output,'corpus.json'))
-const python = process.env.MOSS_RAG_TEST_PYTHON || path.join(cache,'venv/bin/python')
+const pythonCandidates = [
+  process.env.MOSS_RAG_TEST_PYTHON,
+  process.env.MOSS_PYTHON_PATH,
+].filter(Boolean)
+const dependencyProbe = "import importlib.metadata as m; required=['knowledge-rag','chromadb','fastembed','mcp','onnxruntime']; missing=[name for name in required if not any(d.metadata.get('Name','').lower()==name for d in m.distributions())];\nif missing: raise SystemExit(','.join(missing))"
+const python = pythonCandidates.find(candidate => {
+  if (!existsSync(candidate)) return false
+  try { execFileSync(candidate, ['-c', dependencyProbe], { stdio: 'ignore' }); return true } catch { return false }
+})
+if (!python) throw new Error(`没有找到可用于对比的 Python 环境。正式 App 使用 Moss 受管 Python，并在 App 私有目录安装 requirements.lock；对比脚本请先用 Moss Python 创建测试 venv，或设置 MOSS_RAG_TEST_PYTHON。候选路径：${pythonCandidates.join('、') || '未设置'}`)
 const library = createLibraryService({ libraryRoot: path.join(run,'library'), parserPath: path.join(repo,'apps/library/src/backend/library_parser.py'), pythonPath: python })
 let registered
-const rag = new KnowledgeService({ dataDir: path.join(run,'rag'), resourcesDir: path.join(app,'resources'), enginePython: python, modelsCache: path.join(cache,'models'), register: async config => { registered = config }, onChanged: value => console.log(`[engine] ${value.state}: ${value.message || value.error || ''}`) })
+const rag = new KnowledgeService({ dataDir: path.join(run,'rag'), resourcesDir: path.join(app,'resources'), enginePython: python, modelsCache, register: async config => { registered = config }, onChanged: value => console.log(`[engine] ${value.state}: ${value.message || value.error || ''}`) })
 const elapsed = async fn => { const start=performance.now(); const result=await fn(); return { result, ms:performance.now()-start } }
 const percentile = (values, p) => { const sorted=[...values].sort((a,b)=>a-b); return sorted[Math.min(sorted.length-1,Math.ceil(sorted.length*p)-1)] || 0 }
 const basename = result => path.basename(result.filepath || result.relativePath || result.source || '')
@@ -77,7 +89,7 @@ try {
   }
   const byKind=Object.fromEntries([...new Set(rows.map(row=>row.kind))].map(kind=>[kind,{library:summarize(rows.filter(row=>row.kind===kind),'library'),rag:summarize(rows.filter(row=>row.kind===kind),'rag')}]))
   const rssKiB=Number(execFileSync('ps',['-o','rss=','-p',String(rag.process.pid)],{encoding:'utf8'}).trim())
-  const model=JSON.parse(await fs.readFile(path.join(cache,'models/moss-model.json'),'utf8'))
+  const model=JSON.parse(await fs.readFile(path.join(modelsCache,'moss-model.json'),'utf8'))
   const result={at:new Date().toISOString(),corpusHash:hash,documents:corpus.documents.length,queries:rows.length,runDir:run,
     environment:{platform:process.platform,arch:process.arch,cpu:os.cpus()[0]?.model,node:process.version,python:execFileSync(python,['--version'],{encoding:'utf8'}).trim(),dependencies:JSON.parse(execFileSync(python,['-c',"import json; from importlib.metadata import version; print(json.dumps({k:version(k) for k in ['knowledge-rag','chromadb','fastembed','mcp','onnxruntime']}))"],{encoding:'utf8'}))},
     configuration:{model:EMBEDDING_MODEL,modelArtifact:model,ragAlpha:.7,reranker:false,topK:5,modelPreCached:true},

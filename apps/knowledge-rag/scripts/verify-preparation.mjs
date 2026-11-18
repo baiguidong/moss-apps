@@ -25,7 +25,7 @@ try {
   await page.addInitScript(() => {
     const listeners = new Map(), calls = []
     let appearance = { themeMode: 'light', cssThemeId: 'default' }, scope = 'session'
-    let state = { state: 'not-installed', installed: false, message: '', error: null, version: '4.11.0', model: 'intfloat/multilingual-e5-small' }
+    let state = { state: 'not-installed', installed: false, message: '', error: null, version: '4.11.0', model: 'intfloat/multilingual-e5-small', runtime: { python: { available: true, path: '/moss/runtimes/python/bin/python3', version: '3.13.15', source: 'moss-managed', error: null } } }
     const emit = (name, data) => (listeners.get(name) || []).forEach(fn => fn(data))
     const set = update => { state = { ...state, ...update }; emit('knowledge.changed', state) }
     const start = install => {
@@ -56,6 +56,7 @@ try {
     }
   })
   await page.goto(`http://127.0.0.1:${server.address().port}`)
+  await expect(page.getByRole('status', { name: 'Moss Python 环境检查' })).toContainText('3.13.15')
   await page.getByRole('button', { name: '准备引擎', exact: true }).click()
   await page.evaluate(() => window.fixture.advance('dependencies', '正在下载并校验引擎依赖…', { logs: ['Downloading onnxruntime-1.26.0.whl (17.3 MB)'] }))
   await expect(page.locator('.latest-output')).toContainText('Downloading', { timeout: 1000 })

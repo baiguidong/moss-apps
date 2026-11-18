@@ -106,6 +106,13 @@ dialog.reader::backdrop{background:#0005}
 .setup-heading h2 { margin:0 0 4px; font-size:16px; font-weight:600; }
 .setup-heading p { margin:0; font-size:12px; font-variant-numeric:tabular-nums; }
 .setup-icon { display:grid; place-items:center; width:40px; height:40px; border:1px solid var(--border); border-radius:8px; color:var(--primary); background:var(--secondary); flex-shrink:0; }
+.runtime-check { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; padding:10px 12px; border:1px solid var(--border); border-radius:7px; background:color-mix(in oklab,var(--muted) 28%,var(--card)); font-size:12px; }
+.runtime-check>div { min-width:0; }
+.runtime-check strong,.runtime-check small { display:block; }
+.runtime-check small { margin-top:3px; color:var(--muted-foreground); overflow-wrap:anywhere; }
+.runtime-check>span { color:var(--destructive); font-size:11px; text-align:right; overflow-wrap:anywhere; }
+.runtime-check.runtime-ready { border-color:color-mix(in oklab,var(--primary) 45%,var(--border)); }
+.runtime-check.runtime-error { border-color:color-mix(in oklab,var(--destructive) 45%,var(--border)); background:color-mix(in oklab,var(--destructive) 7%,var(--card)); }
 .setup-steps { list-style:none; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; padding:20px 0; margin:20px 0 0; border-top:1px solid var(--border); }
 .setup-steps li { display:flex; gap:7px; color:var(--muted-foreground); font-size:12px; align-items:flex-start; }
 .setup-steps small { display:block; margin-top:4px; font-size:10px; color:var(--muted-foreground); font-weight:400; }

@@ -6,7 +6,12 @@ export type Preparation = {
   stage: string | null; detail: string; observedAt: number; startedAt: number; elapsedMs: number; stageElapsedMs: number; idleMs: number
   download: { completed: number; total: number; file: string } | null; logs: string[]
 }
-export type EngineStatus = { state: string; installed: boolean; message: string; error: string | null; version: string; model: string; url?: string; preparation?: Preparation | null; reindex?: { active: boolean; percent?: number; progress?: string; last_error?: string; last_result?: { errors?: number } } }
+export type EngineStatus = {
+  state: string; installed: boolean; message: string; error: string | null; version: string; model: string; url?: string
+  runtime?: { python?: { available: boolean | null; path: string | null; version: string | null; source: string; error: string | null } }
+  preparation?: Preparation | null
+  reindex?: { active: boolean; percent?: number; progress?: string; last_error?: string; last_result?: { errors?: number } }
+}
 export type Document = { filepath: string; filename: string; content?: string; score?: number; category?: string; nextOffset?: number | null; totalLength?: number }
 export const client = window.mossApp ? createAppClient(window.mossApp) : null
 export async function request<T>(name: string, input: Record<string, unknown> = {}, signal?: AbortSignal): Promise<T> {

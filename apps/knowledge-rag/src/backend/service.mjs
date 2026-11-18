@@ -116,6 +116,14 @@ export class KnowledgeService {
     this.queue = Promise.resolve()
     this.preparation = null
     this.progressTimer = null
+    // The production App always resolves Python through Moss' managed-runtime
+    // host capability.  `enginePython` is retained only for offline tests and
+    // comparison harnesses; it must never be inferred from a repository cache.
+    this.python = enginePython
+      ? { available: true, path: enginePython, version: null, source: 'test', error: null }
+      : { available: null, path: null, version: null, source: 'moss-managed', error: null }
+    this.pythonCheckedAt = 0
+    this.pythonCheck = null
   }
   requirementsHash() { return createHash('sha256').update(readFileSync(path.join(this.resourcesDir, 'requirements.lock'))).digest('hex') }
   installed() {
@@ -133,7 +141,36 @@ export class KnowledgeService {
   }
   status() { return { state: this.state, installed: this.installed(), message: this.message, error: this.error,
     version: ENGINE_VERSION, model: EMBEDDING_MODEL, toolScopeDefault: 'session', pid: this.process?.pid ?? null,
-    url: this.state === 'ready' ? this.url : null, documentRoot: this.documentsDir, preparation: this.preparation?.snapshot() ?? null } }
+    url: this.state === 'ready' ? this.url : null, documentRoot: this.documentsDir,
+    runtime: { python: { ...this.python, path: this.python.path || null } },
+    preparation: this.preparation?.snapshot() ?? null } }
+  async checkEnvironment({ signal = this.controller.signal, force = false } = {}) {
+    if (this.enginePython) return this.python
+    if (typeof this.getPython !== 'function') {
+      this.python = { available: false, path: null, version: null, source: 'moss-managed', error: 'Moss 运行时检查不可用' }
+      this.pythonCheckedAt = Date.now()
+      return this.python
+    }
+    const now = Date.now()
+    if (!force && this.pythonCheckedAt && now - this.pythonCheckedAt < 5000) return this.python
+    if (this.pythonCheck) return this.pythonCheck
+    this.pythonCheck = Promise.resolve().then(() => this.getPython(signal)).then(result => {
+      this.python = {
+        available: Boolean(result?.available && result?.path),
+        path: result?.path || null,
+        version: result?.version || null,
+        source: 'moss-managed',
+        error: null,
+      }
+      this.pythonCheckedAt = Date.now()
+      return this.python
+    }).catch(error => {
+      this.python = { available: false, path: null, version: null, source: 'moss-managed', error: cleanOutput(error?.message || error) }
+      this.pythonCheckedAt = Date.now()
+      return this.python
+    }).finally(() => { this.pythonCheck = null })
+    return this.pythonCheck
+  }
   emitProgress() {
     if (this.closed || this.progressTimer) return
     this.progressTimer = setTimeout(() => {
@@ -219,7 +256,7 @@ export class KnowledgeService {
   async install() {
     if (this.installed()) return
     this.step('environment', '正在检查 Python 并创建独立运行环境…')
-    const python = await this.getPython(this.controller.signal)
+    const python = await this.checkEnvironment({ signal: this.controller.signal, force: true })
     this.controller.signal.throwIfAborted()
     if (!python?.available || !python.path) throw new Error('请先在 Moss 中安装 Python 运行环境，然后重试。')
     await this.command(python.path, ['-m','venv', this.venv])
@@ -337,6 +374,7 @@ export class KnowledgeService {
     return this.connection.call(name, input, { ...options, signal: options.signal ? AbortSignal.any([this.controller.signal, options.signal]) : this.controller.signal })
   }
   async overview(options = {}) {
+    await this.checkEnvironment({ signal: options.signal || this.controller.signal })
     const status = this.status()
     if (this.state !== 'ready') return status
     try { return { ...status, reindex: (await this.call('get_reindex_status', {}, options)).reindex } }

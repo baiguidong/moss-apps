@@ -6,9 +6,11 @@ import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 const appRoot=fileURLToPath(new URL('..',import.meta.url)),repo=path.resolve(appRoot,'../..')
 const core=process.env.MOSS_CORE_ROOT||path.resolve(repo,'../moss')
+const testPython=process.env.MOSS_RAG_TEST_PYTHON
+if (!testPython) throw new Error('桌面验证需要已安装 requirements.lock 的测试 Python。请先用 Moss 受管 Python 创建 venv，并设置 MOSS_RAG_TEST_PYTHON；正式 App 不使用 .cache/knowledge-rag。')
 const output=path.join(repo,'artifacts/moss.knowledge-rag/comparison/screenshots');await fs.mkdir(output,{recursive:true})
 const desktop=await electron.launch({executablePath:process.env.MOSS_TEST_ELECTRON||path.join(core,'ui/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'),
-  args:[path.join(appRoot,'scripts/desktop-fixture.cjs')],env:{...process.env,MOSS_CORE_ROOT:core,MOSS_APPS_ROOT:repo,MOSS_TEST_NODE:process.execPath,MOSS_TEST_PYTHON:process.env.MOSS_RAG_TEST_PYTHON||path.join(repo,'.cache/knowledge-rag/venv/bin/python')}})
+  args:[path.join(appRoot,'scripts/desktop-fixture.cjs')],env:{...process.env,MOSS_CORE_ROOT:core,MOSS_APPS_ROOT:repo,MOSS_TEST_NODE:process.execPath,MOSS_TEST_PYTHON:testPython}})
 const errors=[],checks=[]
 let rag,library,temporary
 try{
@@ -81,7 +83,9 @@ try{
   await desktop.evaluate(()=>globalThis.ragFixture.cleanup())
   await expect.poll(()=>{try{process.kill(pid,0);return false}catch(error){return error.code==='ESRCH'}},{timeout:10000}).toBe(true)
   checks.push('Runtime shutdown stops the owned Python engine process')
-  const packageSha256=createHash('sha256').update(await fs.readFile(path.join(repo,'artifacts/moss.knowledge-rag/0.1.1/moss.knowledge-rag-0.1.1.zip'))).digest('hex')
+  const manifest=JSON.parse(await fs.readFile(path.join(repo,'apps/knowledge-rag/app.moss.json'),'utf8'))
+  const archive=path.join(repo,`artifacts/moss.knowledge-rag/${manifest.version}/moss.knowledge-rag-${manifest.version}.zip`)
+  const packageSha256=createHash('sha256').update(await fs.readFile(archive)).digest('hex')
   await fs.writeFile(path.join(path.dirname(output),'desktop-verification.json'),JSON.stringify({at:new Date().toISOString(),packageSha256,checks,errors,scopeChanges:changes,limitations:['macOS Apple Silicon only','Native picker returns frozen test files; production runtime, backend, MCP, models, preload and renderer are real','Preinstalled test Python and shared pinned model cache avoid duplicate downloads']},null,2))
   await fs.rm(path.join(output,'failure.png'),{force:true})
   console.log(JSON.stringify({checks,output},null,2))

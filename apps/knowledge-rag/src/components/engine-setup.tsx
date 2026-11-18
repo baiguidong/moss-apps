@@ -26,8 +26,14 @@ export function EngineSetup({ status, busy, onStart, onCancel }: {
   const title = !status ? '正在读取引擎状态…' : failed ? '检索引擎未能就绪' : active ? (status.installed ? '正在启动检索服务' : '正在准备检索引擎') : status.installed ? '启动检索服务' : '准备你的语义知识库'
   const download = progress?.download
   const percent = download ? Math.floor(download.completed / download.total * 100) : null
+  const python = status?.runtime?.python
+  const pythonPath = python?.path ? python.path.split(/[\\/]/).slice(-3).join('/') : ''
   return <section className="setup" aria-label="引擎准备进度">
     <div className="setup-heading"><div className="setup-icon">{failed ? <CircleAlert size={22}/> : <BookOpen size={22}/>}</div><div><h2>{title}</h2><p>{progress ? `已用 ${duration(progress.elapsedMs + since)}${active ? ` · 当前步骤 ${duration(progress.stageElapsedMs + since)}` : ''}` : '首次下载引擎依赖与约 130 MB 模型，之后从本机加载。'}</p></div>{active && <LoaderCircle size={18} className="spin"/>}</div>
+    <div className={`runtime-check ${python?.available === false ? 'runtime-error' : python?.available ? 'runtime-ready' : ''}`} role="status" aria-label="Moss Python 环境检查">
+      <div><strong>Moss 内置 Python</strong><small>{python?.available ? `${python.version || '已就绪'} · ${pythonPath}` : python?.available === false ? '未就绪' : '检查中…'}</small></div>
+      {python?.available === false && <span>{python.error || '请在 Moss 设置中启用内置 Python，然后重试。'}</span>}
+    </div>
     {progress && <>
       <ol className="setup-steps" aria-label="准备步骤">{progress.steps.map((step, index) => <li key={step.id} data-state={step.state} aria-current={step.state === 'active' ? 'step' : undefined}>
         <span className="step-icon">{step.state === 'done' || step.state === 'cached' ? <Check size={13}/> : step.state === 'active' ? <LoaderCircle size={13} className="spin"/> : step.state === 'failed' ? <X size={13}/> : index + 1}</span><span>{step.label}<small>{step.state === 'cached' ? '已安装' : step.state === 'done' ? '已完成' : step.state === 'failed' ? '未完成' : step.state === 'cancelled' ? '已取消' : step.state === 'active' ? '进行中' : '等待'}</small></span>

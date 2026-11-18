@@ -57,6 +57,29 @@ test('installation is reusable only with a complete matching dependency lock', a
     assert.equal(service.installed(), false)
   } finally { await fs.rm(root, { recursive: true, force: true }) }
 })
+test('environment diagnostics use the Moss managed Python capability', async () => {
+  const calls = []
+  const service = new KnowledgeService({
+    dataDir: '/unused', resourcesDir: '/unused',
+    getPython: async () => { calls.push('python.get'); return { available: true, path: '/moss/runtimes/python/bin/python3', version: '3.13.15' } },
+  })
+  const status = await service.overview()
+  assert.deepEqual(status.runtime.python, { available: true, path: '/moss/runtimes/python/bin/python3', version: '3.13.15', source: 'moss-managed', error: null })
+  assert.deepEqual(calls, ['python.get'])
+  await service.overview()
+  assert.deepEqual(calls, ['python.get'])
+  await service.close()
+})
+test('environment diagnostics expose an unavailable managed runtime before preparation', async () => {
+  const service = new KnowledgeService({
+    dataDir: '/unused', resourcesDir: '/unused',
+    getPython: async () => ({ available: false, path: null, version: null }),
+  })
+  const status = await service.overview()
+  assert.equal(status.runtime.python.available, false)
+  assert.equal(status.runtime.python.path, null)
+  await service.close()
+})
 test('shutdown completes even when process close happened before cleanup', async () => {
   const service = new KnowledgeService({ dataDir: '/unused', resourcesDir: '/unused' })
   service.process = { pid: undefined, exitCode: null, signalCode: null, kill() { throw new Error('must not kill a failed spawn') } }

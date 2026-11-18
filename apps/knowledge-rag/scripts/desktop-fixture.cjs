@@ -32,7 +32,9 @@ async function cleanup() { if (!closed) { closed = true; for(const {window} of w
   const mossHome=path.join(temporary,'moss'), ragId='moss.knowledge-rag', libraryId='moss.library'
   const ragData=path.join(mossHome,'apps-data',ragId,'instances',`${ragId}--default`)
   await fs.mkdir(path.join(ragData,'engine'),{recursive:true})
-  const cache=path.join(repo,'.cache/knowledge-rag')
+  // This cache belongs only to the desktop test fixture. Production uses the
+  // Moss runtime capability and the App instance data directory instead.
+  const cache=process.env.MOSS_RAG_TEST_CACHE || path.join(repo,'.cache/knowledge-rag')
   const requirementsSha256=createHash('sha256').update(await fs.readFile(path.join(repo,'apps/knowledge-rag/resources/requirements.lock'))).digest('hex')
   await fs.writeFile(path.join(cache,'venv/ready.json'),JSON.stringify({version:'4.11.0',requirementsSha256}))
   await fs.symlink(path.join(cache,'venv'),path.join(ragData,'python-env'))
@@ -51,7 +53,9 @@ async function cleanup() { if (!closed) { closed = true; for(const {window} of w
     },
   })
   console.log('Desktop fixture: Runtime ready')
-  await installAppArchive(runtime,path.join(repo,'artifacts/moss.knowledge-rag/0.1.1/moss.knowledge-rag-0.1.1.zip'))
+  const manifest = JSON.parse(await fs.readFile(path.join(repo, 'apps/knowledge-rag/app.moss.json'), 'utf8'))
+  const archive = path.join(repo, `artifacts/moss.knowledge-rag/${manifest.version}/moss.knowledge-rag-${manifest.version}.zip`)
+  await installAppArchive(runtime, archive)
   console.log('Desktop fixture: RAG installed')
   const libraryPackage=path.join(temporary,'library-package');await fs.mkdir(libraryPackage)
   for(const name of ['app.moss.json','dist','schemas','assets'])await fs.cp(path.join(repo,'apps/library',name),path.join(libraryPackage,name),{recursive:true})
