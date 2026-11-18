@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    }
+  },
+  "required": [
+    "url"
+  ],
+  "additionalProperties": false
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.knowledge-rag",
-  "version": "0.1.9",
+  "version": "0.1.13",
   "displayName": "语义知识库",
   "category": "knowledge",
   "keywords": [
@@ -40,6 +40,12 @@
       },
       {
         "name": "engine.prepare",
+        "inputSchema": "schemas/engine.prepare.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "engine.prepareOffline",
         "inputSchema": "schemas/engine.prepare.input.json",
         "outputSchema": "schemas/result.json",
         "timeoutMs": 300000
@@ -91,6 +97,60 @@
         "inputSchema": "schemas/engine.cancel.input.json",
         "outputSchema": "schemas/result.json",
         "timeoutMs": 30000
+      },
+      {
+        "name": "documents.categories",
+        "inputSchema": "schemas/engine.status.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "index.stats",
+        "inputSchema": "schemas/engine.status.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.similar",
+        "inputSchema": "schemas/documents.similar.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.create",
+        "inputSchema": "schemas/documents.create.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.source",
+        "inputSchema": "schemas/documents.source.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.update",
+        "inputSchema": "schemas/documents.update.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.remove",
+        "inputSchema": "schemas/documents.remove.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "documents.from-url",
+        "inputSchema": "schemas/documents.from-url.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "retrieval.evaluate",
+        "inputSchema": "schemas/retrieval.evaluate.input.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
       }
     ],
     "configuration": {

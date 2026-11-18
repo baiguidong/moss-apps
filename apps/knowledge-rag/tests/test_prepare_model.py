@@ -27,11 +27,14 @@ class ModelPreparationTest(unittest.TestCase):
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(b'valid-model')
                 files[name] = hashlib.sha256(b'valid-model').hexdigest()
+            hashes = patch.dict(model.HASHES, files)
+            hashes.start()
+            self.addCleanup(hashes.stop)
             marker = cache / 'moss-model.json'
             marker.write_text(json.dumps({'revision': model.REVISION, 'files': files}))
             # Cached startup must not import the network downloader at all.
             with patch.dict(sys.modules, {'huggingface_hub': None}), contextlib.redirect_stdout(io.StringIO()) as output:
-                model.prepare(cache, allow_download=True)
+                model.prepare(cache)
             self.assertIn('多语言模型已校验完成', output.getvalue())
             (snapshot / model.FILES[-1]).write_bytes(b'damaged')
             downloaded = []
@@ -51,7 +54,21 @@ class ModelPreparationTest(unittest.TestCase):
 
             modules = {'huggingface_hub': types.SimpleNamespace(hf_hub_download=download), 'tqdm.auto': types.SimpleNamespace(tqdm=FakeTqdm)}
             with patch.dict(sys.modules, modules), contextlib.redirect_stdout(io.StringIO()) as output:
-                model.prepare(cache)
+                with self.assertRaisesRegex(RuntimeError, '请显式准备'):
+                    model.prepare(cache)
+                model.prepare(cache, allow_download=True)
+            offline = cache / 'offline-model'
+            name = model.FILES[-1]
+            (offline / name).parent.mkdir(parents=True)
+            (snapshot / name).write_bytes(b'old')
+            (offline / name).write_bytes(b'wrong')
+            with self.assertRaisesRegex(RuntimeError, '校验失败'):
+                model.prepare(cache, offline_model=offline)
+            self.assertEqual((snapshot / name).read_bytes(), b'old')
+            (offline / name).write_bytes(b'valid-model')
+            with patch.dict(sys.modules, {'huggingface_hub': None}):
+                model.prepare(cache, offline_model=offline)
+            self.assertEqual((snapshot / name).read_bytes(), b'valid-model')
             self.assertEqual(downloaded, [(model.FILES[-1], True)])
             events = [json.loads(line.removeprefix('MOSS_PROGRESS ')) for line in output.getvalue().splitlines()]
             self.assertTrue(any(event.get('completed') == 11 and event.get('total') == 11 for event in events))

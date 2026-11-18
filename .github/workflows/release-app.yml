@@ -9,6 +9,9 @@ on:
       version:
         required: true
         type: string
+      rehearsal:
+        type: boolean
+        default: false
       source_sha:
         required: true
         type: string
@@ -29,6 +32,8 @@ jobs:
     outputs:
       platforms: ${{ steps.release.outputs.platforms }}
       variants: ${{ steps.release.outputs.variants }}
+      has_kits: ${{ steps.release.outputs.has_kits }}
+      kits: ${{ steps.release.outputs.kits }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -161,7 +166,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
-      name: github-pages
+      name: ${{ inputs.rehearsal && 'release-rehearsal' || 'github-pages' }}
     steps:
       - name: Preserve source bytes on every platform
         run: git config --global core.autocrlf false
@@ -255,10 +260,107 @@ jobs:
       - name: Check all variants before publishing
         if: steps.release.outputs.variants == 'true'
         run: node scripts/verify-release-variants.mjs "${{ inputs.app_id }}" "${{ inputs.version }}"
+      - name: Pass the exact signed ZIP to offline kit builders
+        if: needs.context.outputs.has_kits == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-${{ inputs.app_id }}-${{ inputs.version }}
+          if-no-files-found: error
+          path: |
+            artifacts/${{ inputs.app_id }}/${{ inputs.version }}/*.zip
+            artifacts/${{ inputs.app_id }}/${{ inputs.version }}/*.sha256
+            artifacts/${{ inputs.app_id }}/${{ inputs.version }}/*.release.json
+      - name: Publish verified assets through a resumable draft
+        if: needs.context.outputs.has_kits != 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          APP_ID: ${{ inputs.app_id }}
+          VERSION: ${{ inputs.version }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          MOSS_RELEASE_REHEARSAL: ${{ inputs.rehearsal }}
+        run: node scripts/publish-release.mjs --app "$APP_ID" --version "$VERSION" --source-sha "$SOURCE_SHA"
+  offline-kits:
+    needs: [context, release]
+    if: needs.context.outputs.has_kits == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.context.outputs.kits) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha }}
+          submodules: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.0'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+      - run: bun install --frozen-lockfile --filter moss-apps
+      - uses: actions/download-artifact@v4
+        with:
+          name: signed-${{ inputs.app_id }}-${{ inputs.version }}
+          path: artifacts/${{ inputs.app_id }}/${{ inputs.version }}
+      - name: Build offline media on the native target
+        shell: bash
+        env:
+          APP_ID: ${{ inputs.app_id }}
+          VERSION: ${{ inputs.version }}
+          PLATFORM: ${{ matrix.platform }}
+          VARIANTS: ${{ needs.context.outputs.variants }}
+        run: |
+          stem="$APP_ID-$VERSION"
+          if [[ "$VARIANTS" == true ]]; then stem="$stem-$PLATFORM"; fi
+          app_dir=$(node scripts/release-context.mjs "$APP_ID-v$VERSION" | jq -r .app_dir)
+          python "$app_dir/scripts/package-offline.py" "artifacts/$APP_ID/$VERSION/$stem.zip"
+      - name: Bind offline bytes to the signed App ZIP
+        env:
+          MOSS_APP_SIGNING_PRIVATE_KEY: ${{ secrets.MOSS_APP_SIGNING_PRIVATE_KEY }}
+        run: node scripts/offline-kit.mjs "${{ inputs.app_id }}" "${{ inputs.version }}" "${{ matrix.platform }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kit-${{ inputs.app_id }}-${{ inputs.version }}-${{ matrix.platform }}
+          if-no-files-found: error
+          path: |
+            artifacts/${{ inputs.app_id }}/${{ inputs.version }}/*-offline-*.zip
+            artifacts/${{ inputs.app_id }}/${{ inputs.version }}/*-offline-*.sha256
+            artifacts/${{ inputs.app_id }}/${{ inputs.version }}/*.kit.json
+  publish-with-kits:
+    needs: offline-kits
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha }}
+          submodules: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.0'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+      - run: bun install --frozen-lockfile --filter moss-apps
+      - uses: actions/download-artifact@v4
+        with:
+          name: signed-${{ inputs.app_id }}-${{ inputs.version }}
+          path: artifacts/${{ inputs.app_id }}/${{ inputs.version }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: kit-${{ inputs.app_id }}-${{ inputs.version }}-*
+          merge-multiple: true
+          path: artifacts/${{ inputs.app_id }}/${{ inputs.version }}
       - name: Publish verified assets through a resumable draft
         env:
           GITHUB_TOKEN: ${{ github.token }}
           APP_ID: ${{ inputs.app_id }}
           VERSION: ${{ inputs.version }}
           SOURCE_SHA: ${{ inputs.source_sha }}
+          MOSS_RELEASE_REHEARSAL: ${{ inputs.rehearsal }}
         run: node scripts/publish-release.mjs --app "$APP_ID" --version "$VERSION" --source-sha "$SOURCE_SHA"

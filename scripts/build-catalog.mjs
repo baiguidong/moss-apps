@@ -42,6 +42,11 @@ function validateRelease(record) {
     throw new Error(`Artifact URL must use HTTPS: ${artifact.downloadUrl}`)
   }
   }
+  for (const [platform, kit] of Object.entries(record.version.offlineKits || {})) {
+    const base = record.version.artifacts?.[platform] || record.version.artifact
+    if (!record.version.platforms.includes(platform) || !kit.signature || kit.appSha256 !== base?.sha256
+        || !/^[a-f0-9]{64}$/.test(kit.sha256) || new URL(kit.downloadUrl).protocol !== 'https:') throw new Error('Invalid offline kit metadata')
+  }
   return record
 }
 

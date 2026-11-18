@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import { constants, existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import net from 'node:net'
+import os from 'node:os'
 import { createHash, randomBytes, randomUUID } from 'node:crypto'
 import { execFile, spawn } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
@@ -13,6 +14,14 @@ export const ENGINE_VERSION = '4.11.0'
 export const EMBEDDING_MODEL = 'intfloat/multilingual-e5-small'
 export const SUPPORTED = new Set(['.md','.txt','.pdf','.docx','.xlsx','.pptx','.csv','.json','.py','.js','.ts','.tsx','.jsx','.go','.rs','.yaml','.yml','.xml','.sql','.sh'])
 const pythonAt = root => path.join(root, process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python')
+const categories = ['general', 'development', 'security', 'ctf', 'redteam', 'blueteam', 'logscale', 'aar']
+const binaryFormats = new Set(['.pdf', '.docx', '.xlsx', '.pptx'])
+function editablePath(root, filepath) {
+  const relative = relativeDocument(root, filepath)
+  const ext = path.extname(relative).toLowerCase()
+  if (!SUPPORTED.has(ext) || binaryFormats.has(ext)) throw new Error('编辑器支持 UTF-8 纯文本格式。')
+  return relative
+}
 export function pageContent(content, offset = 0, limit = 32000) {
   const start = Math.max(0, Math.trunc(offset)), size = Math.max(1, Math.min(60000, Math.trunc(limit)))
   return { content: content.slice(start, start + size), offset: start, nextOffset: start + size < content.length ? start + size : null, totalLength: content.length }
@@ -190,7 +199,7 @@ export class KnowledgeService {
   async initialize() {
     await this.prepareStorage()
   }
-  begin(kind = 'start') {
+  begin(kind = 'start', offlineMarker = null) {
     if (this.closed) throw new Error('知识库已关闭')
     if (this.operation) return this.status()
     if (kind !== 'install' && this.state === 'ready' && this.connection && this.process) return this.status()
@@ -199,9 +208,16 @@ export class KnowledgeService {
     this.change(install ? 'installing' : 'starting', '正在检查本地引擎…')
     const operation = Promise.resolve().then(async () => {
       try {
-        if (install) await this.install()
+        if (offlineMarker) {
+          this.step('environment', '正在检查离线包与 Moss Python…')
+          const python = await this.checkEnvironment({ force: true })
+          if (!python?.available) throw new Error('请先在 Moss 中启用内置 Python。')
+          await this.command(python.path, ['-I', path.join(this.resourcesDir, 'offline_media.py'), offlineMarker])
+        }
+        const offlineRoot = offlineMarker ? path.dirname(offlineMarker) : null
+        if (install) await this.install(offlineRoot)
         this.controller.signal.throwIfAborted()
-        await this.start({ allowDownload: kind === 'install' })
+        await this.start({ allowDownload: kind === 'install' && !offlineRoot, offlineRoot })
         this.preparation.finish('done')
       } catch (error) {
         this.preparation.finish(this.controller.signal.aborted ? 'cancelled' : 'failed')
@@ -227,13 +243,13 @@ export class KnowledgeService {
     }
     return this.status()
   }
-  async command(command, args, signal = this.controller.signal) {
+  async command(command, args, signal = this.controller.signal, extraEnv = {}) {
     signal = AbortSignal.any([signal, AbortSignal.timeout(10 * 60 * 1000)])
     signal.throwIfAborted()
     const env = await engineEnvironment()
     signal.throwIfAborted()
     await new Promise((resolve, reject) => {
-      const child = spawn(command, args, { stdio: ['ignore','pipe','pipe'], windowsHide: true, env: { ...env, PYTHONUNBUFFERED: '1' } })
+      const child = spawn(command, args, { stdio: ['ignore','pipe','pipe'], windowsHide: true, env: { ...env, ...extraEnv, PYTHONUNBUFFERED: '1' } })
       let output = '', killTimer
       const collectors = [child.stdout, child.stderr].map(stream => {
         const collector = lineCollector(line => { output = (output + '\n' + cleanOutput(line)).slice(-5000); this.preparation?.output(line) })
@@ -253,31 +269,37 @@ export class KnowledgeService {
       })
     })
   }
-  async install() {
+  async install(offlineRoot = null) {
     if (this.installed()) return
     this.step('environment', '正在检查 Python 并创建独立运行环境…')
     const python = await this.checkEnvironment({ signal: this.controller.signal, force: true })
     this.controller.signal.throwIfAborted()
     if (!python?.available || !python.path) throw new Error('请先在 Moss 中安装 Python 运行环境，然后重试。')
     await this.command(python.path, ['-m','venv', this.venv])
-    this.step('dependencies', '正在下载并校验引擎依赖，已下载的依赖会复用…')
-    await this.command(pythonAt(this.venv), ['-m','pip','install','--disable-pip-version-check','--progress-bar','on','--timeout','30','--retries','2','--cache-dir',path.join(this.engineRoot,'pip-cache'),'--require-hashes','-r',path.join(this.resourcesDir,'requirements.lock')])
+    this.step('dependencies', offlineRoot ? '正在从离线包安装并校验引擎依赖…' : '正在下载并校验引擎依赖，已下载的依赖会复用…')
+    const source = offlineRoot
+      ? ['--no-index', '--no-cache-dir', '--only-binary=:all:', '--find-links', path.join(offlineRoot, 'wheels')]
+      : ['--timeout', '30', '--retries', '2', '--cache-dir', path.join(this.engineRoot, 'pip-cache')]
+    const pip = offlineRoot ? ['-I', '-m', 'pip', '--isolated'] : ['-m', 'pip']
+    await this.command(pythonAt(this.venv), [...pip, 'install', '--disable-pip-version-check', '--progress-bar', 'on',
+      ...source, '--require-hashes', '-r', path.join(this.resourcesDir, 'requirements.lock')], this.controller.signal,
+      offlineRoot ? { PIP_CONFIG_FILE: os.devNull } : {})
     await this.command(pythonAt(this.venv), ['-c', `from importlib.metadata import version; assert version('knowledge-rag') == '${ENGINE_VERSION}'`])
     const marker = path.join(this.venv, 'ready.json')
     await fs.writeFile(`${marker}.tmp`, JSON.stringify({ version: ENGINE_VERSION, requirementsSha256: this.requirementsHash() }), { mode: 0o600 })
     await fs.rename(`${marker}.tmp`, marker)
   }
-  async start({ allowDownload = false } = {}) {
+  async start({ allowDownload = false, offlineRoot = null } = {}) {
     if (this.connection && this.process) return
     if (!this.installed()) throw new Error('请先准备检索引擎。')
     this.change('starting', '正在检查本地模型…')
-    this.step('model', allowDownload ? '正在校验并准备多语言模型…' : '正在校验本地模型，不下载文件…')
+    this.step('model', offlineRoot ? '正在从离线包准备多语言模型…' : '正在校验本地多语言模型…')
     await this.stopProcess()
     await this.prepareStorage()
     const generation = ++this.generation
     const models = this.modelsCache || path.join(this.engineRoot, 'models')
     await this.command(this.enginePython || pythonAt(this.venv), [path.join(this.resourcesDir, 'prepare_model.py'), models,
-      ...(allowDownload ? ['--allow-download'] : [])])
+      ...(offlineRoot ? ['--offline-model', path.join(offlineRoot, 'model')] : allowDownload ? ['--allow-download'] : [])])
     this.controller.signal.throwIfAborted()
     this.step('service', '正在加载模型、检查索引并启动本地服务…')
     const port = await freePort(), token = randomBytes(32).toString('hex')
@@ -286,7 +308,8 @@ export class KnowledgeService {
       paths: { documents_dir: this.documentsDir, data_dir: path.join(this.engineRoot,'data'), models_cache_dir: models },
       models: { embedding: { profile: 'custom', model: EMBEDDING_MODEL, dimensions: 384, query_prefix: 'query: ', passage_prefix: 'passage: ', gpu: false }, reranker: { enabled: false } },
       documents: { supported_formats: [...SUPPORTED], embed_batch_size: 8, chunking: { chunk_size: 1000, chunk_overlap: 200 } },
-      search: { default_results: 5, max_results: 100 }, category_mappings: {}, keyword_routes: {}, query_expansions: {},
+      search: { default_results: 5, max_results: 100, lexical_fast_path: { enabled: true, patterns: [] } },
+      category_mappings: Object.fromEntries(categories.map(name => [name + '/', name])), keyword_routes: {}, query_expansions: {},
       server: { transport: 'streamable-http', host: '127.0.0.1', port, auth: { bearer_token: token } },
     }
     await fs.mkdir(this.engineRoot, { recursive: true })
@@ -391,10 +414,75 @@ export class KnowledgeService {
     const start = Math.max(0, Math.trunc(offset)), count = Math.min(100, Math.max(1, Math.trunc(limit)))
     return { items: documents.slice(start, start + count), total: documents.length, nextOffset: start + count < documents.length ? start + count : null }
   }
-  async search({ query, limit = 5, category } = {}, options = {}) {
+  async search({ query, limit = 5, category, hybridAlpha = 0.7, minScore = 0, snippet = false, method = 'auto', includeFolders, excludeFolders } = {}, options = {}) {
     if (typeof query !== 'string' || !query.trim() || query.length > 1000) throw new Error('请输入 1–1000 字的检索问题')
-    const result = await this.call('search_knowledge', { query: query.trim(), max_results: Math.max(1, Math.min(100, limit)), snippet_mode: false, hybrid_alpha: 0.7, ...(category ? { category } : {}) }, options)
-    return { items: (result.results || []).map(item => ({ ...this.normalizeDocument(item), content: String(item.content || '').slice(0, 12000) })) }
+    const result = await this.call('search_knowledge', {
+      query: query.trim(), max_results: Math.max(1, Math.min(100, limit)), snippet_mode: snippet,
+      hybrid_alpha: hybridAlpha, min_score: minScore, search_method: method,
+      ...(category && { category }), ...(includeFolders?.length && { include_folders: includeFolders }),
+      ...(excludeFolders?.length && { exclude_folders: excludeFolders }),
+    }, options)
+    return { filtered: result.filtered_by_score || 0, items: (result.results || []).map(item => ({
+      ...this.normalizeDocument(item), content: String(item.content || '').slice(0, 12000),
+    })) }
+  }
+  async categories(options) {
+    const result = await this.call('list_categories', {}, options)
+    return { counts: result.categories, supported: categories }
+  }
+  async similar({ filepath, limit = 5 }, options) {
+    const result = await this.call('search_similar', { filepath: relativeDocument(this.documentsDir, filepath), max_results: limit }, options)
+    return { items: (result.similar_documents || []).map(item => ({ ...this.normalizeDocument(item), score: item.similarity, content: item.preview })) }
+  }
+  async source({ filepath }) {
+    const relative = editablePath(this.documentsDir, filepath)
+    const resolved = await fs.realpath(path.join(this.documentsDir, relative))
+    relativeDocument(await fs.realpath(this.documentsDir), resolved)
+    const handle = await fs.open(resolved, constants.O_RDONLY | (constants.O_NOFOLLOW || 0))
+    try {
+      const stat = await handle.stat()
+      if (!stat.isFile() || stat.size > 480000) throw new Error('在线编辑支持最多 12 万字的文本文件。')
+      const bytes = await handle.readFile()
+      const content = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes)
+      if (content.length > 120000 || content.includes('\0')) throw new Error('在线编辑支持最多 12 万字的 UTF-8 纯文本。')
+      return { content, revision: createHash('sha256').update(bytes).digest('hex') }
+    } finally { await handle.close() }
+  }
+  async create({ filepath, content, category = 'general' }, options) {
+    if (path.isAbsolute(filepath) || filepath.split(/[\\/]/).includes('..')) throw new Error('请输入分类内的相对文件路径。')
+    const relative = editablePath(this.documentsDir, filepath)
+    if (await fs.lstat(path.join(this.documentsDir, relative)).catch(error => {
+      if (error.code !== 'ENOENT') throw error
+    })) throw new Error('同名文件已存在，请更换路径或打开已有资料编辑。')
+    return this.call('add_document', { filepath: relative, content, category }, options)
+  }
+  async update({ filepath, content, revision }, options) {
+    const current = await this.source({ filepath })
+    if (current.revision !== revision) throw new Error('文件已更改，请重新打开编辑器后再保存。')
+    return this.call('update_document', { filepath: relativeDocument(this.documentsDir, filepath), content }, options)
+  }
+  async fromUrl({ url, category = 'general', title }, options) {
+    if (!['http:', 'https:'].includes(new URL(url).protocol) || !categories.includes(category)) throw new Error('请输入 HTTP(S) 网页地址并选择有效分类。')
+    return this.call('add_from_url', { url, category, ...(title && { title }) }, options)
+  }
+  async remove({ filepath, deleteFile = false }, options) {
+    return this.call('remove_document', { filepath: relativeDocument(this.documentsDir, filepath), delete_file: deleteFile }, options)
+  }
+  async evaluate({ cases }, options) {
+    const rows = cases.map(({ query, filepath }) => ({ query, expected_filepath: relativeDocument(this.documentsDir, filepath) }))
+    const result = await this.call('evaluate_retrieval', { test_cases: JSON.stringify(rows) }, { ...options, timeoutMs: 295000 })
+    return { ...result, per_query: result.per_query.map(row => ({
+      ...row, top_result: row.top_result === 'none' ? row.top_result : relativeDocument(this.documentsDir, row.top_result),
+    })) }
+  }
+  rebuild({ mode = 'smart' }, options) {
+    const args = { incremental: {}, smart: { force: true }, resume: { resume: true }, full: { full_rebuild: true } }
+    return this.call('reindex_documents', args[mode], options)
+  }
+  enqueue(operation) {
+    const result = this.queue.then(operation)
+    this.queue = result.catch(() => {})
+    return result
   }
   async read({ filepath, offset = 0 } = {}, options = {}) {
     const relative = relativeDocument(this.documentsDir, filepath)
@@ -406,7 +494,7 @@ export class KnowledgeService {
   }
   async importFiles({ paths } = {}, options = {}) {
     if (!Array.isArray(paths) || !paths.length || paths.length > 200) throw new Error('每次请选择 1–200 个普通文件')
-    const operation = this.queue.then(async () => {
+    return this.enqueue(async () => {
       const signal = options.signal ? AbortSignal.any([options.signal, this.controller.signal]) : this.controller.signal
       signal.throwIfAborted()
       const { reindex } = await this.call('get_reindex_status', {}, options)
@@ -443,7 +531,5 @@ export class KnowledgeService {
       this.onChanged(this.status())
       return { written, failed, indexing }
     })
-    this.queue = operation.catch(() => {})
-    return operation
   }
 }

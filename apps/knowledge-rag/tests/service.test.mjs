@@ -120,3 +120,41 @@ test('failed installation stays retryable and overlapping preparation is coalesc
   service.begin('install'); await service.operation; assert.equal(count,2)
   await service.close()
 })
+
+test('editor reads the full UTF-8 source and detects stale edits before invoking the writer', async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'knowledge-edit-'))
+  const service = new KnowledgeService({ dataDir: root, resourcesDir: root })
+  try {
+    await service.prepareStorage()
+    const content = '---\ntitle: Guide\n---\n' + '正文'.repeat(20000)
+    const file = path.join(service.documentsDir, 'guide.md')
+    await fs.writeFile(file, content)
+    const draft = await service.source({ filepath: 'guide.md' })
+    assert.equal(draft.content, content)
+    assert.match(draft.revision, /^[a-f0-9]{64}$/)
+    const calls = []
+    service.call = async (name, args) => { calls.push([name, args]); return {} }
+    await service.update({ filepath: 'guide.md', revision: draft.revision, content: 'new text' })
+    assert.deepEqual(calls, [['update_document', { filepath: 'guide.md', content: 'new text' }]])
+    await fs.writeFile(file, 'changed elsewhere')
+    await assert.rejects(service.update({ filepath: 'guide.md', revision: draft.revision, content }), /文件已更改/)
+    await assert.rejects(service.create({ filepath: 'guide.md', content }), /同名文件/)
+    await assert.rejects(service.create({ filepath: '../outside.md', content }))
+    await assert.rejects(service.source({ filepath: 'report.pdf' }))
+    assert.equal(calls.length, 1)
+  } finally { await fs.rm(root, { recursive: true, force: true }) }
+})
+
+test('search controls reach the engine including zero weights, folder filters and full-text mode', async () => {
+  const service = new KnowledgeService({ dataDir: '/unused', resourcesDir: '/unused' })
+  let args
+  service.call = async (name, input) => {
+    assert.equal(name, 'search_knowledge')
+    args = input
+    return { filtered_by_score: 2, results: [{ source: 'general/test.md', content: 'match', score: 0.5, chunk_index: 1 }] }
+  }
+  const result = await service.search({ query: ' needle ', category: 'general', hybridAlpha: 0, minScore: 0.4, limit: 8, snippet: true, method: 'fts5', includeFolders: ['general'], excludeFolders: ['general/archive'] })
+  assert.deepEqual(args, { query: 'needle', category: 'general', hybrid_alpha: 0, min_score: 0.4, max_results: 8, snippet_mode: true, search_method: 'fts5', include_folders: ['general'], exclude_folders: ['general/archive'] })
+  assert.equal(result.items[0].filepath, 'general/test.md')
+  assert.equal(result.filtered, 2)
+})

@@ -16,12 +16,18 @@ export function mergeReleaseVersions(previous, next) {
   const incoming = variants(next)
   if (!previous) return next
   if (previous.version !== next.version || previous.hostApi !== next.hostApi || JSON.stringify([...(previous.permissions || [])].sort()) !== JSON.stringify([...(next.permissions || [])].sort())) throw new Error('Conflicting release version metadata')
+  const offlineKits = { ...previous.offlineKits }
+  for (const [platform, kit] of Object.entries(next.offlineKits || {})) {
+    if (offlineKits[platform] && stable(offlineKits[platform]) !== stable(kit)) throw new Error(`Conflicting offline kit: ${next.version} ${platform}`)
+    offlineKits[platform] = kit
+  }
+  const kits = Object.keys(offlineKits).length ? { offlineKits } : {}
   const artifacts = { ...variants(previous) }
   for (const [platform, artifact] of Object.entries(incoming)) {
     if (artifacts[platform] && stable(artifacts[platform]) !== stable(artifact)) throw new Error(`Conflicting immutable artifact: ${next.version} ${platform}`)
     artifacts[platform] = artifact
   }
-  if (previous.artifact && next.artifact && stable(previous.artifact) === stable(next.artifact)) return { ...previous, platforms: Object.keys(artifacts).sort() }
+  if (previous.artifact && next.artifact && stable(previous.artifact) === stable(next.artifact)) return { ...previous, ...kits, platforms: Object.keys(artifacts).sort() }
   const { artifact: ignored, ...base } = previous
-  return { ...base, platforms: Object.keys(artifacts).sort(), artifacts }
+  return { ...base, ...kits, platforms: Object.keys(artifacts).sort(), artifacts }
 }

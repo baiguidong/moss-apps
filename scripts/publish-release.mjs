@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url'
 import { execFileSync } from 'node:child_process'
 import semver from 'semver'
 import { repoRoot, selectApps, optionValue, sha256Hex, releaseNotesForVersion } from './lib.mjs'
+import { checkOfflineKit } from './offline-kit.mjs'
 import { githubClient, tagCommit } from './release-api.mjs'
 import { verifySourceArchive } from './verify-source-package.mjs'
 
@@ -37,28 +38,40 @@ export async function collectReleaseAssets(app, root, sourceSha, repository, ver
         || checked.origin?.commit !== sourceSha || checked.origin.dirty !== false || checked.sdk?.dirty !== false)) throw new Error('Signed source identity, target or commit mismatch')
     files.set(artifact.fileName, zip)
     files.set(`${stem}.sha256`, checksum)
-    files.set(metadataName, metadataBytes)
+    for (const target of app.marketplace.offlineKitPlatforms || []) {
+      if (platform && platform !== target) continue
+      const kitStem = `${stem}-offline-${target}`
+      const kit = JSON.parse(await fs.readFile(path.join(root, kitStem + '.kit.json')))
+      await checkOfflineKit(app, root, target, artifact, kit)
+      record.version.offlineKits ||= {}
+      record.version.offlineKits[target] = kit
+      files.set(kit.fileName, await fs.readFile(path.join(root, kit.fileName)))
+      files.set(kitStem + '.sha256', await fs.readFile(path.join(root, kitStem + '.sha256')))
+    }
+    files.set(metadataName, record.version.offlineKits ? Buffer.from(JSON.stringify(record, null, 2) + '\n') : metadataBytes)
   }
   return files
 }
 
-export async function publishRelease(client, { appId, version, sourceSha, files, notes = '' }) {
+export async function publishRelease(client, { appId, version, sourceSha, files, notes = '', rehearsalId = '' }) {
   if (!/^[a-z0-9][a-z0-9._-]*$/.test(appId) || !semver.valid(version) || !/^[a-f0-9]{40}$/.test(sourceSha) || !files.size) throw new Error('Invalid publication context')
-  const tag = `${appId}-v${version}`
+  if (rehearsalId && !/^\d+$/.test(rehearsalId)) throw new Error('Invalid rehearsal run ID')
+  const tag = rehearsalId ? `rehearsal-${rehearsalId}-${appId}-v${version}` : `${appId}-v${version}`
   const marker = `<!-- moss-source:${sourceSha} -->`
   const releases = await client.pages('/releases')
   let release = releases.find(r => r.tag_name === tag)
+  if (rehearsalId && release && !release.draft) throw new Error('Rehearsal release is already public')
   if (release && !release.draft) return { status: 'already-published', tag }
   // Recheck ordering in case another workflow published while this build ran.
   const newer = releases.find(r => !r.draft && r.tag_name?.startsWith(`${appId}-v`) && (() => {
     const candidate = r.tag_name.slice(appId.length + 2)
     return semver.valid(candidate) && (semver.prerelease(version) || (!r.prerelease && !semver.prerelease(candidate))) && semver.gte(candidate, version)
   })())
-  if (newer) return { status: 'superseded', tag, latest: newer.tag_name }
+  if (!rehearsalId && newer) return { status: 'superseded', tag, latest: newer.tag_name }
   if (release && (release.target_commitish !== sourceSha || !release.body?.includes(marker))) throw new Error('Existing draft belongs to another source commit or publisher workflow')
   let commit = await tagCommit(client, tag)
   if (commit && commit !== sourceSha) throw new Error(`Tag ${tag} points to another commit`)
-  if (!commit) {
+  if (!commit && !rehearsalId) {
     try {
       await client.request('/git/refs', { method: 'POST', body: { ref: `refs/tags/${tag}`, sha: sourceSha } })
     } catch (error) {
@@ -93,9 +106,10 @@ export async function publishRelease(client, { appId, version, sourceSha, files,
   // Detect external changes between upload and finalization.
   const current = await client.request(`/releases/${release.id}`)
   if (!current.draft || current.tag_name !== tag || current.target_commitish !== sourceSha || !current.body?.includes(marker)) throw new Error('Release changed during upload')
-  if (await tagCommit(client, tag) !== sourceSha) throw new Error('Tag changed during upload')
+  if (!rehearsalId && await tagCommit(client, tag) !== sourceSha) throw new Error('Tag changed during upload')
   const finalAssets = await client.pages(`/releases/${release.id}/assets`)
   if (finalAssets.length !== files.size || finalAssets.some(a => verifiedAssets.get(a.name) !== a.id)) throw new Error('Incomplete release assets')
+  if (rehearsalId) return { status: 'verified-draft', tag, releaseId: release.id, assets: files.size }
   await client.request(`/releases/${release.id}`, { method: 'PATCH', body: { draft: false, prerelease: Boolean(semver.prerelease(version)), make_latest: 'false' } })
   return { status: 'published', tag, assets: files.size }
 }
@@ -111,7 +125,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   const repository = optionValue(argv, '--repository') || process.env.GITHUB_REPOSITORY
   const client = githubClient(repository)
   const files = await collectReleaseAssets(app, path.join(repoRoot, 'artifacts', appId, version), sourceSha, repository)
-  const result = await publishRelease(client, { appId, version, sourceSha, files, notes: releaseNotesForVersion(app.root, version) })
+  const result = await publishRelease(client, { appId, version, sourceSha, files, notes: releaseNotesForVersion(app.root, version),
+    rehearsalId: process.env.MOSS_RELEASE_REHEARSAL === 'true' ? (process.env.GITHUB_RUN_ID || 'missing') : '' })
   console.log(JSON.stringify(result))
   if (result.status === 'deferred' && process.env.GITHUB_STEP_SUMMARY) {
     await fs.appendFile(process.env.GITHUB_STEP_SUMMARY, `\n${result.tag}: source advanced during the build; GitHub refused the old tag. The queued push or next scheduled batch will rebuild the current commit. No release was published.\n`)

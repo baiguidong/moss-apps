@@ -3,15 +3,17 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import sys
+import tempfile
+import argparse
 import time
 
 os.environ.setdefault('HF_HUB_DISABLE_XET', '1')
 os.environ.setdefault('HF_HUB_ETAG_TIMEOUT', '15')
 os.environ.setdefault('HF_HUB_DOWNLOAD_TIMEOUT', '30')
-REPO = 'Xenova/multilingual-e5-small'
-REVISION = '761b726dd34fb83930e26aab4e9ac3899aa1fa78'
-FILES = ['config.json', 'tokenizer.json', 'tokenizer_config.json', 'special_tokens_map.json', 'onnx/model_quantized.onnx']
+MODEL_LOCK = json.loads(Path(__file__).with_name('model.lock.json').read_text())
+REPO, REVISION = MODEL_LOCK['repo'], MODEL_LOCK['revision']
+HASHES = MODEL_LOCK['files']
+FILES = list(HASHES)
 
 
 def report(detail, **values):
@@ -26,20 +28,41 @@ def file_hash(file):
     return digest.hexdigest()
 
 
-def prepare(cache, allow_download=False):
-    marker = cache / 'moss-model.json'
+def copy_offline(source, target, name, expected):
+    if not source.is_file():
+        raise RuntimeError(f'离线包缺少模型文件：{name}')
+    target.parent.mkdir(parents=True, exist_ok=True)
+    total = source.stat().st_size
+    digest = hashlib.sha256()
+    with tempfile.NamedTemporaryFile(dir=target.parent, delete=False) as output:
+        temporary = Path(output.name)
     try:
-        previous = json.loads(marker.read_text())
-    except (OSError, ValueError):
-        previous = {}
+        with source.open('rb') as stream, temporary.open('wb') as output:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+                output.write(chunk)
+                digest.update(chunk)
+                completed = output.tell()
+                if completed == total or completed % (8 * 1024 * 1024) == 0:
+                    report(f'正在从离线包复制：{name}', completed=completed, total=total, file=name)
+        if digest.hexdigest() != expected:
+            raise RuntimeError(f'离线包模型文件校验失败：{name}')
+        temporary.replace(target)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def prepare(cache, allow_download=False, offline_model=None):
+    marker = cache / 'moss-model.json'
     snapshot = cache / ('models--' + REPO.replace('/', '--')) / 'snapshots' / REVISION
     hashes = {}
     for index, name in enumerate(FILES, 1):
         target = snapshot / name
         report(f'正在校验模型文件 {index}/{len(FILES)}：{name}')
-        expected = previous.get('files', {}).get(name) if previous.get('revision') == REVISION else None
+        expected = HASHES[name]
         actual = file_hash(target) if target.is_file() else None
-        if not actual or not expected or actual != expected:
+        if actual != expected and offline_model is not None:
+            copy_offline(offline_model / name, target, name, expected)
+        elif actual != expected:
             if not allow_download:
                 raise RuntimeError('本地模型缺失或校验失败，请显式准备检索引擎。')
             report(f'正在连接模型下载服务（文件 {index}/{len(FILES)}）：{name}')
@@ -65,7 +88,9 @@ def prepare(cache, allow_download=False):
                             tqdm_class=DownloadProgress, etag_timeout=15)
             report(f'正在校验下载结果 {index}/{len(FILES)}：{name}')
             actual = file_hash(target)
-        hashes[name] = actual
+            if actual != expected:
+                raise RuntimeError(f'下载的模型文件与固定版本不符：{name}')
+        hashes[name] = expected
     # FastEmbed resolves main while offline; bind it to the fully downloaded revision.
     ref = snapshot.parent.parent / 'refs' / 'main'
     ref.parent.mkdir(parents=True, exist_ok=True)
@@ -80,4 +105,10 @@ def prepare(cache, allow_download=False):
 
 
 if __name__ == '__main__':
-    prepare(Path(sys.argv[1]), allow_download='--allow-download' in sys.argv[2:])
+    parser = argparse.ArgumentParser()
+    parser.add_argument('cache', type=Path)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--allow-download', action='store_true')
+    mode.add_argument('--offline-model', type=Path)
+    args = parser.parse_args()
+    prepare(args.cache, args.allow_download, args.offline_model)

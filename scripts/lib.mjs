@@ -86,7 +86,7 @@ export function validateMarketplaceMetadata(raw, manifest, sourcePath) {
   }
   const allowed = new Set([
     'schemaVersion', 'appId', 'summary', 'description', 'categories', 'keywords',
-    'platforms', 'homepage', 'repository', 'license', 'featured', 'screenshots',
+    'platforms', 'offlineKitPlatforms', 'homepage', 'repository', 'license', 'featured', 'screenshots',
   ])
   const unknown = Object.keys(raw).find((key) => !allowed.has(key))
   if (unknown) throw new Error(`Unknown marketplace property ${unknown}: ${sourcePath}`)
@@ -112,6 +112,11 @@ export function validateMarketplaceMetadata(raw, manifest, sourcePath) {
   const supportedPlatforms = new Set([
     'darwin-arm64', 'darwin-x64', 'win32-x64', 'win32-arm64', 'linux-x64', 'linux-arm64',
   ])
+  if (raw.offlineKitPlatforms !== undefined && (!Array.isArray(raw.offlineKitPlatforms) || !raw.offlineKitPlatforms.length
+      || new Set(raw.offlineKitPlatforms).size !== raw.offlineKitPlatforms.length
+      || raw.offlineKitPlatforms.some(platform => !raw.platforms.includes(platform) || (manifest.platforms && !manifest.platforms.includes(platform))))) {
+    throw new Error(`Invalid offline kit platforms: ${sourcePath}`)
+  }
   const unsupported = raw.platforms.find((item) => !supportedPlatforms.has(item))
   if (unsupported) throw new Error(`Unsupported marketplace platform ${unsupported}: ${sourcePath}`)
   for (const field of ['homepage', 'repository']) {
@@ -131,6 +136,7 @@ export function validateMarketplaceMetadata(raw, manifest, sourcePath) {
     categories: [category.label],
     keywords,
     platforms: [...new Set(raw.platforms)],
+    ...(raw.offlineKitPlatforms && { offlineKitPlatforms: raw.offlineKitPlatforms }),
     homepage: raw.homepage || '',
     repository: raw.repository || '',
     license: String(raw.license || '').trim(),

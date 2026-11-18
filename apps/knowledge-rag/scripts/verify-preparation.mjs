@@ -43,13 +43,20 @@ try {
     window.mossApp = {
       app: { getInfo: async () => ({ id: 'moss.knowledge-rag', appearance }), getInstallationState: async () => ({ installation: { enabled: true, grants: [] } }) },
       events: { on(name, fn) { listeners.set(name, [...listeners.get(name) || [], fn]); return () => listeners.set(name, listeners.get(name).filter(item => item !== fn)) } },
-      actions: { cancel: async () => {}, async invoke(name) {
+      actions: { cancel: async () => {}, async invoke(name, input) {
         calls.push(name)
         if (name === 'engine.prepare') start(true)
         if (name === 'engine.start') start(false)
         if (name === 'engine.cancel') set({ state: 'failed', message: '已取消，可以稍后重试。', error: null })
         let result = state
         if (name === 'documents.list') result = { items: [{ filepath: 'note.md', filename: '产品资料.md' }], total: 1 }
+        if (name === 'documents.categories') result = { counts: { general: 1 }, supported: ['general'] }
+        if (name === 'documents.read') result = { filepath: 'note.md', filename: '产品资料.md', content: '解析后的第一页', nextOffset: 32000 }
+        if (name === 'documents.source') result = { content: '---\ntitle: 产品资料\n---\n完整原文', revision: 'v1' }
+        if (name === 'documents.update') {
+          if (input.revision !== 'v1' || input.content !== '---\ntitle: 产品资料\n---\n完整原文已编辑') throw new Error('编辑器未提交完整原文及原始版本')
+          result = {}
+        }
         return { ok: true, result }
       } },
       host: { cancel: async () => {}, async request(_protocol, method, input) { if (_protocol === 'moss.mcp/v1') return { ok: true, result: { servers: [] } }; if (method === 'tools.scope.set') scope = input.scope || 'session'; return { ok: true, result: { scope, defaultScope: 'session', overridden: false } } } },
@@ -57,14 +64,17 @@ try {
   })
   await page.goto(`http://127.0.0.1:${server.address().port}`)
   await expect(page.getByRole('status', { name: 'Moss Python 环境检查' })).toContainText('3.13.15')
-  await page.getByRole('button', { name: '准备引擎', exact: true }).click()
+  // A cancelled offline file picker returns the current state.
+  await page.getByRole('button', { name: '选择离线包', exact: true }).click()
+  await expect.poll(() => page.evaluate(() => window.fixture.calls.includes('engine.prepareOffline'))).toBe(true)
+  await page.getByRole('button', { name: '在线准备', exact: true }).click()
   await page.evaluate(() => window.fixture.advance('dependencies', '正在下载并校验引擎依赖…', { logs: ['Downloading onnxruntime-1.26.0.whl (17.3 MB)'] }))
   await expect(page.locator('.latest-output')).toContainText('Downloading', { timeout: 1000 })
   await page.getByRole('button', { name: '取消准备', exact: true }).click()
   await page.evaluate(() => window.fixture.set({ installed: true, preparation: null }))
   await page.getByRole('button', { name: '启动 / 重试', exact: true }).click()
   await page.evaluate(() => window.fixture.advance('model', '正在下载模型文件 5/5：onnx/model_quantized.onnx', { elapsedMs: 45000, stageElapsedMs: 39000, download: { completed: 62 * 1024 * 1024, total: 118 * 1024 * 1024, file: 'onnx/model_quantized.onnx' } }))
-  await expect(page.getByRole('progressbar', { name: '当前文件下载进度' })).toHaveAttribute('value', String(62 * 1024 * 1024))
+  await expect(page.getByRole('progressbar', { name: '当前文件进度' })).toHaveAttribute('value', String(62 * 1024 * 1024))
   await expect(page.getByText('62.0 MB / 118.0 MB · 当前文件')).toBeVisible()
   await page.screenshot({ path: path.join(output, 'model-download.png') })
   await page.evaluate(() => window.fixture.advance('service', '正在检查已有索引，每次检查最多等待 30 秒…', { elapsedMs: 78000, stageElapsedMs: 31000, idleMs: 31000, logs: ['[PREFLIGHT] Checking existing index…'] }))
@@ -96,6 +106,13 @@ try {
   await page.evaluate(() => window.fixture.set({ state: 'ready', error: null, reindex: { active: false } }))
   await expect(page.getByRole('button', { name: '导入文件', exact: true })).toBeEnabled()
   await expect(page.locator('.document')).toHaveCount(1)
+  await page.locator('.document').click()
+  await page.getByRole('button', { name: '编辑原文' }).click()
+  const editor = page.getByRole('textbox', { name: '正文', exact: true })
+  await expect(editor).toHaveValue('---\ntitle: 产品资料\n---\n完整原文')
+  await editor.fill((await editor.inputValue()) + '已编辑')
+  await page.getByRole('button', { name: '保存并索引' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
   await page.getByRole('button', { name: '设置', exact: true }).click()
   await expect(page.getByRole('heading', { name: '检索引擎', exact: true })).toBeVisible()
   assert.deepEqual(errors, [])

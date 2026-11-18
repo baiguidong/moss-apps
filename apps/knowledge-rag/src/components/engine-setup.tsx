@@ -8,8 +8,8 @@ const duration = (ms: number) => {
 }
 const bytes = (value: number) => value >= 1024 * 1024 ? `${(value / 1024 / 1024).toFixed(1)} MB` : `${(value / 1024).toFixed(0)} KB`
 
-export function EngineSetup({ status, busy, onStart, onCancel }: {
-  status: EngineStatus | null; busy: boolean; onStart: () => void; onCancel: () => void
+export function EngineSetup({ status, busy, cancelling, onStart, onCancel, onPrepare, onOffline }: {
+  status: EngineStatus | null; busy: boolean; cancelling: boolean; onStart: () => void; onCancel: () => void; onPrepare: () => void; onOffline: () => void
 }) {
   const active = status?.state === 'installing' || status?.state === 'starting'
   const progress = status?.preparation, failed = status?.state === 'failed'
@@ -29,7 +29,7 @@ export function EngineSetup({ status, busy, onStart, onCancel }: {
   const python = status?.runtime?.python
   const pythonPath = python?.path ? python.path.split(/[\\/]/).slice(-3).join('/') : ''
   return <section className="setup" aria-label="引擎准备进度">
-    <div className="setup-heading"><div className="setup-icon">{failed ? <CircleAlert size={22}/> : <BookOpen size={22}/>}</div><div><h2>{title}</h2><p>{progress ? `已用 ${duration(progress.elapsedMs + since)}${active ? ` · 当前步骤 ${duration(progress.stageElapsedMs + since)}` : ''}` : '首次下载引擎依赖与约 130 MB 模型，之后从本机加载。'}</p></div>{active && <LoaderCircle size={18} className="spin"/>}</div>
+    <div className="setup-heading"><div className="setup-icon">{failed ? <CircleAlert size={22}/> : <BookOpen size={22}/>}</div><div><h2>{title}</h2><p>{progress ? `已用 ${duration(progress.elapsedMs + since)}${active ? ` · 当前步骤 ${duration(progress.stageElapsedMs + since)}` : ''}` : '在线准备会下载依赖和模型。使用离线包时，请解压后选择其中的 offline.json。'}</p></div>{active && <LoaderCircle size={18} className="spin"/>}</div>
     <div className={`runtime-check ${python?.available === false ? 'runtime-error' : python?.available ? 'runtime-ready' : ''}`} role="status" aria-label="Moss Python 环境检查">
       <div><strong>Moss 内置 Python</strong><small>{python?.available ? `${python.version || '已就绪'} · ${pythonPath}` : python?.available === false ? '未就绪' : '检查中…'}</small></div>
       {python?.available === false && <span>{python.error || '请在 Moss 设置中启用内置 Python，然后重试。'}</span>}
@@ -41,14 +41,17 @@ export function EngineSetup({ status, busy, onStart, onCancel }: {
       <div className="setup-current" role="status" aria-live="polite">
         <div className="setup-current-label"><span>{current >= 0 ? `步骤 ${current + 1} / ${progress.steps.length} · ${progress.steps[current].label}` : '正在检查本地引擎'}</span>{download && <span>{percent}%</span>}</div>
         <p>{progress.detail || status?.message}</p>
-        {active && <progress aria-label={download ? '当前文件下载进度' : '当前步骤进行中'} max={download?.total || 100} value={download?.completed}/>}
+        {active && <progress aria-label={download ? '当前文件进度' : '当前步骤进行中'} max={download?.total || 100} value={download?.completed}/>}
         {download && <div className="download-size"><Download size={13}/><span>{bytes(download.completed)} / {bytes(download.total)} · 当前文件</span></div>}
       </div>
-      {active && idle >= 30000 && <p className="setup-stalled" role="status"><CircleAlert size={15}/><span>已有 {duration(idle)} 未收到新输出。{['model','dependencies'].includes(progress.stage || '') ? '下载可能正在等待网络响应，请检查网络或代理；也可以取消后重试。' : '本地服务仍在处理中；若持续无响应，可以取消后重试。'}</span></p>}
+      {active && idle >= 30000 && <p className="setup-stalled" role="status"><CircleAlert size={15}/><span>已有 {duration(idle)} 未收到新输出。可展开详细输出查看进度，或取消后重试。</span></p>}
       {progress.logs.length > 0 && <div className="setup-output"><div className="latest-output"><span>最近输出</span><code>{progress.logs.at(-1)}</code></div><details><summary>查看详细输出</summary><pre>{progress.logs.join('\n')}</pre></details></div>}
     </>}
     {!progress && <p className="setup-description">{status?.message || '资料检索在本机运行。准备完成后，即可导入资料并搜索。'}</p>}
     {status?.error && <pre role="alert" className="setup-error">{status.error}</pre>}
-    <div className="setup-actions">{active ? <><button disabled={busy} onClick={onCancel}>{busy ? <LoaderCircle size={15} className="spin"/> : <X size={15}/>}取消准备</button><span>关闭页面后，准备会在后台继续。</span></> : <button className="primary" disabled={busy || !status} onClick={onStart}>{busy || !status ? <LoaderCircle size={15} className="spin"/> : failed || status.installed ? <RefreshCw size={15}/> : <Download size={15}/>} {status?.installed ? '启动 / 重试' : failed ? '重新准备' : '准备引擎'}</button>}</div>
+    <div className="setup-actions">{active ? <><button disabled={cancelling} onClick={onCancel}>{cancelling ? <LoaderCircle size={15} className="spin"/> : <X size={15}/>}取消准备</button><span>关闭页面后，准备会在后台继续。</span></> : <button className="primary" disabled={busy || cancelling || !status} onClick={onStart}>{busy || !status ? <LoaderCircle size={15} className="spin"/> : failed || status.installed ? <RefreshCw size={15}/> : <Download size={15}/>} {status?.installed ? '启动 / 重试' : failed ? '在线重新准备' : '在线准备'}</button>}
+      {!active && <button disabled={busy || !status} onClick={onOffline}>选择离线包</button>}
+      {failed && status?.installed && progress?.stage === 'model' && <button disabled={busy || cancelling} onClick={onPrepare}><Download size={15}/>在线重新准备模型</button>}
+    </div>
   </section>
 }

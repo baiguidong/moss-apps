@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "filepath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "deleteFile": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "filepath"
+  ],
+  "additionalProperties": false
+}

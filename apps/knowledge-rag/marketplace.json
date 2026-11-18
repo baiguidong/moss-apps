@@ -9,5 +9,8 @@
   ],
   "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/knowledge-rag",
   "repository": "https://github.com/baiguidong/moss-apps",
-  "featured": false
+  "featured": false,
+  "offlineKitPlatforms": [
+    "darwin-arm64"
+  ]
 }

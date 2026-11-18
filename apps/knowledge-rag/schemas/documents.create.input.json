@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "filepath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120000
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    }
+  },
+  "required": [
+    "filepath",
+    "content"
+  ],
+  "additionalProperties": false
+}

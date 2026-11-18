@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "filepath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120000
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "required": [
+    "filepath",
+    "content",
+    "revision"
+  ],
+  "additionalProperties": false
+}

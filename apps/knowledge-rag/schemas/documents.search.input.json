@@ -15,6 +15,45 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 4096
+    },
+    "hybridAlpha": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "minScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "snippet": {
+      "type": "boolean"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "hybrid",
+        "fts5"
+      ]
+    },
+    "includeFolders": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      }
+    },
+    "excludeFolders": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      }
     }
   },
   "required": [

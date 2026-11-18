@@ -7,6 +7,12 @@ on:
     - cron: '17 */6 * * *'
   workflow_dispatch:
     inputs:
+      rehearse_app:
+        description: Optional App ID to build and upload to an unpublished test Release
+        type: string
+      rehearse_version:
+        description: Exact App version for the release rehearsal
+        type: string
       dry_run:
         description: Only generate the release plan
         type: boolean
@@ -17,12 +23,23 @@ permissions:
 
 # Serialize whole batches so an older source snapshot cannot deploy after a new one.
 concurrency:
-  group: moss-app-release-batch
+  group: ${{ inputs.rehearse_app && format('moss-release-rehearsal-{0}', github.run_id) || 'moss-app-release-batch' }}
   cancel-in-progress: false
 
 jobs:
+  rehearsal:
+    if: github.event_name == 'workflow_dispatch' && inputs.rehearse_app != ''
+    uses: ./.github/workflows/release-app.yml
+    permissions:
+      contents: write
+    with:
+      app_id: ${{ inputs.rehearse_app }}
+      version: ${{ inputs.rehearse_version }}
+      source_sha: ${{ github.sha }}
+      rehearsal: true
+    secrets: inherit
   plan:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && !inputs.rehearse_app
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}

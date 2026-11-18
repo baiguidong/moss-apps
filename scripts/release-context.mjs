@@ -18,6 +18,8 @@ const values = {
   package_name: app.kind === 'tool' ? '@moss/app-runtime' : readJson(path.join(app.root, 'package.json')).name,
   app_dir: path.relative(repoRoot, app.root).split(path.sep).join('/'),
   variants: Boolean(app.manifest.platforms),
+  has_kits: Boolean(app.marketplace.offlineKitPlatforms?.length),
+  kits: JSON.stringify({ include: (app.marketplace.offlineKitPlatforms || []).map(platform => ({ platform, os: runners[platform] })) }),
   platforms: JSON.stringify({ include: platforms.map(platform => {
     if (!runners[platform]) throw new Error(`No CI runner for ${platform}`)
     return { platform, os: runners[platform] }
