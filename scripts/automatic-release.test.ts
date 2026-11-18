@@ -172,3 +172,15 @@ test('release asset validation rejects incomplete targets, changed bytes and wro
     await expect(collectReleaseAssets(recordApp, root, sha, 'test/apps', async () => verified)).rejects.toThrow('bytes mismatch')
   } finally { await fs.rm(root, { recursive: true, force: true }) }
 })
+
+test('a rehearsal verifies draft assets without creating a production tag or publishing', async () => {
+  const { client, state } = fake()
+  const dry = () => publishRelease(client, { ...request(), rehearsalId: '123' })
+  expect(await dry()).toMatchObject({ status: 'verified-draft', tag: 'rehearsal-123-moss.example-v1.0.0', assets: 3 })
+  expect(state.releases[0].draft).toBe(true)
+  expect(state.events).not.toContain('POST /git/refs')
+  expect(state.events).not.toContain('PATCH /releases/1')
+  expect((await dry()).status).toBe('verified-draft')
+  expect(state.releases).toHaveLength(1)
+  expect(state.assets).toHaveLength(3)
+})

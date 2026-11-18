@@ -95,3 +95,7 @@ Actions → **Release Changed Apps** → **Run workflow**，默认 `dry_run=true
 Git 与 Filesystem 的真实 MCP 集成测试由 Node test runner 执行，双方均运行编译后的 Node 代码；权限拒绝断言检查明确错误，连接超时不能算作隔离验证通过。
 
 Windows 原生验证改为启动可见测试窗口并等待 WinForms `Shown` 事件，保留窗口启动错误诊断。隔离 runner 已通过实际窗口截图、UI Automation 和中文输入；正式发布仍验证 Host 信任的原始签名包。
+
+## 在线包与离线整包
+
+模型或原生依赖使下载体积相差较大的 App 可在 `marketplace.json` 声明 `offlineKitPlatforms`。CI 从同一份签名在线 ZIP 构建对应平台的离线整包，验证附件后将两种下载方式写入同一版本记录。手动运行 **Release Changed Apps** 并填写 `rehearse_app` 与 `rehearse_version`，即可在草稿中验证发布和桌面安装。首个试点及复现命令见[在线与离线交付设计](./app-offline-delivery.md)。
