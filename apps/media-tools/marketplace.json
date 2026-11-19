@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "appId": "moss.media-tools",
-  "summary": "使用 FFmpeg 裁剪、压缩、转换本地音视频。",
-  "description": "使用 FFmpeg 裁剪、压缩、转换本地音视频。",
+  "summary": "在本机制作 3D 数字人口播、与 Moss 角色对话，使用 FFmpeg 处理音视频。",
+  "description": "在本机制作 3D 数字人口播、与 Moss 角色对话，使用 FFmpeg 处理音视频。",
   "platforms": [
     "darwin-arm64"
   ],

@@ -3,7 +3,9 @@ name: moss-media-tools
 description: 使用 Moss 音视频工坊的受管 FFmpeg/ffprobe，执行页面常用处理或通过完整 FFmpeg 参数完成高级媒体任务，并共享任务结果。
 ---
 
-使用 App 上下文中的 cliPath、dataDir、nodeExecutable、nodeArgs 和 env。将请求保存为 UTF-8 JSON 文件后调用：
+制作数字人口播时，用 studio 列出资源，project-create 创建项目，project-get 读取项目，project-save 接受 id、最新 version 和 fields。保留用户已有设置；版本冲突时重新读取。speech 生成指定版本的本机试听。render 固定项目版本并返回任务 ID 和 presentation；打开项目预览才开始录制，通过 task 查询和 cancel 取消。用户可从任务中导出成片。
+
+传统媒体处理使用 App 上下文中的 cliPath、dataDir、nodeExecutable、nodeArgs 和 env。将请求保存为 UTF-8 JSON 文件后调用：
 
 node <cliPath> --data-dir <dataDir> describe
 node <cliPath> --data-dir <dataDir> run --input-file <absolute-request.json>

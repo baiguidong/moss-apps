@@ -359,14 +359,17 @@
     },
     "apps/media-tools": {
       "name": "@moss/media-tools-app",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
+        "@met4citizen/headaudio": "1.1.0",
+        "@met4citizen/talkinghead": "1.8.2",
         "@modelcontextprotocol/sdk": "1.29.0",
         "@moss/app-sdk": "workspace:*",
         "@moss/engine-apps": "workspace:*",
         "lucide-react": "0.564.0",
         "react": "19.2.0",
         "react-dom": "19.2.0",
+        "three": "0.186.0",
       },
       "devDependencies": {
         "@playwright/test": "1.58.2",
@@ -1051,6 +1054,10 @@
     "@livekit/mutex": ["@livekit/mutex@1.0.0", "https://registry.npmjs.org/@livekit/mutex/-/mutex-1.0.0.tgz", {}, "sha512-aiUhoThBNF9UyGTxEURFzJLhhPLIVTnQiEVMjRhPnfHNKLfo2JY9xovHKIus7B78UD5hsP6DlgpmAsjrz4U0Iw=="],
 
     "@livekit/protocol": ["@livekit/protocol@1.24.0", "https://registry.npmjs.org/@livekit/protocol/-/protocol-1.24.0.tgz", { "dependencies": { "@bufbuild/protobuf": "^1.10.0" } }, "sha512-9dCsqnkMn7lvbI4NGh18zhLDsrXyUcpS++TEFgEk5Xv1WM3R2kT3EzqgL1P/mr3jaabM6rJ8wZA/KJLuQNpF5w=="],
+
+    "@met4citizen/headaudio": ["@met4citizen/headaudio@1.1.0", "", {}, "sha512-jd2uxvYa0i96og74TZ08QYD5OH0TJvZiFdUl/Kf0pn0s1BYWXu0iVtvDU2ircuJtH1snv0v6DRahjNOMyfUhUw=="],
+
+    "@met4citizen/talkinghead": ["@met4citizen/talkinghead@1.8.2", "", { "dependencies": { "three": "^0.186" } }, "sha512-+1EVKIQovJav2uBW7TE6ul50jI2Yh0F40AFWMLIX3sVY3AphpUZ1ebWhZO4I7M/GKdc95gE2eb0qbLtcYWQvZw=="],
 
     "@modelcontextprotocol/sdk": ["@modelcontextprotocol/sdk@1.29.0", "https://registry.npmjs.org/@modelcontextprotocol/sdk/-/sdk-1.29.0.tgz", { "dependencies": { "@hono/node-server": "^1.19.9", "ajv": "^8.17.1", "ajv-formats": "^3.0.1", "content-type": "^1.0.5", "cors": "^2.8.5", "cross-spawn": "^7.0.5", "eventsource": "^3.0.2", "eventsource-parser": "^3.0.0", "express": "^5.2.1", "express-rate-limit": "^8.2.1", "hono": "^4.11.4", "jose": "^6.1.3", "json-schema-typed": "^8.0.2", "pkce-challenge": "^5.0.0", "raw-body": "^3.0.0", "zod": "^3.25 || ^4.0", "zod-to-json-schema": "^3.25.1" }, "peerDependencies": { "@cfworker/json-schema": "^4.1.1" }, "optionalPeers": ["@cfworker/json-schema"] }, "sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ=="],
 
@@ -2797,6 +2804,8 @@
     "tesseract.js-core": ["tesseract.js-core@6.1.2", "https://registry.npmjs.org/tesseract.js-core/-/tesseract.js-core-6.1.2.tgz", {}, "sha512-pv4GjmramjdObhDyR1q85Td8X60Puu/lGQn7Kw2id05LLgHhAcWgnz6xSdMCSxBMWjQDmMyDXPTC2aqADdpiow=="],
 
     "text-segmentation": ["text-segmentation@1.0.3", "https://registry.npmjs.org/text-segmentation/-/text-segmentation-1.0.3.tgz", { "dependencies": { "utrie": "^1.0.2" } }, "sha512-iOiPUo/BGnZ6+54OsWxZidGCsdU8YbE4PSpdPinp7DeMtUJNJBoJ/ouUSTJjHkh1KntHaltHl/gDs2FC4i5+Nw=="],
+
+    "three": ["three@0.186.0", "", {}, "sha512-cr/fIM2ddMSVbYVgkfD4jLJv7Fh/8ZTjvo+7gQeSVGUZHxpx9FDwoL5iC7hUz/LiRA8wMbqfnb90xKfm1/HHkQ=="],
 
     "tiny-emitter": ["tiny-emitter@2.1.0", "https://registry.npmjs.org/tiny-emitter/-/tiny-emitter-2.1.0.tgz", {}, "sha512-NB6Dk1A9xgQPMoGqC5CVXn123gWyte215ONT5Pp5a0yt4nlEoO1ZWeCwpncaekPHXO60i47ihFnZPiRPjRMq4Q=="],
 

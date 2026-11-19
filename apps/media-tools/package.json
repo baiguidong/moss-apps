@@ -1,6 +1,6 @@
 {
   "name": "@moss/media-tools-app",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,12 +10,15 @@
     "build": "node scripts/build.mjs"
   },
   "dependencies": {
+    "@met4citizen/headaudio": "1.1.0",
+    "@met4citizen/talkinghead": "1.8.2",
+    "@modelcontextprotocol/sdk": "1.29.0",
     "@moss/app-sdk": "workspace:*",
     "@moss/engine-apps": "workspace:*",
-    "@modelcontextprotocol/sdk": "1.29.0",
+    "lucide-react": "0.564.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "lucide-react": "0.564.0"
+    "three": "0.186.0"
   },
   "devDependencies": {
     "@types/react": "19.2.2",

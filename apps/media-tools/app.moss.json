@@ -1,17 +1,22 @@
 {
   "schemaVersion": 2,
   "id": "moss.media-tools",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "音视频工坊",
   "category": "creative",
-  "discovery": { "group": "local" },
+  "discovery": {
+    "group": "local"
+  },
   "keywords": [
     "FFmpeg",
     "视频裁剪",
     "音频提取",
-    "视频压缩"
+    "视频压缩",
+    "数字人口播",
+    "3D 角色",
+    "口型同步"
   ],
-  "description": "使用 FFmpeg 裁剪、压缩、转换本地音视频。",
+  "description": "在本机制作 3D 数字人口播、与 Moss 角色对话，使用 FFmpeg 处理音视频。",
   "icon": "assets/icon.svg",
   "hostApi": "^3.21.0",
   "publisher": {
@@ -90,16 +95,188 @@
         "inputSchema": "schemas/artifact.json",
         "outputSchema": "schemas/result.json",
         "timeoutMs": 300000
+      },
+      {
+        "name": "studio.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "projects.create",
+        "inputSchema": "schemas/create.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "projects.get",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "projects.save",
+        "inputSchema": "schemas/save.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "assets.import",
+        "inputSchema": "schemas/import.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "avatars.edit",
+        "inputSchema": "schemas/avatar-edit.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "avatars.get",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "speech.prepare",
+        "inputSchema": "schemas/revision.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "speech.reply",
+        "inputSchema": "schemas/reply.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.submit",
+        "inputSchema": "schemas/revision.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.claim",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.retry",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.audio",
+        "inputSchema": "schemas/lease.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.pulse",
+        "inputSchema": "schemas/lease.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.fail",
+        "inputSchema": "schemas/fail.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.finish",
+        "inputSchema": "schemas/finish.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "chat.get",
+        "inputSchema": "schemas/chat.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "chat.send",
+        "inputSchema": "schemas/message.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "chat.stop",
+        "inputSchema": "schemas/chat.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "chat.persona",
+        "inputSchema": "schemas/persona.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "composer.list",
+        "inputSchema": "schemas/composer-list.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "resources.resolve",
+        "inputSchema": "schemas/resolve.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "transcription.status",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "mic.begin",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "mic.finish",
+        "inputSchema": "schemas/mic.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "audio.transcribe",
+        "inputSchema": "schemas/revision.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "audio.preview",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
       }
     ]
   },
   "host": {
     "protocols": [
-      "moss.local-files/v1"
+      "moss.local-files/v1",
+      "moss.agent/v1",
+      "moss.app-capabilities/v1"
     ]
   },
   "permissions": [
-    "local-files:pick"
+    "local-files:pick",
+    "agent:bindings:read",
+    "agent:bindings:write",
+    "agent:sessions:read",
+    "agent:sessions:write",
+    "agent:turns:read",
+    "agent:turns:write",
+    "platform:media",
+    "apps:invoke"
   ],
   "contributes": {
     "views": [
@@ -108,6 +285,11 @@
         "title": "音视频工坊",
         "route": "#/",
         "order": 270
+      },
+      {
+        "id": "moss-conversation",
+        "title": "口播项目",
+        "route": "#/workbench"
       }
     ],
     "tools": [
@@ -158,6 +340,54 @@
         "action": "artifacts.read",
         "inputSchema": "schemas/artifact.json",
         "effect": "read"
+      },
+      {
+        "id": "studio",
+        "title": "查看口播工作台",
+        "description": "列出角色、音色、口播项目和可用导出规格。",
+        "action": "studio.get",
+        "inputSchema": "schemas/empty.json",
+        "effect": "read"
+      },
+      {
+        "id": "project-create",
+        "title": "创建口播项目",
+        "description": "创建并保存讲稿、角色、画幅、配音设置，返回项目入口。",
+        "action": "projects.create",
+        "inputSchema": "schemas/create.json",
+        "effect": "write"
+      },
+      {
+        "id": "project-get",
+        "title": "读取口播项目",
+        "description": "读取指定项目的当前讲稿、版本和设置。",
+        "action": "projects.get",
+        "inputSchema": "schemas/id.json",
+        "effect": "read"
+      },
+      {
+        "id": "project-save",
+        "title": "保存口播项目",
+        "description": "使用当前版本与要修改的字段保存口播草稿。",
+        "action": "projects.save",
+        "inputSchema": "schemas/save.json",
+        "effect": "write"
+      },
+      {
+        "id": "speech",
+        "title": "生成本机配音",
+        "description": "为指定稿件版本准备音轨和字幕时间。",
+        "action": "speech.prepare",
+        "inputSchema": "schemas/revision.json",
+        "effect": "write"
+      },
+      {
+        "id": "render",
+        "title": "生成口播视频",
+        "description": "固定项目版本并提交 MP4 任务，打开项目预览即可接手，使用 task 查看成品。",
+        "action": "renders.submit",
+        "inputSchema": "schemas/revision.json",
+        "effect": "write"
       }
     ],
     "skills": [
@@ -168,9 +398,32 @@
         "path": "resources/skills/moss-media-tools/SKILL.md",
         "cli": "dist/backend/cli.mjs"
       }
+    ],
+    "resourceProviders": [
+      {
+        "id": "studio-projects",
+        "title": "口播项目",
+        "schemes": [
+          "moss-studio"
+        ],
+        "listAction": "composer.list",
+        "resolveAction": "resources.resolve"
+      }
     ]
   },
   "platforms": [
     "darwin-arm64"
-  ]
+  ],
+  "appCapabilities": {
+    "usesTools": [
+      {
+        "appId": "moss.transcription",
+        "tools": [
+          "files_import",
+          "tasks_start",
+          "workspace_get"
+        ]
+      }
+    ]
+  }
 }
