@@ -9,7 +9,7 @@ import { execFileSync } from 'node:child_process';
 test('Apps that retain shared settings declare and build their page; configuration Apps use Core settings', async () => {
   const apps = listApps().filter(app => app.kind === 'app' && app.manifest.contributes?.views?.some(view => view.route === '#/moss-settings'));
   expect(apps.map(app => app.manifest.id).sort()).toEqual([
-    'moss.buddy', 'moss.knowledge-rag', 'moss.library', 'moss.takt', 'moss.workflow',
+    'moss.anything-rag', 'moss.buddy', 'moss.knowledge-rag', 'moss.library', 'moss.takt', 'moss.workflow',
   ]);
   for (const app of apps) {
     const view = app.manifest.contributes.views.find(view => view.route === '#/moss-settings');

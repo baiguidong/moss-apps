@@ -38,11 +38,14 @@ describe('App Backend manifest', () => {
     expect(() => validateRepositoryAppManifest({ ...source, hostApi: 'invalid' })).toThrow()
   })
   it('advertises Host API 3 and rejects unsupported contracts', () => {
-    expect(APP_HOST_API_VERSION).toBe('3.23.0')
+    expect(APP_HOST_API_VERSION).toBe('3.23.1')
     expect(validateAppManifest({ ...manifest(), hostApi: '^3.0.0' }).hostApi).toBe('^3.0.0')
     expect(() => validateAppManifest({ ...manifest(), hostApi: '^2.9.0' })).toThrow(/requires Host API/)
     expect(validateAppManifest({ ...manifest(), hostApi: '^3.23.0' }).hostApi).toBe('^3.23.0')
     expect(() => validateAppManifest({ ...manifest(), hostApi: '^3.24.0' })).toThrow(/requires Host API/)
+    const rag = JSON.parse(readFileSync(new URL('../apps/anything-rag/app.moss.json', import.meta.url), 'utf8'))
+    expect(validateAppManifest(rag).hostApi).toBe('^3.23.1')
+    expect(() => validateAppManifest(rag, { hostApiVersion: '3.23.0' })).toThrow(/requires Host API/)
   })
 
   it.each(['backup', 'data-workbench'])(
