@@ -1,0 +1,1 @@
+{"type":"object","properties":{"paths":{"type":"array","items":{"type":"string","minLength":1},"minItems":1,"maxItems":200},"spaceId":{"type":"string"}},"required":["paths"],"additionalProperties":false}

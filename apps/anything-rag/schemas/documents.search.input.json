@@ -1,0 +1,1 @@
+{"type":"object","properties":{"query":{"type":"string","minLength":1,"maxLength":2000},"spaceId":{"type":"string"},"topK":{"type":"integer","minimum":1,"maximum":50},"threshold":{"type":"number","minimum":0,"maximum":1},"hybridAlpha":{"type":"number","minimum":0,"maximum":1},"rerank":{"type":"boolean"}},"required":["query"],"additionalProperties":false}

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.anything-rag",
+  "summary": "在本机整理和检索中文资料，回答问题时附上原文引用。",
+  "description": "导入 PDF、Office 文档和文本资料，用语义和关键词查找原文。安装「PDF 创作」后，可对扫描 PDF 进行离线文字识别。",
+  "platforms": ["darwin-arm64", "linux-x64"],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/anything-rag",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "featured": false,
+  "license": "MIT"
+}

@@ -1,0 +1,12 @@
+{
+  "model": "Xenova/multilingual-e5-small",
+  "revision": "761b726dd34fb83930e26aab4e9ac3899aa1fa78",
+  "onnx": "onnx/model_quantized.onnx",
+  "parts": [
+    "onnx/model_quantized.onnx.part-000",
+    "onnx/model_quantized.onnx.part-001",
+    "onnx/model_quantized.onnx.part-002"
+  ],
+  "onnxBytes": 118308185,
+  "onnxSha256": "f80102d3f2a1229f387d3c81909990d8945513e347b0eab049f7de3c6f98c193"
+}
