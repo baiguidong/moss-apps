@@ -1,3 +1,7 @@
+## 0.3.9
+
+- 修复「开始创作」和「主会话中继续」无法准备会话草稿的问题。项目预览继续支持新旧资源链接。
+
 ## 0.3.8
 
 - Rebuild against Moss Core 0.1.25 and refresh the shared appearance/runtime snapshot.

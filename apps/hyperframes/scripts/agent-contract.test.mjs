@@ -11,8 +11,11 @@ const root = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-hyperframes-contract-
 const actions = new Map()
 await engine.register({ registerAction: (name, handler) => actions.set(name, handler) }, { dataDir: root })
 const manifest = JSON.parse(await fs.readFile(new URL('../app.moss.json', import.meta.url)))
+const resourceProvider = manifest.contributes.resourceProviders.find(item => item.id === 'video-projects')
+const resolveAction = manifest.backend.actions.find(action => action.name === resourceProvider.resolveAction)
 const outputSchemas = new Map()
 const validator = new Ajv({ strict: false })
+const validateResolveInput = validator.compile(JSON.parse(await fs.readFile(new URL(`../${resolveAction.inputSchema}`, import.meta.url))))
 for (const action of manifest.backend.actions) {
   if (action.outputSchema) outputSchemas.set(action.name, validator.compile(JSON.parse(await fs.readFile(new URL(`../${action.outputSchema}`, import.meta.url)))))
 }
@@ -21,6 +24,10 @@ const call = async (name, input = {}) => {
   const validate = outputSchemas.get(name)
   if (validate) assert.ok(validate(result), `${name}: ${JSON.stringify(validate.errors)}`)
   return result
+}
+const resolveResource = input => {
+  assert.ok(validateResolveInput(input), `${resolveAction.name}: ${JSON.stringify(validateResolveInput.errors)}`)
+  return call(resolveAction.name, input)
 }
 test.after(() => fs.rm(root, { recursive: true, force: true }))
 
@@ -40,14 +47,11 @@ test('工具与 Manifest action 及独立对象 schema 对齐', async () => {
     assert.equal(schema.additionalProperties, false)
     ajv.compile(schema)
   }
-  const resourceProvider = manifest.contributes.resourceProviders.find(item => item.id === 'video-projects')
   assert.deepEqual(resourceProvider.schemes, ['moss-hyperframes', 'moss'])
-  assert.equal(resourceProvider.resolveAction, 'resources.resolve')
-  assert.ok(actions.has(resourceProvider.resolveAction))
-  assert.deepEqual(JSON.parse(await fs.readFile(new URL('../schemas/resource-resolve.json', import.meta.url))), {
-    type: 'object', properties: { uri: { type: 'string', minLength: 1, maxLength: 8192 } },
-    required: ['uri'], additionalProperties: false,
-  })
+  assert.ok(actions.has(resolveAction.name))
+  assert.equal(validateResolveInput({ uri: 'moss-hyperframes://project/test', intent: 'edit' }), false)
+  assert.equal(validateResolveInput({ intent: 'create', ref: { duration: 0 } }), false)
+  assert.equal(validateResolveInput({}), false)
   const schema = JSON.parse(await fs.readFile(new URL('../schemas/render.json', import.meta.url)))
   const validate = ajv.compile(schema)
   assert.ok(validate({ operation: 'render', projectId: 'project-1' }))
@@ -116,11 +120,11 @@ test('旧版 HTML 项目可以读取与校验', async () => {
 
 test('资源 URI 解析返回项目预览文件并兼容旧协议', async () => {
   const project = await call('projects.create', { name: '资源预览测试', duration: 3 })
-  const canonical = await call('resources.resolve', { uri: `moss-hyperframes://project/${project.id}` })
+  const canonical = await resolveResource({ uri: `moss-hyperframes://project/${project.id}` })
   assert.equal(canonical.kind, 'file')
   assert.equal(canonical.path, path.join(root, 'projects', project.id, 'index.html'))
   assert.equal(await fs.readFile(canonical.path, 'utf8'), project.html)
-  const legacy = await call('resources.resolve', { uri: `moss://hyperframes/project/${project.id}` })
+  const legacy = await resolveResource({ uri: `moss://hyperframes/project/${project.id}` })
   assert.equal(legacy.path, canonical.path)
   await assert.rejects(call('resources.resolve', { uri: 'moss-hyperframes://project/bad%2Fid' }), /资源 URI 无效/)
   await assert.rejects(call('resources.resolve', { uri: `moss://other/project/${project.id}` }), /资源 URI 无效/)
@@ -151,7 +155,7 @@ test('主会话草稿携带真实项目、已声明工具和可返回的项目�
   const manifest = JSON.parse(await fs.readFile(new URL('../app.moss.json', import.meta.url)))
   const composerView = manifest.contributes.views.find(view => view.id === 'moss-conversation')
   assert.ok(composerView)
-  const result = await call('composer.resolve', { intent: 'edit', ref: { projectId: project.id, prompt: '修改开场' } })
+  const result = await resolveResource({ intent: 'edit', ref: { projectId: project.id, prompt: '修改开场' } })
   assert.equal(result.route, `#/projects/${project.id}`)
   assert.match(result.prompt, /修改开场/)
   assert.ok(result.prompt.includes(project.id))
@@ -159,9 +163,10 @@ test('主会话草稿携带真实项目、已声明工具和可返回的项目�
   const listing = await call('composer.list', { query: '会话往返', offset: 0, limit: 1 })
   assert.equal(listing.length, 1)
   assert.equal(listing[0].ref.projectId, project.id)
+  assert.equal((await resolveResource({ intent: 'use', ref: listing[0].ref })).route, result.route)
   assert.deepEqual(await call('composer.list', { query: '没有匹配的视频项目' }), [])
   assert.equal(outputSchemas.get('composer.list')({ projects: listing }), false)
-  const draft = await call('composer.resolve', { intent: 'create', ref: { prompt: '科普短片', aspectRatio: '9:16', duration: 30, templateId: 'lesson' } })
+  const draft = await resolveResource({ intent: 'create', ref: { prompt: '科普短片', aspectRatio: '9:16', duration: 30, templateId: 'lesson' } })
   assert.match(draft.prompt, /30秒的9:16/)
   assert.equal(draft.route, '#/')
   await assert.rejects(call('composer.resolve', { intent: 'edit', ref: {} }), /选择视频项目/)
