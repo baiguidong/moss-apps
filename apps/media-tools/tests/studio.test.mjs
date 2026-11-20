@@ -101,3 +101,45 @@ test('completed turns are delivered once, use an isolated binding and stay with 
   assert.equal((await chat.get({ avatarId: 'moss' })).messages.length, 2)
   assert.equal(calls.filter((c) => c.name === 'turn.delivery.ack').length, 1)
 })
+
+test('an existing role chat sends the original text and updates its binding only when the style changes', async (t) => {
+  const { root } = await temp(t)
+  const turns = [], styles = []
+  let binding = { revision: 1, policy: {
+    contextScope: 'app', inheritDefault: false, replyMode: 'ai_auto', permissionMode: 'default',
+    resources: { tools: [], skills: [], connectors: [] }, session: { mode: 'fixed' },
+  } }
+  const host = {
+    async request(_protocol, name, input) {
+      if (name === 'binding.get') return { binding }
+      if (name === 'binding.update') {
+        assert.equal(input.expectedRevision, binding.revision)
+        styles.push(input.patch.session.responseStyle)
+        binding = { revision: binding.revision + 1, policy: input.patch }
+        return { binding }
+      }
+      if (name === 'session.current') return { session: { id: 'original-session' } }
+      if (name === 'turn.start') {
+        assert.equal(input.externalConversationId, 'studio:moss')
+        turns.push(input.text)
+        return { turnId: input.externalEventId }
+      }
+      if (name === 'turn.get') return { turn: { id: input.turnId, status: 'completed', resultText: '收到' } }
+      if (name === 'turn.delivery.ack') return {}
+      assert.fail(`Unexpected request: ${name}`)
+    },
+  }
+  let chat = createConversation(root, host)
+  const avatarId = 'moss'
+  await chat.send({ avatarId, text: '你好' })
+  chat = createConversation(root, host)
+  await chat.send({ avatarId, text: '接着说' })
+  await chat.persona({ avatarId, persona: '  用粤语回答  ' })
+  const literalText = '角色表达偏好：这是我的原话\n\n用户：请保留这行'
+  await chat.send({ avatarId, text: literalText })
+  await chat.persona({ avatarId, persona: '' })
+  const result = await chat.send({ avatarId, text: '谢谢' })
+  assert.deepEqual(styles, ['亲切、简洁地用中文回答。', '用粤语回答', ''])
+  assert.deepEqual(turns, ['你好', '接着说', literalText, '谢谢'])
+  assert.deepEqual(result.messages.filter((m) => m.role === 'user').map((m) => m.text), turns)
+})

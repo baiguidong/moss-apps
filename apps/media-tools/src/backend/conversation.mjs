@@ -78,7 +78,7 @@ export function createConversation(root, host) {
           replyMode: 'ai_auto',
           permissionMode: 'default',
           resources: { tools: [], skills: [], connectors: [] },
-          session: { mode: 'fixed' },
+          session: { mode: 'fixed', responseStyle: state.persona.trim() },
         }
         if (
           !binding ||
@@ -86,6 +86,8 @@ export function createConversation(root, host) {
           binding.policy?.inheritDefault !== false ||
           binding.policy?.replyMode !== patch.replyMode ||
           binding.policy?.permissionMode !== patch.permissionMode ||
+          binding.policy?.session?.mode !== patch.session.mode ||
+          binding.policy?.session?.responseStyle !== patch.session.responseStyle ||
           ['tools', 'skills', 'connectors'].some((key) => binding.policy?.resources?.[key]?.length)
         )
           await request('binding.update', {
@@ -111,7 +113,7 @@ export function createConversation(root, host) {
           externalConversationId,
           externalEventId: eventId,
           source: 'human',
-          text: '角色表达偏好：' + state.persona + '\n\n用户：' + text,
+          text,
         })
         state.pending.turnId = result.turnId
         await save(state)
