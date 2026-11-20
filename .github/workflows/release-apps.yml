@@ -82,8 +82,29 @@ jobs:
       version: ${{ matrix.version }}
       source_sha: ${{ matrix.source_sha }}
     secrets: inherit
-  catalog:
+  cleanup:
     needs: [plan, release]
+    if: always() && !cancelled() && needs.plan.result == 'success' && (needs.release.result == 'success' || needs.release.result == 'skipped') && inputs.dry_run != true
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.0'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+      - run: bun install --frozen-lockfile --filter moss-apps
+      - name: Prune superseded App Releases
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/prune-releases.mjs
+  catalog:
+    needs: [plan, release, cleanup]
     if: always() && !cancelled() && needs.plan.result == 'success' && inputs.dry_run != true
     permissions:
       contents: read
@@ -91,7 +112,7 @@ jobs:
       id-token: write
     uses: ./.github/workflows/publish-catalog.yml
   result:
-    needs: [plan, release, catalog]
+    needs: [plan, release, cleanup, catalog]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
     steps:
@@ -99,10 +120,11 @@ jobs:
         env:
           PLAN_RESULT: ${{ needs.plan.result }}
           RELEASE_RESULT: ${{ needs.release.result }}
+          CLEANUP_RESULT: ${{ needs.cleanup.result }}
           CATALOG_RESULT: ${{ needs.catalog.result }}
           SOURCE_ERRORS: ${{ needs.plan.outputs.has_errors }}
         run: |
-          if [ "$PLAN_RESULT" = failure ] || [ "$RELEASE_RESULT" = failure ] || [ "$CATALOG_RESULT" = failure ] || [ "$SOURCE_ERRORS" = true ]; then
+          if [ "$PLAN_RESULT" = failure ] || [ "$RELEASE_RESULT" = failure ] || [ "$CLEANUP_RESULT" = failure ] || [ "$CATALOG_RESULT" = failure ] || [ "$SOURCE_ERRORS" = true ]; then
             echo 'Some Apps could not be released. Inspect the release plan and failed App jobs; reruns skip published versions.' >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi

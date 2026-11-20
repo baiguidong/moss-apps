@@ -5,6 +5,7 @@ import path from 'node:path'
 import { planReleases } from './plan-releases.mjs'
 import { githubClient, tagCommit } from './release-api.mjs'
 import { publishRelease, collectReleaseAssets } from './publish-release.mjs'
+import { pruneReleases } from './prune-releases.mjs'
 import { repoRoot, sha256Hex } from './lib.mjs'
 
 const sha = 'a'.repeat(40), other = 'b'.repeat(40)
@@ -81,9 +82,12 @@ function fake() {
         state.assets.push({ id, name }); state.data.set(id, body); return { id, name }
       }
       if (route.startsWith('/releases/assets/')) return state.data.get(Number(route.split('/').pop()))
-      if (route === '/releases/1') {
-        if (method === 'PATCH') Object.assign(state.releases[0], body)
-        return state.releases[0]
+      if (/^\/releases\/\d+$/.test(route)) {
+        const id = Number(route.split('/').pop()), index = state.releases.findIndex(release => release.id === id)
+        if (index < 0) throw new Error(`Unknown release: ${id}`)
+        if (method === 'PATCH') Object.assign(state.releases[index], body)
+        if (method === 'DELETE') { state.releases.splice(index, 1); return null }
+        return state.releases[index]
       }
       throw new Error(`Unexpected fake request: ${route}`)
     },
@@ -93,7 +97,7 @@ function fake() {
 const request = () => ({ appId: 'moss.example', version: '1.0.0', sourceSha: sha,
   files: new Map([['one.zip', Buffer.from('zip')], ['one.sha256', Buffer.from('checksum')], ['one.release.json', Buffer.from('metadata')]]) })
 
-test('publishes only after all assets are verified; formal release reruns never mutate', async () => {
+test('publishes only after all assets are verified; clean formal reruns avoid redundant mutations', async () => {
   const { client, state } = fake()
   expect((await publishRelease(client, request())).status).toBe('published')
   expect(state.events.at(-1)).toBe('PATCH /releases/1')
@@ -101,6 +105,59 @@ test('publishes only after all assets are verified; formal release reruns never 
   const mutations = state.events.length
   expect((await publishRelease(client, request())).status).toBe('already-published')
   expect(state.events).toHaveLength(mutations)
+})
+test('publishing a newer prerelease preserves the App’s stable release and resumable drafts', async () => {
+  const { client, state } = fake()
+  state.releases.push(
+    release('1.0.0', { id: 2 }),
+    release('2.0.0-beta.1', { id: 3, prerelease: true }),
+    release('3.0.0', { id: 4, draft: true }),
+    release('0.8.0', { id: 5, tag_name: 'moss.other-v0.8.0' }),
+    release('0.9.0', { id: 6, tag_name: 'moss.other-v0.9.0' }),
+  )
+  const publish = () => publishRelease(client, { ...request(), version: '2.0.0-beta.2' })
+  expect(await publish()).toMatchObject({ status: 'published', pruned: 1 })
+  expect(state.releases.map(release => release.id)).toEqual([2, 4, 5, 6, 1])
+  expect(state.events.indexOf('DELETE /releases/3')).toBeGreaterThan(state.events.indexOf('PATCH /releases/1'))
+
+  state.releases.push(release('0.9.0', { id: 7 }))
+  expect(await publish()).toMatchObject({ status: 'already-published', pruned: 1 })
+  expect(state.releases.map(release => release.id)).toEqual([2, 4, 5, 6, 1])
+})
+
+test('batch cleanup keeps the latest stable release and any newer published prerelease', async () => {
+  const { client, state } = fake()
+  state.releases.push(
+    release('0.9.0', { id: 11 }),
+    release('1.0.0', { id: 12 }),
+    release('3.0.0', { id: 13, draft: true }),
+    release('2.0.0-beta.1', { id: 14, prerelease: true }),
+    release('2.0.0-beta.2', { id: 15 }),
+    release('2.1.0', { id: 16, prerelease: true }),
+  )
+  expect(await pruneReleases(client)).toHaveLength(3)
+  expect(state.releases.map(release => release.id)).toEqual([12, 13, 16])
+  expect(await pruneReleases(client)).toEqual([])
+
+  state.releases.push(release('2.2.0', { id: 17 }))
+  expect(await pruneReleases(client)).toHaveLength(2)
+  expect(state.releases.map(release => release.id)).toEqual([13, 17])
+})
+
+test('batch cleanup handles historical App IDs and Apps with only prereleases or drafts', async () => {
+  const { client, state } = fake()
+  state.releases.push(
+    { id: 21, tag_name: 'moss.removed-v0.1.0', draft: false },
+    { id: 22, tag_name: 'moss.removed-v0.2.0', draft: false },
+    release('1.0.0-beta.1', { id: 23, prerelease: true }),
+    release('1.0.0-beta.2', { id: 24, prerelease: true }),
+    { id: 25, tag_name: 'moss.draft-v1.0.0', draft: true },
+    { id: 26, tag_name: 'moss.draft-v1.1.0', draft: true },
+    release('2.0.0-rc-v1.2.3', { id: 27, prerelease: true }),
+    { id: 28, tag_name: 'moss.removed-vmanual', draft: false },
+  )
+  expect(await pruneReleases(client)).toHaveLength(2)
+  expect(state.releases.map(release => release.id)).toEqual([22, 24, 25, 26, 27, 28])
 })
 test('interrupted upload resumes missing assets and never publishes an incomplete draft', async () => {
   const { client, state } = fake(); state.failAt = 2

@@ -6,6 +6,7 @@ import semver from 'semver'
 import { repoRoot, selectApps, optionValue, sha256Hex, releaseNotesForVersion } from './lib.mjs'
 import { checkOfflineKit } from './offline-kit.mjs'
 import { githubClient, tagCommit } from './release-api.mjs'
+import { pruneReleases } from './prune-releases.mjs'
 import { verifySourceArchive } from './verify-source-package.mjs'
 
 // Validate all targets before the first remote mutation. The supplied verifier is
@@ -61,7 +62,10 @@ export async function publishRelease(client, { appId, version, sourceSha, files,
   const releases = await client.pages('/releases')
   let release = releases.find(r => r.tag_name === tag)
   if (rehearsalId && release && !release.draft) throw new Error('Rehearsal release is already public')
-  if (release && !release.draft) return { status: 'already-published', tag }
+  if (release && !release.draft) {
+    const pruned = await pruneReleases(client, { appId, releases })
+    return { status: 'already-published', tag, pruned: pruned.length }
+  }
   // Recheck ordering in case another workflow published while this build ran.
   const newer = releases.find(r => !r.draft && r.tag_name?.startsWith(`${appId}-v`) && (() => {
     const candidate = r.tag_name.slice(appId.length + 2)
@@ -111,7 +115,8 @@ export async function publishRelease(client, { appId, version, sourceSha, files,
   if (finalAssets.length !== files.size || finalAssets.some(a => verifiedAssets.get(a.name) !== a.id)) throw new Error('Incomplete release assets')
   if (rehearsalId) return { status: 'verified-draft', tag, releaseId: release.id, assets: files.size }
   await client.request(`/releases/${release.id}`, { method: 'PATCH', body: { draft: false, prerelease: Boolean(semver.prerelease(version)), make_latest: 'false' } })
-  return { status: 'published', tag, assets: files.size }
+  const pruned = await pruneReleases(client, { appId })
+  return { status: 'published', tag, assets: files.size, pruned: pruned.length }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
