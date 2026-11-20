@@ -7,7 +7,7 @@ import os from 'node:os'
 import { bundleAsset } from '@moss/engine-apps/bundle-build'
 import { prepareBinary } from '@moss/engine-apps/download'
 import { platformAsset } from '@moss/engine-apps/platform'
-import model from '../resources/model.json' with {type:'json'}
+import model from '@moss/media-engines/model' with {type:'json'}
 import ffmpeg from '../resources/ffmpeg.json' with {type:'json'}
 const cache = process.env.MOSS_BUILD_DEPENDENCY_CACHE || path.join(os.homedir(), '.cache/moss-apps-build')
 const ffmpegSpec = platformAsset(ffmpeg)

@@ -1,22 +1,12 @@
 ---
 name: moss-media-tools
-description: 使用 Moss 音视频工坊的受管 FFmpeg/ffprobe，执行页面常用处理或通过完整 FFmpeg 参数完成高级媒体任务，并共享任务结果。
+description: 在同一工坊剪辑音视频、转写字幕、制作分镜动画与数字人口播，查询及导出任务产物。
 ---
 
-制作数字人口播时，用 studio 列出资源，project-create 创建项目，project-get 读取项目，project-save 接受 id、最新 version 和 fields。保留用户已有设置；版本冲突时重新读取。speech 生成指定版本的本机试听。render 固定项目版本并返回任务 ID 和 presentation；打开项目预览才开始录制，通过 task 查询和 cancel 取消。用户可从任务中导出成片。
+对已有音视频调用 media_edit。支持 inspect、trim、compress、audio、gif、convert。裁剪传 path、start、end（秒）。要字幕或逐字稿则调用 media_transcribe，传本地 path 和可选 language。用 media_get 的 type=task 查询任务，成功后按 artifacts 数组下标调用 media_export。type=artifact 可按 id、index 读取文本。
 
-传统媒体处理使用 App 上下文中的 cliPath、dataDir、nodeExecutable、nodeArgs 和 env。将请求保存为 UTF-8 JSON 文件后调用：
+用 video_project_save 创建可编辑作品。口播传 kind=avatar 和 fields，例如 {"name":"产品介绍","script":"大家好。"}。分镜传 kind=animation 和 animation，例如 {"name":"产品演示","aspectRatio":"16:9","duration":15}。用 media_get 的 type=project 读取项目。在已有项目上保存时传 id 和最新 version；口播传 fields，动画传完整 storyboard 或一对 sceneId、html。场景仅使用离线 HTML/CSS，每个镜头从自己的零秒开始计时。检查返回的 warnings。media_get 的 type=validate 可以检查项目。
 
-node <cliPath> --data-dir <dataDir> describe
-node <cliPath> --data-dir <dataDir> run --input-file <absolute-request.json>
-node <cliPath> --data-dir <dataDir> list
-node <cliPath> --data-dir <dataDir> show <task-id>
-node <cliPath> --data-dir <dataDir> cancel <task-id>
+用户要求成片时调用 video_render，传 id、version，默认生成 MP4 并返回任务 ID。分镜动画只支持成片，镜头的 narration 是文案。只有数字人口播支持 output=speech 单独试听，生成口播视频时需打开对应项目预览。项目类型或版本未知时，先用 media_get 的 type=project 读取。用户取消时用 media_cancel。
 
-页面提供媒体信息、预览、裁剪、压缩、WAV 提取、GIF 和 MP4 转换。Agent 可使用 mode=raw 的 args 数组传入完整 FFmpeg 参数，必须以 {output} 占位指定本次任务产物，并用 outputName 指定文件名。使用参数数组，不拼接 shell 命令；滤镜表达式是单个参数。若任务需要多个产物，可分别运行或让 FFmpeg 生成一个主产物。
-
-裁剪示例：{"mode":"trim","path":"/absolute/input.mp4","start":1.2,"end":5.5}
-
-高级示例：{"mode":"raw","args":["-hide_banner","-nostdin","-i","/absolute/input.mp4","-vf","scale=1280:-2","{output}"],"outputName":"scaled.mp4"}
-
-结果中的 status、message、artifacts 和实际媒体元数据是成功依据。使用 show 查看失败日志与 argv，修正后重新 run。不得将未完成文件或播放器能打开的预览副本当作最终产物。
+media_get 的 type=settings 返回口播角色、音色、画幅和画质。工坊随包的 FFmpeg 和 ffprobe 版本可通过工坊 CLI 的 describe 命令查询。CLI 使用 App 上下文中的 nodeExecutable、nodeArgs、cliPath、dataDir 和 env，也支持 run --input-file、list、show 和 cancel。media_edit 的 mode=raw 接收 FFmpeg 自身的 args 数组，每项一个参数，必须实际生成 {output} 文件。

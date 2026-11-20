@@ -13,7 +13,7 @@ const ACTIVE_POLL_MS = 15_000
 const EVENT_REFRESH_MS = 400
 export function bytes(size: number) { return size >= 1024 ** 3 ? `${(size / 1024 ** 3).toFixed(2)} GiB` : size >= 1024 ** 2 ? `${(size / 1024 ** 2).toFixed(1)} MiB` : `${Math.max(1, Math.round(size / 1024))} KiB` }
 export function time(seconds: number) { const n = Math.max(0, Math.floor(seconds || 0)); return `${Math.floor(n / 60).toString().padStart(2, '0')}:${(n % 60).toString().padStart(2, '0')}` }
-export function useWorkspace() {
+export function useWorkspace(prefix = '') {
   const client = useRef<ReturnType<typeof createAppClient> | null>(null)
   const [workspace, setWorkspace] = useState<Workspace>({ files: [], tasks: [] })
   const [error, setError] = useState(''), [notice, setNotice] = useState(''), [busy, setBusy] = useState(false), [ready, setReady] = useState(false)
@@ -24,7 +24,7 @@ export function useWorkspace() {
     if (loading.current) { pending.current = true; await loading.current; return }
     const current = client.current
     const request = (async () => {
-      try { const data = await current.actions.invoke('workspace.get', {}) as Workspace; if (alive.current && client.current === current) { setWorkspace(data); setReady(true) } }
+      try { const data = await current.actions.invoke(prefix + 'workspace.get', {}) as Workspace; if (alive.current && client.current === current) { setWorkspace(data); setReady(true) } }
       catch (error) { if (alive.current && client.current === current) setError((error as Error).message) }
     })()
     loading.current = request
@@ -33,7 +33,7 @@ export function useWorkspace() {
       loading.current = null
       if (pending.current && alive.current) { pending.current = false; if (!document.hidden) void refreshWorkspace() }
     }
-  }, [])
+  }, [prefix])
   useEffect(() => {
     alive.current = true
     if (!window.mossApp) { setError('请在 Moss 中打开此 App。'); return }
@@ -74,7 +74,7 @@ export function useWorkspace() {
   const invoke = useCallback(async (name: string, input: any = {}) => {
     if (!client.current) throw new Error('请在 Moss 中打开此 App。')
     setBusy(true); setError(''); setNotice('')
-    try { const result = await client.current.actions.invoke(name, input, { timeoutMs: 300000 }) as any; await refresh(); return result }
+    try { const result = await client.current.actions.invoke(prefix + name, input, { timeoutMs: 300000 }) as any; await refresh(); return result }
     catch (error) { if (alive.current) setError((error as Error).message); return null }
     finally { if (alive.current) setBusy(false) }
   }, [refresh])
@@ -82,8 +82,8 @@ export function useWorkspace() {
   const exportFiles = async (ids: string[]) => { const result = await invoke('files.export', { ids }); if (result && !result.canceled) setNotice(`已导出 ${result.files.length} 个文件；同名文件会保留。`) }
   const previewFile = useCallback(async (id: string) => {
     if (!client.current) throw new Error('请在 Moss 中打开此 App。')
-    return client.current.actions.invoke('files.preview', { id }) as Promise<{ url: string }>
-  }, [])
+    return client.current.actions.invoke(prefix + 'files.preview', { id }) as Promise<{ url: string }>
+  }, [prefix])
   return { workspace, error, notice, busy, ready, invoke, pick, exportFiles, previewFile, refresh, setError, setNotice }
 }
 export type WorkspaceHook = ReturnType<typeof useWorkspace>

@@ -9,7 +9,7 @@ import { createRenders } from './render.mjs'
 import { createConversation } from './conversation.mjs'
 import { createTranscriber } from './transcribe.mjs'
 
-export async function registerStudio(backend, { dataDir }) {
+export async function registerStudio(backend, { dataDir, protocols = [] }, queue) {
   const root = path.join(dataDir, 'studio'),
     projects = createProjectStore(root)
   await projects.init()
@@ -25,7 +25,7 @@ export async function registerStudio(backend, { dataDir }) {
   const tasks = new TaskStore(dataDir)
   const transfer = await createTransfer(),
     speech = createSpeech(root, dataDir),
-    transcriber = createTranscriber(backend.host)
+    transcriber = createTranscriber(queue)
   const emit = () => backend.emit('studio.changed', {})
   const renders = await createRenders({
     root,
@@ -40,13 +40,18 @@ export async function registerStudio(backend, { dataDir }) {
     if (project.version !== version) throw new Error('项目版本已更新，请重新载入')
     return project
   }
+  async function assetUrl(file, type) {
+    if (!protocols.includes('moss.artifacts/v1')) return transfer.read(file, type)
+    const relativePath = path.relative(dataDir, file).split(path.sep).join('/')
+    return (await backend.host.request('moss.artifacts/v1', 'url.get', { relativePath })).url
+  }
   async function track(project, signal) {
     const { file, duration, cues } = await speech(project, signal)
     const captions =
       project.source === 'audio' && project.transcriptId
         ? (await readJson(path.join(root, 'assets', validId(project.transcriptId) + '.json'))).cues
         : cues
-    return { url: transfer.read(file, 'audio/wav'), duration, cues: captions }
+    return { url: await assetUrl(file, 'audio/wav'), duration, cues: captions }
   }
   add('studio.get', async () => ({
     ...(await projects.library()),
@@ -112,8 +117,15 @@ export async function registerStudio(backend, { dataDir }) {
       url:
         id === 'moss'
           ? './avatar.glb'
-          : transfer.read(path.join(root, 'assets', validId(id) + '.glb'), 'model/gltf-binary'),
+          : await assetUrl(path.join(root, 'assets', validId(id) + '.glb'), 'model/gltf-binary'),
     }
+  })
+  add('media.preview', async ({ id }) => {
+    const task = await tasks.get(id)
+    const file = task.artifacts[0]
+    if (task.input.mode !== 'inspect' || task.status !== 'succeeded' || !file || !task.readRoots?.includes(file.path))
+      throw new Error('请选择已读取的媒体文件')
+    return { url: transfer.read(file.path, file.kind === 'audio' ? 'audio/' + path.extname(file.path).slice(1) : 'video/' + path.extname(file.path).slice(1)) }
   })
   add('audio.preview', async ({ id }, ctx) => {
     const lib = await projects.library()
@@ -178,23 +190,14 @@ export async function registerStudio(backend, { dataDir }) {
       route: p ? projectView(p).presentation.route : '#/',
       ref: ref || {},
       prompt: '请帮我创作适合朗读的中文讲稿。',
-      tools: [
-        'studio',
-        'project-create',
-        'project-get',
-        'project-save',
-        'speech',
-        'render',
-        'task',
-        'cancel',
-      ],
+      tools: ['video_project_save', 'media_get', 'video_render'],
       instruction: p
-        ? '读取项目 ' + p.id + '，修改前取得最新版本，调用 project-save 保存讲稿并返回项目入口。'
-        : '先创建口播项目并保存讲稿。用户要求出片时调用 render。',
+        ? '通过 media_get 读取口播项目 ' + p.id + '，携带最新版本调用 video_project_save 保存。'
+        : '调用 video_project_save 创建口播项目。用户要求出片时调用 video_render。',
     }
   })
   const mics = new Map()
-  add('transcription.status', async () => ({ available: await transcriber.available() }))
+  add('transcription.status', async () => ({ available: true }))
   add('mic.begin', async () => {
     for (const [id, m] of mics)
       if (Date.now() - m.at > 600_000) {

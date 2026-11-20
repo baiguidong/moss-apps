@@ -14,6 +14,7 @@
   "dependencies": {
     "@moss/app-sdk": "workspace:*",
     "@moss/engine-apps": "workspace:*",
+    "@moss/media-engines": "workspace:*",
     "hyperframes": "0.8.200",
     "react": "19.2.0",
     "react-dom": "19.2.0"

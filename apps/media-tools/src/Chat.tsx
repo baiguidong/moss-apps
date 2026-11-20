@@ -48,6 +48,7 @@ export function Chat({
     recorder = useRef<MediaRecorder | null>(null),
     stream = useRef<MediaStream | null>(null),
     alive = useRef(true)
+  const waitingForReply = Boolean(data?.pending)
   useEffect(() => {
     alive.current = true
     return () => {
@@ -79,15 +80,15 @@ export function Chat({
     }
     void load()
     const off = window.mossApp?.events.on('chat.changed', load)
-    const timer = setInterval(() => {
+    const timer = waitingForReply ? setInterval(() => {
       if (!document.hidden) void load()
-    }, 2500)
+    }, 2500) : undefined
     return () => {
       active = false
       off?.()
       clearInterval(timer)
     }
-  }, [avatarId, call, generation])
+  }, [avatarId, call, generation, waitingForReply])
   useEffect(() => {
     tail.current?.scrollIntoView({ block: 'nearest' })
   }, [data?.messages.length])
@@ -252,7 +253,7 @@ export function Chat({
       <div className="row spread">
         <button
           disabled={!canListen || busy || !!data?.pending}
-          title={canListen ? '最长 60 秒' : '安装并启用 Moss 语音转写后可用'}
+          title={canListen ? '最长 60 秒' : '正在连接本机转写引擎'}
           onPointerDown={(e) => {
             e.currentTarget.setPointerCapture(e.pointerId)
             void begin()

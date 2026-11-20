@@ -10,12 +10,13 @@
     "build": "node scripts/build.mjs"
   },
   "dependencies": {
+    "@fugood/whisper.node": "1.1.3",
     "@moss/app-sdk": "workspace:*",
     "@moss/local-tasks": "workspace:*",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "@moss/media-engines": "workspace:*",
     "lucide-react": "0.564.0",
-    "@fugood/whisper.node": "1.1.3"
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
   },
   "devDependencies": {
     "@types/react": "19.2.2",

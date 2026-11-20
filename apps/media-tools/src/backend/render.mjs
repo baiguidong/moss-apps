@@ -107,8 +107,9 @@ export async function createRenders({ root, dataDir, transfer, changed }) {
           )
         return {}
       }),
-    finish: (input) =>
-      serial(async () => {
+    finish: async (input) => {
+      let completion
+      const result = await serial(async () => {
         const r = requireLease(input)
         if (r.encoding || !r.upload.parts || r.upload.parts !== input.parts || r.upload.writing)
           throw new Error('录制分片不完整')
@@ -171,10 +172,14 @@ export async function createRenders({ root, dataDir, transfer, changed }) {
             if ((await store.read(r.id)).status !== 'succeeded') await fs.rm(output, { force: true })
           }
         })()
+        completion = job
         executions.add(job)
         void job.finally(() => executions.delete(job)).catch(console.error)
         return { id: r.id }
-      }),
+      })
+      await completion
+      return result
+    },
     async close() {
       clearInterval(timer)
       await serial(async () => {
