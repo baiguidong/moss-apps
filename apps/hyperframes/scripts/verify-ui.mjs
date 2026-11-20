@@ -6,6 +6,7 @@ import http from 'node:http'
 import { createRequire } from 'node:module'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import engine from '../src/backend/engine.mjs'
+import manifest from '../app.moss.json' with { type: 'json' }
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const output = process.env.MOSS_HYPERFRAMES_OUTPUT || path.join(os.tmpdir(), 'hyperframes-redesign')
@@ -43,7 +44,12 @@ try {
   page.setDefaultTimeout(12000)
   page.on('pageerror', error => errors.push(error.message))
   await page.exposeFunction('testInfo', () => ({ appearance: { themeMode: theme, cssThemeId: 'grid-theme' } }))
-  await page.exposeFunction('testPrepare', async input => { composer.push(input); const { providerId, ...context } = input; return { ok: true, ...(await actions.get('composer.resolve')(context)) } })
+  await page.exposeFunction('testPrepare', async input => {
+    composer.push(input)
+    const { providerId, ...context } = input
+    const provider = manifest.contributes.resourceProviders.find(item => item.id === providerId)
+    return { ok: true, ...(await actions.get(provider.resolveAction)(context)) }
+  })
   await page.exposeFunction('testAction', async (name, input) => {
     calls.push({ name, input })
     try {

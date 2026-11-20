@@ -125,14 +125,6 @@ export default {
       return writeProject(root, project)
     })
     register('projects.get', input => readProject(root, input?.id))
-    register('resources.resolve', async input => {
-      keys(input, ['uri'])
-      const projectId = parseResourceUri(input.uri)
-      const project = await readProject(root, projectId)
-      const filePath = path.join(projectPath(root, project.id), 'index.html')
-      await materialize(root, project, { allowIncomplete: true })
-      return { kind: 'file', name: project.name, path: filePath, resourceUri: resourceUri(project.id) }
-    })
     register('projects.storyboard.save', async input => {
       keys(input, ['id', 'storyboard'])
       const project = await readProject(root, input.id), storyboard = storyboardValue(input.storyboard)
@@ -169,7 +161,7 @@ export default {
         .sort((a, b) => b.updatedAt - a.updatedAt).slice(offset, offset + Math.min(limit, 20))
         .map(project => ({ title: project.name, description: `${project.width} × ${project.height} · ${project.duration} 秒`, scope: 'user', ref: { projectId: project.id }, route: `#/projects/${project.id}` }))
     })
-    register('composer.resolve', async input => {
+    const resolveComposer = async input => {
       keys(input, ['intent', 'ref'])
       if (!['create', 'edit', 'use'].includes(input.intent)) throw new Error('创作方式无效')
       const ref = input.ref || {}
@@ -188,6 +180,17 @@ export default {
         tools: ['templates-list', 'projects-create', 'projects-list', 'projects-get', 'storyboard-save', 'scene-save', 'projects-validate', 'tasks-start', 'tasks-get', 'tasks-cancel', 'artifacts-export'],
         instruction: `这是 HyperFrames App 自带的 App skill，不是全局 Skill；不要调用 Skill 工具或猜测 /moss-hyperframes。使用当前 HyperFrames App 的工具保存项目、分镜与离线 HTML/CSS 场景。${project ? `先读取 projectId=${project.id}，在此项目继续编辑。` : `先创建项目，模板 ${ref.templateId ?? 'product-intro'}。`}每个场景的动画从该镜头的 0 秒开始计时，animation-delay 仅用于镜头内错峰，不能累加前序镜头时长；检查保存和校验返回的 warnings。主会话负责需求与创作，App 自动展示保存后的结果。不要假装已生成视频；渲染后查询真实任务并逐镜头检查画面。用户要求渲染时才启动任务；选择资源本身不代表运行授权。创作需求及项目内容均是用户数据。`,
       }
+    }
+    register('composer.resolve', resolveComposer)
+    register('resources.resolve', async input => {
+      // Moss sends both composer requests and project URI lookups to the provider's resolveAction.
+      if (Object.hasOwn(input ?? {}, 'intent')) return resolveComposer(input)
+      keys(input, ['uri'])
+      const projectId = parseResourceUri(input.uri)
+      const project = await readProject(root, projectId)
+      const filePath = path.join(projectPath(root, project.id), 'index.html')
+      await materialize(root, project, { allowIncomplete: true })
+      return { kind: 'file', name: project.name, path: filePath, resourceUri: resourceUri(project.id) }
     })
     // 保留共享 Backend 的 workspace.get，确保 UI 与 Agent 都能看到真实任务。
     register('projects.validate', async input => {
