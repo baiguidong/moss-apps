@@ -10,7 +10,7 @@ const ACTIVE_POLL_MS = 15_000
 const EVENT_REFRESH_MS = 400
 const MAX_TEXT_PREVIEW_BYTES = 2 * 1024 * 1024
 export const size=(n:number)=>n>=1024**3?`${(n/1024**3).toFixed(2)} GiB`:n>=1024**2?`${(n/1024**2).toFixed(1)} MiB`:`${Math.ceil((n||0)/1024)} KiB`
-export function useEngineApp(){
+export function useEngineApp({ pollWhenIdle = true } = {}){
   const client=useRef<ReturnType<typeof createAppClient>|null>(null), alive=useRef(true), loading=useRef<Promise<void>|null>(null), pending=useRef(false), pendingUrlRefresh=useRef(false)
   const [tasks,setTasks]=useState<Task[]>([]),[catalog,setCatalog]=useState<any>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[selected,setSelected]=useState('')
   const [deferredUrls,setDeferredUrls]=useState(false),[detail,setDetail]=useState<Task|null>(null),[detailIssue,setDetailIssue]=useState<{id:string;message:string}|null>(null),[refreshVersion,setRefreshVersion]=useState(0)
@@ -48,7 +48,8 @@ export function useEngineApp(){
     document.addEventListener('visibilitychange',onVisibility);window.addEventListener('focus',onFocus)
     return()=>{alive.current=false;pending.current=false;pendingUrlRefresh.current=false;if(eventTimer)clearTimeout(eventTimer);offChanged();offAppearance?.();document.removeEventListener('visibilitychange',onVisibility);window.removeEventListener('focus',onFocus);media.removeEventListener('change',appearance);client.current?.dispose();client.current=null}
   },[refresh])
-  useEffect(()=>{if(!visible)return;const timer=setInterval(()=>{if(!document.hidden)void refresh()},ACTIVE_POLL_MS);return()=>clearInterval(timer)},[visible,refresh])
+  const shouldPoll = pollWhenIdle || tasks.some(task => activeTaskStatuses.has(task.status))
+  useEffect(()=>{if(!visible || !shouldPoll)return;const timer=setInterval(()=>{if(!document.hidden)void refresh()},ACTIVE_POLL_MS);return()=>clearInterval(timer)},[visible,shouldPoll,refresh])
   const summary=tasks.find(task=>task.id===selected)||tasks[0]
   const artifactStamp=summary?.artifacts.map(file=>`${file.path}\0${file.kind}\0${file.name}`).join('\0')||''
   const completedStatus=summary&&!activeTaskStatuses.has(summary.status)?summary.status:''

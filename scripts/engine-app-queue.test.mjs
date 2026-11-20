@@ -563,6 +563,9 @@ test('TaskStore indexes legacy history and later lists read only the newest page
     store.reads = 0
     assert.deepEqual((await store.list({ limit: 5 })).map(task => task.id), ids.slice(-5).reverse())
     assert.equal(store.reads, 5, `第二次列表读取了 ${store.reads} 个任务`)
+    store.reads = 0
+    assert.deepEqual((await store.list({ offset: 295, limit: 10 })).map(task => task.id), ids.slice(0, 5).reverse())
+    assert.equal(store.reads, 5)
     const fresh = await store.create({})
     assert.equal((await store.list({ limit: 1 }))[0].id, fresh.id)
     await fs.writeFile(path.join(store.directory(fresh.id), 'task.json'), '{broken')

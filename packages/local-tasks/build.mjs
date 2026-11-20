@@ -9,6 +9,11 @@ export function buildApp(root, external = []) {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'app.moss.json')))
   if (manifest.ui?.entry) run('vite', ['build'])
   for (const name of ['main', 'worker']) run('bun', ['build', `src/backend/${name}.mjs`, '--target=node', '--format=esm', ...external.map(name => `--external=${name}`), `--outfile=dist/backend/${name}.mjs`])
+  bundleNativeDependencies(root, external)
+}
+
+export function bundleNativeDependencies(root, external) {
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, 'app.moss.json')))
   const platforms = manifest.platforms || JSON.parse(fs.readFileSync(path.join(root, 'marketplace.json'))).platforms
   const visited = new Map(), target = path.join(root, 'dist/backend/node_modules')
   function copy(name, require, optional = false) {

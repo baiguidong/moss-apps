@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { createAppClient } from '@moss/app-sdk/ui'
 import { AppShell, useEngineApp } from '@moss/engine-apps/ui'
 import {
@@ -16,7 +16,10 @@ import {
   Sparkles,
   FolderOpen,
 } from 'lucide-react'
-import { Stage, type StageHandle } from './Stage'
+import type { StageHandle } from './Stage'
+const Stage = lazy(() => import('./Stage').then(module => ({ default: module.Stage })))
+const Transcripts = lazy(() => import('./Transcripts'))
+const Animation = lazy(() => import('./Animation'))
 import { MediaTools } from './MediaTools'
 import { Chat } from './Chat'
 import { Tasks } from './Tasks'
@@ -42,29 +45,34 @@ const empty: Project = {
   quality: '720p',
 }
 const sections = [
+  ['媒体处理', AudioLines],
+  ['转写字幕', AudioLines],
+  ['分镜动画', ListVideo],
   ['口播', Clapperboard],
   ['对话', MessagesSquare],
-  ['媒体处理', AudioLines],
   ['任务', ListVideo],
 ] as const
 type Tab = (typeof sections)[number][0]
-function routeId() {
+const routes: Record<Tab, string> = { 媒体处理: '/', 转写字幕: '/transcripts', 分镜动画: '/animation', 口播: '/avatar', 对话: '/chat', 任务: '/tasks' }
+function currentRoute() {
   const hash = location.hash
-  const target = hash.startsWith('#/workbench')
-    ? new URLSearchParams(hash.split('?')[1]).get('target') || ''
-    : hash
-  return /^#\/projects\/([a-f0-9-]+)$/.exec(target)?.[1] || ''
+  return hash.startsWith('#/workbench') ? new URLSearchParams(hash.split('?')[1]).get('target') || '#/' : hash
 }
-function writeRoute(id: string) {
-  const target = id ? '#/projects/' + id : '#/'
+function routeId() { return /^#\/projects\/([a-f0-9-]+)$/.exec(currentRoute())?.[1] || '' }
+function routeTab(): Tab {
+  if (routeId()) return '口播'
+  return sections.find(([tab]) => tab !== '媒体处理' && currentRoute().split('/')[1] === routes[tab].slice(1))?.[0] || '媒体处理'
+}
+function writePath(target: string) {
   history.replaceState(
     null,
     '',
     location.hash.startsWith('#/workbench') ? '#/workbench?target=' + encodeURIComponent(target) : target,
   )
 }
+function writeRoute(id: string) { writePath(id ? '#/projects/' + id : '#/avatar') }
 export default function App() {
-  const engine = useEngineApp(),
+  const engine = useEngineApp({ pollWhenIdle: false }),
     client = useRef<ReturnType<typeof createAppClient> | null>(null)
   const call: Call = useCallback(
     (name, input = {}, signal) =>
@@ -73,8 +81,11 @@ export default function App() {
     [],
   )
   const [mediaInput, setMediaInput] = useState<Record<string, any>>()
+  const [featureId, setFeatureId] = useState(() => currentRoute().split('/')[2] || '')
+  const featureDirty = useRef(false)
+  const dirtyChanged = useCallback((value: boolean) => { featureDirty.current = value }, [])
   const modal = useRef<HTMLDialogElement>(null)
-  const [tab, setTab] = useState<Tab>('口播'),
+  const [tab, setTab] = useState<Tab>(routeTab),
     [lib, setLib] = useState<Library | null>(null),
     [project, setProject] = useState<Project>(empty),
     [dirty, setDirty] = useState(false)
@@ -101,7 +112,7 @@ export default function App() {
   }, [dialog])
   const report = engine.setError
   const open = useCallback(
-    async (id: string) => {
+    async (id: string, navigate = true) => {
       const token = ++selection.current
       const next = await call('projects.get', { id })
       if (token !== selection.current) return
@@ -110,7 +121,7 @@ export default function App() {
       setProject(next)
       setDirty(false)
       setStale(false)
-      writeRoute(id)
+      if (navigate) writeRoute(id)
     },
     [call],
   )
@@ -121,11 +132,11 @@ export default function App() {
     if (!initialized.current) {
       initialized.current = true
       const id = routeId() || library.projects[0]?.id
-      if (id) await open(id)
+      if (id) await open(id, false)
       else setProject({ ...empty, avatarId: library.defaultAvatar })
     } else if (p.id && library.projects.some((v) => v.id === p.id && v.version > p.version)) {
       if (dirtyRef.current) setStale(true)
-      else await open(p.id)
+      else await open(p.id, false)
     }
   }, [call, open])
   useEffect(() => {
@@ -143,6 +154,8 @@ export default function App() {
       () => void refresh().catch((e) => report(e.message)),
     )
     const hash = () => {
+      setTab(routeTab())
+      setFeatureId(currentRoute().split('/')[2] || '')
       const id = routeId()
       if (id)
         void open(id)
@@ -334,10 +347,17 @@ export default function App() {
       setRecord(null)
   }, [record, engine.tasks])
   function switchTab(value: Tab) {
-    if (record) return
+    if (record || (featureDirty.current && value !== tab && !window.confirm('放弃未保存的修改并切换工作区？'))) return false
     stop()
+    if (value !== tab) setFeatureId('')
+    writePath(value === '口播' && project.id ? '#/projects/' + project.id : '#' + routes[value])
     setTab(value)
     setDialog('')
+    return true
+  }
+  function openFeature(tab: '分镜动画' | '转写字幕', id: string) {
+    if (!switchTab(tab)) return
+    setFeatureId(id); writePath('#' + routes[tab] + (id ? '/' + id : ''))
   }
   async function selectProject(id: string) {
     if (dirty) await save()
@@ -378,7 +398,7 @@ export default function App() {
               onClick={() => switchTab(label)}
             >
               <Icon size={17} />
-              {label}
+              {label === '口播' ? '数字人口播' : label === '对话' ? '角色对话' : label}
             </button>
           ))}
         </nav>
@@ -442,7 +462,7 @@ export default function App() {
                   </button>
                 </div>
                 <div className="stage-wrap">
-                  {lib && <Stage key={key} ref={stage} settings={active} call={call} onReady={stageReady} />}
+                  {lib && <Suspense fallback={<p>正在载入角色…</p>}><Stage key={key} ref={stage} settings={active} call={call} onReady={stageReady} /></Suspense>}
                 </div>
                 <div className="preview-foot row spread">
                   <span className="row">
@@ -598,7 +618,7 @@ export default function App() {
                         {project.audioId && (
                           <button
                             disabled={!listening}
-                            title={listening ? '使用已安装的语音转写' : '请先安装并启用语音转写'}
+                            title={listening ? '本机转写配音并生成字幕' : '正在连接工坊'}
                             onClick={() =>
                               void run(async () => {
                                 const p = await save()
@@ -664,10 +684,15 @@ export default function App() {
           </>
         )}
         {tab === '媒体处理' && (
-          <MediaTools initial={mediaInput} state={engine} onTask={() => switchTab('任务')} />
+          <MediaTools call={call} initial={mediaInput} state={engine} onTask={() => switchTab('任务')} />
         )}
+        <Suspense fallback={<p>正在打开工作区…</p>}>
+          {tab === '转写字幕' && <Transcripts initialId={featureId} dirtyChanged={dirtyChanged} />}
+          {tab === '分镜动画' && <Animation call={call} dirtyChanged={dirtyChanged} />}
+        </Suspense>
         {tab === '任务' && (
           <Tasks
+            openFeature={openFeature}
             restore={(input) => {
               setMediaInput(input)
               switchTab('媒体处理')
@@ -677,8 +702,8 @@ export default function App() {
             open={(id) =>
               void run(async () => {
                 if (dirty) await save()
-                await open(id)
                 switchTab('口播')
+                await open(id)
               })
             }
           />

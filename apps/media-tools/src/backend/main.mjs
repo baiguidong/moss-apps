@@ -1,17 +1,13 @@
 import { startBackend } from '@moss/engine-apps/backend'
 import { fileURLToPath } from 'node:url'
-import engine from './engine.mjs'
-import { registerStudio } from './studio.mjs'
+import engine from './workshop-engine.mjs'
+import { registerWorkshop } from './workshop.mjs'
 
-let studio
-const workshop = {
+let registration
+startBackend({
   ...engine,
-  register(backend, ctx) {
-    return (studio ??= registerStudio(backend, ctx))
+  register(backend, context, tasks) {
+    return registration ??= registerWorkshop(backend, context, tasks)
   },
-  async close() {
-    const close = await studio
-    await close?.()
-  },
-}
-startBackend(workshop, fileURLToPath(new URL('worker.mjs', import.meta.url)))
+  async close() { await (await registration)?.() },
+}, fileURLToPath(new URL('worker.mjs', import.meta.url)))

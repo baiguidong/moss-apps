@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "appId": "moss.media-tools",
-  "summary": "在本机制作 3D 数字人口播、与 Moss 角色对话，使用 FFmpeg 处理音视频。",
-  "description": "在本机制作 3D 数字人口播、与 Moss 角色对话，使用 FFmpeg 处理音视频。",
+  "summary": "剪辑、字幕转写、分镜动画与数字人口播",
+  "description": "剪辑和转码音视频、校对本机语音转写、编辑分镜动画与数字人口播，共用任务记录与导出。",
   "platforms": [
     "darwin-arm64"
   ],

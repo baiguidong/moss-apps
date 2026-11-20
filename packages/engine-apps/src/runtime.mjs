@@ -207,8 +207,9 @@ export class TaskStore {
     }
     return task
   }
-  async list({ limit = 200 } = {}) {
+  async list({ limit = 200, offset = 0 } = {}) {
     if (!Number.isInteger(limit) || limit < 1 || limit > 200) throw new Error('任务列表上限必须在 1–200 之间')
+    if (!Number.isSafeInteger(offset) || offset < 0) throw new Error('任务列表偏移量无效')
     await fs.mkdir(this.root, { recursive: true })
     await fs.mkdir(this.createdRoot, { recursive: true, mode: 0o700 })
     const [names, indexedNames] = await Promise.all([fs.readdir(this.root), fs.readdir(this.createdRoot)])
@@ -227,7 +228,6 @@ export class TaskStore {
     })
     entries.sort((a, b) => b.localeCompare(a))
     const tasks = [], seen = new Set()
-    let offset = 0
     while (offset < entries.length && tasks.length < limit) {
       const count = Math.min(readBatchSize, limit - tasks.length)
       const batch = entries.slice(offset, offset + count).filter(entry => {

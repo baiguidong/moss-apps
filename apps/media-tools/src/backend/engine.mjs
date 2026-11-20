@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import { constants } from 'node:fs'
 import path from 'node:path'
 import { ensureBinary, existingPaths, run, argv } from '@moss/engine-apps/runtime'
 import spec from '../../resources/engine.json' with { type: 'json' }
@@ -65,7 +66,10 @@ export default {
     const { inputPath, args, output } = await buildCommand(input, ctx.directory)
     if (input.mode === 'inspect') {
       const metadata = await probe(inputPath, ctx)
-      return { result: metadata, readRoots: [inputPath], artifacts: [{ name: path.basename(inputPath), path: inputPath, kind: /\.(mp3|wav|m4a|aac|ogg)$/i.test(inputPath) ? 'audio' : 'video' }], message: '媒体信息已读取' }
+      // The Host serves signed previews only from inside the task directory.
+      const preview = path.join(ctx.directory, 'preview' + path.extname(inputPath))
+      await fs.copyFile(inputPath, preview, constants.COPYFILE_FICLONE)
+      return { result: metadata, artifacts: [{ name: path.basename(inputPath), path: preview, kind: /\.(mp3|wav|m4a|aac|ogg)$/i.test(inputPath) ? 'audio' : 'video' }], message: '媒体信息已读取' }
     }
     const binary = await ensureBinary(spec, ctx.dataDir, ctx.signal)
     await ctx.record?.({ argv: args })

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { size, type EngineState } from '@moss/engine-apps/ui'
+import type { Call } from './types'
+import { size, type Task, type EngineState } from '@moss/engine-apps/ui'
 
 const labels: Record<string, string> = {
   trim: '裁剪视频',
@@ -9,11 +10,12 @@ const labels: Record<string, string> = {
   convert: '转换为 MP4',
 }
 export function MediaTools({
-  state,
+  state, call,
   onTask,
   initial,
 }: {
   state: EngineState
+  call: Call
   onTask: () => void
   initial?: { path?: string; mode?: string; start?: number; end?: number; crf?: number }
 }) {
@@ -26,7 +28,21 @@ export function MediaTools({
   const inspected = state.tasks.find(
     (task) => task.input.mode === 'inspect' && task.input.path === file && task.status === 'succeeded',
   )
-  const source = inspected?.artifacts?.[0]
+  const [source, setSource] = useState<Task['artifacts'][number]>()
+  const getTask = state.getTask, setError = state.setError, inspectId = inspected?.id
+  useEffect(() => {
+    let active = true
+    setSource(undefined)
+    if (inspectId) void getTask(inspectId).then(async task => {
+      const item = task.artifacts[0]
+      if (!item) return
+      if (!item.url && task.input.mode === 'inspect') {
+        item.url = (await call('media.preview', { id: inspectId })).url
+      }
+      if (active) setSource(item)
+    }).catch(e => { if (active) setError(e.message) })
+    return () => { active = false }
+  }, [inspectId, getTask, setError, call])
   const duration = Number(inspected?.result?.format?.duration || 0)
   useEffect(() => {
     if (duration > 0 && end === 0) setEnd(Math.min(duration, 60))

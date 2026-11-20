@@ -1,0 +1,29 @@
+{
+  "name": "@moss/media-engines",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./animation": "./animation.mjs",
+    "./timing": "./animation-timing.mjs",
+    "./transcript": "./transcript.mjs",
+    "./model": "./model.json",
+    "./bundle": "./bundle-dependencies.mjs",
+    "./animation-page": "./ui/AnimationPage.tsx",
+    "./transcription-page": "./ui/TranscriptionPage.tsx",
+    "./animation.css": "./ui/animation.css",
+    "./transcription.css": "./ui/transcription.css"
+  },
+  "dependencies": {
+    "@fugood/whisper.node": "1.1.3",
+    "@moss/engine-apps": "workspace:*",
+    "@moss/local-tasks": "workspace:*",
+    "hyperframes": "0.8.200",
+    "@moss/app-sdk": "workspace:*",
+    "react": "19.2.0",
+    "lucide-react": "0.564.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2"
+  }
+}
