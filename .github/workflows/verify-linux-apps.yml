@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [moss.image-tools, moss.pdf-tools, moss.transcription, moss.file-cleaner, moss.document-converter, moss.code-map]
+        app: [moss.image-tools, moss.pdf-tools, moss.transcription, moss.file-management, moss.document-converter, moss.code-map]
     env:
       MOSS_BUILD_DEPENDENCY_CACHE: ${{ github.workspace }}/.cache/moss-build-dependencies
     steps:
@@ -33,7 +33,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ env.MOSS_BUILD_DEPENDENCY_CACHE }}
-          key: Linux-linux-x64-bundled-engines-v2-${{ matrix.app }}-${{ hashFiles('apps/*/resources/engine.json', 'apps/document-converter/resources/pdf-engine.json', 'apps/*/resources/ff*.json', 'apps/transcription/resources/model.json') }}
+          key: Linux-linux-x64-bundled-engines-v2-${{ matrix.app }}-${{ hashFiles('apps/*/resources/engine.json', 'apps/document-converter/resources/pdf-engine.json', 'apps/file-management/resources/czkawka.json', 'apps/*/resources/ff*.json', 'packages/media-engines/model.json') }}
       - name: Build source snapshot and validate package runtime
         env:
           APP_ID: ${{ matrix.app }}

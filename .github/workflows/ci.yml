@@ -122,7 +122,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.MOSS_BUILD_DEPENDENCY_CACHE }}
-          key: ${{ runner.os }}-${{ matrix.platform }}-bundled-engines-v1-${{ hashFiles('apps/*/resources/engine.json', 'apps/document-converter/resources/pdf-engine.json', 'apps/file-cleaner/resources/ff*.json', 'apps/transcription/resources/model.json') }}
+          key: ${{ runner.os }}-${{ matrix.platform }}-bundled-engines-v1-${{ hashFiles('apps/*/resources/engine.json', 'apps/document-converter/resources/pdf-engine.json', 'apps/file-management/resources/czkawka.json', 'packages/media-engines/model.json') }}
       - name: Build native packages on their supported desktop platform
         run: node scripts/package-app.mjs --platform-packages --supported-platform ${{ matrix.platform }}
       - name: Verify six local Apps with empty data and no external network

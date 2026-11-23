@@ -1,0 +1,10 @@
+{
+  "darwin-arm64": {
+    "ffmpeg": "77d2c853f431318d55ec02676d9b2f185ebfdddb9f7677a251fbe453affe025a",
+    "ffprobe": "c846d5db9d3b5bc33f987725e21f3ea14953931221c191575918e907ad6c18ff"
+  },
+  "linux-x64": {
+    "ffmpeg": "aa3096f1689618befd192ee65892235777aa4123c95055cb06023e6e55208d7a",
+    "ffprobe": "576c21674291ec1948d507ea8ab0d78eb6621a0be8c6f1a6db0f50c5fcb1e0f9"
+  }
+}

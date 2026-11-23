@@ -8,10 +8,11 @@ const coreRoot=process.env.MOSS_CORE_ROOT||fileURLToPath(new URL('../vendor/moss
 import { validateAppManifest } from '../vendor/moss-core/packages/app-sdk/src/index.mjs'
 
 test('App skill manifest survives normalization and rejects old Hosts and escaping paths',async()=>{
- const manifest=JSON.parse(await fs.readFile(new URL('../apps/file-cleaner/app.moss.json',import.meta.url),'utf8'))
+ const manifest=JSON.parse(await fs.readFile(new URL('../apps/file-management/app.moss.json',import.meta.url),'utf8'))
+ manifest.contributes.skills=[{id:'moss-file-cleaner',title:'文件清理',description:'Task CLI',path:'resources/skills/moss-file-cleaner/SKILL.md',cli:'dist/backend/cli.mjs'}]
  const normalized=validateAppManifest(manifest)
  assert.equal(normalized.contributes.skills[0].cli,'dist/backend/cli.mjs')
- assert.throws(()=>validateAppManifest({...manifest,category:'knowledge',hostApi:'^3.11.0'}),/3.14/)
+ assert.throws(()=>validateAppManifest({...manifest,host:{protocols:['moss.local-files/v1']},category:'knowledge',hostApi:'^3.11.0'}),/3.14/)
  assert.throws(()=>validateAppManifest({...manifest,contributes:{...manifest.contributes,skills:[{...manifest.contributes.skills[0],path:'../SKILL.md'}]}}),/path|relative|Invalid/)
 })
 

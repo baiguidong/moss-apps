@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { TaskStore, executeTask, hash, run } from '../packages/engine-apps/src/runtime.mjs'
-import cleaner from '../apps/file-cleaner/src/backend/engine.mjs'
+import cleaner from '../apps/file-management/src/backend/cleanup.mjs'
 import document from '../apps/document-converter/src/backend/engine.mjs'
 const repo=fileURLToPath(new URL('..',import.meta.url)),root=path.join(repo,'artifacts/engine-apps/verification')
 const binaries=process.env.MOSS_ENGINE_FIXTURE_ROOT
@@ -24,15 +24,18 @@ await run(path.join(binaries,'ffmpeg-bin'),['-nostdin','-loglevel','error','-y',
 const checks=[]
 async function data(app){
  const dataDir=path.join(root,'data',app)
- for(const file of ['engine','ffmpeg','ffprobe']){
-  const spec=await fs.readFile(path.join(repo,'apps',app,'resources',file+'.json'),'utf8').then(JSON.parse).catch(()=>null);if(!spec)continue
+ for(const file of ['engine','czkawka','ffmpeg','ffprobe']){
+  const alternate=app==='file-management'&&['ffmpeg','ffprobe'].includes(file)
+  const spec=await fs.readFile(path.join(repo,'apps',alternate?'media-studio':app,'resources',(alternate&&file==='ffmpeg'?'engine':file)+'.json'),'utf8').then(JSON.parse).catch(()=>null);if(!spec)continue
+  if(spec.id==='restic')continue
   const source=path.join(binaries,{czkawka:'mac_czkawka_cli_arm64',pandoc:'pandoc-bin',ffmpeg:'ffmpeg-bin',ffprobe:'ffprobe-bin'}[spec.id])
   assert.equal(await hash(source),spec.binarySha256)
   const target=path.join(dataDir,'engines',spec.id,spec.version,spec.executable);await fs.mkdir(path.dirname(target),{recursive:true});await fs.copyFile(source,target);await fs.chmod(target,0o755)
+  if(alternate)process.env['MOSS_VIDEO_'+spec.id.toUpperCase()]=target
  }
  return new TaskStore(dataDir)
 }
-const cleanStore=await data('file-cleaner')
+const cleanStore=await data('file-management')
 for(const command of (await cleaner.catalog({})).commands){
  const input={command:command.id,paths:[scans],options:{}}
  if(command.options.some(o=>o.key==='minimal-file-size'))input.options['minimal-file-size']='1'

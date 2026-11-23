@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { createAppClient } from '@moss/app-sdk/ui'
 import { FolderOpen, Plus, X, Download, Play, RefreshCw, Terminal, Clock3, CheckCircle2, AlertCircle } from 'lucide-react'
 declare global { interface Window { mossApp?: any } }
-export type Task = { id:string; input:any; source:string; status:string; createdAt:number; message:string; result?:any; argv?:string[]; warnings?:string; artifacts:Array<{name:string;kind:string;path:string;url:string;urlError?:string;size?:number}>; log?:string }
+export type Task = { id:string; input:any; source:string; status:string; createdAt:number; finishedAt?:number; message:string; result?:any; argv?:string[]; warnings?:string; artifacts:Array<{name:string;kind:string;path:string;url:string;urlError?:string;size?:number}>; log?:string }
 export type Option = {key:string;short?:string;label:string;value:boolean;optional?:boolean;description:string;default?:string;choices?:string[]}
 export const labels:Record<string,string>={queued:'等待中',running:'运行中',succeeded:'已完成',failed:'失败',canceled:'已取消',interrupted:'已中断',partial:'部分完成'}
 const activeTaskStatuses = new Set(['queued', 'running'])
@@ -10,7 +10,7 @@ const ACTIVE_POLL_MS = 15_000
 const EVENT_REFRESH_MS = 400
 const MAX_TEXT_PREVIEW_BYTES = 2 * 1024 * 1024
 export const size=(n:number)=>n>=1024**3?`${(n/1024**3).toFixed(2)} GiB`:n>=1024**2?`${(n/1024**2).toFixed(1)} MiB`:`${Math.ceil((n||0)/1024)} KiB`
-export function useEngineApp({ pollWhenIdle = true } = {}){
+export function useEngineApp({ pollWhenIdle = true, taskFilter, summaryAction }: { pollWhenIdle?: boolean; taskFilter?: (task: Task) => boolean; summaryAction?: string } = {}){
   const client=useRef<ReturnType<typeof createAppClient>|null>(null), alive=useRef(true), loading=useRef<Promise<void>|null>(null), pending=useRef(false), pendingUrlRefresh=useRef(false)
   const [tasks,setTasks]=useState<Task[]>([]),[catalog,setCatalog]=useState<any>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[selected,setSelected]=useState('')
   const [deferredUrls,setDeferredUrls]=useState(false),[detail,setDetail]=useState<Task|null>(null),[detailIssue,setDetailIssue]=useState<{id:string;message:string}|null>(null),[refreshVersion,setRefreshVersion]=useState(0)
@@ -19,10 +19,10 @@ export function useEngineApp({ pollWhenIdle = true } = {}){
     if(!client.current||!alive.current)return
     if(loading.current){pending.current=true;pendingUrlRefresh.current ||= renewArtifactUrls;await loading.current;return}
     const current=client.current
-    const request=(async()=>{try{const result:any=await current.actions.invoke('workspace.get',{});if(alive.current&&client.current===current){setTasks(result.tasks);setDeferredUrls(result.artifactUrlsDeferred===true);if(renewArtifactUrls)setRefreshVersion(value=>value+1);if(result.registrationError)setError(result.registrationError)}}catch(e){if(alive.current&&client.current===current)setError((e as Error).message)}})()
+    const request=(async()=>{try{const result:any=await current.actions.invoke(summaryAction||'workspace.get',{});if(alive.current&&client.current===current){setTasks(result.tasks);setDeferredUrls(result.artifactUrlsDeferred===true);if(renewArtifactUrls)setRefreshVersion(value=>value+1);if(result.registrationError)setError(result.registrationError)}}catch(e){if(alive.current&&client.current===current)setError((e as Error).message)}})()
     loading.current=request
     try{await request}finally{loading.current=null;if(pending.current&&alive.current){const renewPending=pendingUrlRefresh.current;pending.current=false;pendingUrlRefresh.current=false;if(!document.hidden)void refreshWorkspace(renewPending)}}
-  },[])
+  },[summaryAction])
   const readArtifact=useCallback((id:string,index:number)=>{
     if(!client.current) return Promise.reject(new Error('任务后台尚未就绪'))
     return client.current.actions.invoke<{text:string}>('artifacts.read',{id,index})
@@ -50,11 +50,13 @@ export function useEngineApp({ pollWhenIdle = true } = {}){
   },[refresh])
   const shouldPoll = pollWhenIdle || tasks.some(task => activeTaskStatuses.has(task.status))
   useEffect(()=>{if(!visible || !shouldPoll)return;const timer=setInterval(()=>{if(!document.hidden)void refresh()},ACTIVE_POLL_MS);return()=>clearInterval(timer)},[visible,shouldPoll,refresh])
-  const summary=tasks.find(task=>task.id===selected)||tasks[0]
+  const visibleTasks=taskFilter ? tasks.filter(taskFilter) : tasks
+  const summary=visibleTasks.find(task=>task.id===selected)||visibleTasks[0]
   const artifactStamp=summary?.artifacts.map(file=>`${file.path}\0${file.kind}\0${file.name}`).join('\0')||''
   const completedStatus=summary&&!activeTaskStatuses.has(summary.status)?summary.status:''
+  const needsDetails=Boolean(summary&&(summaryAction?completedStatus:deferredUrls&&summary.artifacts.length))
   useEffect(()=>{
-    if(!deferredUrls||!summary?.artifacts.length||!client.current){setDetail(null);setDetailIssue(null);return}
+    if(!needsDetails||!summary||!client.current){setDetail(null);setDetailIssue(null);return}
     const current=client.current,id=summary.id
     let canceled=false
     setDetailIssue(null)
@@ -62,21 +64,21 @@ export function useEngineApp({ pollWhenIdle = true } = {}){
       if(!canceled&&alive.current&&client.current===current)setDetail(task)
     }).catch((reason:Error)=>{if(!canceled&&alive.current&&client.current===current)setDetailIssue({id,message:reason.message})})
     return()=>{canceled=true}
-  },[deferredUrls,summary?.id,artifactStamp,completedStatus,refreshVersion,getTask])
-  const invoke=async(name:string,input:any={})=>{
+  },[needsDetails,summary?.id,artifactStamp,completedStatus,refreshVersion,getTask])
+  const invoke=async(name:string,input:any={}, { refreshWorkspace = true } = {})=>{
     if(!client.current)return null
     setBusy(true);setError('');setNotice('')
-    try{const result:any=await client.current.actions.invoke(name,input,{timeoutMs:300000});await refresh();return result}catch(e){setError((e as Error).message);return null}finally{setBusy(false)}
+    try{const result:any=await client.current.actions.invoke(name,input,{timeoutMs:300000});if(refreshWorkspace)await refresh();return result}catch(e){setError((e as Error).message);return null}finally{setBusy(false)}
   }
   const start=async(input:any)=>{const task=await invoke('tasks.start',input);if(task)setSelected(task.id);return task}
   const prepare=async()=>{const value=await invoke('engine.prepare');if(value){setCatalog(value);setNotice('引擎已就绪')}}
   const detailStamp=detail?.artifacts.map(file=>`${file.path}\0${file.kind}\0${file.name}`).join('\0')||''
-  const matchingDetail=summary&&detail?.id===summary.id&&detailStamp===artifactStamp
+  const matchingDetail=summary&&detail?.id===summary.id&&detail.status===summary.status&&(summaryAction||detailStamp===artifactStamp)
   const task=matchingDetail
-    ? {...detail,...summary,artifacts:detail.artifacts} : summary
-  const artifactDetailsReady=!deferredUrls||!summary?.artifacts.length||Boolean(matchingDetail)
+    ? {...detail,...summary,input:detail.input,artifacts:detail.artifacts} : summary
+  const artifactDetailsReady=!needsDetails||Boolean(matchingDetail)
   const artifactDetailsError=detailIssue&&detailIssue.id===summary?.id?detailIssue.message:''
-  return {tasks,catalog,error,notice,busy,selected,setSelected,setError,setNotice,invoke,start,prepare,refresh,readArtifact,getTask,task,deferredUrls,artifactDetailsReady,artifactDetailsError}
+  return {tasks:visibleTasks,catalog,error,notice,busy,selected,setSelected,setError,setNotice,invoke,start,prepare,refresh,readArtifact,getTask,task,deferredUrls,artifactDetailsReady,artifactDetailsError}
 }
 export type EngineState=ReturnType<typeof useEngineApp>
 // Moss owns the visible App identity; this shell starts with the work area.

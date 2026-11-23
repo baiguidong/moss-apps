@@ -282,6 +282,27 @@
         "vite": "7.1.10",
       },
     },
+    "apps/file-management": {
+      "name": "@moss/file-management-app",
+      "version": "0.1.0",
+      "dependencies": {
+        "@modelcontextprotocol/sdk": "1.29.0",
+        "@moss/app-sdk": "workspace:*",
+        "@moss/engine-apps": "workspace:*",
+        "lucide-react": "0.564.0",
+        "react": "19.2.0",
+        "react-dom": "19.2.0",
+      },
+      "devDependencies": {
+        "@playwright/test": "1.58.2",
+        "@types/node": "26.6.2",
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "@vitejs/plugin-react": "5.0.4",
+        "typescript": "5.9.3",
+        "vite": "7.1.10",
+      },
+    },
     "apps/hyperframes": {
       "name": "@moss/hyperframes-app",
       "version": "0.3.9",
@@ -1177,6 +1198,8 @@
     "@moss/feishu-app": ["@moss/feishu-app@workspace:apps/feishu"],
 
     "@moss/file-cleaner-app": ["@moss/file-cleaner-app@workspace:apps/file-cleaner"],
+
+    "@moss/file-management-app": ["@moss/file-management-app@workspace:apps/file-management"],
 
     "@moss/host-contracts": ["@moss/host-contracts@workspace:vendor/moss-core/packages/host-contracts"],
 

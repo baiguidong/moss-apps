@@ -24,6 +24,7 @@ export function argv(values) {
 }
 export const WORKER_READY_MESSAGE = 'moss.engine.worker-ready'
 export const WORKER_START_MESSAGE = 'moss.engine.worker-start'
+export const WORKER_PROGRESS_MESSAGE = 'moss.engine.worker-progress'
 const parentDisconnectedCode = 'ENGINE_PARENT_DISCONNECTED'
 
 /** A worker starts only after its parent explicitly says so, then watches the parent connection. */
@@ -284,7 +285,7 @@ export class TaskStore {
   }
 }
 
-export async function executeTask(engine, store, task, externalSignal) {
+export async function executeTask(engine, store, task, externalSignal, onProgress) {
   const controller = new AbortController(), directory = store.directory(task.id)
   let interrupted = false
   const cancel = () => controller.abort(new Error('任务已取消'))
@@ -308,7 +309,7 @@ export async function executeTask(engine, store, task, externalSignal) {
     controller.signal.throwIfAborted()
     const result = await engine.execute(task.input, { dataDir: store.dataDir, cacheDir: store.cacheDir, sessionId: store.sessionId, directory, signal: controller.signal, log,
       record: async fields => { Object.assign(task, fields); await store.write(task) },
-      progress: async message => { task.message = message; await store.write(task) } })
+      progress: async message => { task.message = message; await store.write(task); onProgress?.() } })
     controller.signal.throwIfAborted()
     Object.assign(task, result, { status: result.status || 'succeeded', message: result.message || '处理完成' })
   } catch (error) {

@@ -28,11 +28,18 @@ async function mapLimited(items, limit, visit) {
 export function startBackend(engine, worker, { sessionScoped = false, Client = AppBackendClient } = {}) {
   if (sessionScoped) return createSessionBackend(ScopedClient => startBackend(engine, worker, { Client: ScopedClient }), { catalog: options => engine.catalog(options) })
   let store, queue, server, base, context, stopping, activationTask, activationError, registrationTask, ready = false, registrationError = '', catalog
-  let hostArtifactUrls = false
+  let hostArtifactUrls = false, serverStart
   const signedUrls = new Map()
   let resolveActivation
   const activationReady = new Promise(resolve => { resolveActivation = resolve })
   const token = randomBytes(32).toString('hex')
+  function startArtifactServer() {
+    return serverStart ??= (async () => {
+      server = http.createServer((req, res) => { serve(req, res).catch(() => { if (!res.headersSent) res.writeHead(404); res.end() }) })
+      await new Promise((resolve,reject) => { server.once('error', reject); server.listen(0,'127.0.0.1',resolve) })
+      base = `http://127.0.0.1:${server.address().port}`
+    })()
+  }
   function shutdown() {
     return stopping ??= (async () => {
       try { await queue?.shutdown({ waitForExit: Boolean(context?.sessionId) }); await Promise.allSettled([activationTask, registrationTask]) }
@@ -56,13 +63,10 @@ export function startBackend(engine, worker, { sessionScoped = false, Client = A
     onInitialize: async ctx => {
       context = ctx; store = new TaskStore(ctx.dataDir, { cacheDir: ctx.cacheDir, sessionId: ctx.sessionId })
       hostArtifactUrls = ctx.protocols.includes('moss.artifacts/v1')
-      if (!hostArtifactUrls) {
-        server = http.createServer((req, res) => { serve(req, res).catch(() => { if (!res.headersSent) res.writeHead(404); res.end() }) })
-        await new Promise((resolve,reject) => { server.once('error', reject); server.listen(0,'127.0.0.1',resolve) })
-        base = `http://127.0.0.1:${server.address().port}`
-      }
+      if (!hostArtifactUrls) await startArtifactServer()
       queue = new WorkerQueue({ store, worker, concurrency: engine.workerConcurrency ?? 1, maxQueued: engine.maxQueuedTasks,
-        env: () => ({ ...engine.workerEnv?.(context), ...(context.cacheDir ? { MOSS_ENGINE_CACHE_DIR: context.cacheDir } : {}), ...(context.sessionId ? { MOSS_TASK_SESSION_ID: context.sessionId } : {}) }),
+        env: async (task, signal) => ({ ...await engine.workerEnv?.(context, task.input, { backend, signal }),
+          ...(context.cacheDir ? { MOSS_ENGINE_CACHE_DIR: context.cacheDir } : {}), ...(context.sessionId ? { MOSS_TASK_SESSION_ID: context.sessionId } : {}) }),
         lease: ctx.protocols.includes('moss.runtime/v1')
           ? (operation, id, signal) => backend.host.request('moss.runtime/v1', `activity.${operation}`, { id }, { signal, timeoutMs: 10_000 }) : null,
         onChanged: () => { if (ready && !queue.closed) backend.emit('workspace.changed', {}) },
@@ -94,8 +98,14 @@ export function startBackend(engine, worker, { sessionScoped = false, Client = A
     // Host URLs must only expose this task's own files, even when an engine
     // grants readRoots for its explicit read/export actions.
     const stat = await fs.stat(target)
-    if (target === jobRoot || !within(jobRoot, target) || !stat.isFile()) {
-      throw new Error('结果文件不在本次任务目录中')
+    if (!stat.isFile()) throw new Error('结果不是文件')
+    if (!within(jobRoot, target)) {
+      if (!engine.externalImagePreviews || file.kind !== 'image' || !/\.(?:png|jpe?g|webp)$/i.test(target) || within(dataRoot, target)) {
+        throw new Error('结果文件不在本次任务目录中')
+      }
+      await artifact(task.id, index)
+      await startArtifactServer()
+      return { url: `${base}/${token}/${task.id}/${index}/`, size: stat.size }
     }
     const relative = path.relative(dataRoot, target)
     if (!relative || !within(dataRoot, target)) throw new Error('结果文件不在 App 数据目录中')
@@ -128,12 +138,13 @@ export function startBackend(engine, worker, { sessionScoped = false, Client = A
     if (activationError) throw activationError
     return queue.start(input, source, async () => {
       await engine.validate(input)
-      await engine.requireReady?.(context)
+      await engine.requireReady?.(context, input)
     }, signal)
   }
   const tasks = {
     startTask,
     getTask: id => store.get(id),
+    listTasks: options => store.list(options),
     async details(id) {
       const task = await store.get(id)
       const log = await fs.readFile(path.join(store.directory(id), 'stderr.log'), 'utf8').catch(() => '')
@@ -196,7 +207,8 @@ export function startBackend(engine, worker, { sessionScoped = false, Client = A
     if (parts.length !== 5 || parts[1] !== token || !/^(0|[1-9]\d*)$/.test(parts[3])) { res.writeHead(404); return res.end() }
     // Trailing / is intentional so links cannot be confused with shell paths.
     if (parts[4] !== '') { res.writeHead(404); return res.end() }
-    const { target } = await artifact(parts[2], Number(parts[3]))
+    const { target, item } = await artifact(parts[2], Number(parts[3]))
+    if (hostArtifactUrls && (item.kind !== 'image' || !/\.(?:png|jpe?g|webp)$/i.test(target))) { res.writeHead(404); return res.end() }
     await sendArtifact(req, res, target)
   }
   backend.registerAction('workspace.get', async () => ({ tasks: await Promise.all((await store.list()).map(task => view(task, { urls: !hostArtifactUrls }))),

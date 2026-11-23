@@ -111,7 +111,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.MOSS_BUILD_DEPENDENCY_CACHE }}
-          key: ${{ runner.os }}-${{ matrix.platform }}-bundled-engines-v1-${{ hashFiles('apps/*/resources/engine.json', 'apps/document-converter/resources/pdf-engine.json', 'apps/file-cleaner/resources/ff*.json', 'apps/transcription/resources/model.json', 'apps/media-studio/resources/melo.json', 'apps/media-studio/resources/whisper-linux.json', 'packages/media-engines/model.json') }}
+          key: ${{ runner.os }}-${{ matrix.platform }}-bundled-engines-v1-${{ hashFiles('apps/*/resources/engine.json', 'apps/document-converter/resources/pdf-engine.json', 'apps/file-management/resources/czkawka.json', 'apps/media-studio/resources/melo.json', 'apps/media-studio/resources/whisper-linux.json', 'packages/media-engines/model.json') }}
       - name: Validate source and runtime on the target desktop platform
         if: steps.release.outputs.variants != 'true'
         run: node scripts/package-app.mjs --app "${{ steps.release.outputs.app_id }}"
@@ -130,10 +130,10 @@ jobs:
           MEDIA_STUDIO_PACKAGE: artifacts/moss.media-studio/${{ inputs.version }}/package-${{ matrix.platform }}
         run: node scripts/verify-media-studio.mjs "$MEDIA_STUDIO_PACKAGE"
       - name: Verify bundled dependencies without external network
-        if: contains(fromJSON('["moss.image-tools","moss.pdf-tools","moss.transcription","moss.file-cleaner","moss.document-converter","moss.code-map"]'), inputs.app_id) && (matrix.platform == 'darwin-arm64' || matrix.platform == 'linux-x64')
+        if: contains(fromJSON('["moss.image-tools","moss.pdf-tools","moss.transcription","moss.file-management","moss.document-converter","moss.code-map"]'), inputs.app_id) && (matrix.platform == 'darwin-arm64' || matrix.platform == 'linux-x64')
         run: node scripts/verify-bundled-apps.mjs --app "${{ inputs.app_id }}"
       - uses: actions/upload-artifact@v4
-        if: always() && contains(fromJSON('["moss.image-tools","moss.pdf-tools","moss.transcription","moss.file-cleaner","moss.document-converter","moss.code-map"]'), inputs.app_id)
+        if: always() && contains(fromJSON('["moss.image-tools","moss.pdf-tools","moss.transcription","moss.file-management","moss.document-converter","moss.code-map"]'), inputs.app_id)
         with:
           name: offline-${{ inputs.app_id }}-${{ matrix.platform }}
           path: artifacts/offline-apps/*.json

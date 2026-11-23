@@ -12,9 +12,8 @@ import {unzipSync} from 'fflate'
 import {sourcePath} from '../vendor/moss-core/packages/app-runtime/src/packages/source.mjs'
 import {hash,TaskStore,WORKER_READY_MESSAGE,WORKER_START_MESSAGE} from '../packages/engine-apps/src/runtime.mjs'
 import {platformAsset} from '../packages/engine-apps/src/platform.mjs'
-import {restoreBundledAsset} from '../packages/engine-apps/src/bundled.mjs'
 const execute=promisify(execFile)
-export const LOCAL_APPS=['moss.image-tools','moss.pdf','moss.transcription','moss.file-cleaner','moss.document','moss.code-map']
+export const LOCAL_APPS=['moss.image-tools','moss.pdf','moss.transcription','moss.file-management','moss.document','moss.code-map']
 const args=process.argv.slice(2)
 const platform = `${process.platform}-${process.arch}`
 if(!['darwin-arm64','linux-x64'].includes(platform))throw new Error(`Bundled native verification is unavailable on ${platform}`)
@@ -53,7 +52,7 @@ async function verify(app){
  const checks=[],dependencies=[]
  const require=createRequire(path.join(pkg,'dist/backend/main.mjs'))
  try{
-  for(const name of ['engine','ffmpeg','ffprobe','pdf-engine','model']){
+  for(const name of ['engine','czkawka','ffmpeg','ffprobe','pdf-engine','model']){
    const raw=await fs.readFile(path.join(pkg,'resources',name+'.json')).then(JSON.parse).catch(()=>null);if(!raw)continue
    const spec=platformAsset(raw)
    const file=name==='model'?path.join(pkg,'dist/models',spec.executable):path.join(pkg,'dist/engines',spec.id,spec.version,spec.executable)
@@ -72,11 +71,6 @@ async function verify(app){
    child.on('exit',code=>{clearTimeout(timer);if(!settled)reject(new Error(`Worker ${code}: ${tail}`))})
    child.send({type:'run',input:input.input,files:input.files,outputDir,dataDir})
   })
-  const cli=async input=>{
-   const file=path.join(temporary,'input.json');await fs.writeFile(file,JSON.stringify(input))
-   const response=await execute(process.execPath,[path.join(pkg,'dist/backend/cli.mjs'),'--data-dir',dataDir,'run','--input-file',file],{cwd:temporary,env:{...process.env,NODE_PATH:''},timeout:180000,maxBuffer:8*1024*1024})
-   const task=JSON.parse(response.stdout);assert.equal(task.status,'succeeded',task.message);return task
-  }
   if(name==='image-tools'){
    const sharp=require('sharp'),file=path.join(temporary,'image.png');await sharp({create:{width:100,height:80,channels:3,background:'#287968'}}).png().toFile(file)
    const result=await localWorker({input:{fileIds:['input'],options:{format:'webp',quality:80,width:50}},files:[{id:'input',name:'image.png',path:file,kind:'image',metadata:await sharp(file).metadata()}]})
@@ -91,13 +85,8 @@ async function verify(app){
    const file=path.join(temporary,'silence.wav');await fs.writeFile(file,wav)
    const result=await localWorker({input:{fileIds:['input'],options:{language:'en'}},files:[{id:'input',name:'silence.wav',path:file}]})
    const transcript=JSON.parse(await fs.readFile(result.files.find(f=>f.kind==='transcript').path));assert.equal(transcript.duration,2);assert(Array.isArray(transcript.segments));checks.push('Packaged FFmpeg, Whisper native module and bundled base model complete inference')
-  }else if(name==='file-cleaner'){
-   const scans=path.join(temporary,"扫描 中文 '[]$;&");await fs.mkdir(scans);await fs.writeFile(path.join(scans,'a.txt'),'duplicate'.repeat(2000));await fs.copyFile(path.join(scans,'a.txt'),path.join(scans,'b.txt'))
-   assert.equal((await cli({command:'dup',paths:[scans],options:{'minimal-file-size':'1'}})).result.fileCount,2)
-   const ffmpeg=platformAsset(JSON.parse(await fs.readFile(path.join(pkg,'resources/ffmpeg.json'))))
-   const binary=await restoreBundledAsset(path.join(pkg,'dist/engines',ffmpeg.id,ffmpeg.version,ffmpeg.executable),path.join(temporary,'ffmpeg'),ffmpeg.binarySha256);await fs.chmod(binary,0o755)
-   await execute(binary,['-nostdin','-loglevel','error','-y','-f','lavfi','-i','color=c=blue:s=160x90:r=10:d=1','-c:v','libx264',path.join(scans,'clip.mp4')])
-   await cli({command:'video-optimizer',paths:[scans],options:{},subcommand:'transcode',suboptions:{}});checks.push('Packaged Czkawka and FFmpeg/ffprobe run duplicate and video scans')
+  }else if(id==='moss.file-management'){
+   checks.push(...await verifyFileManagement(pkg,manifest,temporary,dataDir))
   }else if(name==='document-converter'){
    const file=path.join(temporary,'中文.md');await fs.writeFile(file,'# OFFLINE PANDOC\n\n本地文档\n')
    // Exercise bundled Pandoc directly for DOCX/HTML, without starting a desktop
@@ -130,24 +119,87 @@ async function verify(app){
  }
 }
 
+async function verifyFileManagement(pkg, manifest, temporary, dataDir) {
+ const store = new TaskStore(dataDir), password = 'isolated file management verification'
+ const submit = async (input, env) => {
+  const task = await store.create(input, 'offline-verification')
+  const result = await runEngineWorker(pkg, store, task, env)
+  assert.equal(result.status, 'succeeded', result.message)
+  return result
+ }
+ const scans = path.join(temporary, "扫描 中文 '[]$;&"), repo = path.join(temporary, 'repo'), target = path.join(temporary, 'restored')
+ await Promise.all([scans, repo, target].map(directory => fs.mkdir(directory)))
+ const payload = 'duplicate'.repeat(2000)
+ await fs.writeFile(path.join(scans, 'a.txt'), payload)
+ await fs.copyFile(path.join(scans, 'a.txt'), path.join(scans, 'b.txt'))
+ assert.equal(manifest.backend.lifecycle, 'on-demand')
+ assert(manifest.contributes.tools.some(tool => tool.id === 'cleanup_scan' && tool.effect === 'read'))
+ const scan = await submit({ command: 'dup', paths: [scans], options: { 'minimal-file-size': '1' } }, { RESTIC_PASSWORD: '' })
+ assert.equal(scan.result.fileCount, 2)
+ assert(scan.result.groups[0].files.every(file => file.trashIdentity))
+ assert.equal(typeof JSON.parse(await fs.readFile(scan.artifacts[0].path, 'utf8')), 'object')
+ const empty = path.join(scans, 'empty-folder')
+ await fs.mkdir(path.join(empty, 'nested'), { recursive: true })
+ const emptyFolders = await submit({ command: 'empty-folders', paths: [scans] }, { RESTIC_PASSWORD: '' })
+ assert(emptyFolders.result.groups.some(group => group.files.some(file => file.path === empty && file.trashIdentity)))
+
+ const fixDirectory = path.join(temporary, 'extensions')
+ await fs.mkdir(fixDirectory)
+ const original = path.join(fixDirectory, 'photo.jpg'), occupied = path.join(fixDirectory, 'photo.png')
+ await fs.writeFile(original, Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64'))
+ await fs.writeFile(occupied, 'preserve this file')
+ const extensionScan = await submit({ command: 'ext', paths: [fixDirectory] }, { RESTIC_PASSWORD: '' })
+ const fix = await store.create({ command: 'ext', paths: [fixDirectory], options: { 'fix-extensions': true },
+  confirmChanges: true, followUp: { id: extensionScan.id, operation: 'fix' } }, 'offline-verification')
+ const conflict = await runEngineWorker(pkg, store, fix, { RESTIC_PASSWORD: '' })
+ assert.equal(conflict.status, 'partial')
+ assert.match(conflict.warnings, /target file already exists/)
+ assert.equal(await fs.readFile(occupied, 'utf8'), 'preserve this file')
+ assert((await fs.stat(original)).size > 0)
+
+ const binaries = await fs.readdir(path.join(pkg, 'dist/engines'))
+ assert(!binaries.includes('ffmpeg') && !binaries.includes('ffprobe'), 'Video dependencies belong to the media studio')
+ const video = await store.create({ command: 'video', paths: [scans] }, 'offline-verification')
+ const missing = await runEngineWorker(pkg, store, video, { RESTIC_PASSWORD: '', MOSS_VIDEO_FFMPEG: '', MOSS_VIDEO_FFPROBE: '' })
+ assert.equal(missing.status, 'failed')
+ assert.match(missing.message, /安装多媒体工坊.*moss\.media-studio/)
+
+ const env = { RESTIC_PASSWORD: password }
+ await submit({ command: 'init', repo }, env)
+ const backup = await submit({ command: 'backup', repo, paths: [scans] }, env)
+ const snapshots = await submit({ command: 'snapshots', repo }, env)
+ const snapshot = snapshots.result.snapshots[0].id
+ assert(snapshot.startsWith(backup.result.summary.snapshot_id))
+ const restored = await submit({ command: 'restore', repo, snapshot, target }, env)
+ assert.equal(await fs.readFile(path.join(target, scans, 'a.txt'), 'utf8'), payload)
+ const tasks = await store.list()
+ assert(tasks.some(task => task.id === scan.id) && tasks.some(task => task.id === restored.id))
+ assert(!JSON.stringify(tasks).includes(password))
+ return ['Packaged Czkawka scans files and missing media studio blocks video with an install prompt', 'Packaged Restic initializes, backs up and restores file contents using the same task store']
+}
+
 async function sessionTask(pkg,manifest,temporary,input){
  const sessionId='offline-check',directory=path.join(temporary,'workspace','artifacts',manifest.id,sessionId),cacheDir=path.join(temporary,'empty-data')
  const store=new TaskStore(directory,{cacheDir,sessionId}),task=await store.create(input,'offline-verification')
- // Use the shipped worker's parent handshake and session environment, just as
- // the Backend queue does. Host lifecycle/storage isolation has separate tests.
- await new Promise((resolve,reject)=>{
-  const child=fork(path.join(pkg,'dist/backend/worker.mjs'),[directory,task.id],{cwd:pkg,stdio:['ignore','pipe','pipe','ipc'],env:{...process.env,NODE_PATH:'',MOSS_ENGINE_CACHE_DIR:cacheDir,MOSS_TASK_SESSION_ID:sessionId}})
-  let tail='',error,killTimer
-  const timer=setTimeout(()=>{error=new Error('Session worker timeout');child.kill('SIGTERM');killTimer=setTimeout(()=>child.kill('SIGKILL'),2000)},180000)
-  child.stdout.on('data',chunk=>{tail=(tail+chunk).slice(-6000)});child.stderr.on('data',chunk=>{tail=(tail+chunk).slice(-6000)})
-  child.once('error',value=>{error=value})
-  child.on('message',message=>{if(message.type===WORKER_READY_MESSAGE)child.send({type:WORKER_START_MESSAGE},value=>{if(value){error=value;child.kill('SIGTERM')}})})
-  child.once('close',(code,signal)=>{clearTimeout(timer);clearTimeout(killTimer);if(error||code!==0)reject(error||new Error(`Session worker ${code??signal}: ${tail}`));else resolve()})
- })
- const result=await store.get(task.id)
+ const result=await runEngineWorker(pkg,store,task,{MOSS_ENGINE_CACHE_DIR:cacheDir,MOSS_TASK_SESSION_ID:sessionId})
  assert.equal(result.status,'succeeded',result.message)
  assert.equal(result.sessionId,sessionId)
  assert(result.artifacts.every(file=>file.path.startsWith(directory+path.sep)),'outputs must belong to the session workspace')
  assert.equal(new URL(result.result.resourceUri).searchParams.get('session'),sessionId)
  return result
+}
+
+async function runEngineWorker(pkg,store,task,env = {}){
+ // Use the shipped worker's parent handshake and session environment, just as
+ // the Backend queue does. Host lifecycle/storage isolation has separate tests.
+ await new Promise((resolve,reject)=>{
+  const child=fork(path.join(pkg,'dist/backend/worker.mjs'),[store.dataDir,task.id],{cwd:pkg,stdio:['ignore','pipe','pipe','ipc'],env:{...process.env,NODE_PATH:'',...env}})
+  let tail='',error,killTimer
+  const timer=setTimeout(()=>{error=new Error('Engine worker timeout');child.kill('SIGTERM');killTimer=setTimeout(()=>child.kill('SIGKILL'),2000)},180000)
+  child.stdout.on('data',chunk=>{tail=(tail+chunk).slice(-6000)});child.stderr.on('data',chunk=>{tail=(tail+chunk).slice(-6000)})
+  child.once('error',value=>{error=value})
+  child.on('message',message=>{if(message.type===WORKER_READY_MESSAGE)child.send({type:WORKER_START_MESSAGE},value=>{if(value){error=value;child.kill('SIGTERM')}})})
+  child.once('close',(code,signal)=>{clearTimeout(timer);clearTimeout(killTimer);if(error||code!==0)reject(error||new Error(`Engine worker ${code??signal}: ${tail}`));else resolve()})
+ })
+ return store.get(task.id)
 }

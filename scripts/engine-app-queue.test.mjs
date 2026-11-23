@@ -91,6 +91,30 @@ test('worker queue caps real child processes, rejects overflow and cancels waiti
   } finally { await queue.shutdown(); await f.cleanup() }
 })
 
+test('canceling worker dependency preparation frees the queue without spawning that task', async () => {
+  const f = await fixture()
+  let preparing
+  const started = new Promise(resolve => { preparing = resolve })
+  const queue = new WorkerQueue({ store: f.store, worker: f.worker,
+    env: async task => {
+      if (task.input.waitForDependency) {
+        preparing()
+        return new Promise(() => {})
+      }
+      return { ENGINE_QUEUE_EVENTS: f.events }
+    },
+  })
+  try {
+    const pending = await queue.start({ delay: 25, waitForDependency: true })
+    await started
+    await queue.cancel(pending.id)
+    assert.equal((await waitFor(f.store, pending.id)).status, 'canceled')
+    const next = await queue.start({ delay: 25 })
+    assert.equal((await waitFor(f.store, next.id)).status, 'succeeded')
+    assert(!(await fs.readFile(f.events, 'utf8')).includes(pending.id))
+  } finally { await queue.shutdown(); await f.cleanup() }
+})
+
 test('shutdown leaves waiting jobs recoverable and stops a running worker', async () => {
   const f = await fixture(), errors = []
   const options = { store: f.store, worker: f.worker, concurrency: 1, maxQueued: 2,
