@@ -22,10 +22,10 @@ export function validate(input, files) {
   if (!['auto', 'zh', 'en', 'ja', 'ko', 'fr', 'de', 'es'].includes(language)) throw new Error('不支持的语言')
   return { fileIds: input.fileIds, title: `转写 ${files.find(f => f.id === input.fileIds[0]).name}`, options: { language } }
 }
-export async function ensureModel(dataDir, signal, progress) {
+export async function ensureModel(dataDir, signal, progress, spec = model) {
   signal.throwIfAborted(); progress(0, '准备随包识别模型')
-  const bundled = fileURLToPath(new URL('../models/' + MODEL.name, import.meta.url))
-  return restoreBundledAsset(bundled, path.join(dataDir, 'models', MODEL.revision, MODEL.name), MODEL.sha256, signal)
+  const bundled = fileURLToPath(new URL('../models/' + spec.executable, import.meta.url))
+  return restoreBundledAsset(bundled, path.join(dataDir, 'models', spec.version, spec.executable), spec.binarySha256, signal)
 }
 
 export function subtitleTime(value, separator = ',') {
@@ -45,8 +45,8 @@ async function writeTranscript(dir, transcript) {
   for (const [ext, content] of Object.entries(text)) { const file = path.join(dir, `逐字稿.${ext}`), temporary = file + '.tmp'; await fs.writeFile(temporary, content); await fs.rename(temporary, file) }
   await atomicJson(path.join(dir, '逐字稿.json'), transcript)
 }
-export async function execute({ input, files, outputDir, dataDir, signal, progress }) {
-  const file = files.find(f => f.id === input.fileIds[0]), model = await ensureModel(dataDir, signal, progress)
+export async function execute({ input, files, outputDir, dataDir, signal, progress, modelSpec }) {
+  const file = files.find(f => f.id === input.fileIds[0]), model = await ensureModel(dataDir, signal, progress, modelSpec)
   progress(21, '准备音频')
   const executable = await ensureBinary(ffmpegSpec, dataDir, signal)
   const audioPath = path.join(outputDir, '播放音频.wav')
