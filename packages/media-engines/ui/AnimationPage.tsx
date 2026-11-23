@@ -83,7 +83,38 @@ function Artwork({ example, large = false }: { example: Example; large?: boolean
 function Modal({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null)
   useEffect(() => { ref.current?.showModal() }, [])
-  return <dialog ref={ref} className="modal" onCancel={onClose}><div className="section-heading"><h2>{title}</h2><button className="icon-button" aria-label="关闭" onClick={onClose}><Icon name="close"/></button></div>{children}</dialog>
+  return <dialog ref={ref} className="modal" aria-label={title} onCancel={event => { event.preventDefault(); onClose() }}><div className="section-heading"><h2>{title}</h2><button className="icon-button" aria-label="关闭" onClick={onClose}><Icon name="close"/></button></div>{children}</dialog>
+}
+type NewProjectFields = { name: string; aspectRatio: string; duration: number; templateId: string }
+function NewProjectDialog({ templates, onCreate, onClose }: {
+  templates: Template[]; onCreate: (fields: NewProjectFields) => Promise<void>; onClose: () => void
+}) {
+  const [name, setName] = useState(''), [aspectRatio, setAspectRatio] = useState('16:9')
+  const [duration, setDuration] = useState(15), [templateId, setTemplateId] = useState(templates[0]?.id || 'product-intro')
+  const [saving, setSaving] = useState(false), [error, setError] = useState('')
+  return <Modal title="新建视频" onClose={() => { if (!saving) onClose() }}>
+    <form className="new-video-form" onSubmit={async event => {
+      event.preventDefault()
+      if (saving || !name.trim()) return
+      setSaving(true)
+      try { await onCreate({ name: name.trim(), aspectRatio, duration, templateId }) }
+      catch (reason) { setError(errorText(reason)); setSaving(false) }
+    }}>
+      <label>项目名称<input autoFocus required maxLength={120} value={name} onChange={e => setName(e.target.value)} /></label>
+      <label>分镜模板<select value={templateId} onChange={e => setTemplateId(e.target.value)}>
+        {(templates.length ? templates : examples).map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+      </select></label>
+      <div className="field-row">
+        <label>画面比例<select value={aspectRatio} onChange={e => setAspectRatio(e.target.value)}>
+          <option value="16:9">横屏 16:9</option><option value="9:16">竖屏 9:16</option><option value="1:1">方形 1:1</option>
+        </select></label>
+        <label>时长（秒）<input required type="number" min="0.3" max="3600" step="any" value={duration || ''} onChange={e => setDuration(Number(e.target.value))} /></label>
+      </div>
+      {error && <p role="alert" className="error-text">{error}</p>}
+      <div className="modal-actions"><button type="button" disabled={saving} onClick={onClose}>取消</button>
+        <button className="primary" disabled={saving || !name.trim()}>{saving ? '正在创建…' : '创建项目'}</button></div>
+    </form>
+  </Modal>
 }
 function ShotEditor({ project, shot, onSave, onClose, action }: { action: typeof defaultAction; project: Project; shot: Shot; onSave: (value: Project) => void; onClose: () => void }) {
   const [draft, setDraft] = useState(shot), [html, setHtml] = useState(project.scenes?.find(scene => scene.id === shot.id)?.html || '')
@@ -107,7 +138,7 @@ function Guide({ onStart }: { onStart: () => void }) {
     ['03', '检查画面，渲染成片', '选择分镜检查画面。点击「渲染视频」后在本机生成 MP4，完成后可播放预览并导出到本地。', 'play'],
   ].map(([number, title, description, icon]) => <article key={number}><span className="step-number">{number}</span><Icon name={icon} size={26}/><h2>{title}</h2><p>{description}</p></article>)}</div><button className="primary" onClick={onStart}>开始我的第一支视频 <Icon name="arrow"/></button><div className="guide-about"><h2>HyperFrames 是什么？</h2><p>HyperFrames 是 HeyGen 开源的 HTML 动画与视频渲染项目，采用 Apache-2.0 协议。这个 Moss App 基于 HyperFrames 0.8.200，提供项目、分镜、HTML / CSS 场景、校验、本地渲染和视频导出工具。</p><p>工作台的四个起步示例由此 App 提供。场景预览用于检查布局，最终动画以渲染成片为准。填写字幕文案不会自动合成语音。</p><a href="https://github.com/heygen-com/hyperframes" target="_blank" rel="noreferrer">查看开源项目 <Icon name="external" size={14}/></a></div></section>
 }
-export function AnimationPage({ action = defaultAction, embedded = false, onDirty }: { action?: typeof defaultAction; embedded?: boolean; onDirty?: (value:boolean) => void } = {}) {
+export function AnimationPage({ action = defaultAction, embedded = false, projectToolbar = false, onDirty }: { action?: typeof defaultAction; embedded?: boolean; projectToolbar?: boolean; onDirty?: (value:boolean) => void } = {}) {
   useTheme()
   const [projects, setProjects] = useState<Project[]>([]), [templates, setTemplates] = useState<Template[]>([]), [tasks, setTasks] = useState<Task[]>([])
   const [projectId, setProjectId] = useState(routeProject), [shotId, setShotId] = useState('')
@@ -119,6 +150,7 @@ export function AnimationPage({ action = defaultAction, embedded = false, onDirt
   const [fps, setFps] = useState(30), [quality, setQuality] = useState('high')
   const [busy, setBusy] = useState(''), [notice, setNotice] = useState<{ text: string; error?: boolean } | null>(null), [loading, setLoading] = useState(!!window.mossApp)
   const [editing, setEditing] = useState<Shot | null>(null), [showRender, setShowRender] = useState(false)
+  const [showNew, setShowNew] = useState(false)
   const [fallbackPrompt, setFallbackPrompt] = useState(''), [validation, setValidation] = useState('')
   const requestVersion = useRef(0), initialized = useRef(false), resultVersion = useRef(0)
   const promptRef = useRef<HTMLTextAreaElement>(null)
@@ -128,8 +160,8 @@ export function AnimationPage({ action = defaultAction, embedded = false, onDirt
   const shots = project?.storyboard?.scenes || []
   const shot = shots.find(item => item.id === shotId) || shots[0]
   const sceneHtml = project?.storyboard ? project.scenes?.find(item => item.id === shot?.id)?.html || '' : project?.html || ''
-  useEffect(() => { onDirty?.(Boolean(editing || busy)); return () => onDirty?.(false) }, [editing, busy, onDirty])
-  const projectTasks = tasks.filter(task => task.input?.projectId === project?.id)
+  useEffect(() => { onDirty?.(Boolean(editing || busy || showNew)); return () => onDirty?.(false) }, [editing, busy, showNew, onDirty])
+  const projectTasks = project ? tasks.filter(task => task.input?.projectId === project.id) : []
   const renderTasks = projectTasks.filter(task => task.input?.operation !== 'validate')
   const latest = renderTasks[0]
   const active = renderTasks.find(isRunning)
@@ -157,10 +189,10 @@ export function AnimationPage({ action = defaultAction, embedded = false, onDirt
       const next: Project[] = (projectsValue.projects || []).sort((a: Project, b: Project) => (b.updatedAt || 0) - (a.updatedAt || 0))
       setProjects(next); setTasks(workspace.tasks || []); setTemplates(templatesValue.templates || [])
       if (workspace.registrationError) setNotice({ text: workspace.registrationError, error: true })
-      if (!initialized.current) { initialized.current = true; if ((!location.hash || (location.hash.startsWith('#/workbench') && !routeProject())) && next[0]) setProjectId(next[0].id) }
+      if (!initialized.current) { initialized.current = true; if (!projectToolbar && (!location.hash || (location.hash.startsWith('#/workbench') && !routeProject())) && next[0]) setProjectId(next[0].id) }
     } catch (error) { if (version === requestVersion.current) setNotice({ text: errorText(error), error: true }) }
     finally { if (version === requestVersion.current) setLoading(false) }
-  }, [action])
+  }, [action, projectToolbar])
   useEffect(() => {
     void refresh()
     const off = window.mossApp?.events.on('workspace.changed', () => void refresh())
@@ -220,12 +252,23 @@ export function AnimationPage({ action = defaultAction, embedded = false, onDirt
     const value = await action('artifacts.export', { id: result.id, index: videoArtifactIndex })
     setNotice({ text: value?.canceled ? '已取消导出。' : `视频已导出${value?.path ? `：${value.path}` : '。'}` })
   })
-  return <div className="app-shell">
-    <aside className="sidebar" aria-label="项目导航"><button className="new-project" onClick={() => selectProject('')}><Icon name="plus"/> 新建视频 <span>↗</span></button><button className={`nav-item ${view === 'workspace' ? 'selected' : ''}`} onClick={() => setView('workspace')}><Icon name="grid"/> 创作工作台</button><div className="nav-label">我的项目 <span>{projects.length.toString().padStart(2, '0')}</span></div><div className="project-list">{projects.map(item => <button title={item.name} key={item.id} className={`project-link ${item.id === project?.id && view === 'workspace' ? 'selected' : ''}`} onClick={() => selectProject(item.id)}><Icon name="film" size={16}/><span>{item.name}<small>{durationText(item.duration)} · {item.width > item.height ? '横屏' : item.width < item.height ? '竖屏' : '方形'}</small></span></button>)}{!projects.length && <p className="nav-empty">{loading ? '正在读取项目…' : '你的第一支视频，\n从一个想法开始。'}</p>}</div><div className="sidebar-bottom"><button className={`nav-item ${view === 'guide' ? 'selected' : ''}`} onClick={() => setView('guide')}><Icon name="book"/> 使用指南 <Icon name="arrow" size={15}/></button></div></aside>
+  const startNew = () => { if (projectToolbar) setShowNew(true); else selectProject('') }
+  return <div className={projectToolbar ? 'app-shell project-toolbar-layout' : 'app-shell'}>
+    {projectToolbar ? <nav className="project-toolbar" aria-label="分镜项目导航">
+      <h2>分镜动画</h2>
+      <button className="project-home" aria-current={!projectId && view === 'workspace' ? 'page' : undefined}
+        disabled={!projectId && view === 'workspace'} onClick={() => selectProject('')}><Icon name="grid" size={16} />创作工作台</button>
+      <select aria-label="打开分镜项目" value={view === 'workspace' ? projectId : ''} onChange={event => selectProject(event.target.value)}>
+        <option value="">我的项目（{projects.length}）</option>
+        {projects.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+      </select>
+      <button className="primary" disabled={!!busy} onClick={startNew}><Icon name="plus" size={16} />新建视频</button>
+      <button className="icon-button" aria-label="使用指南" title="使用指南" onClick={() => setView('guide')}><Icon name="book" size={17} /></button>
+    </nav> : <aside className="sidebar" aria-label="项目导航"><button className="new-project" onClick={() => selectProject('')}><Icon name="plus"/> 新建视频 <span>↗</span></button><button className={`nav-item ${view === 'workspace' ? 'selected' : ''}`} onClick={() => setView('workspace')}><Icon name="grid"/> 创作工作台</button><div className="nav-label">我的项目 <span>{projects.length.toString().padStart(2, '0')}</span></div><div className="project-list">{projects.map(item => <button title={item.name} key={item.id} className={`project-link ${item.id === project?.id && view === 'workspace' ? 'selected' : ''}`} onClick={() => selectProject(item.id)}><Icon name="film" size={16}/><span>{item.name}<small>{durationText(item.duration)} · {item.width > item.height ? '横屏' : item.width < item.height ? '竖屏' : '方形'}</small></span></button>)}{!projects.length && <p className="nav-empty">{loading ? '正在读取项目…' : '你的第一支视频，\n从一个想法开始。'}</p>}</div><div className="sidebar-bottom"><button className={`nav-item ${view === 'guide' ? 'selected' : ''}`} onClick={() => setView('guide')}><Icon name="book"/> 使用指南 <Icon name="arrow" size={15}/></button></div></aside>}
     <main className="main-content"><header className="topbar" data-app-toolbar><div className="workspace-title"><h1>{view === 'guide' ? '使用指南' : project?.name || '视频创作'}</h1>{project && view === 'workspace' && <p>{project.width} × {project.height} · {durationText(project.duration)} · {shots.length ? `${shots.length} 个分镜` : 'HTML 动画项目'}</p>}</div><div className="top-actions">{project && view === 'workspace' && <button className="quiet-button" onClick={() => void openConversation()} disabled={!!busy}><Icon name="chat" size={16}/> 主会话中继续</button>}<button className="icon-button" data-app-secondary-action aria-label="同步项目" title="同步项目" disabled={!!busy || loading} onClick={() => void perform('refresh', refresh)}><Icon name="refresh" size={16}/></button></div></header>
     {notice && <div className={`notice ${notice.error ? 'notice-error' : ''}`} role={notice.error ? 'alert' : 'status'}><Icon name="info" size={17}/><span>{notice.text}</span><button className="icon-button" aria-label="关闭提示" onClick={() => setNotice(null)}><Icon name="close" size={16}/></button></div>}
     {!window.mossApp && <div className="standalone-note"><Icon name="info" size={16}/> 当前为界面预览。在 Moss 内打开即可使用主会话和本地视频工具。</div>}
-    <div className="page-content">{view === 'guide' ? <Guide onStart={() => selectProject('')}/> : <>
+    <div className="page-content">{view === 'guide' ? <Guide onStart={startNew}/> : <>
       <div className="creation-layout" data-app-primary><section className="brief-card"><div className="section-heading"><h2><Icon name="spark"/> {project ? '一起打磨这支视频' : '你想做什么视频？'}</h2><span className="small-label">{project ? '继续创作' : '创作需求'}</span></div><p className="card-description">{project ? '描述要调整的内容，AI 会读取当前项目继续创作。' : '主题、风格、想传达的信息，都可以从这里开始。'}</p>{project?.purpose && <div className="project-brief"><span>当前创作目标</span><p>{project.purpose}</p>{project.style && <small>{project.style}</small>}</div>}
         <div className="composer"><textarea ref={promptRef} aria-label="视频创作需求" maxLength={3500} placeholder={project ? '例如：让开场更有冲击力，把第二幕改成产品使用场景…' : '例如：做一支 15 秒的新品介绍，简约温暖的风格，突出设计、音质和日常使用场景…'} value={prompt} onChange={event => setPrompt(event.target.value)}/><div className="composer-context"><span className="app-chip"><span className="mini-mark"><Icon name="film" size={12}/></span> HyperFrames <Icon name="check" size={12}/></span><span>{project ? '已关联当前项目' : '已选择创作 App'}</span></div></div>
         <div className="demo-shortcuts" aria-label="示例快捷输入">{examples.map(item => <button key={item.id} title={item.prompt} className={exampleId === item.id ? 'selected' : ''} onClick={() => useExample(item)}><Icon name="spark" size={11}/>{item.name}</button>)}</div>
@@ -245,6 +288,12 @@ export function AnimationPage({ action = defaultAction, embedded = false, onDirt
       </> : <section className="examples-section"><div className="section-heading"><div><h2>从示例开始</h2><p className="section-description">选择一个方向，创作需求会自动填好。你可以随意修改。</p></div><span className="small-label">4 个起步示例</span></div><div className="example-grid">{examples.map(item => <button className={`example-card ${exampleId === item.id ? 'selected' : ''}`} aria-pressed={exampleId === item.id} key={item.id} onClick={() => useExample(item)}><Artwork example={item}/><div className="example-caption"><div><strong>{item.name}</strong><span>{item.duration} 秒 · {item.aspectRatio}</span></div><span className="example-arrow"><Icon name={exampleId === item.id ? 'check' : 'arrow'} size={16}/></span></div></button>)}</div></section>}
       <footer className="page-footer"><span><Icon name="film" size={14}/> 创意在主会话，成果在这里。</span><button className="text-button" onClick={() => setView('guide')}>了解工作流程 <Icon name="arrow" size={14}/></button></footer>
     </>}</div></main>
+    {showNew && <NewProjectDialog templates={templates} onClose={() => setShowNew(false)} onCreate={async fields => {
+      const next = unwrapProject(await action('projects.create', fields))
+      updateProject(next)
+      selectProject(next.id)
+      setShowNew(false)
+    }} />}
     {editing && project && <ShotEditor action={action} key={`${project.id}/${editing.id}`} project={project} shot={editing} onSave={updateProject} onClose={() => setEditing(null)}/>}
     {showRender && project && <Modal title="渲染为视频" onClose={() => !busy && setShowRender(false)}><p className="muted">将「{project.name}」的已保存场景渲染为 MP4。</p><div className="render-spec"><Icon name="film" size={23}/><span>{project.width} × {project.height}<small>{durationText(project.duration)} · {shots.length || 1} 个场景</small></span></div><div className="field-row"><label>帧率<select value={fps} onChange={event => setFps(Number(event.target.value))}>{[24, 30, 60].map(value => <option key={value} value={value}>{value} fps</option>)}</select></label><label>画面质量<select value={quality} onChange={event => setQuality(event.target.value)}><option value="high">高质量</option><option value="balanced">均衡</option><option value="fast">快速预览</option></select></label></div>{validation && <p role="status" className="muted">{validation}</p>}{notice?.error && <p role="alert" className="error-text">{notice.text}</p>}<div className="modal-actions"><button disabled={!!busy} onClick={() => void perform('validate', async () => { const value = await action('projects.validate', { id: project.id }); setValidation(value.message || '项目结构校验通过，渲染时将执行引擎检查。') })}>检查项目</button><button className="primary" disabled={!!busy || !!active} onClick={() => void render()}><Icon name="play" size={15}/>{busy === 'render' ? '正在启动…' : '开始渲染'}</button></div></Modal>}
     {fallbackPrompt && <Modal title="在主会话继续创作" onClose={() => setFallbackPrompt('')}><p className="muted">当前宿主暂不支持直接打开主会话。复制下面的需求，在主会话选择 HyperFrames App 后发送。</p><textarea className="fallback-prompt" aria-label="主会话提示" value={fallbackPrompt} readOnly/><div className="modal-actions"><button className="primary" onClick={() => void perform('copy', async () => { await navigator.clipboard.writeText(fallbackPrompt); setNotice({ text: '需求已复制。' }); setFallbackPrompt('') })}>复制创作需求</button></div></Modal>}

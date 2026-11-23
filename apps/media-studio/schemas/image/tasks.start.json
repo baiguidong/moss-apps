@@ -1,0 +1,265 @@
+{
+  "type": "object",
+  "properties": {
+    "fileIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      },
+      "minItems": 1,
+      "maxItems": 50
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": [
+            "original",
+            "jpeg",
+            "png",
+            "webp",
+            "avif",
+            "tiff"
+          ],
+          "default": "webp"
+        },
+        "quality": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8192,
+          "description": "输出宽度，0 自动计算或保留；与高度和适应模式共同生效。"
+        },
+        "crop": {
+          "type": "object",
+          "properties": {
+            "left": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 60000
+            },
+            "top": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 60000
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60000
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60000
+            }
+          },
+          "required": [
+            "left",
+            "top",
+            "width",
+            "height"
+          ],
+          "additionalProperties": false
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8192,
+          "description": "输出高度，0 自动计算或保留"
+        },
+        "rotation": {
+          "type": "number",
+          "minimum": -360,
+          "maximum": 360,
+          "description": "顺时针旋转角度，裁剪之后应用"
+        },
+        "brightness": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 3,
+          "description": "亮度倍率，默认 1"
+        },
+        "saturation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "饱和度倍率，默认 1"
+        },
+        "hue": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360,
+          "description": "色相旋转角度"
+        },
+        "lightness": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100,
+          "description": "明度偏移"
+        },
+        "gamma": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 3,
+          "description": "伽马校正，默认 1"
+        },
+        "blur": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "高斯模糊 sigma，0 关闭；开启时最小 0.3"
+        },
+        "sharpen": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "锐化 sigma，0 关闭"
+        },
+        "median": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 11,
+          "description": "中值降噪，0 关闭，或 3、5、7、9、11"
+        },
+        "threshold": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255,
+          "description": "二值化阈值，由 thresholdEnabled 开启"
+        },
+        "border": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1024,
+          "description": "四周等宽扩边像素"
+        },
+        "fit": {
+          "type": "string",
+          "enum": [
+            "inside",
+            "cover",
+            "contain",
+            "fill",
+            "outside"
+          ]
+        },
+        "position": {
+          "type": "string",
+          "enum": [
+            "centre",
+            "north",
+            "northeast",
+            "east",
+            "southeast",
+            "south",
+            "southwest",
+            "west",
+            "northwest",
+            "entropy",
+            "attention"
+          ]
+        },
+        "metadata": {
+          "type": "string",
+          "enum": [
+            "strip",
+            "keep"
+          ]
+        },
+        "allowEnlargement": {
+          "type": "boolean"
+        },
+        "flip": {
+          "type": "boolean"
+        },
+        "flop": {
+          "type": "boolean"
+        },
+        "grayscale": {
+          "type": "boolean"
+        },
+        "negate": {
+          "type": "boolean"
+        },
+        "normalise": {
+          "type": "boolean"
+        },
+        "thresholdEnabled": {
+          "type": "boolean"
+        },
+        "transparentBackground": {
+          "type": "boolean"
+        },
+        "background": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "tint": {
+          "type": "string",
+          "pattern": "^(#[a-fA-F0-9]{6})?$"
+        },
+        "watermark": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "fontSize": {
+              "type": "integer",
+              "minimum": 8,
+              "maximum": 256
+            },
+            "opacity": {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 1
+            },
+            "margin": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[a-fA-F0-9]{6}$"
+            },
+            "position": {
+              "type": "string",
+              "enum": [
+                "centre",
+                "north",
+                "northeast",
+                "east",
+                "southeast",
+                "south",
+                "southwest",
+                "west",
+                "northwest"
+              ]
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "fileIds"
+  ],
+  "additionalProperties": false
+}

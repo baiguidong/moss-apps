@@ -13,7 +13,7 @@ const ACTIVE_POLL_MS = 15_000
 const EVENT_REFRESH_MS = 400
 export function bytes(size: number) { return size >= 1024 ** 3 ? `${(size / 1024 ** 3).toFixed(2)} GiB` : size >= 1024 ** 2 ? `${(size / 1024 ** 2).toFixed(1)} MiB` : `${Math.max(1, Math.round(size / 1024))} KiB` }
 export function time(seconds: number) { const n = Math.max(0, Math.floor(seconds || 0)); return `${Math.floor(n / 60).toString().padStart(2, '0')}:${(n % 60).toString().padStart(2, '0')}` }
-export function useWorkspace(prefix = '') {
+export function useWorkspace(prefix = '', changedEvent = 'workspace.changed') {
   const client = useRef<ReturnType<typeof createAppClient> | null>(null)
   const [workspace, setWorkspace] = useState<Workspace>({ files: [], tasks: [] })
   const [error, setError] = useState(''), [notice, setNotice] = useState(''), [busy, setBusy] = useState(false), [ready, setReady] = useState(false)
@@ -58,13 +58,13 @@ export function useWorkspace(prefix = '') {
       if (document.hidden) { if (eventTimer) clearTimeout(eventTimer); eventTimer = null }
       else scheduleRefresh()
     }
-    const off = client.current.events.on('workspace.changed', scheduleRefresh)
+    const off = client.current.events.on(changedEvent, scheduleRefresh)
     const offRuntime = client.current.events.on('runtime', value => { const event = value as { type?: string; state?: string }; if (event?.type === 'status' && event.state === 'running') scheduleRefresh() })
     document.addEventListener('visibilitychange', onVisibility)
     window.addEventListener('focus', scheduleRefresh)
     if (!document.hidden) void refresh()
     return () => { alive.current = false; pending.current = false; if (eventTimer) clearTimeout(eventTimer); off(); offRuntime(); offAppearance(); document.removeEventListener('visibilitychange', onVisibility); window.removeEventListener('focus', scheduleRefresh); media.removeEventListener('change', appearance); client.current?.dispose(); client.current = null }
-  }, [refresh])
+  }, [refresh, changedEvent])
   const active = workspace.tasks.some(task => activeTaskStatuses.has(task.status))
   useEffect(() => {
     if (!visible || (ready && !active)) return
@@ -87,12 +87,12 @@ export function useWorkspace(prefix = '') {
   return { workspace, error, notice, busy, ready, invoke, pick, exportFiles, previewFile, refresh, setError, setNotice }
 }
 export type WorkspaceHook = ReturnType<typeof useWorkspace>
-export function Shell({ title, children, state, actions }: { title: string; children: ReactNode; state: WorkspaceHook; actions?: ReactNode }) {
-  return <div className="task-app"><h1 className="visually-hidden">{title}</h1><header className="app-header" data-app-toolbar aria-label="文件操作"><span className="muted">{state.workspace.files.filter(f => f.role === 'input').length ? `已导入 ${state.workspace.files.filter(f => f.role === 'input').length} 个文件` : '选择本地文件开始'}</span><div className="header-actions">{actions}<button className="primary" disabled={state.busy || !state.ready} onClick={() => void state.pick()}><FolderOpen size={16} />导入文件</button></div></header>
+export function Shell({ title, children, state, actions, embedded = false }: { title: string; children: ReactNode; state: WorkspaceHook; actions?: ReactNode; embedded?: boolean }) {
+  return <div className="task-app">{!embedded && <h1 className="visually-hidden">{title}</h1>}<header className="app-header" data-app-toolbar aria-label="文件操作"><span className="muted">{state.workspace.files.filter(f => f.role === 'input').length ? `已导入 ${state.workspace.files.filter(f => f.role === 'input').length} 个文件` : '选择本地文件开始'}</span><div className="header-actions">{actions}<button className="primary" disabled={state.busy || !state.ready} onClick={() => void state.pick()}><FolderOpen size={16} />导入文件</button></div></header>
     {state.error && <div role="alert" className="notice error">{state.error}<button aria-label="关闭错误提示" onClick={() => state.setError('')}><X size={16} /></button></div>}
     {!!state.workspace.unavailableFiles?.length && <div role="status" className="notice error">{state.workspace.unavailableFiles.length} 个文件暂时无法访问：{state.workspace.unavailableFiles.slice(0, 3).map(file => file.name).join('、')}{state.workspace.unavailableFiles.length > 3 ? ' 等' : ''}</div>}
     {state.notice && <div role="status" className="notice success"><Check size={16} />{state.notice}</div>}
-    <main data-app-primary>{children}</main><footer><span>本地处理 · 结果保存在此 App</span></footer></div>
+    {embedded ? <div className="task-content">{children}</div> : <><main data-app-primary>{children}</main><footer><span>本地处理 · 结果保存在此 App</span></footer></>}</div>
 }
 export function Empty({ title, children, onImport }: { title: string; children: ReactNode; onImport: () => void }) { return <div className="empty"><div className="empty-icon"><Files size={36} strokeWidth={1.4} /></div><h2>{title}</h2><p>{children}</p><button className="primary" onClick={onImport}><FolderOpen size={16} />选择本地文件</button></div> }
 export function History({ state, onSelect }: { state: WorkspaceHook; onSelect?: (task: LocalTask) => void }) {

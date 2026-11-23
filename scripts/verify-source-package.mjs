@@ -3,6 +3,7 @@ import path from 'node:path'
 import os from 'node:os'
 import { pathToFileURL } from 'node:url'
 import { unzipSync } from 'fflate'
+import semver from 'semver'
 import { copySourceTree, validateSourcePackage, sourcePath, runtimeFileList, restoreSourceModes, sourceFileList, excludeSourceEntry, SHARED_SDK_WORKSPACES } from '../vendor/moss-core/packages/app-runtime/src/packages/source.mjs'
 import { validateAppPackage, DEFAULT_PACKAGE_LIMITS } from '../vendor/moss-core/packages/app-runtime/src/packages/index.mjs'
 import { verifyPackageRuntime } from '../vendor/moss-core/packages/app-runtime/src/packages/verify-runtime.mjs'
@@ -56,10 +57,11 @@ export async function verifySourceArchive(archive, { rebuild = false, requireSig
       for (const value of [signature.publisherId, signature.keyId]) if (!/^[a-zA-Z0-9._-]+$/.test(value)) throw new Error('Invalid signing identity')
       trustedPublishers[signature.publisherId] = { keys: { [signature.keyId]: await fs.readFile(path.join(repoRoot, 'publishers', signature.publisherId, `${signature.keyId}.pem`), 'utf8') } }
     }
-    // Validate the signed target on publication hosts, which may use another OS.
+    // Verify the package against its declared target. Installation still checks the actual Host.
     const manifest = JSON.parse(await fs.readFile(path.join(root, 'app.moss.json'), 'utf8'))
     const platform = manifest.platforms?.length === 1 ? manifest.platforms[0] : undefined
-    const pkg = await validateAppPackage(root, { platform, requireSource, requireTrustedPublisher: requireSignature, trustedPublishers })
+    const hostApiVersion = semver.validRange(manifest.hostApi || '') ? semver.minVersion(manifest.hostApi)?.version : undefined
+    const pkg = await validateAppPackage(root, { platform, hostApiVersion, requireSource, requireTrustedPublisher: requireSignature, trustedPublishers })
     const hasSource = await fs.access(path.join(root, 'source-manifest.json')).then(() => true, () => false)
     if (requireSource && !hasSource) throw new Error('Archive does not contain the required editable source')
     const source = hasSource ? await validateSourcePackage(root, { required: true }) : null

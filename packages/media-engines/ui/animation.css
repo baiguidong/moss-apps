@@ -378,3 +378,27 @@ progress{width:100%;height:4px;accent-color:var(--primary)}
 .new-project{min-height:32px;margin-bottom:8px}
 .demo-badge{font-size:11px}
 @media(max-width:620px){.sidebar{display:flex;flex-direction:column;align-items:stretch;padding:12px}.new-project{align-self:flex-start;margin:0}.project-list{width:100%}.workspace-title h1{font-size:15px}.topbar{padding:10px 12px}.top-actions .quiet-button{font-size:12px;padding:5px 8px}.page-content{padding:12px 12px 0}}
+
+.app-shell.project-toolbar-layout { display: block; min-height: 0; container: animation-editor / inline-size; }
+.project-toolbar { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; padding: 5px 0 12px; border-bottom: 1px solid var(--border); }
+.project-toolbar h2 { margin: 0 8px 0 0; font-size: 18px; white-space: nowrap; }
+.project-toolbar select { width: auto; flex: 0 1 17rem; min-width: 9rem; max-width: 100%; padding-block: 6px; }
+.project-toolbar .primary { margin-inline-start: auto; }
+.project-toolbar .project-home[aria-current] { opacity: 1; color: var(--fg); background: var(--soft); cursor: default; }
+.project-toolbar-layout .main-content { min-width: 0; }
+.project-toolbar-layout .page-content, .project-toolbar-layout .topbar { padding-inline: 0; }
+.project-toolbar-layout .result-row { display: grid; grid-template-columns: auto minmax(0,1fr) auto auto; text-align: start; margin: 0; }
+.project-toolbar-layout .result-row + .result-row { border-top: 0; }
+.project-toolbar-layout .result-row strong { overflow-wrap: anywhere; }
+.new-video-form { display: grid; gap: 12px; }
+@container animation-editor (max-width: 720px) {
+  .project-toolbar-layout .creation-layout { grid-template-columns: minmax(0,1fr); }
+  .project-toolbar-layout .result-row { column-gap: 7px; }
+}
+@container animation-editor (max-width: 540px) {
+  .project-toolbar h2 { display: none; }
+  .project-toolbar select { flex: 1 1 110px; min-width: 0; }
+  .project-toolbar .primary { margin-inline-start: 0; }
+  .project-toolbar-layout .result-row { grid-template-columns: auto minmax(0,1fr) auto; }
+  .project-toolbar-layout .result-open { grid-column: 2 / -1; }
+}

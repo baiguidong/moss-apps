@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 8192,
+      "description": "录音或视频的本地绝对路径"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "zh",
+        "en",
+        "ja",
+        "ko",
+        "fr",
+        "de",
+        "es"
+      ]
+    }
+  },
+  "required": [
+    "path"
+  ],
+  "additionalProperties": false
+}

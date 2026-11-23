@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "enum": [
+        "file",
+        "directory"
+      ]
+    },
+    "multiple": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

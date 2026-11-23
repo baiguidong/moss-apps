@@ -426,29 +426,39 @@ export class LocalTasks {
 export function startApp({ worker, inspect, validate, extraActions = {}, sessionScoped = false, Client = AppBackendClient }) {
   if (sessionScoped) return createSessionBackend(ScopedClient => startApp({ worker, inspect, validate, extraActions, Client: ScopedClient }))
   let service
-  const artifactUrl = relativePath => {
-    const key = relativePath.split(path.sep).join('/')
-    return backend.host.request('moss.artifacts/v1', 'url.get', { relativePath: key }).then(result => result.url)
-  }
   const backend = new Client({
-    async onInitialize(context) { service = await new LocalTasks({ dataDir: context.dataDir, sessionId: context.sessionId, worker, inspect, validate,
-      onChanged: data => backend.emit('workspace.changed', data),
-      onActivityLog: (level, message, details) => backend.log(level, message, details),
-      activity: context.protocols.includes('moss.runtime/v1') ? (operation, id) => backend.host.request('moss.runtime/v1', `activity.${operation}`, { id }, { timeoutMs: 10_000 }) : null,
-      artifactUrl: context.protocols.includes('moss.artifacts/v1') ? artifactUrl : null,
-    }).initialize() },
+    async onInitialize(context) { service = await openLocalTasks(backend, context, { worker, inspect, validate }) },
     async onShutdown() { await service?.close() },
   })
-  backend.registerAction('workspace.get', () => service.overview())
-  backend.registerAction('files.pick', async (_, context) => {
+  registerLocalActions(backend, () => service, { extraActions })
+  backend.start()
+  return backend
+}
+
+export function openLocalTasks(backend, context, { worker, inspect, validate, directory = '', event = 'workspace.changed' }) {
+  const artifactUrl = relativePath => {
+    const key = path.join(directory, relativePath).split(path.sep).join('/')
+    return backend.host.request('moss.artifacts/v1', 'url.get', { relativePath: key }).then(result => result.url)
+  }
+  return new LocalTasks({
+    dataDir: path.join(context.dataDir, directory), sessionId: context.sessionId, worker, inspect, validate,
+    onChanged: data => backend.emit(event, data),
+    onActivityLog: (level, message, details) => backend.log(level, message, details),
+    activity: context.protocols.includes('moss.runtime/v1') ? (operation, id) => backend.host.request('moss.runtime/v1', `activity.${operation}`, { id }, { timeoutMs: 10_000 }) : null,
+    artifactUrl: context.protocols.includes('moss.artifacts/v1') ? artifactUrl : null,
+  }).initialize()
+}
+
+export function registerLocalActions(backend, getService, { prefix = '', extraActions = {} } = {}) {
+  const add = (name, handler) => backend.registerAction(prefix + name, async (input, context) => handler(await getService(), input, context))
+  add('workspace.get', service => service.overview())
+  add('files.pick', async (service, _, context) => {
     const { paths } = await context.host.request('moss.local-files/v1', 'pick', { kind: 'file', multiple: true }, { signal: context.signal, timeoutMs: 300000 })
     return paths.length ? service.importFiles(paths, context.signal) : { files: [], errors: [] }
   })
-  backend.registerAction('files.import', (input, context) => service.importFiles(input.paths, context.signal))
-  backend.registerAction('files.export', (input, context) => service.exportFiles(input.ids, context.host, context.signal))
-  backend.registerAction('tasks.start', (input, context) => service.start(input, context.signal))
-  backend.registerAction('tasks.cancel', input => service.cancel(input.id))
-  for (const [name, handler] of Object.entries(extraActions)) backend.registerAction(name, (input, context) => service.runTracked(() => handler(service, input, context)))
-  backend.start()
-  return backend
+  add('files.import', (service, input, context) => service.importFiles(input.paths, context.signal))
+  add('files.export', (service, input, context) => service.exportFiles(input.ids, context.host, context.signal))
+  add('tasks.start', (service, input, context) => service.start(input, context.signal))
+  add('tasks.cancel', (service, input) => service.cancel(input.id))
+  for (const [name, handler] of Object.entries(extraActions)) add(name, (service, input, context) => service.runTracked(() => handler(service, input, context)))
 }

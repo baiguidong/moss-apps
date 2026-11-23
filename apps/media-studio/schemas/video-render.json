@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "output": {
+      "type": "string",
+      "enum": [
+        "video",
+        "speech"
+      ],
+      "description": "默认 video，两类项目都可生成 MP4。speech 仅适用于 avatar（数字人口播），返回试听音轨。animation（分镜动画）无法单独试听配音。"
+    },
+    "fps": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 120,
+      "description": "分镜动画的每秒帧数。口播使用项目设置，省略此参数。"
+    },
+    "quality": {
+      "type": "string",
+      "enum": [
+        "fast",
+        "balanced",
+        "high"
+      ],
+      "description": "分镜动画的渲染质量。口播使用项目设置，省略此参数。"
+    }
+  },
+  "required": [
+    "id",
+    "version"
+  ],
+  "additionalProperties": false
+}

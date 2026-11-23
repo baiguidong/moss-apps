@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "text": {
+      "type": "string",
+      "maxLength": 6000
+    },
+    "voice": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "rate": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 350
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "text",
+    "voice",
+    "rate"
+  ]
+}
