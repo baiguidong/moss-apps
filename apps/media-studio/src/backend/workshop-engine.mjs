@@ -4,6 +4,7 @@ import { existingPaths } from '@moss/engine-apps/runtime'
 import animation from '@moss/media-engines/animation'
 import { execute as transcribe, inspect, validate as validateRecording } from '@moss/media-engines/transcript'
 import media from './engine.mjs'
+import linuxModel from '../../resources/whisper-linux.json' with { type: 'json' }
 
 async function recording(input) {
   const [filePath] = await existingPaths([input.path])
@@ -43,7 +44,8 @@ export default {
       return writes
     }
     try {
-      const result = await transcribe({ ...source, dataDir: ctx.dataDir, outputDir: ctx.directory, signal: ctx.signal, progress })
+      const result = await transcribe({ ...source, dataDir: ctx.dataDir, outputDir: ctx.directory, signal: ctx.signal, progress,
+        modelSpec: process.platform === 'linux' ? linuxModel : undefined })
       return { message: result.message, artifacts: result.files.map(file => ({ ...file, name: path.basename(file.path) })) }
     } finally { await writes }
   },

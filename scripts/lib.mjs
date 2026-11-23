@@ -85,13 +85,17 @@ export function validateMarketplaceMetadata(raw, manifest, sourcePath) {
     throw new Error(`Invalid marketplace metadata: ${sourcePath}`)
   }
   const allowed = new Set([
-    'schemaVersion', 'appId', 'summary', 'description', 'categories', 'keywords',
+    'schemaVersion', 'appId', 'replacedBy', 'summary', 'description', 'categories', 'keywords',
     'platforms', 'offlineKitPlatforms', 'homepage', 'repository', 'license', 'featured', 'screenshots',
   ])
   const unknown = Object.keys(raw).find((key) => !allowed.has(key))
   if (unknown) throw new Error(`Unknown marketplace property ${unknown}: ${sourcePath}`)
   if (raw.schemaVersion !== 1) throw new Error(`marketplace.schemaVersion must be 1: ${sourcePath}`)
   if (raw.appId !== manifest.id) throw new Error(`marketplace.appId must equal ${manifest.id}: ${sourcePath}`)
+  if (raw.replacedBy !== undefined && (typeof raw.replacedBy !== 'string' || raw.replacedBy === manifest.id
+      || !/^[a-z0-9](?:[a-z0-9._-]{0,78}[a-z0-9])?$/.test(raw.replacedBy))) {
+    throw new Error(`Invalid marketplace.replacedBy: ${sourcePath}`)
+  }
   if (!String(raw.summary || '').trim() || String(raw.summary).length > 160) {
     throw new Error(`marketplace.summary must contain 1-160 characters: ${sourcePath}`)
   }
@@ -130,6 +134,7 @@ export function validateMarketplaceMetadata(raw, manifest, sourcePath) {
   return Object.freeze({
     schemaVersion: 1,
     appId: manifest.id,
+    ...(raw.replacedBy && { replacedBy: raw.replacedBy }),
     summary: String(raw.summary).trim(),
     description: String(raw.description || manifest.description || '').trim(),
     category: category.id,

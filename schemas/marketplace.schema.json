@@ -8,6 +8,7 @@
   "properties": {
     "schemaVersion": { "const": 1 },
     "appId": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,78}[a-z0-9])?$" },
+    "replacedBy": { "description": "Marketplace successor. Hide this listing when the successor has a stable release in the catalog.", "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,78}[a-z0-9])?$" },
     "summary": { "type": "string", "minLength": 1, "maxLength": 160 },
     "description": { "type": "string", "maxLength": 8000 },
     "categories": {

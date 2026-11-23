@@ -3,7 +3,8 @@ import { bundleAsset } from '@moss/engine-apps/bundle-build'
 import { prepareBinary } from '@moss/engine-apps/download'
 import { bundleNativeDependencies } from '@moss/local-tasks/build'
 import { bundleDependencies } from '@moss/media-engines/bundle'
-import model from '@moss/media-engines/model' with { type: 'json' }
+import baseModel from '@moss/media-engines/model' with { type: 'json' }
+import linuxModel from '../resources/whisper-linux.json' with { type: 'json' }
 import melo from '../resources/melo.json' with { type: 'json' }
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
@@ -15,6 +16,7 @@ import path from 'node:path'
 const root = fileURLToPath(new URL('..', import.meta.url))
 const cache = process.env.MOSS_BUILD_DEPENDENCY_CACHE || path.join(os.homedir(), '.cache/moss-apps-build')
 const linux = process.platform === 'linux'
+const model = linux ? linuxModel : baseModel
 const external = ['@fugood/whisper.node', 'sharp', 'hyperframes', 'sherpa-onnx-node']
 
 function execute(command, args) {
@@ -33,16 +35,28 @@ bundleDependencies('hyperframes', path.join(root, 'dist/backend'), createRequire
 await bundleAsset(await prepareBinary(model, cache), path.join(root, 'dist/models', model.executable), model.binarySha256)
 
 if (linux) {
+  // The Linux package ships CPU addons for glibc. Whisper loads its prebuilt
+  // addon, and Node executes the compiled JS in the bundled dependency tree.
+  const modules = path.join(root, 'dist/backend/node_modules')
+  for (const name of ['@img/sharp-linuxmusl-x64', '@img/sharp-libvips-linuxmusl-x64', '@fugood/whisper.node/whisper.cpp']) {
+    await fs.rm(path.join(modules, name), { recursive: true, force: true })
+  }
+  for (const file of await fs.readdir(modules, { recursive: true, withFileTypes: true })) {
+    if (file.isFile() && /(?:\.d\.[cm]?ts|\.(?:[cm]?[jt]s|css)\.map)$/.test(file.name)) {
+      await fs.unlink(path.join(file.parentPath, file.name))
+    }
+  }
   worker('src/backend/voice-worker.mjs', 'voice-worker')
   const archive = await prepareBinary(melo, cache)
   const assets = path.join(root, 'dist/voices/melo-zh')
   const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'moss-melo-'))
   try {
-    const files = ['LICENSE', 'model.onnx', 'lexicon.txt', 'tokens.txt', 'date.fst', 'number.fst', 'phone.fst']
+    const files = ['LICENSE', 'lexicon.txt', 'tokens.txt', 'date.fst', 'number.fst', 'phone.fst']
     execute('tar', ['-xjf', archive, '-C', temporary, '--strip-components=1', ...files.map(file => melo.member + '/' + file)])
     await fs.mkdir(assets, { recursive: true })
-    for (const file of files.filter(file => file !== 'model.onnx')) await fs.copyFile(path.join(temporary, file), path.join(assets, file))
-    await bundleAsset(path.join(temporary, 'model.onnx'), path.join(assets, 'model.onnx'), melo.modelSha256)
+    for (const file of files) await fs.copyFile(path.join(temporary, file), path.join(assets, file))
+    const voice = melo.quantizedModel
+    await bundleAsset(await prepareBinary(voice, cache), path.join(assets, voice.executable), voice.binarySha256)
   } finally {
     await fs.rm(temporary, { recursive: true, force: true })
   }

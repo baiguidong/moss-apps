@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "appId": "moss.media-tools",
+  "replacedBy": "moss.media-studio",
   "summary": "剪辑、字幕转写、分镜动画与数字人口播",
   "description": "剪辑和转码音视频、校对本机语音转写、编辑分镜动画与数字人口播，共用任务记录与导出。",
   "platforms": [

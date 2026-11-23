@@ -111,7 +111,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.MOSS_BUILD_DEPENDENCY_CACHE }}
-          key: ${{ runner.os }}-${{ matrix.platform }}-bundled-engines-v1-${{ hashFiles('apps/*/resources/engine.json', 'apps/document-converter/resources/pdf-engine.json', 'apps/file-cleaner/resources/ff*.json', 'apps/media-studio/resources/melo.json', 'packages/media-engines/model.json') }}
+          key: ${{ runner.os }}-${{ matrix.platform }}-bundled-engines-v1-${{ hashFiles('apps/*/resources/engine.json', 'apps/document-converter/resources/pdf-engine.json', 'apps/file-cleaner/resources/ff*.json', 'apps/media-studio/resources/melo.json', 'apps/media-studio/resources/whisper-linux.json', 'packages/media-engines/model.json') }}
       - name: Validate source and runtime on the target desktop platform
         if: steps.release.outputs.variants != 'true'
         run: node scripts/package-app.mjs --app "${{ steps.release.outputs.app_id }}"

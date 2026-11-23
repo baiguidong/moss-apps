@@ -77,6 +77,9 @@ const summaries = []
 for (const [appId, entry] of [...byApp.entries()].sort(([left], [right]) => left.localeCompare(right))) {
   // Removed Apps stay retired even when their GitHub releases still exist.
   if (!sourceApps.has(appId) && !sourceErrors.length) continue
+  const sourceApp = sourceApps.get(appId)
+  const successor = sourceApp?.marketplace.replacedBy
+  if (sourceApps.has(successor) && byApp.has(successor)) continue
   let versions = [...entry.versions.values()].sort((left, right) => semver.rcompare(left.version, right.version))
   if (mirrorApps.has(appId)) {
     const mirrored = []
@@ -87,7 +90,6 @@ for (const [appId, entry] of [...byApp.entries()].sort(([left], [right]) => left
   // New Hosts select exclusively from artifacts; this legacy field is never a fallback.
   versions = versions.map(version => version.artifacts ? { ...version, artifact: version.artifacts[version.platforms[0]] } : version)
   const latest = versions[0]
-  const sourceApp = sourceApps.get(appId)
   let iconUrl = ''
   if (sourceApp?.manifest.icon) {
     const extension = path.extname(sourceApp.manifest.icon).toLowerCase() || '.png'
