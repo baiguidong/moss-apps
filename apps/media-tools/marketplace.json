@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "appId": "moss.media-tools",
+  "replacedBy": "moss.media-studio",
   "summary": "在本机制作 3D 数字人口播、与 Moss 角色对话，使用 FFmpeg 处理音视频。",
   "description": "在本机制作 3D 数字人口播、与 Moss 角色对话，使用 FFmpeg 处理音视频。",
   "platforms": [

@@ -88,3 +88,33 @@ test('catalog publishes config Apps with their resources and excludes prerelease
     expect(await readFile(path.join(output, 'v1/assets/moss.drawio.svg'), 'utf8')).toContain('<svg')
   } finally { await rm(fixture, { recursive: true, force: true }) }
 })
+
+test('four media listings switch to the studio when its stable release is available', async () => {
+  const fixture = await mkdtemp(path.join(os.tmpdir(), 'moss-studio-catalog-'))
+  const output = path.join(fixture, 'site')
+  const studio = 'moss.media-studio'
+  const previous = ['moss.image-tools', 'moss.media-tools', 'moss.transcription', 'moss.hyperframes'].sort()
+  async function release(id: string, version: string) {
+    await writeFile(path.join(fixture, id + '.release.json'), JSON.stringify({
+      schemaVersion: 1,
+      app: { id, displayName: id },
+      version: { version, platforms: ['darwin-arm64'], artifact: { downloadUrl: 'https://example.com/app.zip', sha256: '0'.repeat(64) } },
+    }))
+  }
+  async function listed() {
+    const result = spawnSync(process.execPath, ['scripts/build-catalog.mjs', '--artifacts', fixture, '--output', output], {
+      cwd: path.resolve(import.meta.dirname, '..'), encoding: 'utf8',
+    })
+    expect(result.status, result.stderr).toBe(0)
+    const index = JSON.parse(await readFile(path.join(output, 'v1/index.json'), 'utf8'))
+    return index.apps.map((app: { id: string }) => app.id).sort()
+  }
+  try {
+    for (const id of previous) await release(id, '0.1.0')
+    await release(studio, '0.2.1-beta.1')
+    expect(await listed()).toEqual(previous)
+    await release(studio, '0.2.1')
+    expect(await listed()).toEqual([studio])
+    for (const id of previous) await expect(readFile(path.join(output, 'v1/apps', id + '.json'))).rejects.toThrow()
+  } finally { await rm(fixture, { recursive: true, force: true }) }
+})
