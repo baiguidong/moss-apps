@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "uri": {
+      "type": "string",
+      "maxLength": 512
+    },
+    "intent": {
+      "type": "string",
+      "enum": [
+        "create",
+        "use",
+        "edit"
+      ]
+    },
+    "ref": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

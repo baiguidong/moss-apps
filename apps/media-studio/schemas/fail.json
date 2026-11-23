@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "lease": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 500
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "lease",
+    "message"
+  ]
+}

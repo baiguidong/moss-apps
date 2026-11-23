@@ -1,0 +1,67 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mode"
+  ],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "description": "inspect 读取媒体信息，trim 裁剪，compress 压缩，audio 提取 WAV，gif 生成动图，convert 转为 MP4。raw 接收完整 FFmpeg 参数。",
+      "enum": [
+        "inspect",
+        "trim",
+        "compress",
+        "audio",
+        "gif",
+        "convert",
+        "raw"
+      ]
+    },
+    "path": {
+      "type": "string",
+      "description": "除 raw 之外必填，传本地输入媒体的绝对路径。"
+    },
+    "start": {
+      "type": "number",
+      "description": "trim 必填，片段的开始时间（秒）。",
+      "minimum": 0,
+      "maximum": 864000
+    },
+    "end": {
+      "type": "number",
+      "description": "trim 必填，片段的结束时间（秒），必须晚于 start。",
+      "minimum": 0,
+      "maximum": 864000
+    },
+    "crf": {
+      "type": "number",
+      "description": "compress 的压缩质量，越小越清晰，默认 28。",
+      "minimum": 18,
+      "maximum": 40
+    },
+    "fps": {
+      "type": "number",
+      "description": "gif 的每秒帧数，默认 10。",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "width": {
+      "type": "number",
+      "description": "gif 的宽度（像素），按原比例计算高度，默认 640。",
+      "minimum": 64,
+      "maximum": 1920
+    },
+    "outputName": {
+      "type": "string",
+      "description": "产物文件名；raw 参数中使用 {output} 引用"
+    },
+    "args": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "raw 接收 FFmpeg 自身的处理参数，每项一个字符串。命令必须实际生成 {output} 文件。版本查询和 ffprobe 命令不适用。"
+    }
+  }
+}

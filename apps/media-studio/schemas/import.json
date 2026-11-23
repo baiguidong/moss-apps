@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "avatar",
+        "audio"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "kind"
+  ]
+}

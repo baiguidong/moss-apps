@@ -111,7 +111,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.MOSS_BUILD_DEPENDENCY_CACHE }}
-          key: ${{ runner.os }}-${{ matrix.platform }}-bundled-engines-v1-${{ hashFiles('apps/*/resources/engine.json', 'apps/document-converter/resources/pdf-engine.json', 'apps/file-cleaner/resources/ff*.json', 'apps/transcription/resources/model.json') }}
+          key: ${{ runner.os }}-${{ matrix.platform }}-bundled-engines-v1-${{ hashFiles('apps/*/resources/engine.json', 'apps/document-converter/resources/pdf-engine.json', 'apps/file-cleaner/resources/ff*.json', 'apps/transcription/resources/model.json', 'apps/media-studio/resources/melo.json', 'packages/media-engines/model.json') }}
       - name: Validate source and runtime on the target desktop platform
         if: steps.release.outputs.variants != 'true'
         run: node scripts/package-app.mjs --app "${{ steps.release.outputs.app_id }}"
@@ -124,6 +124,11 @@ jobs:
           MOSS_APP_SIGNING_PRIVATE_KEY: ${{ secrets.MOSS_APP_SIGNING_PRIVATE_KEY }}
           MOSS_APP_SIGNING_KEY_ID: release-1
         run: node scripts/package-app.mjs --app "${{ inputs.app_id }}" --platform ${{ matrix.platform }} --require-signature
+      - name: Verify media studio processing and browser rendering
+        if: inputs.app_id == 'moss.media-studio'
+        env:
+          MEDIA_STUDIO_PACKAGE: artifacts/moss.media-studio/${{ inputs.version }}/package-${{ matrix.platform }}
+        run: node scripts/verify-media-studio.mjs "$MEDIA_STUDIO_PACKAGE"
       - name: Verify bundled dependencies without external network
         if: contains(fromJSON('["moss.image-tools","moss.pdf-tools","moss.transcription","moss.file-cleaner","moss.document-converter","moss.code-map"]'), inputs.app_id) && (matrix.platform == 'darwin-arm64' || matrix.platform == 'linux-x64')
         run: node scripts/verify-bundled-apps.mjs --app "${{ inputs.app_id }}"

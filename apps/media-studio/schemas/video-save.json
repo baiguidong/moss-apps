@@ -1,0 +1,208 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "avatar",
+        "animation"
+      ],
+      "description": "新建时必填。avatar 配 fields，animation 配 animation。更新时由 id 确定类型。"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "修改已有项目时，与 version 一起传入。"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "最近一次读取或保存返回的版本，冲突时重新读取。"
+    },
+    "fields": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "script": {
+          "type": "string",
+          "maxLength": 6000
+        },
+        "avatarId": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "script",
+            "audio"
+          ]
+        },
+        "voice": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "rate": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 350
+        },
+        "aspect": {
+          "type": "string",
+          "enum": [
+            "16:9",
+            "9:16"
+          ]
+        },
+        "quality": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "480p"
+          ]
+        },
+        "camera": {
+          "type": "string",
+          "enum": [
+            "upper",
+            "head",
+            "full"
+          ]
+        },
+        "background": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "subtitles": {
+          "type": "boolean"
+        },
+        "audioId": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "transcriptId": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "additionalProperties": false,
+      "description": "口播项目的讲稿、角色和画幅字段。"
+    },
+    "animation": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "purpose": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "style": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "aspectRatio": {
+          "type": "string",
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ]
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 64,
+          "maximum": 4096
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 64,
+          "maximum": 4096
+        },
+        "duration": {
+          "type": "number",
+          "minimum": 0.3,
+          "maximum": 3600
+        },
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "product-intro",
+            "data-report",
+            "lesson",
+            "project-update"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "description": "新建分镜项目的名称、模板、画幅和时长（秒）。"
+    },
+    "storyboard": {
+      "type": "object",
+      "properties": {
+        "scenes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 30,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_-]{1,64}$"
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "duration": {
+                "type": "number",
+                "minimum": 0.1,
+                "maximum": 3600
+              },
+              "narration": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "visual": {
+                "type": "string",
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "duration"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "scenes"
+      ],
+      "additionalProperties": false,
+      "description": "完整分镜列表，传 id 和 version 保存。"
+    },
+    "sceneId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "修改单个镜头时与 html 一起传入。"
+    },
+    "html": {
+      "type": "string",
+      "description": "该镜头完整的离线 HTML/CSS，动画时间从本镜头 0 秒开始。",
+      "minLength": 1,
+      "maxLength": 524288
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

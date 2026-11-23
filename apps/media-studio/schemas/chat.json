@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "avatarId": {
+      "type": "string",
+      "maxLength": 64
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "avatarId"
+  ]
+}

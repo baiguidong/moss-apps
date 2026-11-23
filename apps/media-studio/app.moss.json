@@ -1,0 +1,624 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.media-studio",
+  "version": "0.2.1",
+  "displayName": "多媒体工坊",
+  "category": "creative",
+  "discovery": {
+    "group": "local"
+  },
+  "keywords": [
+    "图片处理",
+    "图片裁剪",
+    "批量压缩",
+    "水印",
+    "FFmpeg",
+    "视频裁剪",
+    "音频提取",
+    "视频压缩",
+    "数字人口播",
+    "3D 角色",
+    "口型同步",
+    "Whisper",
+    "字幕校对",
+    "HyperFrames",
+    "分镜动画"
+  ],
+  "description": "批量处理图片、剪辑和转码音视频、校对字幕、制作分镜动画和数字人口播。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.24.0",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "toolScope": "session",
+  "navigation": {
+    "location": "more",
+    "viewId": "workspace"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 1200,
+      "height": 820,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "on-demand",
+    "actions": [
+      {
+        "name": "workspace.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "catalog.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "engine.prepare",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "paths.pick",
+        "inputSchema": "schemas/pick.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.start",
+        "inputSchema": "schemas/start.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.get",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "tasks.cancel",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "artifacts.read",
+        "inputSchema": "schemas/artifact.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "artifacts.export",
+        "inputSchema": "schemas/artifact.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "studio.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "projects.create",
+        "inputSchema": "schemas/create.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "projects.get",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "projects.save",
+        "inputSchema": "schemas/save.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "assets.import",
+        "inputSchema": "schemas/import.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "avatars.edit",
+        "inputSchema": "schemas/avatar-edit.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "avatars.get",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "speech.prepare",
+        "inputSchema": "schemas/revision.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "speech.reply",
+        "inputSchema": "schemas/reply.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.submit",
+        "inputSchema": "schemas/revision.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.claim",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.retry",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.audio",
+        "inputSchema": "schemas/lease.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.pulse",
+        "inputSchema": "schemas/lease.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.fail",
+        "inputSchema": "schemas/fail.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "renders.finish",
+        "inputSchema": "schemas/finish.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "chat.get",
+        "inputSchema": "schemas/chat.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "chat.send",
+        "inputSchema": "schemas/message.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "chat.stop",
+        "inputSchema": "schemas/chat.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "chat.persona",
+        "inputSchema": "schemas/persona.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "composer.list",
+        "inputSchema": "schemas/composer-list.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "resources.resolve",
+        "inputSchema": "schemas/resolve.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "transcription.status",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "mic.begin",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "mic.finish",
+        "inputSchema": "schemas/mic.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "audio.transcribe",
+        "inputSchema": "schemas/revision.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "audio.preview",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "media.transcribe",
+        "inputSchema": "schemas/transcribe.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "video.save",
+        "inputSchema": "schemas/video-save.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "video.render",
+        "inputSchema": "schemas/video-render.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "media.get",
+        "inputSchema": "schemas/media-get.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "transcript.save",
+        "inputSchema": "schemas/transcript-save.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "animation.assets",
+        "inputSchema": "schemas/animation-assets.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "animation.list",
+        "inputSchema": "schemas/composer-list.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "animation.resolve",
+        "inputSchema": "schemas/animation-resolve.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "recording.files.pick",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "recording.workspace.get",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "recording.tasks.cancel",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "recording.files.preview",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "recording.transcript.save",
+        "inputSchema": "schemas/transcript-save.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "recording.tasks.start",
+        "inputSchema": "schemas/recording-start.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "recording.files.export",
+        "inputSchema": "schemas/recording-export.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "animation.projects.list",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "animation.templates.list",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "media.preview",
+        "inputSchema": "schemas/id.json",
+        "outputSchema": "schemas/result.json"
+      },
+      {
+        "name": "image.tasks.retry",
+        "inputSchema": "schemas/image/tasks.cancel.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "image.tasks.list",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "image.workspace.get",
+        "inputSchema": "schemas/image/workspace.get.json",
+        "outputSchema": "schemas/image/result.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "image.files.pick",
+        "inputSchema": "schemas/image/files.pick.json",
+        "outputSchema": "schemas/image/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "image.files.preview",
+        "inputSchema": "schemas/image/files.preview.json",
+        "outputSchema": "schemas/image/result.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "image.files.import",
+        "inputSchema": "schemas/image/files.import.json",
+        "outputSchema": "schemas/image/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "image.files.export",
+        "inputSchema": "schemas/image/files.export.json",
+        "outputSchema": "schemas/image/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "image.tasks.cancel",
+        "inputSchema": "schemas/image/tasks.cancel.json",
+        "outputSchema": "schemas/image/result.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "image.tasks.start",
+        "inputSchema": "schemas/image/tasks.start.json",
+        "outputSchema": "schemas/image/result.json",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "history.import",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "video.runtime",
+        "inputSchema": "schemas/empty.json",
+        "outputSchema": "schemas/video-runtime.json",
+        "timeoutMs": 120000
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.local-files/v1",
+      "moss.agent/v1",
+      "moss.runtime/v1",
+      "moss.artifacts/v1"
+    ]
+  },
+  "permissions": [
+    "local-files:pick",
+    "agent:bindings:read",
+    "agent:bindings:write",
+    "agent:sessions:read",
+    "agent:sessions:write",
+    "agent:turns:read",
+    "agent:turns:write",
+    "platform:media",
+    "video:runtime:read"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "workspace",
+        "title": "多媒体工坊",
+        "route": "#/",
+        "order": 270
+      },
+      {
+        "id": "moss-conversation",
+        "title": "视频项目",
+        "route": "#/workbench"
+      }
+    ],
+    "tools": [
+      {
+        "id": "media_edit",
+        "title": "剪辑与转换音视频",
+        "description": "处理已有本地文件，可查询媒体信息、裁剪、压缩、提取音轨、生成 GIF 或转码。返回任务 ID。",
+        "action": "tasks.start",
+        "inputSchema": "schemas/start.json",
+        "effect": "write"
+      },
+      {
+        "id": "media_transcribe",
+        "title": "录音转文字和字幕",
+        "description": "将已有录音或视频转写为带时间戳的逐字稿、TXT、SRT 和 VTT。返回任务 ID。",
+        "action": "media.transcribe",
+        "inputSchema": "schemas/transcribe.json",
+        "effect": "write"
+      },
+      {
+        "id": "video_project_save",
+        "title": "创建或修改视频项目",
+        "description": "创建 kind=avatar 的数字人口播或 kind=animation 的分镜动画。修改时传项目 ID、最新 version 和讲稿字段、分镜表或单个镜头 HTML。返回新版本。",
+        "action": "video.save",
+        "inputSchema": "schemas/video-save.json",
+        "effect": "write"
+      },
+      {
+        "id": "video_render",
+        "title": "渲染成片或口播配音",
+        "description": "传已保存项目的 id 和 version。分镜动画只支持生成 MP4。数字人口播还可以单独试听配音。生成 MP4 返回任务 ID，口播录制时需打开项目预览。",
+        "action": "video.render",
+        "inputSchema": "schemas/video-render.json",
+        "effect": "write"
+      },
+      {
+        "id": "media_get",
+        "title": "查询媒体任务、项目与产物",
+        "description": "按 type 查询任务状态、项目版本和内容、文本产物或历史。settings 查看口播角色、音色和制作规格，validate 检查分镜结构。",
+        "action": "media.get",
+        "inputSchema": "schemas/media-get.json",
+        "effect": "read"
+      },
+      {
+        "id": "media_cancel",
+        "title": "取消媒体任务",
+        "description": "按任务 ID 取消排队或运行中的剪辑、转写、动画或口播任务。",
+        "action": "tasks.cancel",
+        "inputSchema": "schemas/id.json",
+        "effect": "write"
+      },
+      {
+        "id": "media_export",
+        "title": "导出媒体产物",
+        "description": "按任务 ID 和产物 index 保存到用户选择的目录，同名文件自动另取名。",
+        "action": "artifacts.export",
+        "inputSchema": "schemas/artifact.json",
+        "effect": "write"
+      },
+      {
+        "id": "image_import",
+        "title": "导入本地图片",
+        "description": "将本地静态图片复制到图片工作区，返回供 image_process 使用的文件 ID。原件保留。",
+        "action": "image.files.import",
+        "inputSchema": "schemas/image/files.import.json",
+        "effect": "write"
+      },
+      {
+        "id": "image_get",
+        "title": "查看图片、任务和结果",
+        "description": "查看图片工作区的原图、处理进度和结果。结果文件 ID 可交给 image_export。",
+        "action": "image.workspace.get",
+        "inputSchema": "schemas/image/workspace.get.json",
+        "effect": "read"
+      },
+      {
+        "id": "image_process",
+        "title": "批量处理图片",
+        "description": "按 fileIds 提交图片任务，options 可组合格式压缩、裁剪缩放、旋转调色、降噪、水印和元数据处理。返回任务 ID，通过 image_get 查询。",
+        "action": "image.tasks.start",
+        "inputSchema": "schemas/image/tasks.start.json",
+        "effect": "write"
+      },
+      {
+        "id": "image_cancel",
+        "title": "取消图片处理任务",
+        "description": "传 image_process 返回的任务 ID，取消排队或运行中的图片任务。",
+        "action": "image.tasks.cancel",
+        "inputSchema": "schemas/image/tasks.cancel.json",
+        "effect": "write"
+      },
+      {
+        "id": "image_export",
+        "title": "导出图片结果",
+        "description": "传 image_get 返回的结果文件 ID，经目录选择器导出图片；保留已有同名文件。",
+        "action": "image.files.export",
+        "inputSchema": "schemas/image/files.export.json",
+        "effect": "write"
+      }
+    ],
+    "skills": [
+      {
+        "id": "moss-media-studio",
+        "title": "多媒体工坊（音视频 CLI）",
+        "description": "通过受管 CLI 使用完整引擎参数并与页面共享任务结果。",
+        "path": "resources/skills/moss-media-studio/SKILL.md",
+        "cli": "dist/backend/cli.mjs"
+      }
+    ],
+    "resourceProviders": [
+      {
+        "id": "studio-projects",
+        "title": "口播项目",
+        "schemes": [
+          "moss-media-studio-avatar"
+        ],
+        "listAction": "composer.list",
+        "resolveAction": "resources.resolve"
+      },
+      {
+        "id": "animation-projects",
+        "title": "分镜项目",
+        "schemes": [
+          "moss-media-studio-animation"
+        ],
+        "listAction": "animation.list",
+        "resolveAction": "animation.resolve"
+      }
+    ]
+  },
+  "platforms": [
+    "darwin-arm64",
+    "linux-x64"
+  ],
+  "appCapabilities": {
+    "provides": [
+      {
+        "protocol": "moss.media-runtime/v1",
+        "methods": [
+          {
+            "name": "video.get",
+            "action": "video.runtime",
+            "permission": "video:runtime:read",
+            "effect": "read"
+          }
+        ]
+      }
+    ]
+  }
+}

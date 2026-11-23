@@ -1,0 +1,77 @@
+{
+  "type": "object",
+  "properties": {
+    "fields": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "script": {
+          "type": "string",
+          "maxLength": 6000
+        },
+        "avatarId": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "script",
+            "audio"
+          ]
+        },
+        "voice": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "rate": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 350
+        },
+        "aspect": {
+          "type": "string",
+          "enum": [
+            "16:9",
+            "9:16"
+          ]
+        },
+        "quality": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "480p"
+          ]
+        },
+        "camera": {
+          "type": "string",
+          "enum": [
+            "upper",
+            "head",
+            "full"
+          ]
+        },
+        "background": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "subtitles": {
+          "type": "boolean"
+        },
+        "audioId": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "transcriptId": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

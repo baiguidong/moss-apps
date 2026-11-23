@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.media-studio",
+  "summary": "图片处理、音视频剪辑、字幕转写、分镜动画与数字人口播",
+  "description": "批量处理图片、剪辑和转码音视频、校对字幕、制作分镜动画和数字人口播。",
+  "platforms": [
+    "darwin-arm64",
+    "linux-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/media-studio",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT",
+  "featured": false
+}

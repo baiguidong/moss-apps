@@ -67,7 +67,7 @@ export function startBackend(engine, worker, { sessionScoped = false, Client = A
           ? (operation, id, signal) => backend.host.request('moss.runtime/v1', `activity.${operation}`, { id }, { signal, timeoutMs: 10_000 }) : null,
         onChanged: () => { if (ready && !queue.closed) backend.emit('workspace.changed', {}) },
       })
-      await engine.register?.(backend, ctx)
+      await engine.register?.(backend, ctx, tasks)
       setImmediate(() => {
         if (stopping) { resolveActivation(); return }
         activationTask = queue.restore({ start: false }).then(() => {
@@ -134,7 +134,45 @@ export function startBackend(engine, worker, { sessionScoped = false, Client = A
   const tasks = {
     startTask,
     getTask: id => store.get(id),
+    async details(id) {
+      const task = await store.get(id)
+      const log = await fs.readFile(path.join(store.directory(id), 'stderr.log'), 'utf8').catch(() => '')
+      return { ...await view(task), log: log.slice(-64000) }
+    },
+    async readArtifact(id, index) {
+      const { target } = await artifact(id, index)
+      if ((await fs.stat(target)).size > 2 * 1024 * 1024) throw new Error('结果较大，请导出后处理，或缩小查询范围')
+      return { text: await fs.readFile(target, 'utf8') }
+    },
+    exportArtifacts,
+    async exportArtifact(id, index, ctx) {
+      const result = await exportArtifacts([{ id, index }], ctx)
+      return result.canceled ? { canceled: true } : { path: result.files[0] }
+    },
     cancelTask: async id => { await activationReady; return queue.cancel(id) },
+  }
+  async function exportArtifacts(items, ctx) {
+    const sources = await Promise.all(items.map(({ id, index }) => artifact(id, index)))
+    const { paths } = await backend.host.request('moss.local-files/v1', 'pick',
+      { kind: 'directory', multiple: false }, { signal: ctx.signal, timeoutMs: 300000 })
+    if (!paths.length) return { canceled: true, files: [] }
+    const files = []
+    for (const { target } of sources) {
+      ctx.signal?.throwIfAborted()
+      const name = path.parse(target)
+      for (let n = 0; n < 1000; n++) {
+        const destination = path.join(paths[0], `${name.name}${n ? ` (${n})` : ''}${name.ext}`)
+        try {
+          await fs.copyFile(target, destination, constants.COPYFILE_EXCL)
+          files.push(destination)
+          break
+        } catch (error) {
+          if (error.code !== 'EEXIST') throw error
+          if (n === 999) throw new Error('目标目录同名文件过多')
+        }
+      }
+    }
+    return { canceled: false, files }
   }
   async function artifact(id, index) {
     const task = await store.get(id), item = task.artifacts[index]
@@ -164,32 +202,13 @@ export function startBackend(engine, worker, { sessionScoped = false, Client = A
   backend.registerAction('workspace.get', async () => ({ tasks: await Promise.all((await store.list()).map(task => view(task, { urls: !hostArtifactUrls }))),
     artifactUrlsDeferred: hostArtifactUrls, engine: { id:engine.id, version:engine.spec.version }, registrationError: activationError?.message || registrationError }))
   backend.registerAction('catalog.get', async () => catalog ??= await engine.catalog({ dataDir: context.dataDir, cacheDir: context.cacheDir }))
-  backend.registerAction('engine.prepare', async () => { catalog = await engine.catalog({ dataDir: context.dataDir, cacheDir: context.cacheDir, prepare: true }); if (engine.register) await engine.register(backend, context); if (engine.activate) await activateEngine(); return catalog })
+  backend.registerAction('engine.prepare', async () => { catalog = await engine.catalog({ dataDir: context.dataDir, cacheDir: context.cacheDir, prepare: true }); if (engine.register) await engine.register(backend, context, tasks); if (engine.activate) await activateEngine(); return catalog })
   backend.registerAction('paths.pick', (input, ctx) => backend.host.request('moss.local-files/v1','pick',input,{ signal:ctx.signal }))
   backend.registerAction('tasks.start', (input, ctx) => startTask(input, ctx.source?.surface === 'tool' ? 'agent-tool' : 'ui', ctx.signal))
   backend.registerAction('tasks.cancel', ({id}) => tasks.cancelTask(id))
-  backend.registerAction('tasks.get', async ({id}) => {
-    const task = await store.get(id)
-    const log = await fs.readFile(path.join(store.directory(id),'stderr.log'),'utf8').catch(() => '')
-    return { ...await view(task), log:log.slice(-64000) }
-  })
-  backend.registerAction('artifacts.read', async ({id,index}) => {
-    const {target} = await artifact(id,index)
-    if ((await fs.stat(target)).size > 2*1024*1024) throw new Error('结果较大，请导出后处理，或缩小查询范围')
-    return {text:await fs.readFile(target,'utf8')}
-  })
-  backend.registerAction('artifacts.export', async ({id,index},ctx) => {
-    const {target} = await artifact(id,index)
-    const {paths} = await backend.host.request('moss.local-files/v1','pick',{kind:'directory',multiple:false},{signal:ctx.signal})
-    if (!paths.length) return {canceled:true}
-    const name=path.parse(target)
-    for(let n=0;n<1000;n++) {
-      const destination=path.join(paths[0],`${name.name}${n ? ` (${n})` : ''}${name.ext}`)
-      try { await fs.copyFile(target,destination,constants.COPYFILE_EXCL); return {path:destination} }
-      catch(error) { if(error.code!=='EEXIST') throw error }
-    }
-    throw new Error('目标目录同名文件过多')
-  })
+  backend.registerAction('tasks.get', ({id}) => tasks.details(id))
+  backend.registerAction('artifacts.read', ({id,index}) => tasks.readArtifact(id,index))
+  backend.registerAction('artifacts.export', ({id,index},ctx) => tasks.exportArtifact(id,index,ctx))
   if (Client === AppBackendClient && typeof process.send === 'function') for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, () => {
     void shutdown().catch(error => console.error(error)).finally(() => process.exit(0))
   })
