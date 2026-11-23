@@ -33,6 +33,17 @@ bundleDependencies('hyperframes', path.join(root, 'dist/backend'), createRequire
 await bundleAsset(await prepareBinary(model, cache), path.join(root, 'dist/models', model.executable), model.binarySha256)
 
 if (linux) {
+  // The Linux package ships CPU addons for glibc. Whisper loads its prebuilt
+  // addon, and Node executes the compiled JS in the bundled dependency tree.
+  const modules = path.join(root, 'dist/backend/node_modules')
+  for (const name of ['@img/sharp-linuxmusl-x64', '@img/sharp-libvips-linuxmusl-x64', '@fugood/whisper.node/whisper.cpp']) {
+    await fs.rm(path.join(modules, name), { recursive: true, force: true })
+  }
+  for (const file of await fs.readdir(modules, { recursive: true, withFileTypes: true })) {
+    if (file.isFile() && /(?:\.d\.[cm]?ts|\.(?:[cm]?[jt]s|css)\.map)$/.test(file.name)) {
+      await fs.unlink(path.join(file.parentPath, file.name))
+    }
+  }
   worker('src/backend/voice-worker.mjs', 'voice-worker')
   const archive = await prepareBinary(melo, cache)
   const assets = path.join(root, 'dist/voices/melo-zh')
