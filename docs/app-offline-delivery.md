@@ -56,6 +56,8 @@ Moss 桌面从演练市场读取目录，通过 GitHub Release CDN 下载上述�
 
 ## 发布与升级
 
+网页操控 0.1.11 的完整包包含专用浏览器内核。支持完整 ZIP 的 Moss 可直接通过「本地安装 ZIP」安装整个离线包，首次使用专用浏览器时自动校验并准备内核。应用市场的完整包安装入口也会自动保留这些资源。
+
 正式上线可先交付支持双包的 Core 桌面版本，再把 App 的版本更新合入 `moss-apps/main`。推送触发 **Release Changed Apps**，定时任务也会检查漏发版本。常规发布使用仓库已有的 `MOSS_APP_SIGNING_PRIVATE_KEY` 和 Core 信任的发布者公钥。正式 Release 完成后，**Publish App Catalog** 从已发布的 release JSON 构建目录和详情并部署到 GitHub Pages。Core 刷新目录后读取所选版本和目标平台的附件地址，从 GitHub Release 下载。[正式目录](https://baiguidong.github.io/moss-apps/v1/index.json)
 
 1. 在 App 的 `marketplace.json` 声明 `offlineKitPlatforms`，值须是该 App 支持的平台。试点只启用 `darwin-arm64`。普通 App 沿用既有发布流程。
