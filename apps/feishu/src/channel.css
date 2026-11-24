@@ -1,0 +1,312 @@
+.channelFormActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.probeResult { flex: 1 1 180px; }
+.channelFormActions > .channelActions { margin-inline-start: auto; }
+
+.displaySettings {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--fn-card-border-normal);
+}
+
+.displaySettingsTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: var(--fn-text-secondary);
+}
+
+.responseModeChoice.mosswork-radio-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 8px;
+}
+.responseModeChoice .mosswork-radio-wrapper {
+  box-sizing: border-box;
+  min-height: 44px;
+  margin: 0;
+  padding: 8px 12px;
+  align-items: center;
+  background: var(--fn-bg-primary);
+  border: 1px solid var(--fn-border-strong);
+  border-radius: 8px;
+  font-weight: 500;
+}
+.responseModeChoice .mosswork-radio-wrapper:not(.mosswork-radio-wrapper-disabled):hover,
+.responseModeChoice .mosswork-radio-wrapper-checked {
+  border-color: var(--fn-text-brand);
+}
+.responseModeChoice .mosswork-radio-wrapper-checked {
+  background: var(--fn-color-brand-bg);
+}
+.responseModeChoice .mosswork-radio { flex-shrink: 0; }
+.responseModeChoice .mosswork-radio:not(.mosswork-radio-checked):not(.mosswork-radio-disabled) .mosswork-radio-inner {
+  background: var(--fn-bg-primary);
+  border-color: var(--fn-text-secondary);
+}
+.responseModeChoice .mosswork-radio-checked:not(.mosswork-radio-disabled) .mosswork-radio-inner {
+  background: var(--fn-text-brand);
+  border-color: var(--fn-text-brand);
+}
+.responseModeChoice .mosswork-radio-checked:not(.mosswork-radio-disabled) .mosswork-radio-inner::after {
+  background: var(--fn-bg-primary);
+}
+.responseModeChoice .mosswork-radio-wrapper:has(input:focus-visible) {
+  outline: 2px solid var(--fn-text-brand);
+  outline-offset: 2px;
+}
+
+.progressSettings { margin: -8px 0 18px; }
+.progressSetting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 8px;
+}
+.progressSetting + .progressSetting { border-top: 1px solid var(--fn-card-border-normal); }
+.progressSetting button { flex-shrink: 0; }
+.progressSetting p {
+  margin: 4px 0 0;
+  color: var(--fn-text-secondary);
+  font-size: 12px;
+}
+.defaultToolList summary { cursor: pointer; color: var(--fn-color-brand-soft); }
+.defaultToolList summary span { margin-inline-start: 6px; color: var(--fn-text-secondary); }
+.toolList { display: grid; gap: 10px; }
+.defaultToolList .toolListToolbar { margin-top: 8px; }
+.toolListToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.toolSelectionBar, .toolGroupHeader, .toolGroupTitle, .toolBulkActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+.toolSelectionBar, .toolGroupHeader { justify-content: space-between; }
+.toolSelectionBar { margin: 10px 0; }
+.toolGroup {
+  min-width: 0;
+  border: 1px solid var(--fn-border-strong);
+  border-radius: 8px;
+  background: var(--fn-bg-primary);
+}
+.toolGroupHeader {
+  min-height: 32px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--fn-border-strong);
+  border-radius: 7px 7px 0 0;
+  background: var(--fn-bg-tertiary);
+}
+.toolGroupTitle { min-width: 0; overflow-wrap: anywhere; }
+.toolGroupTitle h3 { margin: 0; font-size: 14px; font-weight: 650; color: var(--fn-text-primary); }
+.toolCount { font-size: 12px; color: var(--fn-text-secondary); white-space: nowrap; }
+.toolBulkActions .mosswork-btn-default:not(:disabled),
+.toolGroupHeader > .mosswork-btn-default:not(:disabled) {
+  background: var(--fn-bg-primary);
+  border-color: var(--fn-border-strong);
+}
+.toolBulkActions .mosswork-btn-default:not(:disabled):hover,
+.toolGroupHeader > .mosswork-btn-default:not(:disabled):hover {
+  color: var(--fn-text-primary);
+  border-color: var(--fn-text-brand);
+}
+.toolGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 136px), 1fr));
+  column-gap: 12px;
+  padding: 4px 10px;
+}
+.toolList .mosswork-checkbox-wrapper, .toolName {
+  min-width: 0;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  overflow-wrap: anywhere;
+}
+.toolList .mosswork-checkbox { flex: 0 0 auto; }
+.toolList .mosswork-checkbox:not(.mosswork-checkbox-checked):not(.mosswork-checkbox-disabled) .mosswork-checkbox-inner {
+  background: var(--fn-bg-primary);
+  border-color: var(--fn-text-secondary);
+}
+.toolEmpty { margin: 4px 0; color: var(--fn-text-secondary); }
+.toolSearch { flex: 1 1 170px; min-width: 0; border-color: #777365; }
+.toolValidation { margin: 6px 0 0; color: var(--fn-color-danger, #ff7875); }
+.toolCatalogStatus { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--fn-text-secondary); }
+
+.configModeSwitch {
+  margin-bottom: 12px;
+}
+
+.qrPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 8px;
+}
+
+.qrCardWrap {
+  display: flex;
+  justify-content: center;
+}
+
+.qrFrame {
+  box-sizing: content-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(200px, calc(100vw - 56px));
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  padding: 8px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid var(--fn-border-secondary, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.qrFrame svg { height: auto; max-width: 100%; }
+
+.qrScanHint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--fn-text-tertiary);
+  margin: 0;
+  text-align: center;
+}
+
+/* Steps row — horizontal pill chips */
+.qrSteps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.qrStep {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--fn-text-secondary);
+  background: var(--fn-bg-secondary, rgba(0, 0, 0, 0.03));
+  border: 1px solid var(--fn-border-secondary, rgba(0, 0, 0, 0.07));
+  padding: 4px 10px 4px 5px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.qrDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 50%;
+  background: var(--fn-color-brand);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.qrStepDivider {
+  width: 20px;
+  height: 1px;
+  background: var(--fn-border-secondary, rgba(0, 0, 0, 0.1));
+  flex-shrink: 0;
+}
+
+html, body, #root { margin: 0; min-height: 100%; }
+body {
+  background: var(--fn-bg-secondary);
+  color: var(--fn-text-primary);
+  font-family: var(--fn-font-family);
+}
+.channelPage {
+  box-sizing: border-box;
+  max-width: 608px;
+  margin-inline: auto;
+  padding: clamp(16px, 4vw, 28px);
+}
+
+.channelLoading { display: grid; justify-content: center; padding-top: 32px; }
+.channelHeader, .channelActions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.channelHeader { justify-content: space-between; margin-bottom: 16px; }
+.channelHeading { display: flex; align-items: center; gap: 8px; }
+.channelHeading .channelBack { color: var(--fn-text-primary); }
+.channelHeading .channelBack svg { display: block; }
+.channelHeader h1 { margin: 0; font-size: 18px; font-weight: 600; }
+.channelActions { color: var(--fn-text-secondary); }
+.formNotice { margin-bottom: 12px; }
+
+@media (max-width: 410px) {
+  .qrSteps { gap: 4px; }
+  .qrStep { white-space: normal; padding-inline-end: 5px; }
+  .qrStepDivider { width: 8px; }
+}
+.qrStepGroup { display: flex; align-items: center; gap: 6px; }
+
+.credentialGuide { margin-bottom: 16px; }
+.credentialGuide p { margin: 0 0 5px; color: var(--fn-text-secondary); }
+.credentialGuide .credentialLink { height: auto; padding: 0; color: var(--fn-color-brand-soft); }
+.credentialGuide .credentialLink:not(:disabled):hover { color: var(--fn-color-brand-hover); }
+
+.credentialGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+}
+
+.credentialFields .mosswork-form-item { margin-bottom: 14px; }
+.credentialFields .credentialInput,
+.channelSelect.mosswork-select-outlined .mosswork-select-selector {
+  min-height: 40px;
+  padding-inline: 12px;
+  border-color: #777365;
+  border-radius: 10px;
+  background: var(--fn-bg-primary);
+}
+.channelSelect { min-height: 40px; }
+
+.credentialFields .credentialInput input { background: transparent; }
+.credentialFields .credentialInput::placeholder,
+.credentialFields .credentialInput input::placeholder,
+.channelSelect .mosswork-select-selection-placeholder { color: var(--fn-text-secondary); }
+
+.credentialFields .credentialInput:not(.mosswork-input-status-error):hover,
+.channelSelect.mosswork-select-outlined:not(.mosswork-select-disabled):hover .mosswork-select-selector {
+  border-color: var(--fn-text-secondary);
+}
+.credentialFields .credentialInput:not(.mosswork-input-status-error):focus-within,
+.channelSelect.mosswork-select-outlined.mosswork-select-focused .mosswork-select-selector {
+  border-color: var(--fn-color-brand);
+  box-shadow: 0 0 0 3px var(--fn-color-brand-bg);
+}
+.credentialFields .credentialInput.mosswork-input-status-error { border-color: var(--fn-color-danger, #ff7875); }
+
+.optionalCredentials { border-top: 1px solid var(--fn-card-border-normal); }
+.optionalCredentials summary { padding-block: 10px 0; cursor: pointer; color: var(--fn-text-primary); }
+.optionalCredentials summary span { margin-inline-start: 6px; color: var(--fn-text-secondary); font-size: 12px; }
+.optionalCredentials[open] summary { margin-bottom: 10px; }
+
+@media (max-width: 480px) {
+  .credentialGrid { grid-template-columns: minmax(0, 1fr); }
+}

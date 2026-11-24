@@ -1,44 +1,25 @@
-import { spawnSync } from 'node:child_process'
-import fs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { execFileSync } from 'node:child_process'
+import { copyFile, cp, mkdir, rm } from 'node:fs/promises'
 import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
 
-const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const backendFile = path.join(appRoot, 'dist', 'backend', 'main.mjs')
-const uiFile = path.join(appRoot, 'dist', 'ui', 'index.html')
+const root = new URL('../', import.meta.url)
+const require = createRequire(import.meta.url)
+await rm(new URL('dist/', root), { recursive: true, force: true })
+await mkdir(new URL('dist/backend/sdk/lark/', root), { recursive: true })
+await mkdir(new URL('dist/ui/', root), { recursive: true })
 
-fs.mkdirSync(path.dirname(backendFile), { recursive: true })
-fs.mkdirSync(path.dirname(uiFile), { recursive: true })
+function build(args) {
+  execFileSync('bun', ['build', ...args], { cwd: fileURLToPath(root), stdio: 'inherit' })
+}
 
-const result = spawnSync('bun', [
-  'build',
-  path.join(appRoot, 'src', 'backend', 'feishu', 'index.ts'),
-  '--target=node',
-  '--format=esm',
+build([
+  'src/backend/main.ts', '--target=node', '--format=esm', '--outfile=dist/backend/main.mjs',
   '--define=__dirname=__mossLarkModuleDir',
   '--banner=import { fileURLToPath as __mossFileURLToPath } from "node:url"; const __mossLarkModuleDir = __mossFileURLToPath(new URL("./sdk/lark/lib/", import.meta.url));',
-  `--outfile=${backendFile}`,
-], {
-  cwd: appRoot,
-  stdio: 'inherit',
-  env: process.env,
-})
-
-if (result.error) {
-  console.error(result.error.message)
-  process.exit(1)
-}
-if (result.status !== 0) process.exit(result.status ?? 1)
-
-fs.copyFileSync(path.join(appRoot, 'src', 'index.html'), uiFile)
-
-const uiBuild = spawnSync('bun', ['build', fileURLToPath(import.meta.resolve('@moss/app-sdk/ui')), '--target=browser', '--format=esm', `--outfile=${path.join(path.dirname(uiFile), 'app-client.mjs')}`], { cwd: appRoot, stdio: 'inherit' })
-if (uiBuild.error) throw uiBuild.error
-if (uiBuild.status !== 0) process.exit(uiBuild.status ?? 1)
-
-// Preserve SDK version lookup after bundling, without retaining a build-machine path.
-const require = createRequire(import.meta.url)
-const sdkMetadata = path.join(path.dirname(backendFile), 'sdk/lark/package.json')
-fs.mkdirSync(path.dirname(sdkMetadata), { recursive: true })
-fs.copyFileSync(require.resolve('@larksuiteoapi/node-sdk/package.json'), sdkMetadata)
+])
+build(['src/main.tsx', '--target=browser', '--format=esm', '--outdir=dist/ui', '--production'])
+await copyFile(require.resolve('@larksuiteoapi/node-sdk/package.json'), new URL('dist/backend/sdk/lark/package.json', root))
+await copyFile(new URL('src/index.html', root), new URL('dist/ui/index.html', root))
+await cp(new URL('src/gateway/', root), new URL('dist/backend/gateway/', root), { recursive: true })
+await copyFile(new URL('resources/requirements.lock', root), new URL('dist/backend/requirements.lock', root))

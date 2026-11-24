@@ -2,19 +2,21 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "additionalProperties": false,
-  "required": ["appId"],
   "properties": {
-    "appId": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 160,
-      "title": "飞书 App ID"
-    },
-    "allowedUsers": {
-      "type": "array",
-      "items": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "appId": { "type": "string", "maxLength": 160 },
+    "domain": { "enum": ["feishu", "lark"] },
+    "enabled": { "type": "boolean" },
+    "agentId": { "type": ["string", "null"] },
+    "responseMode": { "enum": ["invoke", "stream"] },
+    "showThinking": { "type": "boolean" },
+    "showToolHints": { "type": "boolean" },
+    "allowedTools": {
+      "type": ["array", "null"],
+      "minItems": 1,
+      "maxItems": 256,
       "uniqueItems": true,
-      "default": []
-    }
+      "items": { "type": "string", "pattern": "^[a-zA-Z0-9_-]{1,128}$" }
+    },
+    "allowedUsers": { "type": "array", "items": { "type": "string" } }
   }
 }

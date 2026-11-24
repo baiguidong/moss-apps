@@ -1,0 +1,55 @@
+--- a/packages/app-sdk/src/schemas/app-manifest.schema.json
++++ b/packages/app-sdk/src/schemas/app-manifest.schema.json
+@@ -141,6 +141,10 @@
+         {
+           "const": "communication",
+           "title": "沟通协作"
++        },
++        {
++          "const": "channel",
++          "title": "渠道"
+         },
+         {
+           "const": "knowledge",
+--- a/packages/app-sdk/src/index.d.mts
++++ b/packages/app-sdk/src/index.d.mts
+@@ -466,7 +466,7 @@
+   invalidate?(): void
+ }
+
+-export type AppCategory = 'communication' | 'knowledge' | 'files' | 'creative' | 'development' | 'data' | 'automation' | 'ai' | 'sales' | 'marketing' | 'finance' | 'business' | 'hr' | 'education' | 'legal' | 'life' | 'diagnostics' | 'other'
++export type AppCategory = 'communication' | 'channel' | 'knowledge' | 'files' | 'creative' | 'development' | 'data' | 'automation' | 'ai' | 'sales' | 'marketing' | 'finance' | 'business' | 'hr' | 'education' | 'legal' | 'life' | 'diagnostics' | 'other'
+ export interface AppCategoryDefinition { readonly id: AppCategory; readonly label: string }
+ export type AppNavigation = { location: 'more' | 'settings'; viewId: string } | { location: 'none' | 'details'; viewId?: never }
+ export type AppSettingsGroup = 'integrations' | 'tools' | 'apps'
+--- a/packages/app-sdk/src/categories.mjs
++++ b/packages/app-sdk/src/categories.mjs
+@@ -11,10 +11,13 @@
+ const legacyCategoryIds = new Set(['communication', 'knowledge', 'automation', 'ai', 'development', 'diagnostics', 'other'])
+
+ export function getAppCategoryMinimumHostVersion(value) {
+-  return legacyCategoryIds.has(getAppCategory(value).id) ? '3.0.0' : '3.21.0'
++  const id = getAppCategory(value).id
++  if (id === 'channel') return '3.25.0'
++  return legacyCategoryIds.has(id) ? '3.0.0' : '3.21.0'
+ }
+
+ const legacyCategories = new Map(Object.entries({
++  channel: [['moss.feishu', 'communication']],
+   knowledge: [['moss.zsxq', 'other']],
+   files: [['moss.backup', 'knowledge'], ['moss.baidu-netdisk', 'knowledge'], ['moss.drive', 'knowledge'], ['moss.file-cleaner', 'knowledge'], ['moss.filesystem', 'knowledge'], ['moss.tencent-weiyun', 'other']],
+   creative: [['moss.canva', 'other'], ['moss.canva-ai', 'other'], ['moss.designkit-buddy-cli', 'other'], ['moss.drawio', 'development'], ['moss.flova', 'other'], ['moss.image-tools', 'knowledge'], ['moss.infimind-ecommerce-image', 'other'], ['moss.infimind-video', 'other'], ['moss.kling-ai-plugin', 'other'], ['moss.kling-ai-plugin-ai', 'other'], ['moss.mastergo-vibe-mcp', 'development'], ['moss.media-tools', 'knowledge'], ['moss.mglc', 'other'], ['moss.picset-commerce-images', 'other'], ['moss.picset-video-generation', 'other'], ['moss.transcription', 'knowledge']],
+--- a/packages/app-sdk/src/schemas/index.mjs
++++ b/packages/app-sdk/src/schemas/index.mjs
+@@ -403,8 +403,9 @@
+       `App requires Host API ${candidate.hostApi}; this Host provides ${hostApiVersion}`,
+     )
+   }
+-  if (getAppCategoryMinimumHostVersion(candidate.category) === '3.21.0' && !semver.subset(candidate.hostApi, '>=3.21.0')) {
+-    throw new AppServiceError(APP_ERROR_CODES.invalidManifest, 'Extended App categories require hostApi >=3.21.0')
++  const categoryMinimumHost = getAppCategoryMinimumHostVersion(candidate.category)
++  if (categoryMinimumHost !== '3.0.0' && !semver.subset(candidate.hostApi, `>=${categoryMinimumHost}`)) {
++    throw new AppServiceError(APP_ERROR_CODES.invalidManifest, `Extended App categories require hostApi >=${categoryMinimumHost}`)
+   }
+   if (candidate.toolScope !== undefined && !semver.subset(candidate.hostApi, '>=3.1.0')) {
+     throw new AppServiceError(APP_ERROR_CODES.invalidManifest, 'toolScope requires hostApi >=3.1.0')
