@@ -14,11 +14,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: read
+    outputs:
+      artifact_name: ${{ steps.artifact.outputs.name }}
     steps:
       - name: Preserve source bytes on every platform
         run: git config --global core.autocrlf false
@@ -39,8 +41,22 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/build-catalog.mjs --github-repository "$GITHUB_REPOSITORY" --mirror-apps moss.library,moss.audit
       - uses: actions/configure-pages@v5
+      - id: artifact
+        run: echo "name=github-pages-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-pages-artifact@v3
         with:
+          name: ${{ steps.artifact.outputs.name }}
           path: site
+
+  publish:
+    # Start deployment after the upload job completes so its artifact can be listed.
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ needs.build.outputs.artifact_name }}
