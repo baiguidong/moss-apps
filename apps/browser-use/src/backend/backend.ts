@@ -5,7 +5,8 @@ import { DEFAULT_CONFIG, PLAYWRIGHT_CDP, browserArgs, browserFields, configFromF
 import { useBundledPlaywright } from './builtin-config'
 import { createRequire } from 'node:module'
 const loadRuntime = createRequire(import.meta.url)
-const prepareManagedBrowser = (options: { signal: AbortSignal }): Promise<string> => loadRuntime('../playwright-cdp/managed.cjs').prepareManagedBrowser(options)
+const prepareManagedBrowser = (options: { signal: AbortSignal }): Promise<string> =>
+  loadRuntime('../playwright-cdp/managed.cjs').prepareManagedBrowser(options)
 
 export function createBrowserBackend(options: ConstructorParameters<typeof AppBackendClient>[0] = {}, dependencies = { prepareManagedBrowser }) {
   let initialized = false, closing = false, setup: Promise<void> | undefined

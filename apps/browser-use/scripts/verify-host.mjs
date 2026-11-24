@@ -1,6 +1,6 @@
 // Install the real archive in an isolated Host; verify Core settings, lazy startup and MCP tools.
 import assert from 'node:assert/strict'
-import { mkdtemp, rm, readFile, mkdir, writeFile, symlink } from 'node:fs/promises'
+import { mkdtemp, rm, readFile, mkdir, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { pathToFileURL, fileURLToPath } from 'node:url'
@@ -47,15 +47,16 @@ for (const method of MCP_METHODS) runtime.registerHostHandler(MCP_PROTOCOL, meth
   return host.handle(method, input, context)
 })
 const serverName = 'moss_browser_use__playwright-cdp'
-const waitFor = async (predicate, message) => {
-  const deadline = Date.now() + 45_000
+const waitFor = async (predicate, message, timeoutMs = 45_000) => {
+  const deadline = Date.now() + timeoutMs
   while (Date.now() < deadline) { if (await predicate()) return; await new Promise(resolve => setTimeout(resolve, 100)) }
   throw new Error(message)
 }
 let client, transport
 try {
   await runtime.initialize()
-  await installAppArchive(runtime, join(repo, 'artifacts/moss.browser-use', manifest.version, `moss.browser-use-${manifest.version}-${process.platform}-${process.arch}.zip`))
+  const archive = process.env.MOSS_VERIFY_BROWSER_OFFLINE_ZIP || join(repo, 'artifacts/moss.browser-use', manifest.version, `moss.browser-use-${manifest.version}-${process.platform}-${process.arch}.zip`)
+  await installAppArchive(runtime, archive)
   await waitFor(() => Boolean(host.enabledServers()[serverName]), 'App did not register its service')
   assert.equal(inspections, 0, 'App startup must not inspect')
   assert.equal(registrations, 1)
@@ -70,7 +71,11 @@ try {
   assert.equal(ready.data.preparation.state, 'idle')
   assert.equal(ready.data.servers.length, 1)
   await invoke('servers.inspect', { name: 'playwright-cdp' })
-  await waitFor(async () => (await invoke('servers.list')).data.preparation.state === 'ready', 'explicit inspection did not finish')
+  await waitFor(async () => {
+    const { preparation } = (await invoke('servers.list')).data
+    assert.notEqual(preparation.state, 'failed', preparation.error)
+    return preparation.state === 'ready'
+  }, 'explicit inspection did not finish', 630_000)
   const startupInspections = inspections
   await runtime.setAppEnabled(manifest.id, false)
   await runtime.setAppEnabled(manifest.id, true)
@@ -88,11 +93,9 @@ net.Socket.prototype.connect = function (...args) {
   if (options?.port && !['localhost', '127.0.0.1', '::1'].includes(options.host || 'localhost')) throw new Error('External network blocked');
   return connect.apply(this, args);
 };\n`)
-  // First use now unpacks the bundled browser lazily. Allow the OS archive
-  // extractor while keeping npm/npx and other development tools off PATH.
+  // Keep npm/npx and other development tools off PATH during offline use.
   const bin = join(temporary, 'bin')
   await mkdir(bin)
-  await symlink(process.platform === 'win32' ? join(process.env.SystemRoot, 'System32/tar.exe') : '/usr/bin/tar', join(bin, process.platform === 'win32' ? 'tar.exe' : 'tar'))
   transport = new StdioClientTransport({ ...config, env: { ...process.env, ...config.env, PATH: bin, npm_config_offline: 'true', npm_config_cache: join(temporary, 'empty-cache'), NODE_OPTIONS: '--require=' + JSON.stringify(guard) }, stderr: 'pipe' })
   client = new Client({ name: 'browser-app-verification', version: manifest.version })
   await client.connect(transport)

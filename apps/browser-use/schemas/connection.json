@@ -26,7 +26,7 @@
         {
           "const": "managed",
           "title": "Moss 专用浏览器（推荐）",
-          "description": "实际操作网页时打开专用浏览器，保留登录状态，复用同一实例；无需扩展。"
+          "description": "首次使用时准备专用浏览器，打开后保留登录状态。"
         },
         {
           "const": "extension",

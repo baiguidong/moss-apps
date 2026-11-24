@@ -13,7 +13,9 @@
 
 自定义 Chrome 可执行文件时，必须同时填写已存在且已安装 Playwright 扩展的用户目录。App 校验并固定选中的现有配置，不创建空白系统 Chrome 目录。
 
-专用模式随平台安装包提供固定版本的 Chrome for Testing，首次实际使用时离线解包，后续复用。启动 Moss、加载工具目录、打开设置或重新连接均不会启动 Chrome，实际网页操作才建立浏览器连接。Playwright MCP 0.0.83 及生产依赖随包提供，无需 npx 或运行时安装 JavaScript 依赖。
+市场提供在线包和完整离线包。在线包包含 Playwright MCP 及其依赖。首次操作网页或在服务列表主动检查专用浏览器时，App 下载并校验固定版本的 Chrome for Testing，后续复用已准备的内核。启动 Moss、加载工具目录和查看设置时保持空闲，实际网页操作才启动 Chrome。
+
+完整离线包附带对应平台的浏览器内核。通过市场选择完整包安装，或在断网电脑的 Moss 应用页使用「本地安装 ZIP」选择整个离线包。首次使用专用浏览器时，App 自动校验并准备随包内核。
 
 默认专用 CDP 为 `http://127.0.0.1:9222`。浏览器内核和登录配置保存在此 App 实例数据目录下的 `browser-binaries/` 与 `browser-profiles/playwright-cdp-9222/`。每个端口保留固定目录，重连和浏览器重新打开仍使用同一份登录数据；网站自身过期或要求重新认证时仍需登录。专用模式只启动受管 Chrome for Testing，不启动系统 Google Chrome。
 
@@ -32,6 +34,7 @@ bun install
 bun run --cwd apps/browser-use check
 bun run --cwd apps/browser-use test
 node scripts/package-app.mjs --app moss.browser-use
+python3 apps/browser-use/scripts/package-offline.py artifacts/moss.browser-use/0.1.11/moss.browser-use-0.1.11-darwin-arm64.zip
 node apps/browser-use/scripts/verify-host.mjs
 node apps/browser-use/scripts/verify-browser-startup.mjs
 node apps/browser-use/scripts/verify-managed-browser.mjs

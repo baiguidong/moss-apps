@@ -27,6 +27,9 @@ Promise.resolve().then(async () => {
       if (args[i] === '--moss-managed-browser' || args[i].startsWith('--cdp-endpoint=')) continue
       kept.push(args[i])
     }
+    if (!kept.some(arg => arg === '--cdp-timeout' || arg.startsWith('--cdp-timeout='))) {
+      kept.push('--cdp-timeout', '650000')
+    }
     args = [...kept, '--cdp-endpoint', result.endpoint]
   } else args = args.filter(arg => arg !== '--moss-managed-browser')
   const { connectionArgs, validateExtensionProfile } = require('./browser.cjs')

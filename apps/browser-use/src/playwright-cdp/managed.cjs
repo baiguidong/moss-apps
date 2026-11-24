@@ -1,14 +1,12 @@
 const fs = require('node:fs/promises')
 const { constants } = require('node:fs')
-const { createHash, randomUUID } = require('node:crypto')
 const path = require('node:path')
 const { homedir } = require('node:os')
-const { createRequire } = require('node:module')
-const { execFile, spawn } = require('node:child_process')
-const { promisify } = require('node:util')
+const { spawn } = require('node:child_process')
 const http = require('node:http')
-const exec = promisify(execFile)
+const { lock, platform, chrome, stageChromeArchive, extractChrome } = require('./chrome-archive.cjs')
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+const preparationTimeout = 630_000
 const mossRoot = () => process.env.MOSS_HOME || path.join(homedir(), '.moss')
 // Browser binaries and persistent profiles always belong to this App.
 // Direct launches use the default instance when no Host context is supplied.
@@ -23,90 +21,46 @@ function option(args, name) {
   return value
 }
 
-function corePath() {
-  const mcp = require.resolve('@playwright/mcp/package.json')
-  return path.dirname(createRequire(mcp).resolve('playwright-core/package.json'))
-}
+const browserDirectory = () => path.join(root(), 'browser-binaries', `chromium-${lock.revision}-${platform}`)
 
 async function installedExecutable() {
-  const bundle = await bundledBrowser()
-  if (bundle) {
-    const executable = path.join(bundle.directory, bundle.executable)
-    try {
-      await fs.access(path.join(bundle.directory, 'INSTALLATION_COMPLETE'))
-      await fs.access(executable, constants.X_OK)
-      return executable
-    } catch { return null }
-  }
-  const core = corePath()
-  const { stdout } = await exec(process.execPath, ['-e', 'process.stdout.write(require(process.argv[1]).chromium.executablePath())', core], { timeout: 10_000 })
-  const executable = stdout.trim()
+  if (!chrome) return null
+  const directory = browserDirectory()
+  const executable = path.join(directory, chrome.executable)
   try {
+    await fs.access(path.join(directory, 'INSTALLATION_COMPLETE'))
     await fs.access(executable, constants.X_OK)
-    let directory = path.dirname(executable)
-    for (let i = 0; i < 7; i++, directory = path.dirname(directory)) {
-      try { await fs.access(path.join(directory, 'INSTALLATION_COMPLETE')); return executable } catch {}
-    }
-  } catch {}
-  return null
-}
-
-async function bundledBrowser() {
-  const file = path.join(__dirname, 'browser-bundle.json')
-  const bundle = await fs.readFile(file, 'utf8').then(JSON.parse).catch(error => { if (error.code === 'ENOENT') return null; throw error })
-  if (!bundle) return null
-  const platform = `${process.platform}-${process.arch}`
-  if (bundle.platform !== platform) throw new Error(`此 App 包包含 ${bundle.platform} 专用浏览器，当前环境为 ${platform}。请安装对应平台的 App 包。`)
-  if (!/^[a-zA-Z0-9._-]+$/.test(bundle.revision) || !/^[a-zA-Z0-9._ /-]+$/.test(bundle.executable)
-    || bundle.executable.split('/').some(part => !part || part === '.' || part === '..')
-    || !Array.isArray(bundle.parts) || !bundle.parts.length) throw new Error('App 内专用浏览器清单无效。')
-  return { ...bundle, directory: path.join(root(), 'browser-binaries', `chromium-${bundle.revision}-${platform}`) }
-}
-
-async function installBundledBrowser(bundle, signal) {
-  const executable = await installedExecutable()
-  if (executable) return executable
-  const parent = path.dirname(bundle.directory)
-  await fs.mkdir(parent, { recursive: true, mode: 0o700 })
-  const temporary = path.join(parent, `.chromium-${randomUUID()}`)
-  const archive = `${temporary}.tar.gz`
-  await fs.mkdir(temporary, { mode: 0o700 })
-  try {
-    const output = await fs.open(archive, 'wx', 0o600)
-    const digest = createHash('sha256')
-    try {
-      for (const part of bundle.parts) {
-        signal?.throwIfAborted()
-        if (!/^part-[0-9]{3}$/.test(part.file)) throw new Error('App 内专用浏览器分片无效。')
-        const bytes = await fs.readFile(path.join(__dirname, part.file))
-        if (bytes.length !== part.size || createHash('sha256').update(bytes).digest('hex') !== part.sha256) throw new Error('App 内专用浏览器分片校验失败。')
-        await output.writeFile(bytes)
-        digest.update(bytes)
-      }
-    } finally { await output.close() }
-    if (digest.digest('hex') !== bundle.sha256) throw new Error('App 内专用浏览器校验失败。')
-    await exec('tar', ['-xzf', archive, '-C', temporary], { signal, timeout: 300_000 })
-    const pathToChrome = path.join(temporary, bundle.executable)
-    await fs.access(pathToChrome, constants.X_OK)
-    await fs.writeFile(path.join(temporary, 'INSTALLATION_COMPLETE'), bundle.sha256, { mode: 0o600 })
-    await fs.rename(temporary, bundle.directory).catch(async error => {
-      if (error.code !== 'EEXIST' && error.code !== 'ENOTEMPTY') throw error
-    })
-    const ready = await installedExecutable()
-    if (!ready) throw new Error('App 内专用浏览器解包未完成。')
-    return ready
-  } finally {
-    await fs.rm(temporary, { recursive: true, force: true })
-    await fs.rm(archive, { force: true })
-  }
+    return executable
+  } catch { return null }
 }
 
 async function prepareManagedBrowser({ signal } = {}) {
-  const bundle = await bundledBrowser()
-  if (bundle) return installBundledBrowser(bundle, signal)
-  const installed = await installedExecutable()
-  if (installed) return installed
-  throw new Error('此 App 安装包缺少专用浏览器，请重新安装对应平台的完整 App 包。')
+  if (!chrome) throw new Error(`当前平台 ${platform} 不支持专用浏览器。`)
+  signal?.throwIfAborted()
+  const executable = await installedExecutable()
+  if (executable) return executable
+  const directory = browserDirectory()
+  const parent = path.dirname(directory)
+  await fs.mkdir(parent, { recursive: true, mode: 0o700 })
+  const release = await acquireLock(`${directory}.lock`, Date.now() + preparationTimeout, signal)
+  try {
+    const cached = await installedExecutable()
+    if (cached) return cached
+    const temporary = await fs.mkdtemp(path.join(parent, '.chromium-'))
+    try {
+      const archive = path.join(temporary, 'chrome.zip')
+      const extracted = path.join(temporary, 'browser')
+      await stageChromeArchive(archive, signal)
+      await fs.mkdir(extracted)
+      await extractChrome(extracted, archive, signal)
+      await fs.access(path.join(extracted, chrome.executable), constants.X_OK)
+      await fs.writeFile(path.join(extracted, 'INSTALLATION_COMPLETE'), chrome.sha256, { mode: 0o600 })
+      signal?.throwIfAborted()
+      await fs.rm(directory, { recursive: true, force: true })
+      await fs.rename(extracted, directory)
+      return path.join(directory, chrome.executable)
+    } finally { await fs.rm(temporary, { recursive: true, force: true }) }
+  } finally { await release() }
 }
 
 function probe(endpoint) {
@@ -125,8 +79,9 @@ function probe(endpoint) {
   })
 }
 
-async function acquireLock(file, deadline) {
+async function acquireLock(file, deadline, signal) {
   while (Date.now() < deadline) {
+    signal?.throwIfAborted()
     try {
       const handle = await fs.open(file, 'wx', 0o600)
       await handle.writeFile(String(process.pid)); await handle.close()
@@ -161,7 +116,7 @@ function managedBrowserConfig(args, options) {
 async function ensureManagedBrowser(args, options = {}) {
   const { url, endpoint, profile } = managedBrowserConfig(args, options)
   await fs.mkdir(profile, { recursive: true, mode: 0o700 })
-  const release = await acquireLock(path.join(profile, '.moss-start.lock'), Date.now() + 30_000)
+  const release = await acquireLock(path.join(profile, '.moss-start.lock'), Date.now() + preparationTimeout, options.signal)
   try {
     const status = await (options.probe || probe)(endpoint)
     const stateFile = path.join(profile, 'moss-browser.json')
@@ -170,7 +125,8 @@ async function ensureManagedBrowser(args, options = {}) {
       if (status !== 'occupied' && state?.webSocketDebuggerUrl === status.webSocketDebuggerUrl && state?.kind === 'chrome-for-testing') return { endpoint, profile, mode: 'reused', version: status }
       throw new Error(`端口 ${url.port || 80} 已由其他浏览器或服务使用。请先关闭旧版 Moss 自动化窗口，或在高级设置中更换专用浏览器端口。Moss 不会关闭日常 Chrome。`)
     }
-    const executable = await (options.prepare || prepareManagedBrowser)({})
+    const executable = await (options.prepare || prepareManagedBrowser)({ signal: options.signal })
+    options.signal?.throwIfAborted()
     const log = await fs.open(path.join(profile, 'chrome-launch.log'), 'a', 0o600)
     let child, failure
     try {
@@ -201,13 +157,13 @@ async function ensureManagedBrowser(args, options = {}) {
 // Never replay a tool that has already executed.
 async function createManagedEndpoint(args, options = {}) {
   managedBrowserConfig(args, options)
-  let closed = false
+  const controller = new AbortController()
   const server = http.createServer(async (request, response) => {
-    if (closed || request.method !== 'GET' || !/^\/json\/version\/?$/.test(request.url)) {
+    if (controller.signal.aborted || request.method !== 'GET' || !/^\/json\/version\/?$/.test(request.url)) {
       response.writeHead(404).end(); return
     }
     try {
-      const browser = await ensureManagedBrowser(args, options)
+      const browser = await ensureManagedBrowser(args, { ...options, signal: controller.signal })
       response.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' })
       response.end(JSON.stringify(browser.version))
     } catch (error) {
@@ -221,7 +177,7 @@ async function createManagedEndpoint(args, options = {}) {
   })
   server.unref()
   return { endpoint: `http://127.0.0.1:${server.address().port}`, close() {
-    closed = true; server.close(); server.closeAllConnections()
+    controller.abort(); server.close(); server.closeAllConnections()
   } }
 }
 

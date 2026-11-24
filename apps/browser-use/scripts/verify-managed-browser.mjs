@@ -67,7 +67,8 @@ try {
   const idle = await connect(); await idle.listTools(); await idle.close()
   await assertBrowserClosed('tool discovery and idle reconnect must not launch Chrome')
   assert.ok(!(await readdir(join(appData, 'browser-profiles')).catch(() => [])).includes(`playwright-cdp-${new URL(endpoint).port}`), 'discovery must not create a managed profile')
-  const starts = await Promise.all([first, second].map(client => client.callTool({ name: 'browser_tabs', arguments: { action: 'list' } })))
+  const starts = await Promise.all([first, second].map(client =>
+    client.callTool({ name: 'browser_tabs', arguments: { action: 'list' } }, undefined, { timeout: 660_000 })))
   for (const result of starts) assert.ok(!result.isError, JSON.stringify(result))
   websocket = (await (await fetch(`${endpoint}/json/version`)).json()).webSocketDebuggerUrl
   const profile = join(appData, 'browser-profiles', `playwright-cdp-${new URL(endpoint).port}`)

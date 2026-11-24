@@ -1,0 +1,34 @@
+{
+  "version": "155.0.8059.12",
+  "revision": "1247",
+  "sources": [
+    "https://storage.googleapis.com/chrome-for-testing-public",
+    "https://cdn.npmmirror.com/binaries/playwright/builds/cft"
+  ],
+  "platforms": {
+    "darwin-arm64": {
+      "archive": "mac-arm64/chrome-mac-arm64.zip",
+      "executable": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+      "size": 192946713,
+      "sha256": "d64771a096fffd48b49a65e481dda50ae43a7de55fb93acfa6aece26ec3b10db"
+    },
+    "darwin-x64": {
+      "archive": "mac-x64/chrome-mac-x64.zip",
+      "executable": "chrome-mac-x64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+      "size": 203267451,
+      "sha256": "580b3ea6231df5cb9760e27a889dfde21f391adbd58429d72be4684f789e8682"
+    },
+    "win32-x64": {
+      "archive": "win64/chrome-win64.zip",
+      "executable": "chrome-win64/chrome.exe",
+      "size": 207283631,
+      "sha256": "48e66b6d93271398c68564ac8ca081b862cb7b78851ec3eae376a9a8d1941a15"
+    },
+    "linux-x64": {
+      "archive": "linux64/chrome-linux64.zip",
+      "executable": "chrome-linux64/chrome",
+      "size": 198335306,
+      "sha256": "a24546e0e6c763bf864861ce50498f38783663e24cd2af2a16798c25dc3a9489"
+    }
+  }
+}

@@ -3,7 +3,6 @@ import { fileURLToPath } from 'node:url'
 import { mkdirSync, cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
-import { bundleBrowser } from './bundle-browser.mjs'
 
 const cwd = fileURLToPath(new URL('..', import.meta.url))
 rmSync(new URL('../dist/ui/', import.meta.url), { recursive: true, force: true })
@@ -39,5 +38,11 @@ function copyPackage(name, fromRequire) {
 copyPackage('@playwright/mcp', require)
 cpSync(path.join(cwd, 'src/playwright-cdp'), target, { recursive: true })
 writeFileSync(path.join(target, 'versions.json'), JSON.stringify(Object.fromEntries(copied), null, 2) + '\n')
-console.log('Bundled offline Playwright MCP:', Object.fromEntries(copied))
-await bundleBrowser(cwd, target)
+const { version, revision } = JSON.parse(readFileSync(path.join(target, 'chrome.lock.json'), 'utf8'))
+const chromium = JSON.parse(readFileSync(path.join(target, 'node_modules/playwright-core/browsers.json'), 'utf8'))
+  .browsers.find(browser => browser.name === 'chromium')
+if (chromium?.browserVersion !== version || chromium.revision !== revision) throw new Error('Chrome lock does not match Playwright')
+if (typeof require(path.join(target, 'node_modules/playwright-core/lib/coreBundle.js')).utils?.extractZip !== 'function') {
+  throw new Error('The pinned Playwright ZIP extractor is unavailable')
+}
+console.log('Bundled Playwright MCP:', Object.fromEntries(copied))
