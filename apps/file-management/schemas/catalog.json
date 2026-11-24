@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "cleanupCommand": {
+      "type": "string",
+      "enum": [
+        "dup",
+        "empty-folders",
+        "big",
+        "empty-files",
+        "temp",
+        "image",
+        "music",
+        "symlinks",
+        "broken",
+        "video",
+        "ext",
+        "bad-names",
+        "video-optimizer",
+        "exif-remover"
+      ],
+      "description": "填写清理类别以查询该类别的可用选项和子命令。省略时返回备份操作和清理类别。"
+    }
+  }
+}

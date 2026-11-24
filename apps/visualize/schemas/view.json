@@ -1,0 +1,63 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "format": {
+      "enum": [
+        "csv",
+        "svg"
+      ]
+    },
+    "view": {
+      "type": "object",
+      "properties": {
+        "filter": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "hiddenSeries": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 7
+          },
+          "maxItems": 8
+        },
+        "zoom": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          ]
+        },
+        "from": {
+          "type": "string",
+          "maxLength": 10
+        },
+        "to": {
+          "type": "string",
+          "maxLength": 10
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "format",
+    "view"
+  ]
+}

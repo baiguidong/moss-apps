@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "appId": "moss.backup",
+  "replacedBy": "moss.file-management",
   "summary": "使用 Restic 备份目录、浏览快照并恢复文件。",
   "description": "使用 Restic 备份目录、浏览快照并恢复文件。",
   "platforms": [

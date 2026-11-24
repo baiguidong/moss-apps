@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "appId": "moss.file-cleaner",
+  "replacedBy": "moss.file-management",
   "summary": "扫描重复文件、相似图片和磁盘问题，查看结果并按策略清理。",
   "description": "扫描重复文件、相似图片和磁盘问题，查看结果并按策略清理。",
   "platforms": [

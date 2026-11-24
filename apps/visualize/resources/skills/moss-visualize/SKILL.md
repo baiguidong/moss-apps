@@ -19,7 +19,8 @@ description: 在主会话中创建可视化和交互工具，解释原理、探�
 
 1. 确认问题、数据来源、单位和必要的交互。示例数据明确标注，不捏造真实数据。
 2. 首次制作时读取 [运行协议](references/runtime.md)；创作前阅读下方共同规则，并按内容类型读取 [布局与图形规范](references/design.md) 中对应段落。调用 `visualize_templates` 可获取可运行示例和运行说明；示例只是起点。
-3. 简单数据图可用 `visualize_create` 的 `mode: chart`，传 title、type、csv；type 支持 bar/line/pie/scatter/table。首列标签，后续为有限数值；scatter 首列是数值 X；最多 1000 行、8 个系列；pie 只用第一个数值系列且不得为负。模型生成这些参数，不让用户手写。需要精确布局或交互时使用 `mode: html`。
+3. 简单数据图可用 `visualize_create` 的 `mode: chart`，传 title、type、csv；type 支持 bar/stacked/line/pie/scatter/table。首列标签，后续为有限数值；scatter 首列是数值 X；最多 1000 行、8 个系列；pie 只用第一个数值系列且不得为负。模型生成这些参数，不让用户手写。需要精确布局或交互时使用 `mode: html`。
+   对用户提供的 CSV/XLSX 附件，先调用 visualize_inspect 导入附件并检查工作表、表头和样本，如有多个工作表或字段含义不明确，先向用户确认。创建时可直接复用返回的 sourcePath。可在 visualize_create 传 sourcePath（用户指定的本地路径或会话工作区相对路径）、sheet、mapping，例如 {"x":"日期","value":"销售额","series":"地区","bucket":"month"}。按映射求和，缺失组合按零处理。ISO 日期折线以实际时间为横轴。没有附件时仍可用 csv。
 4. HTML 只写片段，无 doctype/html/head/body；包含必要的内联 CSS/JS，所有资源内嵌，总量小于 1 MiB。使用真实标签与换行，不把转义后的字符串当片段；通过工具 JSON 正确传输。给根节点唯一 ID，以 `document.getElementById` 获取，不能依赖 `document.currentScript`。聚合、分箱、采样或降低精度以缩减大数据。检查未定义变量、节点查询和主要交互。
 5. `visualize_status` 返回 succeeded 且成果存在后才交付；失败或取消如实说明。检查实际输出、主要交互、明暗主题和窄屏；不能把未实现的交互称为完成。
 6. 需要立即在右侧显示时，把成功任务的 `result.presentation` 原样传给 `moss_present`；新版本也通过它更新。尊重用户固定、关闭跟随等导致的 deferred 状态，不能反复抢占焦点。仅需内联展示可不展开右侧。
@@ -55,3 +56,5 @@ description: 在主会话中创建可视化和交互工具，解释原理、探�
 ## 会话文件归属
 
 通过原生工具执行创作；本次输入副本、产物、预览、源材料和修改版本均属于当前会话 workspace。不要把用户作品写入 App 私有目录。跨会话复用时显式导入文件。用户明确保存为个人模板或技能时，将完整依赖安装到个人库；未安装的模板草稿仍随会话清理。
+
+用户在图表请求导出筛选视图时，使用 visualize_export_view，传标注资源 URI 中的原作品任务 ID、用户选择的 csv/svg 及标注上下文中的完整 state（作为 view）。回复该工具返回的文件链接；保存当前视图无需创建修改版本。

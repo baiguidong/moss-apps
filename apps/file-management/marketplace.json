@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.file-management",
+  "summary": "在一个工作台清理文件、备份目录和恢复快照。",
+  "description": "使用 Czkawka 扫描和清理本地目录，使用 Restic 加密备份并恢复文件。页面和 Agent 共用任务记录、进度与报告。",
+  "platforms": [
+    "darwin-arm64",
+    "linux-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/file-management",
+  "repository": "https://github.com/baiguidong/moss-apps",
+  "license": "MIT",
+  "featured": false
+}

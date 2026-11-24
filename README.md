@@ -10,7 +10,7 @@ App 按主要用途分组：
 | --- | --- |
 | 沟通协作 `communication` | [飞书](apps/feishu/README.md)、[即时消息](apps/openim/README.md) |
 | 文档与知识 `knowledge` | [知识库](apps/library/README.md)、[PDF 工作台](apps/pdf-tools/README.md)、[文档转换](tool-apps/markitdown/README.md)、[Notion](tool-apps/notion/README.md) |
-| 文件与存储 `files` | [网盘](apps/drive/README.md)、[文件系统](tool-apps/filesystem/README.md)、[备份与恢复](apps/backup/README.md)、[文件清理](apps/file-cleaner/README.md) |
+| 文件与存储 `files` | [网盘](apps/drive/README.md)、[文件系统](tool-apps/filesystem/README.md)、[文件管理](apps/file-management/README.md) |
 | 设计与音视频 `creative` | [多媒体工坊](apps/media-studio/README.md)、[Canva](tool-apps/canva/README.md)、[Draw.io](tool-apps/drawio/README.md) |
 | 开发工具 `development` | [应用构建](apps/app-builder/README.md)、[Git 仓库](tool-apps/git/README.md)、[CloudBase](tool-apps/cloudbase/README.md)、[TAPD](tool-apps/tapd/README.md) |
 | 数据与分析 `data` | [数据库查询](apps/database/README.md)、[本地数据工作台](apps/data-workbench/README.md)、[Excel 表格](tool-apps/excel/README.md)、[DBX MCP](tool-apps/dbx/README.md) |

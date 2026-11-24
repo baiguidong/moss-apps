@@ -5,7 +5,8 @@ import path from 'node:path'
 import {execFileSync} from 'node:child_process'
 import {listApps,selectApps,repoRoot} from './lib.mjs'
 import {planReleases} from './plan-releases.mjs'
-const ids=['moss.image-tools','moss.pdf','moss.transcription','moss.file-cleaner','moss.document','moss.code-map']
+const retiredIds=['moss.backup','moss.file-cleaner']
+const ids=['moss.image-tools','moss.pdf','moss.transcription','moss.file-management','moss.document','moss.code-map']
 test('all six local Apps enter the native CI and automatic release matrix',()=>{
  const apps=listApps().filter(app=>ids.includes(app.manifest.id))
  expect(apps).toHaveLength(6)
@@ -19,13 +20,19 @@ test('all six local Apps enter the native CI and automatic release matrix',()=>{
   expect(context.variants).toBe(true);expect(JSON.parse(context.platforms).include).toEqual([{platform:'darwin-arm64',os:'macos-15'},{platform:'linux-x64',os:'ubuntu-24.04'}])
  }
 })
-test('the market generator registers all six native artifacts and icons',async()=>{
+test('the market lists the new App and hides both old Apps when it has a release',async()=>{
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'moss-six-app-market-')),records=path.join(root,'records'),site=path.join(root,'site');await fs.mkdir(records)
  try{
-  for(const app of listApps().filter(app=>ids.includes(app.manifest.id))){const id=app.manifest.id;await fs.writeFile(path.join(records,id+'.release.json'),JSON.stringify({schemaVersion:1,app:{id,displayName:app.manifest.displayName,publisher:app.manifest.publisher},version:{version:app.manifest.version,hostApi:app.manifest.hostApi,permissions:app.manifest.permissions,platforms:app.manifest.platforms,artifacts:Object.fromEntries(app.manifest.platforms.map(platform=>[platform,{downloadUrl:`https://example.com/${id}-${platform}.zip`,sha256:'a'.repeat(64)}]))}}))}
+  for(const app of listApps().filter(app=>[...ids,...retiredIds].includes(app.manifest.id))){const id=app.manifest.id;await fs.writeFile(path.join(records,id+'.release.json'),JSON.stringify({schemaVersion:1,app:{id,displayName:app.manifest.displayName,publisher:app.manifest.publisher},version:{version:app.manifest.version,hostApi:app.manifest.hostApi,permissions:app.manifest.permissions,platforms:app.manifest.platforms,artifacts:Object.fromEntries(app.manifest.platforms.map(platform=>[platform,{downloadUrl:`https://example.com/${id}-${platform}.zip`,sha256:'a'.repeat(64)}]))}}))}
   execFileSync(process.execPath,['scripts/build-catalog.mjs','--artifacts',records,'--output',site],{cwd:repoRoot})
   const catalog=JSON.parse(await fs.readFile(path.join(site,'v1/index.json'),'utf8'));expect(catalog.apps.map(app=>app.id).sort()).toEqual([...ids].sort())
-  const categories={'moss.image-tools':'creative','moss.pdf':'knowledge','moss.transcription':'creative','moss.file-cleaner':'files','moss.document':'knowledge','moss.code-map':'development'}
+  expect(catalog.apps.find(app=>app.id==='moss.file-management').displayName).toBe('文件管理')
+  const categories={'moss.image-tools':'creative','moss.pdf':'knowledge','moss.transcription':'creative','moss.file-management':'files','moss.document':'knowledge','moss.code-map':'development'}
   for(const id of ids){const app=JSON.parse(await fs.readFile(path.join(site,'v1/apps',id+'.json'),'utf8'));expect(app.versions[0].artifacts['darwin-arm64']).toBeTruthy();expect(app.versions[0].artifacts['linux-x64']).toBeTruthy();expect(app.iconUrl).toContain(id);expect(app.category).toBe(categories[id])}
+  for(const id of retiredIds) await expect(fs.stat(path.join(site,'v1/apps',id+'.json'))).rejects.toHaveProperty('code','ENOENT')
+  await fs.unlink(path.join(records,'moss.file-management.release.json'))
+  execFileSync(process.execPath,['scripts/build-catalog.mjs','--artifacts',records,'--output',site],{cwd:repoRoot})
+  const prior=JSON.parse(await fs.readFile(path.join(site,'v1/index.json'),'utf8'))
+  expect(prior.apps.filter(app=>retiredIds.includes(app.id)).map(app=>app.id).sort()).toEqual(retiredIds)
  }finally{await fs.rm(root,{recursive:true,force:true})}
 })

@@ -20,7 +20,8 @@
         "line",
         "pie",
         "scatter",
-        "table"
+        "table",
+        "stacked"
       ]
     },
     "csv": {
@@ -35,6 +36,52 @@
       "type": "string",
       "pattern": "^[a-f0-9-]{36}$",
       "description": "继续修改时填原任务 ID；原版本保留。"
+    },
+    "sourcePath": {
+      "type": "string",
+      "minLength": 1,
+      "description": "用户指定的本地附件路径，或相对于当前会话工作区的路径。支持 CSV 和 XLSX。"
+    },
+    "sheet": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Excel 工作表名，默认第一张。"
+    },
+    "mapping": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        },
+        "series": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bucket": {
+          "enum": [
+            "day",
+            "month"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "value"
+      ]
+    },
+    "xAxis": {
+      "enum": [
+        "auto",
+        "date",
+        "category"
+      ],
+      "description": "折线横轴，自动识别 ISO 日期，也可指定分类或日期轴。"
     }
   },
   "required": [

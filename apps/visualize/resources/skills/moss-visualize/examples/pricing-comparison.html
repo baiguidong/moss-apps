@@ -1,0 +1,41 @@
+<style>
+#pricing{--line:light-dark(#d0dfd7,#3d5547);--accent:light-dark(#24796a,#82c5b0);max-width:760px;margin:auto}
+#pricing .pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,215px),1fr));gap:20px}
+#pricing fieldset{min-width:0;border:1px solid var(--line);border-radius:8px;padding:12px 16px}
+#pricing legend{font-weight:600}#pricing label{display:grid;margin:8px 0;font-size:14px}
+#pricing input{accent-color:var(--accent);width:100%}#pricing p{margin:8px 0}#pricing .value{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+#pricing .result{border-top:1px solid var(--line);margin-top:18px;padding-top:12px;color:var(--accent)}
+</style>
+<section id="pricing"><h2>两种定价，哪种毛利更高？</h2><p>每件成本 60 元。分别调整两个方案的售价和预计销量。</p>
+<div class="pair"></div><p class="result" aria-live="polite"></p></section>
+<script>
+(()=>{
+  const root=document.getElementById('pricing'),api=window.mossVisualization
+  const initial={priceA:100,unitsA:120,priceB:115,unitsB:105},state={...initial}
+  const format=n=>n.toLocaleString('zh-CN')
+  for(const name of ['A','B']){
+    const box=document.createElement('fieldset')
+    box.innerHTML='<legend>方案 '+name+'</legend>'+[['price','单价（元）',60,200],['units','销量（件）',0,300]].map(([key,label,min,max])=>
+      '<label>'+label+' <output data-label="'+key+name+'"></output><input type="range" data-key="'+key+name+'" min="'+min+'" max="'+max+'"></label>').join('')+
+      '<p>收入 <output data-revenue="'+name+'"></output></p><p>毛利 <output class="value" data-profit="'+name+'"></output></p>'
+    root.querySelector('.pair').append(box)
+  }
+  function render(saved){
+    for(const input of root.querySelectorAll('input')){
+      const key=input.dataset.key,v=saved?.[key]
+      if(Number.isFinite(v))state[key]=Math.max(+input.min,Math.min(+input.max,Math.round(v)))
+      input.value=state[key];root.querySelector('[data-label="'+key+'"]').textContent=state[key]
+    }
+    const profit={}
+    for(const s of ['A','B']){
+      const price=state['price'+s],units=state['units'+s]
+      profit[s]=(price-60)*units
+      root.querySelector('[data-revenue="'+s+'"]').textContent=format(price*units)+' 元'
+      root.querySelector('[data-profit="'+s+'"]').textContent=format(profit[s])+' 元'
+    }
+    root.querySelector('.result').textContent=profit.A===profit.B?'两种方案毛利相同。':'方案 '+(profit.A>profit.B?'A':'B')+' 的毛利高 '+format(Math.abs(profit.A-profit.B))+' 元。'
+  }
+  root.addEventListener('input',e=>{render({[e.target.dataset.key]:+e.target.value});api?.setState({...state})})
+  addEventListener('moss:state',e=>render({...initial,...e.detail}));render(api?.getState())
+})()
+</script>

@@ -11,6 +11,16 @@ export function composerActions(dataDir) {
     async resolve(input) {
       if (input?.uri) {
         const uri = new URL(input.uri)
+        if (uri.protocol === 'moss-visualize:' && uri.hostname === 'files' && !uri.search && !uri.hash) {
+          const match = /^\/([a-f0-9-]{36})\/([a-f0-9-]{36})\/(csv|svg)$/.exec(uri.pathname)
+          if (!match) throw new Error('视图文件引用无效')
+          const [,id,exportId,format] = match
+          const task = await store.get(id)
+          const root = await fs.realpath(store.directory(id))
+          const file = await fs.realpath(path.join(root, exportId + '.' + format))
+          if (path.dirname(file) !== root || task.status !== 'succeeded') throw new Error('视图文件不可用')
+          return { kind:'file', path:file, name:task.input.title + ' · 当前视图.' + format, resourceUri:input.uri }
+        }
         if (uri.protocol !== 'moss-visualize:' || uri.hostname !== 'works' || uri.search || uri.hash || !/^\/[a-zA-Z0-9_-]{1,100}$/.test(uri.pathname)) throw new Error('作品引用无效')
         const task = await store.get(uri.pathname.slice(1))
         if (task.status !== 'succeeded') throw new Error('作品尚未生成')

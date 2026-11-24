@@ -1,0 +1,2980 @@
+{
+  "commands": [
+    {
+      "id": "dup",
+      "title": "重复文件",
+      "help": "Finds duplicate files\n\nUsage: mac_czkawka_cli_arm64 dup [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -r, --reference-directories <REFERENCE_DIRECTORIES>\n          List of reference directory(ies) (absolute paths). Files here appear as the reference entry in results - only non-reference files that match a reference file are reported. Files found exclusively in reference directories are not listed.\n\n  -Z, --minimal-prehash-cache-file-size <MINIMAL_PREHASH_CACHE_FILE_SIZE>\n          Minimum size of prehash cached files in bytes\n          \n          [default: 257144]\n\n  -u, --use-prehash-cache\n          Use prehash cache to speed up the scanning process by avoiding rehashing files that have already been hashed\n\n  -m, --minimal-file-size <MINIMAL_FILE_SIZE>\n          Minimum size of checked files in bytes, assigning bigger value may speed up searching\n          \n          [default: 8192]\n\n  -i, --maximal-file-size <MAXIMAL_FILE_SIZE>\n          Maximum size of checked files in bytes, assigning lower value may speed up searching\n          \n          [default: 18446744073709551615]\n\n  -c, --minimal-cached-file-size <MINIMAL_CACHED_FILE_SIZE>\n          Minimum file size (in bytes) to be included in the hash cache. A higher value produces a smaller cache file, making cache loading faster, but more files will be excluded from the cache and must be re-hashed on each scan. A lower value stores more files in the cache, making the scan faster at the cost of a larger cache file and slower cache loading.\n          \n          [default: 257144]\n\n  -s, --search-method <SEARCH_METHOD>\n          Methods to search files.\n          NAME - Fast but rarely usable,\n          SIZE - Fast but not accurate, checking by the file's size,\n          SIZE_NAME - Checking by both the file's size and name,\n          HASH - The slowest method, checking by the hash of the entire file\n          \n          [default: HASH]\n\n  -D, --delete-method <DELETE_METHOD>\n          Method for selecting which files to delete from duplicate groups:\n          AEN - All files Except Newest (keeps only newest)\n          AEO - All files Except Oldest (keeps only oldest)\n          ON - Only the Newest deleted (keeps all but newest)\n          OO - Only the Oldest deleted (keeps all but oldest)\n          AEB - All files Except Biggest (keeps only biggest)\n          AES - All files Except Smallest (keeps only smallest)\n          OB - Only the Biggest deleted (keeps all but biggest)\n          OS - Only the Smallest deleted (keeps all but smallest)\n          HARD - create hard links to save space\n          NONE - do not delete files (default)\n          \n          [default: NONE]\n\n  -Q, --dry-run\n          Performs a dry run showing what operations would be performed without actually executing them.\n\n  -y, --move-to-trash\n          Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.\n\n  -t, --hash-type <HASH_TYPE>\n          Hash algorithm used to calculate file hashes. BLAKE3 is recommended for most cases (fast and secure), CRC32 is faster but less reliable, XXH3 is very fast but not cryptographically secure.\n          \n          [default: BLAKE3]\n\n  -l, --case-sensitive-name-comparison\n          Enables case-sensitive file name comparison. By default, comparisons are case-insensitive (e.g., 'File.txt' equals 'file.txt').\n\n  -L, --allow-hard-links\n          Treats hard links as separate files rather than ignoring them. By default, hard links are detected and only counted once.\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "reference-directories",
+          "short": "r",
+          "label": "参考目录",
+          "value": true,
+          "description": "List of reference directory(ies) (absolute paths). Files here appear as the reference entry in results - only non-reference files that match a reference file are reported. Files found exclusively in reference directories are not listed.",
+          "default": ""
+        },
+        {
+          "key": "minimal-prehash-cache-file-size",
+          "short": "Z",
+          "label": "minimal prehash cache file size",
+          "value": true,
+          "description": "Minimum size of prehash cached files in bytes [default: 257144]",
+          "default": "257144"
+        },
+        {
+          "key": "use-prehash-cache",
+          "short": "u",
+          "label": "use prehash cache",
+          "value": false,
+          "description": "Use prehash cache to speed up the scanning process by avoiding rehashing files that have already been hashed",
+          "default": ""
+        },
+        {
+          "key": "minimal-file-size",
+          "short": "m",
+          "label": "最小文件（字节）",
+          "value": true,
+          "description": "Minimum size of checked files in bytes, assigning bigger value may speed up searching [default: 8192]",
+          "default": "8192"
+        },
+        {
+          "key": "maximal-file-size",
+          "short": "i",
+          "label": "最大文件（字节）",
+          "value": true,
+          "description": "Maximum size of checked files in bytes, assigning lower value may speed up searching [default: 18446744073709551615]",
+          "default": "18446744073709551615"
+        },
+        {
+          "key": "minimal-cached-file-size",
+          "short": "c",
+          "label": "minimal cached file size",
+          "value": true,
+          "description": "Minimum file size (in bytes) to be included in the hash cache. A higher value produces a smaller cache file, making cache loading faster, but more files will be excluded from the cache and must be re-hashed on each scan. A lower value stores more files in the cache, making the scan faster at the cost of a larger cache file and slower cache loading. [default: 257144]",
+          "default": "257144"
+        },
+        {
+          "key": "search-method",
+          "short": "s",
+          "label": "匹配方式",
+          "value": true,
+          "description": "Methods to search files. NAME - Fast but rarely usable, SIZE - Fast but not accurate, checking by the file's size, SIZE_NAME - Checking by both the file's size and name, HASH - The slowest method, checking by the hash of the entire file [default: HASH]",
+          "default": "HASH"
+        },
+        {
+          "key": "delete-method",
+          "short": "D",
+          "label": "清理策略",
+          "value": true,
+          "description": "Method for selecting which files to delete from duplicate groups: AEN - All files Except Newest (keeps only newest) AEO - All files Except Oldest (keeps only oldest) ON - Only the Newest deleted (keeps all but newest) OO - Only the Oldest deleted (keeps all but oldest) AEB - All files Except Biggest (keeps only biggest) AES - All files Except Smallest (keeps only smallest) OB - Only the Biggest deleted (keeps all but biggest) OS - Only the Smallest deleted (keeps all but smallest) HARD - create hard links to save space NONE - do not delete files (default) [default: NONE]",
+          "default": "NONE"
+        },
+        {
+          "key": "dry-run",
+          "short": "Q",
+          "label": "预演，不修改文件",
+          "value": false,
+          "description": "Performs a dry run showing what operations would be performed without actually executing them.",
+          "default": ""
+        },
+        {
+          "key": "move-to-trash",
+          "short": "y",
+          "label": "移到回收站",
+          "value": false,
+          "description": "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.",
+          "default": ""
+        },
+        {
+          "key": "hash-type",
+          "short": "t",
+          "label": "哈希算法",
+          "value": true,
+          "description": "Hash algorithm used to calculate file hashes. BLAKE3 is recommended for most cases (fast and secure), CRC32 is faster but less reliable, XXH3 is very fast but not cryptographically secure. [default: BLAKE3]",
+          "default": "BLAKE3"
+        },
+        {
+          "key": "case-sensitive-name-comparison",
+          "short": "l",
+          "label": "case sensitive name comparison",
+          "value": false,
+          "description": "Enables case-sensitive file name comparison. By default, comparisons are case-insensitive (e.g., 'File.txt' equals 'file.txt').",
+          "default": ""
+        },
+        {
+          "key": "allow-hard-links",
+          "short": "L",
+          "label": "包含硬链接",
+          "value": false,
+          "description": "Treats hard links as separate files rather than ignoring them. By default, hard links are detected and only counted once.",
+          "default": ""
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka dup -d /home/rafal -e /home/rafal/Obrazy -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "id": "empty-folders",
+      "title": "空文件夹",
+      "help": "Finds empty folders\n\nUsage: mac_czkawka_cli_arm64 empty-folders [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -D, --delete-files\n          Automatically delete all found items matching the criteria.\n\n  -Q, --dry-run\n          Performs a dry run showing what operations would be performed without actually executing them.\n\n  -y, --move-to-trash\n          Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka empty-folders -d /home/rafal/rr /home/gateway -f results.txt\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "delete-files",
+          "short": "D",
+          "label": "删除匹配文件",
+          "value": false,
+          "description": "Automatically delete all found items matching the criteria.",
+          "default": ""
+        },
+        {
+          "key": "dry-run",
+          "short": "Q",
+          "label": "预演，不修改文件",
+          "value": false,
+          "description": "Performs a dry run showing what operations would be performed without actually executing them.",
+          "default": ""
+        },
+        {
+          "key": "move-to-trash",
+          "short": "y",
+          "label": "移到回收站",
+          "value": false,
+          "description": "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.",
+          "default": ""
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka empty-folders -d /home/rafal/rr /home/gateway -f results.txt",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "id": "big",
+      "title": "大文件",
+      "help": "Finds big files\n\nUsage: mac_czkawka_cli_arm64 big [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -n, --number-of-files <NUMBER_OF_FILES>\n          Number of biggest (or smallest with -J flag) files to display in results\n          \n          [default: 50]\n\n  -D, --delete-files\n          Automatically delete all found items matching the criteria.\n\n  -Q, --dry-run\n          Performs a dry run showing what operations would be performed without actually executing them.\n\n  -y, --move-to-trash\n          Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.\n\n  -J, --smallest-mode\n          Switch mode to find smallest files instead of biggest ones\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -J -x VIDEO -f results.txt\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "number-of-files",
+          "short": "n",
+          "label": "结果数量",
+          "value": true,
+          "description": "Number of biggest (or smallest with -J flag) files to display in results [default: 50]",
+          "default": "50"
+        },
+        {
+          "key": "delete-files",
+          "short": "D",
+          "label": "删除匹配文件",
+          "value": false,
+          "description": "Automatically delete all found items matching the criteria.",
+          "default": ""
+        },
+        {
+          "key": "dry-run",
+          "short": "Q",
+          "label": "预演，不修改文件",
+          "value": false,
+          "description": "Performs a dry run showing what operations would be performed without actually executing them.",
+          "default": ""
+        },
+        {
+          "key": "move-to-trash",
+          "short": "y",
+          "label": "移到回收站",
+          "value": false,
+          "description": "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.",
+          "default": ""
+        },
+        {
+          "key": "smallest-mode",
+          "short": "J",
+          "label": "smallest mode",
+          "value": false,
+          "description": "Switch mode to find smallest files instead of biggest ones",
+          "default": ""
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -J -x VIDEO -f results.txt",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "id": "empty-files",
+      "title": "空文件",
+      "help": "Finds empty files\n\nUsage: mac_czkawka_cli_arm64 empty-files [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -D, --delete-files\n          Automatically delete all found items matching the criteria.\n\n  -Q, --dry-run\n          Performs a dry run showing what operations would be performed without actually executing them.\n\n  -y, --move-to-trash\n          Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.\n\n      --zero-byte-content\n          Also find non-empty files whose entire content consists of null bytes (0x00). These files take disk space but carry no meaningful data.\n\n      --non-printable-content\n          Also find non-empty files whose entire content consists of non-printable characters (any byte outside the visible ASCII range 0x21-0x7E: all control characters, space (0x20), DEL (0x7F), and non-ASCII bytes 0x80-0xFF). Implies --zero-byte-content.\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "delete-files",
+          "short": "D",
+          "label": "删除匹配文件",
+          "value": false,
+          "description": "Automatically delete all found items matching the criteria.",
+          "default": ""
+        },
+        {
+          "key": "dry-run",
+          "short": "Q",
+          "label": "预演，不修改文件",
+          "value": false,
+          "description": "Performs a dry run showing what operations would be performed without actually executing them.",
+          "default": ""
+        },
+        {
+          "key": "move-to-trash",
+          "short": "y",
+          "label": "移到回收站",
+          "value": false,
+          "description": "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.",
+          "default": ""
+        },
+        {
+          "key": "zero-byte-content",
+          "short": null,
+          "label": "zero byte content",
+          "value": false,
+          "description": "Also find non-empty files whose entire content consists of null bytes (0x00). These files take disk space but carry no meaningful data.",
+          "default": ""
+        },
+        {
+          "key": "non-printable-content",
+          "short": null,
+          "label": "non printable content",
+          "value": false,
+          "description": "Also find non-empty files whose entire content consists of non-printable characters (any byte outside the visible ASCII range 0x21-0x7E: all control characters, space (0x20), DEL (0x7F), and non-ASCII bytes 0x80-0xFF). Implies --zero-byte-content.",
+          "default": ""
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "id": "temp",
+      "title": "临时文件",
+      "help": "Finds temporary files\n\nUsage: mac_czkawka_cli_arm64 temp [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -D, --delete-files\n          Automatically delete all found items matching the criteria.\n\n  -Q, --dry-run\n          Performs a dry run showing what operations would be performed without actually executing them.\n\n  -y, --move-to-trash\n          Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.\n\n  -L, --extensions <EXTENSIONS>\n          Extensions/suffixes to treat as temporary files (e.g. .log .swp). If not specified, the built-in default list is used. If specified, the provided list replaces the defaults entirely. Matched using ends_with on the lowercased filename.\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "delete-files",
+          "short": "D",
+          "label": "删除匹配文件",
+          "value": false,
+          "description": "Automatically delete all found items matching the criteria.",
+          "default": ""
+        },
+        {
+          "key": "dry-run",
+          "short": "Q",
+          "label": "预演，不修改文件",
+          "value": false,
+          "description": "Performs a dry run showing what operations would be performed without actually executing them.",
+          "default": ""
+        },
+        {
+          "key": "move-to-trash",
+          "short": "y",
+          "label": "移到回收站",
+          "value": false,
+          "description": "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.",
+          "default": ""
+        },
+        {
+          "key": "extensions",
+          "short": "L",
+          "label": "extensions",
+          "value": true,
+          "description": "Extensions/suffixes to treat as temporary files (e.g. .log .swp). If not specified, the built-in default list is used. If specified, the provided list replaces the defaults entirely. Matched using ends_with on the lowercased filename.",
+          "default": ""
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "id": "image",
+      "title": "相似图片",
+      "help": "Finds similar images\n\nUsage: mac_czkawka_cli_arm64 image [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -r, --reference-directories <REFERENCE_DIRECTORIES>\n          List of reference directory(ies) (absolute paths). Files here appear as the reference entry in results - only non-reference files that match a reference file are reported. Files found exclusively in reference directories are not listed.\n\n  -m, --minimal-file-size <MINIMAL_FILE_SIZE>\n          Minimum size of checked files in bytes, assigning bigger value may speed up searching\n          \n          [default: 16384]\n\n  -i, --maximal-file-size <MAXIMAL_FILE_SIZE>\n          Maximum size of checked files in bytes, assigning lower value may speed up searching\n          \n          [default: 18446744073709551615]\n\n  -s, --max-difference <MAX_DIFFERENCE>\n          Maximum difference between images to be considered as similar (0-40). Lower values mean more strict matching. For hash_size 8, values up to 10 are recommended, for hash_size 16 up to 20 are recommended.\n          \n          [default: 5]\n\n  -D, --delete-method <DELETE_METHOD>\n          Method for selecting which files to delete from duplicate groups:\n          AEN - All files Except Newest (keeps only newest)\n          AEO - All files Except Oldest (keeps only oldest)\n          ON - Only the Newest deleted (keeps all but newest)\n          OO - Only the Oldest deleted (keeps all but oldest)\n          AEB - All files Except Biggest (keeps only biggest)\n          AES - All files Except Smallest (keeps only smallest)\n          OB - Only the Biggest deleted (keeps all but biggest)\n          OS - Only the Smallest deleted (keeps all but smallest)\n          HARD - create hard links to save space\n          NONE - do not delete files (default)\n          \n          [default: NONE]\n\n  -Q, --dry-run\n          Performs a dry run showing what operations would be performed without actually executing them.\n\n  -y, --move-to-trash\n          Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.\n\n  -L, --allow-hard-links\n          Treats hard links as separate files rather than ignoring them. By default, hard links are detected and only counted once.\n\n  -J, --ignore-same-size\n          Within each similar-file group, removes entries that share a file size with another entry in the same group. Groups that shrink to a single entry are discarded.\n\n  -Z, --ignore-same-resolution\n          Within each similar-file group, removes entries that share a resolution (WxH) with another entry in the same group. Groups that shrink to a single entry are discarded.\n\n  -g, --hash-alg <HASH_ALG>\n          Perceptual hash algorithm used to compare images. Gradient (default) works well for most cases, Mean is faster but less accurate, Blockhash is good for finding very similar images, VertGradient/DoubleGradient provide different matching characteristics, Median is robust against color changes.\n          \n          [default: Gradient]\n\n  -z, --image-filter <IMAGE_FILTER>\n          Filter algorithm used when resizing images for comparison. Lanczos3 provides highest quality but is slower, Nearest is fastest but lowest quality, Triangle/Gaussian/CatmullRom offer different quality-speed tradeoffs.\n          \n          [default: Nearest]\n\n  -c, --hash-size <HASH_SIZE>\n          Size of the perceptual hash. Larger values provide more detailed comparison but require higher max_difference values. 8 is fastest and least detailed, 64 is slowest but most detailed. Recommended: 8 or 16 for typical use.\n          \n          [default: 16]\n\n      --geometric-invariance <GEOMETRIC_INVARIANCE>\n          Geometric invariance mode for similar image matching. off compares images as-is, mirror-flip also compares mirrored/flipped variants, mirror-flip-rotate90 also compares 90-degree rotations.\n          \n          [default: off]\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka image -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "reference-directories",
+          "short": "r",
+          "label": "参考目录",
+          "value": true,
+          "description": "List of reference directory(ies) (absolute paths). Files here appear as the reference entry in results - only non-reference files that match a reference file are reported. Files found exclusively in reference directories are not listed.",
+          "default": ""
+        },
+        {
+          "key": "minimal-file-size",
+          "short": "m",
+          "label": "最小文件（字节）",
+          "value": true,
+          "description": "Minimum size of checked files in bytes, assigning bigger value may speed up searching [default: 16384]",
+          "default": "16384"
+        },
+        {
+          "key": "maximal-file-size",
+          "short": "i",
+          "label": "最大文件（字节）",
+          "value": true,
+          "description": "Maximum size of checked files in bytes, assigning lower value may speed up searching [default: 18446744073709551615]",
+          "default": "18446744073709551615"
+        },
+        {
+          "key": "max-difference",
+          "short": "s",
+          "label": "相似度阈值",
+          "value": true,
+          "description": "Maximum difference between images to be considered as similar (0-40). Lower values mean more strict matching. For hash_size 8, values up to 10 are recommended, for hash_size 16 up to 20 are recommended. [default: 5]",
+          "default": "5"
+        },
+        {
+          "key": "delete-method",
+          "short": "D",
+          "label": "清理策略",
+          "value": true,
+          "description": "Method for selecting which files to delete from duplicate groups: AEN - All files Except Newest (keeps only newest) AEO - All files Except Oldest (keeps only oldest) ON - Only the Newest deleted (keeps all but newest) OO - Only the Oldest deleted (keeps all but oldest) AEB - All files Except Biggest (keeps only biggest) AES - All files Except Smallest (keeps only smallest) OB - Only the Biggest deleted (keeps all but biggest) OS - Only the Smallest deleted (keeps all but smallest) HARD - create hard links to save space NONE - do not delete files (default) [default: NONE]",
+          "default": "NONE"
+        },
+        {
+          "key": "dry-run",
+          "short": "Q",
+          "label": "预演，不修改文件",
+          "value": false,
+          "description": "Performs a dry run showing what operations would be performed without actually executing them.",
+          "default": ""
+        },
+        {
+          "key": "move-to-trash",
+          "short": "y",
+          "label": "移到回收站",
+          "value": false,
+          "description": "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.",
+          "default": ""
+        },
+        {
+          "key": "allow-hard-links",
+          "short": "L",
+          "label": "包含硬链接",
+          "value": false,
+          "description": "Treats hard links as separate files rather than ignoring them. By default, hard links are detected and only counted once.",
+          "default": ""
+        },
+        {
+          "key": "ignore-same-size",
+          "short": "J",
+          "label": "ignore same size",
+          "value": false,
+          "description": "Within each similar-file group, removes entries that share a file size with another entry in the same group. Groups that shrink to a single entry are discarded.",
+          "default": ""
+        },
+        {
+          "key": "ignore-same-resolution",
+          "short": "Z",
+          "label": "ignore same resolution",
+          "value": false,
+          "description": "Within each similar-file group, removes entries that share a resolution (WxH) with another entry in the same group. Groups that shrink to a single entry are discarded.",
+          "default": ""
+        },
+        {
+          "key": "hash-alg",
+          "short": "g",
+          "label": "hash alg",
+          "value": true,
+          "description": "Perceptual hash algorithm used to compare images. Gradient (default) works well for most cases, Mean is faster but less accurate, Blockhash is good for finding very similar images, VertGradient/DoubleGradient provide different matching characteristics, Median is robust against color changes. [default: Gradient]",
+          "default": "Gradient"
+        },
+        {
+          "key": "image-filter",
+          "short": "z",
+          "label": "image filter",
+          "value": true,
+          "description": "Filter algorithm used when resizing images for comparison. Lanczos3 provides highest quality but is slower, Nearest is fastest but lowest quality, Triangle/Gaussian/CatmullRom offer different quality-speed tradeoffs. [default: Nearest]",
+          "default": "Nearest"
+        },
+        {
+          "key": "hash-size",
+          "short": "c",
+          "label": "hash size",
+          "value": true,
+          "description": "Size of the perceptual hash. Larger values provide more detailed comparison but require higher max_difference values. 8 is fastest and least detailed, 64 is slowest but most detailed. Recommended: 8 or 16 for typical use. [default: 16]",
+          "default": "16"
+        },
+        {
+          "key": "geometric-invariance",
+          "short": null,
+          "label": "geometric invariance",
+          "value": true,
+          "description": "Geometric invariance mode for similar image matching. off compares images as-is, mirror-flip also compares mirrored/flipped variants, mirror-flip-rotate90 also compares 90-degree rotations. [default: off]",
+          "default": "off"
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka image -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "id": "music",
+      "title": "重复音频",
+      "help": "Finds same music by tags\n\nUsage: mac_czkawka_cli_arm64 music [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -r, --reference-directories <REFERENCE_DIRECTORIES>\n          List of reference directory(ies) (absolute paths). Files here appear as the reference entry in results - only non-reference files that match a reference file are reported. Files found exclusively in reference directories are not listed.\n\n  -D, --delete-method <DELETE_METHOD>\n          Method for selecting which files to delete from duplicate groups:\n          AEN - All files Except Newest (keeps only newest)\n          AEO - All files Except Oldest (keeps only oldest)\n          ON - Only the Newest deleted (keeps all but newest)\n          OO - Only the Oldest deleted (keeps all but oldest)\n          AEB - All files Except Biggest (keeps only biggest)\n          AES - All files Except Smallest (keeps only smallest)\n          OB - Only the Biggest deleted (keeps all but biggest)\n          OS - Only the Smallest deleted (keeps all but smallest)\n          HARD - create hard links to save space\n          NONE - do not delete files (default)\n          \n          [default: NONE]\n\n  -Q, --dry-run\n          Performs a dry run showing what operations would be performed without actually executing them.\n\n  -y, --move-to-trash\n          Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.\n\n  -a, --approximate-comparison\n          Use approximate comparison when comparing music tags (allows small differences in tag values)\n\n  -c, --compare-fingerprints-only-with-similar-titles\n          When using audio content comparison, only compare files that have similar titles to reduce false positives and speed up the process\n\n  -z, --music-similarity <MUSIC_SIMILARITY>\n          Sets which rows must be equal to set these files as duplicates (may be mixed, but must be divided by commas).\n          \n          [default: track_title,track_artist]\n\n  -s, --search-method <SEARCH_METHOD>\n          Methods to search files.\n          CONTENT - finds similar audio files by content, TAGS - finds similar music by tags.\n          \n          [default: TAGS]\n\n  -m, --minimal-file-size <MINIMAL_FILE_SIZE>\n          Minimum size of checked files in bytes, assigning bigger value may speed up searching\n          \n          [default: 8192]\n\n  -i, --maximal-file-size <MAXIMAL_FILE_SIZE>\n          Maximum size of checked files in bytes, assigning lower value may speed up searching\n          \n          [default: 18446744073709551615]\n\n  -l, --minimum-segment-duration <MINIMUM_SEGMENT_DURATION>\n          Minimum duration of audio segment to compare in seconds. Smaller values will find shorter similar segments but may increase false positives. Values should be between 0.0 and 3600.0\n          \n          [default: 10.0]\n\n  -Y, --maximum-difference <MAXIMUM_DIFFERENCE>\n          Maximum allowed difference between audio segments (greater than 0.0, up to 10.0 inclusive). Value close to 0.0 will find only nearly identical segments, while 10.0 will find segments that are barely similar. Lower values mean stricter matching.\n          \n          [default: 2.0]\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka music -d /home/rafal -f results.txt\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "reference-directories",
+          "short": "r",
+          "label": "参考目录",
+          "value": true,
+          "description": "List of reference directory(ies) (absolute paths). Files here appear as the reference entry in results - only non-reference files that match a reference file are reported. Files found exclusively in reference directories are not listed.",
+          "default": ""
+        },
+        {
+          "key": "delete-method",
+          "short": "D",
+          "label": "清理策略",
+          "value": true,
+          "description": "Method for selecting which files to delete from duplicate groups: AEN - All files Except Newest (keeps only newest) AEO - All files Except Oldest (keeps only oldest) ON - Only the Newest deleted (keeps all but newest) OO - Only the Oldest deleted (keeps all but oldest) AEB - All files Except Biggest (keeps only biggest) AES - All files Except Smallest (keeps only smallest) OB - Only the Biggest deleted (keeps all but biggest) OS - Only the Smallest deleted (keeps all but smallest) HARD - create hard links to save space NONE - do not delete files (default) [default: NONE]",
+          "default": "NONE"
+        },
+        {
+          "key": "dry-run",
+          "short": "Q",
+          "label": "预演，不修改文件",
+          "value": false,
+          "description": "Performs a dry run showing what operations would be performed without actually executing them.",
+          "default": ""
+        },
+        {
+          "key": "move-to-trash",
+          "short": "y",
+          "label": "移到回收站",
+          "value": false,
+          "description": "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.",
+          "default": ""
+        },
+        {
+          "key": "approximate-comparison",
+          "short": "a",
+          "label": "approximate comparison",
+          "value": false,
+          "description": "Use approximate comparison when comparing music tags (allows small differences in tag values)",
+          "default": ""
+        },
+        {
+          "key": "compare-fingerprints-only-with-similar-titles",
+          "short": "c",
+          "label": "compare fingerprints only with similar titles",
+          "value": false,
+          "description": "When using audio content comparison, only compare files that have similar titles to reduce false positives and speed up the process",
+          "default": ""
+        },
+        {
+          "key": "music-similarity",
+          "short": "z",
+          "label": "music similarity",
+          "value": true,
+          "description": "Sets which rows must be equal to set these files as duplicates (may be mixed, but must be divided by commas). [default: track_title,track_artist]",
+          "default": "track_title,track_artist"
+        },
+        {
+          "key": "search-method",
+          "short": "s",
+          "label": "匹配方式",
+          "value": true,
+          "description": "Methods to search files. CONTENT - finds similar audio files by content, TAGS - finds similar music by tags. [default: TAGS]",
+          "default": "TAGS"
+        },
+        {
+          "key": "minimal-file-size",
+          "short": "m",
+          "label": "最小文件（字节）",
+          "value": true,
+          "description": "Minimum size of checked files in bytes, assigning bigger value may speed up searching [default: 8192]",
+          "default": "8192"
+        },
+        {
+          "key": "maximal-file-size",
+          "short": "i",
+          "label": "最大文件（字节）",
+          "value": true,
+          "description": "Maximum size of checked files in bytes, assigning lower value may speed up searching [default: 18446744073709551615]",
+          "default": "18446744073709551615"
+        },
+        {
+          "key": "minimum-segment-duration",
+          "short": "l",
+          "label": "minimum segment duration",
+          "value": true,
+          "description": "Minimum duration of audio segment to compare in seconds. Smaller values will find shorter similar segments but may increase false positives. Values should be between 0.0 and 3600.0 [default: 10.0]",
+          "default": "10.0"
+        },
+        {
+          "key": "maximum-difference",
+          "short": "Y",
+          "label": "maximum difference",
+          "value": true,
+          "description": "Maximum allowed difference between audio segments (greater than 0.0, up to 10.0 inclusive). Value close to 0.0 will find only nearly identical segments, while 10.0 will find segments that are barely similar. Lower values mean stricter matching. [default: 2.0]",
+          "default": "2.0"
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka music -d /home/rafal -f results.txt",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "id": "symlinks",
+      "title": "无效符号链接",
+      "help": "Finds invalid symlinks\n\nUsage: mac_czkawka_cli_arm64 symlinks [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -D, --delete-files\n          Automatically delete all found items matching the criteria.\n\n  -Q, --dry-run\n          Performs a dry run showing what operations would be performed without actually executing them.\n\n  -y, --move-to-trash\n          Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "delete-files",
+          "short": "D",
+          "label": "删除匹配文件",
+          "value": false,
+          "description": "Automatically delete all found items matching the criteria.",
+          "default": ""
+        },
+        {
+          "key": "dry-run",
+          "short": "Q",
+          "label": "预演，不修改文件",
+          "value": false,
+          "description": "Performs a dry run showing what operations would be performed without actually executing them.",
+          "default": ""
+        },
+        {
+          "key": "move-to-trash",
+          "short": "y",
+          "label": "移到回收站",
+          "value": false,
+          "description": "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.",
+          "default": ""
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "id": "broken",
+      "title": "损坏文件",
+      "help": "Finds broken files\n\nUsage: mac_czkawka_cli_arm64 broken [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -D, --delete-files\n          Automatically delete all found items matching the criteria.\n\n  -Q, --dry-run\n          Performs a dry run showing what operations would be performed without actually executing them.\n\n  -y, --move-to-trash\n          Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.\n\n  -c, --checked-types <CHECKED_TYPES>\n          Methods to search files - by default all types except video are checked (VIDEO_FFPROBE and VIDEO_FFMPEG require ffmpeg to be installed).\n          PDF - finds broken PDF files,\n          AUDIO - finds broken audio files,\n          IMAGE - finds broken image files,\n          ARCHIVE - finds broken archive files (zip, 7z, gz, tar, zst, bz2, xz),\n          FONT - finds broken font files (ttf, otf, ttc),\n          MARKUP - finds broken JSON/XML/TOML/YAML/SVG files,\n          VIDEO_FFPROBE - quick video check using ffprobe (header validation),\n          VIDEO_FFMPEG - deep video check using ffmpeg (full decode)\n          \n          [default: PDF AUDIO IMAGE ARCHIVE FONT MARKUP]\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka broken -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "delete-files",
+          "short": "D",
+          "label": "删除匹配文件",
+          "value": false,
+          "description": "Automatically delete all found items matching the criteria.",
+          "default": ""
+        },
+        {
+          "key": "dry-run",
+          "short": "Q",
+          "label": "预演，不修改文件",
+          "value": false,
+          "description": "Performs a dry run showing what operations would be performed without actually executing them.",
+          "default": ""
+        },
+        {
+          "key": "move-to-trash",
+          "short": "y",
+          "label": "移到回收站",
+          "value": false,
+          "description": "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.",
+          "default": ""
+        },
+        {
+          "key": "checked-types",
+          "short": "c",
+          "label": "checked types",
+          "value": true,
+          "description": "Methods to search files - by default all types except video are checked (VIDEO_FFPROBE and VIDEO_FFMPEG require ffmpeg to be installed). PDF - finds broken PDF files, AUDIO - finds broken audio files, IMAGE - finds broken image files, ARCHIVE - finds broken archive files (zip, 7z, gz, tar, zst, bz2, xz), FONT - finds broken font files (ttf, otf, ttc), MARKUP - finds broken JSON/XML/TOML/YAML/SVG files, VIDEO_FFPROBE - quick video check using ffprobe (header validation), VIDEO_FFMPEG - deep video check using ffmpeg (full decode) [default: PDF AUDIO IMAGE ARCHIVE FONT MARKUP]",
+          "default": "PDF AUDIO IMAGE ARCHIVE FONT MARKUP"
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka broken -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "id": "video",
+      "title": "相似视频",
+      "help": "Finds similar video files\n\nUsage: mac_czkawka_cli_arm64 video [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -r, --reference-directories <REFERENCE_DIRECTORIES>\n          List of reference directory(ies) (absolute paths). Files here appear as the reference entry in results - only non-reference files that match a reference file are reported. Files found exclusively in reference directories are not listed.\n\n  -D, --delete-method <DELETE_METHOD>\n          Method for selecting which files to delete from duplicate groups:\n          AEN - All files Except Newest (keeps only newest)\n          AEO - All files Except Oldest (keeps only oldest)\n          ON - Only the Newest deleted (keeps all but newest)\n          OO - Only the Oldest deleted (keeps all but oldest)\n          AEB - All files Except Biggest (keeps only biggest)\n          AES - All files Except Smallest (keeps only smallest)\n          OB - Only the Biggest deleted (keeps all but biggest)\n          OS - Only the Smallest deleted (keeps all but smallest)\n          HARD - create hard links to save space\n          NONE - do not delete files (default)\n          \n          [default: NONE]\n\n  -Q, --dry-run\n          Performs a dry run showing what operations would be performed without actually executing them.\n\n  -y, --move-to-trash\n          Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.\n\n  -L, --allow-hard-links\n          Treats hard links as separate files rather than ignoring them. By default, hard links are detected and only counted once.\n\n  -J, --ignore-same-size\n          Within each similar-file group, removes entries that share a file size with another entry in the same group. Groups that shrink to a single entry are discarded.\n\n  -Z, --ignore-same-resolution\n          Within each similar-file group, removes entries that share a resolution (WxH) with another entry in the same group. Groups that shrink to a single entry are discarded.\n\n  -m, --minimal-file-size <MINIMAL_FILE_SIZE>\n          Minimum size of checked files in bytes, assigning bigger value may speed up searching\n          \n          [default: 8192]\n\n  -i, --maximal-file-size <MAXIMAL_FILE_SIZE>\n          Maximum size of checked files in bytes, assigning lower value may speed up searching\n          \n          [default: 18446744073709551615]\n\n  -t, --tolerance <TOLERANCE>\n          Maximum difference between video frames, bigger value means that videos can looks more and more different (allowed values <0,20>)\n          \n          [default: 10]\n\n  -U, --skip-forward-amount <SKIP_FORWARD_AMOUNT>\n          Amount of seconds to skip forward in video. Allowed values are from 0 to 300. 0 means that no skipping will be done. Default is 15.\n          \n          [default: 15]\n\n  -B, --crop-detect <CROP_DETECT>\n          Detect and crop letterbox (black bar) regions before computing the video signature. Disable if you want to keep the full frame.\n          \n          [default: true]\n          [possible values: true, false]\n\n      --window-count <WINDOW_COUNT>\n          How many temporal windows are sampled per video when building the signature. More windows = more accurate matches, but slower scans. Allowed range: 1-20.\n          \n          [default: 5]\n\n      --duration-tolerance-pct <DURATION_TOLERANCE_PCT>\n          Videos are pre-grouped by duration before being compared. Two videos are considered candidates if their durations differ by no more than this percentage. Lower values speed up scanning but may miss matches when duration metadata is imprecise.\n          \n          [default: 20]\n\n      --min-matching-windows <MIN_MATCHING_WINDOWS>\n          Minimum fraction of temporal windows that must match between two videos to classify them as 'same content'. Higher values require more agreement across the full timeline.\n          \n          [default: 0.6]\n\n      --subclip-min-match <SUBCLIP_MIN_MATCH>\n          Minimum fraction of clip windows that must align inside the source video to flag a sub-clip match (a shorter video contained inside a longer one).\n          \n          [default: 0.5]\n\n  -A, --scan-duration <SCAN_DURATION>\n          Duration of video scanning in seconds. Longer duration provides more accurate results but takes more time. Allowed values are predefined in the application.\n          \n          [default: 10]\n\n      --generate-thumbnails\n          Generate thumbnails for found similar videos. Thumbnail preview is only available in GUI (krokiet/cedinia), but generating them via CLI can pre-populate the cache for later GUI usage.\n\n      --thumbnail-video-percentage-from-start <THUMBNAIL_VIDEO_PERCENTAGE_FROM_START>\n          Percentage of video duration from the start at which the thumbnail frame is captured. Thumbnail preview is only available in GUI, but generating them via CLI can pre-populate the cache for later GUI usage.\n          \n          [default: 10]\n\n      --generate-thumbnail-grid\n          When enabled, generates a grid of multiple frames instead of a single thumbnail frame. Thumbnail preview is only available in GUI, but generating them via CLI can pre-populate the cache for later GUI usage.\n\n      --thumbnail-grid-tiles-per-side <THUMBNAIL_GRID_TILES_PER_SIDE>\n          Number of tiles per side when generating a grid thumbnail (e.g. 2 means a 2x2 = 4-frame grid). Thumbnail preview is only available in GUI, but generating them via CLI can pre-populate the cache for later GUI usage.\n          \n          [default: 2]\n\n      --check-audio-content\n          When enabled, videos are also compared by their audio fingerprint. This is very resource-intensive and significantly slows down scanning.\n\n      --audio-similarity-percent <AUDIO_SIMILARITY_PERCENT>\n          Minimum percentage of audio duration that must match between two videos to consider them similar. Allowed range: 0.0-100.0.\n          \n          [default: 80]\n\n      --audio-maximum-difference <AUDIO_MAXIMUM_DIFFERENCE>\n          Maximum score difference allowed for matched audio segments. Lower values mean stricter matching. Allowed range: 0.0-10.0.\n          \n          [default: 3]\n\n      --audio-length-ratio <AUDIO_LENGTH_RATIO>\n          Minimum ratio between the shorter and longer audio duration. Videos where the shorter is less than this fraction of the longer are skipped. Allowed range: 0.0-1.0.\n          \n          [default: 0.1]\n\n      --audio-min-duration-seconds <AUDIO_MIN_DURATION_SECONDS>\n          Videos with audio duration shorter than this value are excluded from audio comparison.\n          \n          [default: 10]\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka video -d /home/rafal -f results.txt\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "reference-directories",
+          "short": "r",
+          "label": "参考目录",
+          "value": true,
+          "description": "List of reference directory(ies) (absolute paths). Files here appear as the reference entry in results - only non-reference files that match a reference file are reported. Files found exclusively in reference directories are not listed.",
+          "default": ""
+        },
+        {
+          "key": "delete-method",
+          "short": "D",
+          "label": "清理策略",
+          "value": true,
+          "description": "Method for selecting which files to delete from duplicate groups: AEN - All files Except Newest (keeps only newest) AEO - All files Except Oldest (keeps only oldest) ON - Only the Newest deleted (keeps all but newest) OO - Only the Oldest deleted (keeps all but oldest) AEB - All files Except Biggest (keeps only biggest) AES - All files Except Smallest (keeps only smallest) OB - Only the Biggest deleted (keeps all but biggest) OS - Only the Smallest deleted (keeps all but smallest) HARD - create hard links to save space NONE - do not delete files (default) [default: NONE]",
+          "default": "NONE"
+        },
+        {
+          "key": "dry-run",
+          "short": "Q",
+          "label": "预演，不修改文件",
+          "value": false,
+          "description": "Performs a dry run showing what operations would be performed without actually executing them.",
+          "default": ""
+        },
+        {
+          "key": "move-to-trash",
+          "short": "y",
+          "label": "移到回收站",
+          "value": false,
+          "description": "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.",
+          "default": ""
+        },
+        {
+          "key": "allow-hard-links",
+          "short": "L",
+          "label": "包含硬链接",
+          "value": false,
+          "description": "Treats hard links as separate files rather than ignoring them. By default, hard links are detected and only counted once.",
+          "default": ""
+        },
+        {
+          "key": "ignore-same-size",
+          "short": "J",
+          "label": "ignore same size",
+          "value": false,
+          "description": "Within each similar-file group, removes entries that share a file size with another entry in the same group. Groups that shrink to a single entry are discarded.",
+          "default": ""
+        },
+        {
+          "key": "ignore-same-resolution",
+          "short": "Z",
+          "label": "ignore same resolution",
+          "value": false,
+          "description": "Within each similar-file group, removes entries that share a resolution (WxH) with another entry in the same group. Groups that shrink to a single entry are discarded.",
+          "default": ""
+        },
+        {
+          "key": "minimal-file-size",
+          "short": "m",
+          "label": "最小文件（字节）",
+          "value": true,
+          "description": "Minimum size of checked files in bytes, assigning bigger value may speed up searching [default: 8192]",
+          "default": "8192"
+        },
+        {
+          "key": "maximal-file-size",
+          "short": "i",
+          "label": "最大文件（字节）",
+          "value": true,
+          "description": "Maximum size of checked files in bytes, assigning lower value may speed up searching [default: 18446744073709551615]",
+          "default": "18446744073709551615"
+        },
+        {
+          "key": "tolerance",
+          "short": "t",
+          "label": "tolerance",
+          "value": true,
+          "description": "Maximum difference between video frames, bigger value means that videos can looks more and more different (allowed values <0,20>) [default: 10]",
+          "default": "10"
+        },
+        {
+          "key": "skip-forward-amount",
+          "short": "U",
+          "label": "skip forward amount",
+          "value": true,
+          "description": "Amount of seconds to skip forward in video. Allowed values are from 0 to 300. 0 means that no skipping will be done. Default is 15. [default: 15]",
+          "default": "15"
+        },
+        {
+          "key": "crop-detect",
+          "short": "B",
+          "label": "crop detect",
+          "value": true,
+          "description": "Detect and crop letterbox (black bar) regions before computing the video signature. Disable if you want to keep the full frame. [default: true] [possible values: true, false]",
+          "default": "true"
+        },
+        {
+          "key": "window-count",
+          "short": null,
+          "label": "window count",
+          "value": true,
+          "description": "How many temporal windows are sampled per video when building the signature. More windows = more accurate matches, but slower scans. Allowed range: 1-20. [default: 5]",
+          "default": "5"
+        },
+        {
+          "key": "duration-tolerance-pct",
+          "short": null,
+          "label": "duration tolerance pct",
+          "value": true,
+          "description": "Videos are pre-grouped by duration before being compared. Two videos are considered candidates if their durations differ by no more than this percentage. Lower values speed up scanning but may miss matches when duration metadata is imprecise. [default: 20]",
+          "default": "20"
+        },
+        {
+          "key": "min-matching-windows",
+          "short": null,
+          "label": "min matching windows",
+          "value": true,
+          "description": "Minimum fraction of temporal windows that must match between two videos to classify them as 'same content'. Higher values require more agreement across the full timeline. [default: 0.6]",
+          "default": "0.6"
+        },
+        {
+          "key": "subclip-min-match",
+          "short": null,
+          "label": "subclip min match",
+          "value": true,
+          "description": "Minimum fraction of clip windows that must align inside the source video to flag a sub-clip match (a shorter video contained inside a longer one). [default: 0.5]",
+          "default": "0.5"
+        },
+        {
+          "key": "scan-duration",
+          "short": "A",
+          "label": "scan duration",
+          "value": true,
+          "description": "Duration of video scanning in seconds. Longer duration provides more accurate results but takes more time. Allowed values are predefined in the application. [default: 10]",
+          "default": "10"
+        },
+        {
+          "key": "generate-thumbnails",
+          "short": null,
+          "label": "generate thumbnails",
+          "value": false,
+          "description": "Generate thumbnails for found similar videos. Thumbnail preview is only available in GUI (krokiet/cedinia), but generating them via CLI can pre-populate the cache for later GUI usage.",
+          "default": ""
+        },
+        {
+          "key": "thumbnail-video-percentage-from-start",
+          "short": null,
+          "label": "thumbnail video percentage from start",
+          "value": true,
+          "description": "Percentage of video duration from the start at which the thumbnail frame is captured. Thumbnail preview is only available in GUI, but generating them via CLI can pre-populate the cache for later GUI usage. [default: 10]",
+          "default": "10"
+        },
+        {
+          "key": "generate-thumbnail-grid",
+          "short": null,
+          "label": "generate thumbnail grid",
+          "value": false,
+          "description": "When enabled, generates a grid of multiple frames instead of a single thumbnail frame. Thumbnail preview is only available in GUI, but generating them via CLI can pre-populate the cache for later GUI usage.",
+          "default": ""
+        },
+        {
+          "key": "thumbnail-grid-tiles-per-side",
+          "short": null,
+          "label": "thumbnail grid tiles per side",
+          "value": true,
+          "description": "Number of tiles per side when generating a grid thumbnail (e.g. 2 means a 2x2 = 4-frame grid). Thumbnail preview is only available in GUI, but generating them via CLI can pre-populate the cache for later GUI usage. [default: 2]",
+          "default": "2"
+        },
+        {
+          "key": "check-audio-content",
+          "short": null,
+          "label": "check audio content",
+          "value": false,
+          "description": "When enabled, videos are also compared by their audio fingerprint. This is very resource-intensive and significantly slows down scanning.",
+          "default": ""
+        },
+        {
+          "key": "audio-similarity-percent",
+          "short": null,
+          "label": "audio similarity percent",
+          "value": true,
+          "description": "Minimum percentage of audio duration that must match between two videos to consider them similar. Allowed range: 0.0-100.0. [default: 80]",
+          "default": "80"
+        },
+        {
+          "key": "audio-maximum-difference",
+          "short": null,
+          "label": "audio maximum difference",
+          "value": true,
+          "description": "Maximum score difference allowed for matched audio segments. Lower values mean stricter matching. Allowed range: 0.0-10.0. [default: 3]",
+          "default": "3"
+        },
+        {
+          "key": "audio-length-ratio",
+          "short": null,
+          "label": "audio length ratio",
+          "value": true,
+          "description": "Minimum ratio between the shorter and longer audio duration. Videos where the shorter is less than this fraction of the longer are skipped. Allowed range: 0.0-1.0. [default: 0.1]",
+          "default": "0.1"
+        },
+        {
+          "key": "audio-min-duration-seconds",
+          "short": null,
+          "label": "audio min duration seconds",
+          "value": true,
+          "description": "Videos with audio duration shorter than this value are excluded from audio comparison. [default: 10]",
+          "default": "10"
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka video -d /home/rafal -f results.txt",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "id": "ext",
+      "title": "扩展名检查",
+      "help": "Finds files with invalid extensions\n\nUsage: mac_czkawka_cli_arm64 ext [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -F, --fix-extensions\n          Automatically rename files to use proper extensions based on their detected file type\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka ext -d /home/czokolada/ -f results.txt\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "fix-extensions",
+          "short": "F",
+          "label": "修复扩展名",
+          "value": false,
+          "description": "Automatically rename files to use proper extensions based on their detected file type",
+          "default": ""
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka ext -d /home/czokolada/ -f results.txt",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "id": "bad-names",
+      "title": "文件名检查",
+      "help": "Finds files with bad names\n\nUsage: mac_czkawka_cli_arm64 bad-names [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -D, --delete-files\n          Automatically delete all found items matching the criteria.\n\n  -Q, --dry-run\n          Performs a dry run showing what operations would be performed without actually executing them.\n\n  -y, --move-to-trash\n          Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.\n\n  -u, --uppercase-extension\n          Detects files with uppercase extensions (e.g., .JPG instead of .jpg)\n\n  -j, --emoji-used\n          Detects files with emoji characters in their names\n\n  -w, --space-at-start-or-end\n          Detects files with spaces at the beginning or end of their names\n\n  -n, --non-ascii-graphical\n          Detects files with non-ASCII graphical characters in their names\n\n  -r, --restricted-charset <RESTRICTED_CHARSET>\n          List of allowed special characters. Any other characters will be flagged as problematic. Example: '_- .' for underscore, dash, space, and dot\n\n  -a, --remove-duplicated-non-alphanumeric\n          Detects files with duplicated non-alphanumeric characters (e.g., 'file__name' or 'file..txt')\n\n  -F, --fix-names\n          Automatically rename files to fix detected naming issues\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka bad-names -d /home/rafal -f results.txt\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "delete-files",
+          "short": "D",
+          "label": "删除匹配文件",
+          "value": false,
+          "description": "Automatically delete all found items matching the criteria.",
+          "default": ""
+        },
+        {
+          "key": "dry-run",
+          "short": "Q",
+          "label": "预演，不修改文件",
+          "value": false,
+          "description": "Performs a dry run showing what operations would be performed without actually executing them.",
+          "default": ""
+        },
+        {
+          "key": "move-to-trash",
+          "short": "y",
+          "label": "移到回收站",
+          "value": false,
+          "description": "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.",
+          "default": ""
+        },
+        {
+          "key": "uppercase-extension",
+          "short": "u",
+          "label": "大写扩展名",
+          "value": false,
+          "description": "Detects files with uppercase extensions (e.g., .JPG instead of .jpg)",
+          "default": ""
+        },
+        {
+          "key": "emoji-used",
+          "short": "j",
+          "label": "含表情符号",
+          "value": false,
+          "description": "Detects files with emoji characters in their names",
+          "default": ""
+        },
+        {
+          "key": "space-at-start-or-end",
+          "short": "w",
+          "label": "首尾空格",
+          "value": false,
+          "description": "Detects files with spaces at the beginning or end of their names",
+          "default": ""
+        },
+        {
+          "key": "non-ascii-graphical",
+          "short": "n",
+          "label": "非 ASCII 字符",
+          "value": false,
+          "description": "Detects files with non-ASCII graphical characters in their names",
+          "default": ""
+        },
+        {
+          "key": "restricted-charset",
+          "short": "r",
+          "label": "允许的特殊字符",
+          "value": true,
+          "description": "List of allowed special characters. Any other characters will be flagged as problematic. Example: '_- .' for underscore, dash, space, and dot",
+          "default": ""
+        },
+        {
+          "key": "remove-duplicated-non-alphanumeric",
+          "short": "a",
+          "label": "重复标点",
+          "value": false,
+          "description": "Detects files with duplicated non-alphanumeric characters (e.g., 'file__name' or 'file..txt')",
+          "default": ""
+        },
+        {
+          "key": "fix-names",
+          "short": "F",
+          "label": "修复文件名",
+          "value": false,
+          "description": "Automatically rename files to fix detected naming issues",
+          "default": ""
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka bad-names -d /home/rafal -f results.txt",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "id": "video-optimizer",
+      "title": "视频优化",
+      "help": "Optimizes video files (transcode or crop)\n\nUsage: mac_czkawka_cli_arm64 video-optimizer [OPTIONS] --directories <DIRECTORIES> <COMMAND>\n\nCommands:\n  transcode  Transcode videos to different codec\n  crop       Crop black bars from videos\n  help       Print this message or the help of the given subcommand(s)\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka video-optimizer -d /home/rafal -f results.txt\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka video-optimizer -d /home/rafal -f results.txt",
+          "default": ""
+        }
+      ],
+      "subcommands": [
+        {
+          "id": "transcode",
+          "title": "转码",
+          "options": [
+            {
+              "key": "excluded-codecs",
+              "short": "c",
+              "label": "excluded codecs",
+              "value": true,
+              "description": "Comma-separated list of video codecs to exclude from transcoding (e.g., 'h265,av1,vp9')",
+              "default": ""
+            },
+            {
+              "key": "generate-thumbnails",
+              "short": "t",
+              "label": "generate thumbnails",
+              "value": false,
+              "description": "Generate video thumbnails for preview",
+              "default": ""
+            },
+            {
+              "key": "thumbnail-percentage",
+              "short": "V",
+              "label": "thumbnail percentage",
+              "value": true,
+              "description": "Percentage from start of video where thumbnail should be taken (1-99%) [default: 10]",
+              "default": "10"
+            },
+            {
+              "key": "thumbnail-grid",
+              "short": "g",
+              "label": "thumbnail grid",
+              "value": false,
+              "description": "Generate a grid of thumbnails instead of single thumbnail",
+              "default": ""
+            },
+            {
+              "key": "thumbnail-grid-tiles-per-side",
+              "short": "Z",
+              "label": "thumbnail grid tiles per side",
+              "value": true,
+              "description": "Number of tiles per side for thumbnail grid (2-6). Only used if -g is enabled. [default: 3]",
+              "default": "3"
+            },
+            {
+              "key": "fix-videos",
+              "short": "F",
+              "label": "fix videos",
+              "value": false,
+              "description": "Actually perform the transcoding on found videos",
+              "default": ""
+            },
+            {
+              "key": "target-codec",
+              "short": null,
+              "label": "target codec",
+              "value": true,
+              "description": "Target video codec for transcoding (h264, h265, av1, vp9). Only used with -F flag. [default: h265]",
+              "default": "h265"
+            },
+            {
+              "key": "quality",
+              "short": null,
+              "label": "quality",
+              "value": true,
+              "description": "Video encoding quality (0-51). Lower values mean better quality. 23 is default for h264/h265, 30 for av1/vp9. [default: 23]",
+              "default": "23"
+            },
+            {
+              "key": "fail-if-not-smaller",
+              "short": null,
+              "label": "fail if not smaller",
+              "value": false,
+              "description": "Fail the optimization if resulting file is not smaller than original",
+              "default": ""
+            },
+            {
+              "key": "overwrite-original",
+              "short": null,
+              "label": "overwrite original",
+              "value": false,
+              "description": "Overwrite original video files with optimized versions",
+              "default": ""
+            },
+            {
+              "key": "limit-video-size",
+              "short": null,
+              "label": "limit video size",
+              "value": false,
+              "description": "Limit maximum video dimensions",
+              "default": ""
+            },
+            {
+              "key": "max-width",
+              "short": null,
+              "label": "max width",
+              "value": true,
+              "description": "Maximum video width in pixels when limit_video_size is enabled [default: 1920]",
+              "default": "1920"
+            },
+            {
+              "key": "max-height",
+              "short": null,
+              "label": "max height",
+              "value": true,
+              "description": "Maximum video height in pixels when limit_video_size is enabled [default: 1080]",
+              "default": "1080"
+            },
+            {
+              "key": "noise-reduction",
+              "short": null,
+              "label": "noise reduction",
+              "value": true,
+              "description": "Noise reduction filter to apply during transcoding. none - disabled hqdn3d - general-purpose temporal/spatial denoiser; higher strength = more aggressive noise removal [default: none]",
+              "default": "none"
+            },
+            {
+              "key": "noise-reduction-strength",
+              "short": null,
+              "label": "noise reduction strength",
+              "value": true,
+              "description": "Strength of the noise reduction filter (1-10). Higher values remove more noise but may soften fine details. Only used when --noise-reduction is not 'none'. [default: 5]",
+              "default": "5"
+            },
+            {
+              "key": "custom-ffmpeg-command",
+              "short": null,
+              "label": "custom ffmpeg command",
+              "value": true,
+              "description": "Custom ffmpeg command-line arguments to pass to ffmpeg during transcoding. When set, most other encoding options are ignored.",
+              "default": ""
+            },
+            {
+              "key": "help",
+              "short": "h",
+              "label": "help",
+              "value": false,
+              "description": "Print help (see a summary with '-h')",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "crop",
+          "title": "裁剪黑边",
+          "options": [
+            {
+              "key": "crop-mechanism",
+              "short": "m",
+              "label": "crop mechanism",
+              "value": true,
+              "description": "Mechanism for detecting areas to crop: 'blackbars' for removing black bars, 'staticcontent' for detecting static content areas [default: blackbars]",
+              "default": "blackbars"
+            },
+            {
+              "key": "black-pixel-threshold",
+              "short": "k",
+              "label": "black pixel threshold",
+              "value": true,
+              "description": "Threshold for considering a pixel as black when detecting black bars (0-128). Lower values are stricter. [default: 32]",
+              "default": "32"
+            },
+            {
+              "key": "black-bar-percentage",
+              "short": "b",
+              "label": "black bar percentage",
+              "value": true,
+              "description": "Minimum percentage of black pixels in a line to consider it a black bar (50-100%) [default: 90]",
+              "default": "90"
+            },
+            {
+              "key": "max-samples",
+              "short": "s",
+              "label": "max samples",
+              "value": true,
+              "description": "Maximum number of video frames to sample when detecting black bars (5-1000) [default: 20]",
+              "default": "20"
+            },
+            {
+              "key": "min-crop-size",
+              "short": "z",
+              "label": "min crop size",
+              "value": true,
+              "description": "Minimum size in pixels for crop area to be considered (1-1000) [default: 10]",
+              "default": "10"
+            },
+            {
+              "key": "generate-thumbnails",
+              "short": "t",
+              "label": "generate thumbnails",
+              "value": false,
+              "description": "Generate video thumbnails for preview",
+              "default": ""
+            },
+            {
+              "key": "thumbnail-percentage",
+              "short": "V",
+              "label": "thumbnail percentage",
+              "value": true,
+              "description": "Percentage from start of video where thumbnail should be taken (1-99%) [default: 10]",
+              "default": "10"
+            },
+            {
+              "key": "thumbnail-grid",
+              "short": "g",
+              "label": "thumbnail grid",
+              "value": false,
+              "description": "Generate a grid of thumbnails instead of single thumbnail",
+              "default": ""
+            },
+            {
+              "key": "thumbnail-grid-tiles-per-side",
+              "short": "Z",
+              "label": "thumbnail grid tiles per side",
+              "value": true,
+              "description": "Number of tiles per side for thumbnail grid (2-6). Only used if -g is enabled. [default: 3]",
+              "default": "3"
+            },
+            {
+              "key": "fix-videos",
+              "short": "F",
+              "label": "fix videos",
+              "value": false,
+              "description": "Actually perform the cropping on found videos",
+              "default": ""
+            },
+            {
+              "key": "overwrite-original",
+              "short": null,
+              "label": "overwrite original",
+              "value": false,
+              "description": "Overwrite original video files with cropped versions",
+              "default": ""
+            },
+            {
+              "key": "target-codec",
+              "short": null,
+              "label": "target codec",
+              "value": true,
+              "description": "Optional: Also transcode to different codec while cropping. Only used with -F flag.",
+              "default": ""
+            },
+            {
+              "key": "quality",
+              "short": null,
+              "label": "quality",
+              "value": true,
+              "description": "Video encoding quality when transcoding (0-51). Only used when target_codec is specified.",
+              "default": ""
+            },
+            {
+              "key": "help",
+              "short": "h",
+              "label": "help",
+              "value": false,
+              "description": "Print help (see a summary with '-h')",
+              "default": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "exif-remover",
+      "title": "EXIF 清理",
+      "help": "Finds and removes EXIF tags from images\n\nUsage: mac_czkawka_cli_arm64 exif-remover [OPTIONS] --directories <DIRECTORIES>\n\nOptions:\n  -T, --thread-number <THREAD_NUMBER>\n          Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.\n          \n          [default: 0]\n\n  -d, --directories <DIRECTORIES>\n          List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.\n\n  -e, --excluded-directories <EXCLUDED_DIRECTORIES>\n          List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.\n\n  -E, --excluded-items <EXCLUDED_ITEMS>\n          List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).\n\n  -x, --allowed-extensions <ALLOWED_EXTENSIONS>\n          List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)\n\n  -P, --excluded-extensions <EXCLUDED_EXTENSIONS>\n          List of file extensions to exclude from search.\n\n  -f, --file-to-save <file-name>\n          Saves the search results into a human-readable formatted text file.\n\n  -C, --compact-file-to-save <json-file-name>\n          Saves the search results into a compact (minified) JSON file without extra whitespace.\n\n  -p, --pretty-file-to-save <pretty-json-file-name>\n          Saves the search results into a pretty-printed (indented) JSON file for better readability.\n\n  -R, --not-recursive\n          Disables recursive directory traversal. Only files in the top-level directories will be scanned.\n\n  -X, --exclude-other-filesystems\n          Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)\n\n  -N, --do-not-print-results\n          Suppresses printing of search results to the console. Useful when only saving results to files.\n\n  -M, --do-not-print-messages\n          Suppresses all informational messages, warnings, and errors from being printed to console.\n\n  -W, --ignore-error-code-on-found\n          Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.\n\n  -H, --disable-cache\n          Disables the cache system. This will make scanning slower but ensures fresh results without cached data.\n\n  -i, --ignored-tags <IGNORED_TAGS>\n          Comma-separated list of EXIF tag names to ignore (not remove). Example: 'Orientation,DateTime,Software'\n\n  -F, --fix-exif\n          Actually remove EXIF tags from files\n\n  -o, --override-file\n          Override original files instead of creating a copy with 'czkawka_cleaned_exif' inserted before the extension (e.g. 'photo.jpg' becomes 'photo.czkawka_cleaned_exif.jpg')\n\n  -h, --help\n          Print help (see a summary with '-h')\n\nEXAMPLE:\n    czkawka exif-remover -d /home/rafal -f results.txt\n",
+      "options": [
+        {
+          "key": "thread-number",
+          "short": "T",
+          "label": "线程数",
+          "value": true,
+          "description": "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage. [default: 0]",
+          "default": "0"
+        },
+        {
+          "key": "directories",
+          "short": "d",
+          "label": "扫描目录",
+          "value": true,
+          "description": "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders.",
+          "default": ""
+        },
+        {
+          "key": "excluded-directories",
+          "short": "e",
+          "label": "排除目录",
+          "value": true,
+          "description": "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored.",
+          "default": ""
+        },
+        {
+          "key": "excluded-items",
+          "short": "E",
+          "label": "排除规则",
+          "value": true,
+          "description": "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows).",
+          "default": ""
+        },
+        {
+          "key": "allowed-extensions",
+          "short": "x",
+          "label": "包含扩展名",
+          "value": true,
+          "description": "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,opus,tta,wma,webm)",
+          "default": ""
+        },
+        {
+          "key": "excluded-extensions",
+          "short": "P",
+          "label": "排除扩展名",
+          "value": true,
+          "description": "List of file extensions to exclude from search.",
+          "default": ""
+        },
+        {
+          "key": "file-to-save",
+          "short": "f",
+          "label": "file to save",
+          "value": true,
+          "description": "Saves the search results into a human-readable formatted text file.",
+          "default": ""
+        },
+        {
+          "key": "compact-file-to-save",
+          "short": "C",
+          "label": "compact file to save",
+          "value": true,
+          "description": "Saves the search results into a compact (minified) JSON file without extra whitespace.",
+          "default": ""
+        },
+        {
+          "key": "pretty-file-to-save",
+          "short": "p",
+          "label": "pretty file to save",
+          "value": true,
+          "description": "Saves the search results into a pretty-printed (indented) JSON file for better readability.",
+          "default": ""
+        },
+        {
+          "key": "not-recursive",
+          "short": "R",
+          "label": "只扫描当前层",
+          "value": false,
+          "description": "Disables recursive directory traversal. Only files in the top-level directories will be scanned.",
+          "default": ""
+        },
+        {
+          "key": "exclude-other-filesystems",
+          "short": "X",
+          "label": "不跨文件系统",
+          "value": false,
+          "description": "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-results",
+          "short": "N",
+          "label": "do not print results",
+          "value": false,
+          "description": "Suppresses printing of search results to the console. Useful when only saving results to files.",
+          "default": ""
+        },
+        {
+          "key": "do-not-print-messages",
+          "short": "M",
+          "label": "do not print messages",
+          "value": false,
+          "description": "Suppresses all informational messages, warnings, and errors from being printed to console.",
+          "default": ""
+        },
+        {
+          "key": "ignore-error-code-on-found",
+          "short": "W",
+          "label": "ignore error code on found",
+          "value": false,
+          "description": "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.",
+          "default": ""
+        },
+        {
+          "key": "disable-cache",
+          "short": "H",
+          "label": "禁用缓存",
+          "value": false,
+          "description": "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.",
+          "default": ""
+        },
+        {
+          "key": "ignored-tags",
+          "short": "i",
+          "label": "ignored tags",
+          "value": true,
+          "description": "Comma-separated list of EXIF tag names to ignore (not remove). Example: 'Orientation,DateTime,Software'",
+          "default": ""
+        },
+        {
+          "key": "fix-exif",
+          "short": "F",
+          "label": "移除 EXIF",
+          "value": false,
+          "description": "Actually remove EXIF tags from files",
+          "default": ""
+        },
+        {
+          "key": "override-file",
+          "short": "o",
+          "label": "覆盖原文件",
+          "value": false,
+          "description": "Override original files instead of creating a copy with 'czkawka_cleaned_exif' inserted before the extension (e.g. 'photo.jpg' becomes 'photo.czkawka_cleaned_exif.jpg')",
+          "default": ""
+        },
+        {
+          "key": "help",
+          "short": "h",
+          "label": "help",
+          "value": false,
+          "description": "Print help (see a summary with '-h') EXAMPLE: czkawka exif-remover -d /home/rafal -f results.txt",
+          "default": ""
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "operation"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-f0-9-]{36}$" },
+    "operation": { "enum": ["trash", "fix"] },
+    "paths": { "type": "array", "minItems": 1, "maxItems": 500, "uniqueItems": true, "items": { "type": "string" } }
+  },
+  "if": { "properties": { "operation": { "const": "trash" } } },
+  "then": { "required": ["paths"] }
+}

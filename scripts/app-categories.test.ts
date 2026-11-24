@@ -9,7 +9,7 @@ test('repository Apps declare supported primary categories and derive marketplac
   const expected = {
     communication: ['moss.feishu', 'moss.openim'],
     knowledge: ['moss.library', 'moss.notion', 'moss.zsxq'],
-    files: ['moss.drive', 'moss.filesystem', 'moss.backup'],
+    files: ['moss.drive', 'moss.filesystem', 'moss.backup', 'moss.file-management'],
     creative: ['moss.drawio', 'moss.canva', 'moss.media-tools'],
     data: ['moss.database', 'moss.excel', 'moss.bazhuayu'],
     sales: ['moss.sharecrm', 'moss.yunke-cli'],

@@ -32,6 +32,8 @@ test('offline uPlot: zoom, series, state sync, escaping, narrow and dark preview
     assert.deepEqual(await page.evaluate(() => window.saved.hiddenSeries), [1])
     await page.locator('#filter').fill(type === 'line' ? '二月' : '10')
     assert.equal(await page.locator('.table tbody tr:visible').count(), 1)
+    assert.equal(await page.locator('#row-count').innerText(), '1 / 4 行')
+    await page.locator('#filter').fill('')
     const bounds = await page.locator('.u-over').boundingBox()
     await page.mouse.move(bounds.x + bounds.width * .2, bounds.y + bounds.height * .5)
     await page.mouse.down(); await page.mouse.move(bounds.x + bounds.width * .7, bounds.y + bounds.height * .5, { steps: 8 }); await page.mouse.up()
@@ -43,7 +45,7 @@ test('offline uPlot: zoom, series, state sync, escaping, narrow and dark preview
     await page.evaluate(() => dispatchEvent(new CustomEvent('moss:state', { detail: { filter: '', hiddenSeries: [], zoom: [2.5, 8] } })))
     await page.waitForTimeout(80)
     assert.equal(await page.evaluate(() => window.saves), saves, 'incoming state must not echo to the Host')
-    assert.equal(await page.locator('.table tbody tr:visible').count(), 4)
+    assert.equal(await page.locator('.table tbody tr:visible').count(), type === 'scatter' ? 0 : 4)
     assert.equal(await page.locator('[data-toggle="1"]').isChecked(), true)
     for (const width of [1100, 480]) for (const colorScheme of ['light', 'dark']) {
       await page.setViewportSize({ width, height: 800 }); await page.emulateMedia({ colorScheme })

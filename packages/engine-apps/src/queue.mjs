@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process'
-import { WORKER_READY_MESSAGE, WORKER_START_MESSAGE } from './runtime.mjs'
+import { WORKER_PROGRESS_MESSAGE, WORKER_READY_MESSAGE, WORKER_START_MESSAGE } from './runtime.mjs'
 
 const activeStatuses = new Set(['queued', 'running'])
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -148,6 +148,7 @@ export class WorkerQueue {
     const entry = this.active.get(id)
     if (!entry) { await this.endLease(id); return }
     entry.activityFailure = activityFailureMessage
+    entry.preparing?.abort(new Error(activityFailureMessage))
     if (entry.child) this.stopChild(entry)
   }
 
@@ -259,6 +260,7 @@ export class WorkerQueue {
 
   async cancel(id) {
     const task = await this.store.cancel(id)
+    this.active.get(id)?.preparing?.abort(new Error('任务已取消'))
     const pending = this.pending.get(id)
     if (!pending) return task
     this.admitting++
@@ -316,6 +318,10 @@ export class WorkerQueue {
         }
         await this.launch(entry)
       } catch (error) {
+        if (this.closed && !entry.child && !entry.activityFailure && !await this.store.isCanceled(id)) {
+          this.active.delete(id); this.pending.set(id, task); entry.complete()
+          break
+        }
         await this.finalize(entry, 'failed', entry.activityFailure || String(error.message || error))
       }
     }
@@ -324,10 +330,19 @@ export class WorkerQueue {
   async launch(entry) {
     const { task } = entry
     if (entry.activityFailure) throw new Error(entry.activityFailure)
+    const preparing = entry.preparing = new AbortController()
+    const signal = AbortSignal.any([preparing.signal, this.shutdownController.signal])
+    let env
+    try {
+      env = await runWithSignal(() => this.env(task, signal), signal)
+      if (await this.store.isCanceled(task.id)) throw new Error('任务已取消')
+      signal.throwIfAborted()
+    } finally { entry.preparing = null }
     const child = spawn(this.executable, [this.worker, this.dataDir, task.id], {
-      stdio: ['ignore', 'ignore', 'ignore', 'ipc'], shell: false, env: { ...process.env, ...this.env() },
+      stdio: ['ignore', 'ignore', 'ignore', 'ipc'], shell: false, env: { ...process.env, ...env },
     })
     entry.child = child
+    child.on('message', message => { if (message?.type === WORKER_PROGRESS_MESSAGE) this.notifyChanged() })
     child.once('error', error => { entry.error = error })
     child.once('close', (code, signal) => {
       void entry.ready.catch(() => {}).then(() => this.finalize(entry, null, this.exitMessage(entry, code, signal))).catch(this.onError)

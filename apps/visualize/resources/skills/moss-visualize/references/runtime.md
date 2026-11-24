@@ -37,3 +37,5 @@ render();
 创建返回的 `result.presentation` 可以直接传给 Moss 的 moss_present 工具。它负责当前会话右侧动态展示，用户关闭跟随或固定成果时应尊重 deferred 返回。仅在最终回复渲染引用不意味着右侧已经打开。
 
 内置 `mode=chart` 的 line/scatter 使用随包 uPlot，无需额外配置或外部脚本。支持拖动 X 轴缩放、重置、悬停图例与系列切换，交互状态字段为 filter、hiddenSeries、zoom。HTML 导出包含所需代码，SVG 导出仍为静态图。
+
+内置图表的 filter、hiddenSeries、from、to、zoom 共同控制图形、明细和导出范围。导出当前视图使用 visualize_export_view；作品与导出文件独立保存。

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.visualize",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "displayName": "可视化",
   "category": "data",
   "keywords": [
@@ -16,9 +16,9 @@
   "overview": {
     "description": "直接在主会话里把想法和数据变成交互图表、原理演示与可视化界面。筛选数据、查看细节、对比方案，或拖动滑块观察结果变化。作品可以在会话和右侧成果区操作，也能导出为离线文件。用自然语言描述需求即可。",
     "examples": [
-      "用可调节的交互演示解释复利，可以改变本金、年利率和投资年限。",
-      "把这组数据做成可筛选的销售图表：华东 120 万、华南 85 万、华北 96 万。",
-      "用交互图演示太阳、地球和月球的运动，支持暂停和调整速度。"
+      "把这份销售 Excel 按月汇总，按地区画堆叠柱图。",
+      "把不等间隔的销售日期画成趋势图，筛选后导出当前视图。",
+      "用双方案定价演示比较收入和毛利，支持调整价格与销量。"
     ]
   },
   "icon": "assets/icon.svg",
@@ -104,6 +104,18 @@
         "inputSchema": "schemas/empty.json",
         "outputSchema": "schemas/result.json",
         "timeoutMs": 30000
+      },
+      {
+        "name": "files.import",
+        "inputSchema": "schemas/inspect.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "views.export",
+        "inputSchema": "schemas/view.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
       }
     ],
     "storage": "session"
@@ -133,7 +145,7 @@
       {
         "id": "visualize_create",
         "title": "创建可视化",
-        "description": "根据 CSV 数据生成柱形图、折线图、饼图、散点图或表格，或保存提供的自包含 HTML 交互演示。mode=chart 使用 csv，mode=html 使用 html。返回任务 id，用 visualize_status 查询；修改已有作品时传 parentId 并提供完整新内容，保留旧版本。",
+        "description": "从会话 CSV/Excel 附件或 CSV 文本生成图表、表格，或用自包含 HTML 创作演示。可指定工作表、字段映射、按月汇总及地区分组。先用 visualize_inspect 查看附件字段。修改提供 parentId，旧版保留。",
         "action": "tasks.start",
         "inputSchema": "schemas/start.json",
         "effect": "write"
@@ -169,6 +181,22 @@
         "action": "catalog.get",
         "inputSchema": "schemas/empty.json",
         "effect": "read"
+      },
+      {
+        "id": "visualize_inspect",
+        "title": "查看附件字段",
+        "description": "将指定的 CSV 或 Excel 附件导入本会话，返回附件副本路径、工作表、表头和前五行，供确认字段映射。",
+        "action": "files.import",
+        "inputSchema": "schemas/inspect.json",
+        "effect": "write"
+      },
+      {
+        "id": "visualize_export_view",
+        "title": "保存当前图表视图",
+        "description": "根据原任务 id、交互状态 view 和格式 csv 或 svg，将当前视图保存到当前会话作品目录并返回可打开的链接。",
+        "action": "views.export",
+        "inputSchema": "schemas/view.json",
+        "effect": "write"
       }
     ],
     "resourceProviders": [

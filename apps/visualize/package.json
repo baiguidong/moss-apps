@@ -1,6 +1,6 @@
 {
   "name": "@moss/visualize-app",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,9 @@
   "dependencies": {
     "@moss/app-sdk": "workspace:*",
     "@moss/engine-apps": "workspace:*",
-    "uplot": "1.6.32"
+    "uplot": "1.6.32",
+    "@moss/creation-apps": "workspace:*",
+    "exceljs": "4.4.0"
   },
   "devDependencies": {
     "playwright": "1.58.2"

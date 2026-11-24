@@ -1,0 +1,87 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "command",
+    "paths"
+  ],
+  "properties": {
+    "command": {
+      "type": "string",
+      "enum": [
+        "dup",
+        "empty-folders",
+        "big",
+        "empty-files",
+        "temp",
+        "image",
+        "music",
+        "symlinks",
+        "broken",
+        "video",
+        "ext",
+        "bad-names",
+        "video-optimizer",
+        "exif-remover"
+      ],
+      "description": "扫描类别，如 dup（重复文件）、big（大文件）、image（相似图片）"
+    },
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "maxItems": 100,
+      "description": "已有本地目录的绝对路径"
+    },
+    "options": {
+      "type": "object",
+      "description": "使用能力查询工具返回的参数名。开关传布尔值，其他值传字符串，重复参数传字符串数组。",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "subcommand": {
+      "type": "string",
+      "enum": [
+        "transcode",
+        "crop"
+      ],
+      "description": "video-optimizer 的子命令"
+    },
+    "suboptions": {
+      "type": "object",
+      "description": "使用能力查询工具返回的参数名。开关传布尔值，其他值传字符串，重复参数传字符串数组。",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
