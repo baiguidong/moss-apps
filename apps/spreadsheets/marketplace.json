@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "appId": "moss.spreadsheets",
-  "summary": "在主会话中创建、读取和修改 Excel 表格，计算公式并预览数据。",
-  "description": "在主会话中创建、读取和修改 Excel 表格，计算公式并预览数据。",
+  "summary": "在主会话中创建表格，在本地工作台编辑、重算并导出 XLSX。",
+  "description": "在主会话中创建表格，在本地工作台编辑、重算并导出 XLSX。",
   "platforms": [
     "darwin-arm64",
     "darwin-x64",

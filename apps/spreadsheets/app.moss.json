@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.spreadsheets",
-  "version": "0.2.10",
+  "version": "0.2.17",
   "displayName": "表格",
   "category": "knowledge",
   "keywords": [
@@ -9,7 +9,7 @@
     "创作",
     "内置"
   ],
-  "description": "在主会话中创建、读取和修改 Excel 表格，计算公式并预览数据。",
+  "description": "在主会话中创建表格，在本地工作台编辑、重算并导出 XLSX。",
   "overview": {
     "description": "在主会话中创建、读取和修改 Excel 表格，计算公式并预览数据。 用自然语言描述需求，成果在主会话和右侧展示。修改会保留原版本。",
     "examples": [
@@ -113,6 +113,48 @@
         "inputSchema": "schemas/empty.json",
         "outputSchema": "schemas/result.json",
         "timeoutMs": 30000
+      },
+      {
+        "name": "editor.open",
+        "inputSchema": "schemas/editor-open.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "editor.cells",
+        "inputSchema": "schemas/editor-cells.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "editor.status",
+        "inputSchema": "schemas/editor-status.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "editor.save",
+        "inputSchema": "schemas/editor-save.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "editor.export",
+        "inputSchema": "schemas/editor-open.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "editor.start",
+        "inputSchema": "schemas/start.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
+      },
+      {
+        "name": "editor.history",
+        "inputSchema": "schemas/editor-open.json",
+        "outputSchema": "schemas/result.json",
+        "timeoutMs": 300000
       }
     ],
     "storage": "session"
@@ -214,9 +256,20 @@
         "listAction": "composer.list",
         "resolveAction": "composer.resolve"
       }
+    ],
+    "views": [
+      {
+        "id": "workbook",
+        "title": "表格工作台",
+        "route": "#/"
+      }
     ]
   },
   "navigation": {
-    "location": "none"
+    "location": "more",
+    "viewId": "workbook"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html"
   }
 }

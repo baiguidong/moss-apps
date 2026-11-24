@@ -1,10 +1,10 @@
 {
   "name": "@moss/spreadsheets-app",
-  "version": "0.2.10",
+  "version": "0.2.17",
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check src/backend/engine.mjs && node --check src/preview/table.mjs && node --check src/backend/preview.mjs",
+    "check": "node --check src/backend/engine.mjs && node --check src/preview/table.mjs && node --check src/backend/preview.mjs && node --check src/backend/editor.mjs && node --check src/ui/main.mjs",
     "test": "node scripts/build-preview.mjs && node --test tests/*.test.mjs",
     "build": "node scripts/build.mjs",
     "test:preview": "node scripts/build-preview.mjs && node --test tests/preview.browser.mjs"
@@ -16,9 +16,15 @@
     "@tanstack/table-core": "8.21.3",
     "exceljs": "4.4.0",
     "hyperformula": "3.5.0",
-    "ssf": "0.11.2"
+    "ssf": "0.11.2",
+    "@univerjs/presets": "1.6.1",
+    "@univerjs/preset-sheets-core": "1.6.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "rxjs": "7.8.2"
   },
   "devDependencies": {
-    "playwright": "1.58.2"
+    "playwright": "1.58.2",
+    "vite": "7.1.10"
   }
 }

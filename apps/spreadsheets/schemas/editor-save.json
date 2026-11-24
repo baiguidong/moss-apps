@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "properties": {
+    "uri": {
+      "type": "string",
+      "pattern": "^moss-spreadsheets://works/[a-f0-9-]{36}(\\?session=[a-zA-Z0-9._-]{1,128})?$",
+      "maxLength": 240
+    },
+    "edits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string"
+          },
+          "cell": {
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "formula": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sheet",
+          "cell"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000,
+      "minItems": 1
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "required": [
+    "uri",
+    "edits",
+    "revision"
+  ],
+  "additionalProperties": false
+}

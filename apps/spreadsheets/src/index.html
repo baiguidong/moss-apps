@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>表格工作台</title>
+  </head>
+  <body>
+    <main aria-label="表格工作台">
+      <header class="workbook-bar">
+        <div class="workbook-selection">
+          <button type="button" id="import">打开文件</button>
+          <label for="recent" class="sr-only">最近工作簿</label>
+          <select id="recent">
+            <option value="">最近工作簿</option>
+          </select>
+        </div>
+        <div class="workbook-actions">
+          <button type="button" id="undo" class="history-icon" aria-label="撤销" title="撤销" disabled>↶</button>
+          <button type="button" id="redo" class="history-icon" aria-label="重做" title="重做" disabled>↷</button>
+          <button type="button" id="save" class="primary" disabled>保存</button>
+          <button type="button" id="back" hidden>返回预览</button>
+          <div id="activity" hidden>
+            <button type="button" id="changes" aria-expanded="false" aria-controls="change-list">修改记录</button>
+            <button type="button" id="history" aria-expanded="false" aria-controls="history-panel">历史记录</button>
+            <button type="button" id="current" hidden>返回当前文件</button>
+          </div>
+        </div>
+      </header>
+      <div class="feedback">
+        <span id="status" role="status"></span>
+        <span id="error" role="alert" hidden></span>
+      </div>
+      <section id="empty">
+        <h1>打开工作簿</h1>
+        <p>打开 XLSX、CSV 或 TSV，或用示例试一下跨表公式。</p>
+        <button type="button" id="sample">打开报价示例</button>
+      </section>
+      <div id="workspace">
+        <div id="grid" hidden></div>
+        <aside id="inspection" aria-label="工作簿记录" hidden>
+          <div id="change-list" hidden></div>
+          <section id="history-panel" aria-labelledby="history-title" hidden>
+            <header class="history-heading">
+              <div>
+                <h2 id="history-title">历史记录</h2>
+                <span id="history-count"></span>
+              </div>
+              <button id="history-close" type="button" aria-label="关闭历史记录" title="关闭历史记录">×</button>
+            </header>
+            <div id="history-list"></div>
+          </section>
+        </aside>
+      </div>
+      <dialog id="leave">
+        <form method="dialog">
+          <p>当前工作簿有未保存的修改。</p>
+          <div class="workbook-actions">
+            <button value="cancel" autofocus>继续编辑</button>
+            <button value="discard">放弃修改</button>
+            <button value="save" class="primary">保存并返回</button>
+          </div>
+        </form>
+      </dialog>
+    </main>
+    <script type="module" src="/ui/main.mjs"></script>
+  </body>
+</html>

@@ -25,8 +25,10 @@ async function mapLimited(items, limit, visit) {
   return result
 }
 
-export function startBackend(engine, worker, { sessionScoped = false, Client = AppBackendClient } = {}) {
-  if (sessionScoped) return createSessionBackend(ScopedClient => startBackend(engine, worker, { Client: ScopedClient }), { catalog: options => engine.catalog(options) })
+export function startBackend(engine, worker, { sessionScoped = false, workbenchActions = [], Client = AppBackendClient } = {}) {
+  if (sessionScoped) return createSessionBackend(ScopedClient => startBackend(engine, worker, { Client: ScopedClient }), {
+    catalog: options => engine.catalog(options), workbenchActions,
+  })
   let store, queue, server, base, context, stopping, activationTask, activationError, registrationTask, ready = false, registrationError = '', catalog
   let hostArtifactUrls = false, serverStart
   const signedUrls = new Map()

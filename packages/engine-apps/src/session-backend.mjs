@@ -4,9 +4,10 @@ import { AppBackendClient } from '@moss/app-sdk'
 
 // One Host process, separate task stores/queues for each trusted session scope.
 // The facade lets existing engines retain their per-store closures.
-export function createSessionBackend(factory, { catalog } = {}) {
+export function createSessionBackend(factory, { catalog, workbenchActions = [] } = {}) {
   const scopes = new Map(), closed = new Set()
   let context, manifest, stopping = false
+  let workbench
   async function close(id) {
     closed.add(id)
     const pending = scopes.get(id)
@@ -22,20 +23,29 @@ export function createSessionBackend(factory, { catalog } = {}) {
     const root = await fs.realpath(storage.directory), workspace = await fs.realpath(storage.workspace)
     const relative = path.relative(workspace, root)
     if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) throw new Error('任务目录不在会话工作区中')
+    return initializeScope({ dataDir: root, workspace, sessionId: storage.sessionId })
+  }
+  async function initializeWorkbench() {
+    const directory = path.join(context.dataDir, 'workbench')
+    await fs.mkdir(directory, { recursive: true, mode: 0o700 })
+    if (await fs.realpath(directory) !== path.join(await fs.realpath(context.dataDir), 'workbench')) throw new Error('工作台目录无效')
+    return initializeScope({ dataDir: directory })
+  }
+  async function initializeScope(scope) {
     const entry = { actions: new Map(), active: new Set(), options: null, controller: new AbortController() }
     const host = { ...backend.host, request(protocol, method, input, options) {
-      if (protocol === 'moss.artifacts/v1' && method === 'url.get') input = { ...input, sessionId: storage.sessionId }
+      if (scope.sessionId && protocol === 'moss.artifacts/v1' && method === 'url.get') input = { ...input, sessionId: scope.sessionId }
       return backend.host.request(protocol, method, input, options)
     } }
     class ScopedClient {
       constructor(options) { entry.options = options; this.host = host }
       registerAction(name, handler) { entry.actions.set(name, handler) }
-      emit(name, data) { if (!closed.has(storage.sessionId)) backend.emit(name, { ...data, sessionId: storage.sessionId }) }
+      emit(name, data) { if (!closed.has(scope.sessionId)) backend.emit(name, { ...data, ...(scope.sessionId ? { sessionId: scope.sessionId } : {}) }) }
       log(...args) { backend.log(...args) }
       start() {}
     }
     factory(ScopedClient)
-    entry.context = { ...context, dataDir: root, cacheDir: context.dataDir, sessionId: storage.sessionId, workspace, host }
+    entry.context = { ...context, ...scope, cacheDir: context.dataDir, host }
     await entry.options.onInitialize(entry.context)
     return entry
   }
@@ -53,6 +63,10 @@ export function createSessionBackend(factory, { catalog } = {}) {
     const storage = call.source?.storage
     if (name === 'session.close') { if (storage) await close(storage.sessionId); return { closed: true } }
     if (!storage) {
+      if (!stopping && call.source?.surface === 'app' && workbenchActions.includes(name)) {
+        workbench ??= initializeWorkbench().catch(error => { workbench = undefined; throw error })
+        return dispatch(await workbench, name, input, call)
+      }
       if (name === 'workspace.get') return { tasks: [], files: [], artifactUrlsDeferred: true }
       if (name === 'composer.list') return { items: [] }
       if (name === 'catalog.get' || name === 'engine.prepare') return catalog?.({ dataDir: context.dataDir, cacheDir: context.dataDir, prepare: name === 'engine.prepare' }) || {}
@@ -70,11 +84,17 @@ export function createSessionBackend(factory, { catalog } = {}) {
     const entry = await scopes.get(storage.sessionId)
     if (stopping || closed.has(storage.sessionId)) throw new Error('会话已关闭')
     if (entry.context.dataDir !== storage.directory) throw new Error('会话存储目录已改变')
+    return dispatch(entry, name, input, call)
+  }
+  async function dispatch(entry, name, input, call) {
     const handler = entry.actions.get(name)
     if (!handler) throw new Error(`未注册的会话操作：${name}`)
     const task = Promise.resolve().then(() => handler(input, { ...call, ...entry.context, source: call.source, signal: call.signal ? AbortSignal.any([call.signal, entry.controller.signal]) : entry.controller.signal }))
     entry.active.add(task)
-    try { return decorate(await task, storage.sessionId) }
+    try {
+      const result = await task
+      return entry.context.sessionId ? decorate(result, entry.context.sessionId) : result
+    }
     finally { entry.active.delete(task) }
   }
   const backend = new AppBackendClient({
@@ -89,7 +109,16 @@ export function createSessionBackend(factory, { catalog } = {}) {
         await entry
       }
     },
-    async onShutdown() { stopping = true; await Promise.all([...scopes.keys()].map(close)) },
+    async onShutdown() {
+      stopping = true
+      await Promise.all([...scopes.keys()].map(close))
+      const entry = await workbench?.catch(() => null)
+      if (entry) {
+        entry.controller.abort(new Error('工作台已关闭'))
+        await entry.options.onShutdown?.()
+        await Promise.allSettled([...entry.active])
+      }
+    },
   })
   backend.start()
   return backend

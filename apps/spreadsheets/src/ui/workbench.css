@@ -1,0 +1,157 @@
+:root {
+  color-scheme: light dark;
+  font: 13px/1.45 system-ui, sans-serif;
+  --page: light-dark(#fff, #171b20);
+  --text: light-dark(#20252f, #eceff4);
+  --workbook-muted: var(--muted-foreground, light-dark(#526071, #a6b1c1));
+  --line: light-dark(#dce2e9, #3a414b);
+  --surface: light-dark(#f6f8fb, #222831);
+  --action: light-dark(#2258b1, #5b88dc);
+  color: var(--text);
+  background: var(--page);
+}
+* { box-sizing: border-box; }
+html, body, main { margin: 0; width: 100%; height: 100%; }
+main { display: flex; flex-direction: column; min-width: 0; position: relative; }
+.workbook-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.workbook-selection, .workbook-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.workbook-selection { min-width: 0; }
+button, select {
+  font: inherit;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  min-height: 30px;
+  padding: 4px 9px;
+}
+select { max-width: min(48vw, 280px); }
+button { cursor: pointer; }
+button:disabled { cursor: default; opacity: 0.5; }
+button:focus-visible, select:focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
+.primary { background: var(--action); border-color: var(--action); color: #fff; }
+#status, #empty p { color: var(--workbook-muted); }
+.feedback { padding: 0 12px; overflow-wrap: anywhere; }
+.feedback:has(#status:not(:empty)), .feedback:has(#error:not([hidden])) { padding-block: 5px; }
+#error { color: light-dark(#a22228, #ff9b9b); }
+#empty { align-self: center; margin: min(12vh, 80px) 16px 0; text-align: center; }
+#empty h1 { margin: 0; font-size: 17px; font-weight: 630; }
+#empty p { margin: 7px 0 12px; }
+#workspace { display: flex; min-height: 0; flex: 1; }
+#grid { position: relative; z-index: 0; flex: 1; min-height: 0; min-width: 0; }
+.history-icon { font-size: 15px; line-height: 1; padding-inline: 5px; }
+#activity { display: flex; align-items: center; gap: 5px; }
+#activity button[aria-expanded='true'] { border-color: var(--action); color: var(--action); }
+#inspection {
+  flex: 0 0 min(274px, 37%);
+  min-width: 0;
+  border-inline-start: 1px solid var(--line);
+  padding: 8px;
+  overflow: auto;
+  background: var(--page);
+}
+#change-list {
+  display: grid;
+  gap: 4px;
+}
+#change-list button { text-align: left; overflow-wrap: anywhere; }
+#inspection:has(#history-panel:not([hidden])) { padding: 0; }
+.history-heading {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--page);
+}
+.history-heading h2 { margin: 0; font-size: 13px; font-weight: 650; }
+#history-count { font-size: 11px; color: var(--workbook-muted); }
+#history-close {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--workbook-muted);
+  font-size: 19px;
+  line-height: 1;
+}
+#history-close:hover { background: var(--surface); color: var(--text); }
+#history-list { padding: 8px 8px 12px; }
+.history-group + .history-group { margin-top: 10px; }
+.history-group h3 {
+  margin: 2px 0 3px;
+  padding: 3px 5px;
+  color: var(--workbook-muted);
+  font-size: 11px;
+  font-weight: 550;
+}
+.history-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 3px 6px;
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  text-align: left;
+}
+.history-entry:hover { background: var(--surface); }
+.history-entry[aria-current='true'] {
+  border-color: color-mix(in srgb, var(--action) 26%, transparent);
+  background: color-mix(in srgb, var(--action) 8%, var(--page));
+}
+.history-entry-name { font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
+.history-entry time { font-size: 11px; font-variant-numeric: tabular-nums; color: var(--workbook-muted); }
+.history-entry-detail, .history-message { color: var(--workbook-muted); font-size: 11px; }
+.history-entry-detail { grid-column: 1 / -1; }
+.history-message { margin: 8px 5px; }
+[data-editor-inline] .workbook-bar {
+  position: absolute;
+  inset: 1px 4px auto auto;
+  z-index: 2;
+  padding: 0;
+  border: 0;
+}
+[data-editor-inline] .workbook-actions { flex-wrap: nowrap; gap: 4px; height: 26px; }
+[data-editor-inline] .workbook-actions button {
+  min-height: 21px;
+  height: 22px;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+[data-editor-inline] .workbook-actions > .history-icon { min-width: 22px; font-size: 15px; }
+[data-editor-inline] #grid header > div:first-child {
+  padding-inline-end: max(0px, calc(var(--inline-tools-width, 0px) - var(--inspection-width, 0px)));
+}
+[data-editor-inline] #inspection { margin-top: 28px; }
+[data-editor-inline] .feedback { position: absolute; top: 29px; right: 4px; z-index: 1; background: var(--page); }
+[data-editor-inline] .feedback:has(#error[hidden]) { padding: 0; background: transparent; }
+[data-editor-inline] #status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media (max-width: 550px) {
+  [data-editor-inline] #activity button { max-width: 69px; text-overflow: ellipsis; overflow: hidden; }
+}
+dialog { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--page); color: var(--text); }
+dialog p { margin: 0 0 12px; }
+dialog::backdrop { background: #0006; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); }

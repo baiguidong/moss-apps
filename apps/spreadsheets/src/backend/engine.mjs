@@ -6,6 +6,7 @@ import { HyperFormula } from 'hyperformula'
 import { creationEngine, validateTitle, inputFile, safeName, escapeHtml as h } from '@moss/creation-apps'
 import { JSZip, officeZip, xml, serialize } from '@moss/creation-apps/office'
 import { workbookPreview } from './preview.mjs'
+import { editorRoute, registerEditor } from './editor.mjs'
 const columnName=number=>{let result='';for(let n=number;n>0;n=Math.floor((n-1)/26))result=String.fromCharCode(65+(n-1)%26)+result;return result}
 const NS='http://schemas.openxmlformats.org/spreadsheetml/2006/main'
 const primitive=v=>v===null||['string','number','boolean'].includes(typeof v)
@@ -149,4 +150,19 @@ const engine={id:'spreadsheets',spec:{version:'0.1.1'},validate,
   const data=path.join(ctx.directory,'workbook.json');await fs.writeFile(data,JSON.stringify(book.worksheets.map(s=>({name:s.name,rows:Array.from({length:s.rowCount},(_,r)=>Array.from({length:s.columnCount},(_,c)=>cellValue(s.getCell(r+1,c+1))))})),null,2))
   return {artifacts:[{name:path.basename(output),path:output,kind:'document'},{name:'交互表格预览',path:preview,kind:'html',purpose:'interactive-preview'},{name:'工作簿数据.json',path:data,kind:'json'}],result:{sheets:book.worksheets.map(s=>({name:s.name,rows:s.rowCount,columns:s.columnCount})),previewIndex:1},message:'工作簿已生成'}
  }}
-export default creationEngine(engine,{scheme:'moss-spreadsheets',title:'表格',tools:['spreadsheet_create','spreadsheet_status','spreadsheet_read']})
+const creation = creationEngine(engine,{scheme:'moss-spreadsheets',title:'表格',tools:['spreadsheet_create','spreadsheet_status','spreadsheet_read']})
+export default {
+  ...creation,
+  async register(backend, context, tasks) {
+    await creation.register(backend, context)
+    if (tasks) registerEditor(backend, context, tasks, engine.execute)
+  },
+  async execute(input, context) {
+    const output = await creation.execute(input, context)
+    if (context.sessionId && output.result?.displayMarkdown) {
+      const id = path.basename(context.directory)
+      output.result.displayMarkdown += '\n\n[编辑工作簿](' + editorRoute(id, context.sessionId) + ')'
+    }
+    return output
+  },
+}
