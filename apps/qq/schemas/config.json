@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "agentId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "responseMode": {
+      "enum": [
+        "invoke",
+        "stream"
+      ]
+    },
+    "showThinking": {
+      "type": "boolean"
+    },
+    "showToolHints": {
+      "type": "boolean"
+    },
+    "allowedTools": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9_-]{1,128}$"
+      }
+    },
+    "accountId": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "groupContext": {
+      "type": "object",
+      "properties": {
+        "visibility": {
+          "enum": [
+            "auto",
+            "mention_only",
+            "mention_recent",
+            "all"
+          ]
+        },
+        "activation": {
+          "enum": [
+            "mention",
+            "always"
+          ]
+        },
+        "history_limit": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "clear_after_reply": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -6,11 +6,11 @@
 | --- | --- | --- |
 | 1 | 飞书 | 扫码创建应用、手动填写 |
 | 2 | [个人微信](../apps/weixin/README.md) | 微信扫码登录、手机确认 |
-| 3 | [企业微信渠道](../apps/wecom-channel/README.md)、[钉钉渠道](../apps/dingtalk-channel/README.md) | 扫码授权或手动填写机器人凭据 |
+| 3 | [QQ](../apps/qq/README.md)、[企业微信渠道](../apps/wecom-channel/README.md)、[钉钉渠道](../apps/dingtalk-channel/README.md) | 扫码授权或手动填写机器人凭据 |
 | 4 | [Telegram](../apps/telegram/README.md)、[Discord](../apps/discord/README.md) | Bot Token，可设置代理及消息接收范围 |
-| 待接入 | QQ、小艺、MQTT | 使用各自的凭据与连接设置 |
+| 待接入 | 小艺、MQTT | 使用各自的凭据与连接设置 |
 
-范围对照 MossWork Dashboard 的 `CHANNEL_KEYS` 和 `moss-gateway` 的 `ChannelKind`，排除元宝。每种渠道先搬用 MossWork 的配置流程和消息处理源码，再通过 Moss App SDK 对接凭据库、内置运行时和会话。企业微信、钉钉、Telegram、Discord 通过 `packages/bot-channels` 共用宿主适配和设置页面，独立打包各自的平台协议和依赖。
+范围对照 MossWork Dashboard 的 `CHANNEL_KEYS` 和 `moss-gateway` 的 `ChannelKind`，排除元宝。每种渠道先搬用 MossWork 的配置流程和消息处理源码，再通过 Moss App SDK 对接凭据库、内置运行时和会话。QQ、企业微信、钉钉、Telegram、Discord 通过 `packages/bot-channels` 共用宿主适配和设置页面，独立打包各自的平台协议和依赖。
 
 渠道可通过 `moss.agent/v1` 的 `turn.start` 为本轮开启 `progress.thinking` 和 `progress.tools`。宿主将思考状态及工具名称和调用状态通过 `turn.progress` 发给请求的 App 实例。飞书在「处理提示和最终回复」模式下提供两个独立开关。
 

@@ -583,6 +583,19 @@
         "pptxgenjs": "4.0.1",
       },
     },
+    "apps/qq": {
+      "name": "@moss/qq-app",
+      "version": "0.1.1",
+      "dependencies": {
+        "@moss/bot-channels": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "bun-types": "latest",
+        "typescript": "^5.9.3",
+      },
+    },
     "apps/self-test": {
       "name": "@moss/self-test-app",
       "version": "0.1.25",
@@ -1357,6 +1370,8 @@
     "@moss/pdf-tools-app": ["@moss/pdf-tools-app@workspace:apps/pdf-tools"],
 
     "@moss/presentations-app": ["@moss/presentations-app@workspace:apps/presentations"],
+
+    "@moss/qq-app": ["@moss/qq-app@workspace:apps/qq"],
 
     "@moss/self-test-app": ["@moss/self-test-app@workspace:apps/self-test"],
 
@@ -3589,6 +3604,8 @@
     "@moss/openim-app/tailwind-merge": ["tailwind-merge@3.3.1", "https://registry.npmmirror.com/tailwind-merge/-/tailwind-merge-3.3.1.tgz", {}, "sha512-gBXpgUm/3rp1lMZZrM/w7D8GKqshif0zAymAhbCyIt8KMe+0v9DQ7cdYLR4FHH/cKpdTXb+A/tKKU3eolfsI+g=="],
 
     "@moss/openim-app/tailwindcss": ["tailwindcss@4.1.10", "https://registry.npmmirror.com/tailwindcss/-/tailwindcss-4.1.10.tgz", {}, "sha512-P3nr6WkvKV/ONsTzj6Gb57sWPMX29EPNPopo7+FcpkQaNsrNpZ1pv8QmrYI2RqEKD7mlGqLnGovlcYnBK0IqUA=="],
+
+    "@moss/qq-app/bun-types": ["bun-types@1.4.5", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.5.tgz", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-ECHn+9dhL3wv0G6u0+7dQvrnaimXiRDxxerYBmhTaLyJEEuvTPWk2Fye3XIf5Y++JIIiHKfQw4Z7V5D8KuiXbg=="],
 
     "@moss/self-test-app/tailwindcss": ["tailwindcss@4.2.0", "https://registry.npmmirror.com/tailwindcss/-/tailwindcss-4.2.0.tgz", {}, "sha512-yYzTZ4++b7fNYxFfpnberEEKu43w44aqDMNM9MHMmcKuCH7lL8jJ4yJ7LGHv7rSwiqM0nkiobF9I6cLlpS2P7Q=="],
 
