@@ -130,9 +130,15 @@ async def run(config):
 
     class Channel(adapter.Channel):
         started = False
+        startup_error = None
 
         async def start(self):
-            await super().start()
+            try:
+                await super().start()
+            except Exception as exc:
+                if hasattr(adapter, "startup_error"):
+                    self.startup_error = adapter.startup_error(exc)
+                raise
             self.started = True
 
         def get_debounce_key(self, message):
@@ -190,6 +196,9 @@ async def run(config):
     try:
         await manager.start()
         if not channel.started:
+            if channel.startup_error:
+                emit("error", message=channel.startup_error)
+                return
             raise RuntimeError("Channel startup failed")
         watcher = asyncio.create_task(monitor())
         while line := await asyncio.to_thread(sys.stdin.readline):

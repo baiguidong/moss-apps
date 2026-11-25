@@ -229,6 +229,19 @@
         "typescript": "^5.9.3",
       },
     },
+    "apps/discord": {
+      "name": "@moss/discord-app",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moss/bot-channels": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "bun-types": "latest",
+        "typescript": "^5.9.3",
+      },
+    },
     "apps/document-converter": {
       "name": "@moss/document-converter-app",
       "version": "0.4.5",
@@ -1302,6 +1315,8 @@
     "@moss/devtools-app": ["@moss/devtools-app@workspace:apps/devtools"],
 
     "@moss/dingtalk-app": ["@moss/dingtalk-app@workspace:apps/dingtalk-channel"],
+
+    "@moss/discord-app": ["@moss/discord-app@workspace:apps/discord"],
 
     "@moss/document-converter-app": ["@moss/document-converter-app@workspace:apps/document-converter"],
 
@@ -3552,6 +3567,8 @@
     "@moss/devtools-app/bun-types": ["bun-types@1.4.2", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.2.tgz", { "dependencies": { "@types/node": "*" } }, "sha512-bxV1FgK7yBIzjRe5zBozIM4Bem11ZJcCXSrjWRG3YWLt8yFDePu4cLjpebO8OvPeIE9trbyPF4fuj3Cia4Fj3w=="],
 
     "@moss/dingtalk-app/bun-types": ["bun-types@1.4.5", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.5.tgz", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-ECHn+9dhL3wv0G6u0+7dQvrnaimXiRDxxerYBmhTaLyJEEuvTPWk2Fye3XIf5Y++JIIiHKfQw4Z7V5D8KuiXbg=="],
+
+    "@moss/discord-app/bun-types": ["bun-types@1.4.5", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.5.tgz", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-ECHn+9dhL3wv0G6u0+7dQvrnaimXiRDxxerYBmhTaLyJEEuvTPWk2Fye3XIf5Y++JIIiHKfQw4Z7V5D8KuiXbg=="],
 
     "@moss/drive-app/bun-types": ["bun-types@1.4.2", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.2.tgz", { "dependencies": { "@types/node": "*" } }, "sha512-bxV1FgK7yBIzjRe5zBozIM4Bem11ZJcCXSrjWRG3YWLt8yFDePu4cLjpebO8OvPeIE9trbyPF4fuj3Cia4Fj3w=="],
 

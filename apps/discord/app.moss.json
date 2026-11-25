@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.discord",
+  "version": "0.1.0",
+  "displayName": "Discord",
+  "category": "communication",
+  "keywords": [
+    "Discord",
+    "机器人",
+    "渠道"
+  ],
+  "description": "填写 Bot Token连接Discord，在聊天中使用 Moss。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.23.1",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 460,
+      "height": 720,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "actions": [
+      {
+        "name": "status.get"
+      }
+    ],
+    "configuration": {
+      "schema": "schemas/config.json",
+      "secrets": "schemas/secrets.json"
+    }
+  },
+  "permissions": [
+    "agent:catalog:read",
+    "agent:bindings:read",
+    "agent:bindings:write",
+    "agent:turns:read",
+    "agent:turns:write",
+    "platform:external-links"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "channels",
+        "title": "Discord",
+        "route": "#/channels",
+        "icon": "forum",
+        "order": 200
+      }
+    ],
+    "settings": [
+      {
+        "id": "channel-configuration",
+        "title": "通道设置",
+        "group": "integrations",
+        "viewId": "channels"
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.agent/v1",
+      "moss.runtimes/v1",
+      "moss.platform/v1"
+    ]
+  },
+  "navigation": {
+    "location": "details"
+  },
+  "overview": {
+    "description": "填写 Bot Token连接Discord，在聊天中使用 Moss。"
+  },
+  "discovery": {
+    "group": "online",
+    "kind": "app",
+    "authMethods": [
+      "credentials"
+    ]
+  }
+}
