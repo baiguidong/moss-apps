@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.telegram",
+  "summary": "填写 Bot Token连接Telegram，在聊天中使用 Moss。",
+  "description": "填写 Bot Token连接Telegram，在聊天中使用 Moss。",
+  "platforms": [
+    "darwin-arm64",
+    "win32-x64",
+    "linux-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/telegram",
+  "repository": "https://github.com/baiguidong/moss-apps"
+}

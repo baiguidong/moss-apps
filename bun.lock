@@ -635,6 +635,19 @@
         "typescript": "5.9.3",
       },
     },
+    "apps/telegram": {
+      "name": "@moss/telegram-app",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moss/bot-channels": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "bun-types": "latest",
+        "typescript": "^5.9.3",
+      },
+    },
     "apps/templates": {
       "name": "@moss/templates-app",
       "version": "0.2.4",
@@ -1335,6 +1348,8 @@
     "@moss/spreadsheets-app": ["@moss/spreadsheets-app@workspace:apps/spreadsheets"],
 
     "@moss/takt-app": ["@moss/takt-app@workspace:apps/takt"],
+
+    "@moss/telegram-app": ["@moss/telegram-app@workspace:apps/telegram"],
 
     "@moss/templates-app": ["@moss/templates-app@workspace:apps/templates"],
 
@@ -3563,6 +3578,8 @@
     "@moss/takt-app/@types/node": ["@types/node@22.19.15", "https://registry.npmmirror.com/@types/node/-/node-22.19.15.tgz", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-F0R/h2+dsy5wJAUe3tAU6oqa2qbWY5TpNfL/RGmo1y38hiyO1w3x2jPtt76wmuaJI4DQnOBu21cNXQ2STIUUWg=="],
 
     "@moss/takt-app/zod": ["zod@4.3.6", "https://registry.npmmirror.com/zod/-/zod-4.3.6.tgz", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
+
+    "@moss/telegram-app/bun-types": ["bun-types@1.4.5", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.5.tgz", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-ECHn+9dhL3wv0G6u0+7dQvrnaimXiRDxxerYBmhTaLyJEEuvTPWk2Fye3XIf5Y++JIIiHKfQw4Z7V5D8KuiXbg=="],
 
     "@moss/trace-app/bun-types": ["bun-types@1.4.2", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.2.tgz", { "dependencies": { "@types/node": "*" } }, "sha512-bxV1FgK7yBIzjRe5zBozIM4Bem11ZJcCXSrjWRG3YWLt8yFDePu4cLjpebO8OvPeIE9trbyPF4fuj3Cia4Fj3w=="],
 
