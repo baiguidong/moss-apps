@@ -35,7 +35,7 @@
  }
 
  const legacyCategories = new Map(Object.entries({
-+  channel: [['moss.feishu', 'communication']],
++  channel: [['moss.feishu', 'communication'], ['moss.weixin', 'communication'], ['moss.wecom-channel', 'communication'], ['moss.dingtalk-channel', 'communication']],
    knowledge: [['moss.zsxq', 'other']],
    files: [['moss.backup', 'knowledge'], ['moss.baidu-netdisk', 'knowledge'], ['moss.drive', 'knowledge'], ['moss.file-cleaner', 'knowledge'], ['moss.filesystem', 'knowledge'], ['moss.tencent-weiyun', 'other']],
    creative: [['moss.canva', 'other'], ['moss.canva-ai', 'other'], ['moss.designkit-buddy-cli', 'other'], ['moss.drawio', 'development'], ['moss.flova', 'other'], ['moss.image-tools', 'knowledge'], ['moss.infimind-ecommerce-image', 'other'], ['moss.infimind-video', 'other'], ['moss.kling-ai-plugin', 'other'], ['moss.kling-ai-plugin-ai', 'other'], ['moss.mastergo-vibe-mcp', 'development'], ['moss.media-tools', 'knowledge'], ['moss.mglc', 'other'], ['moss.picset-commerce-images', 'other'], ['moss.picset-video-generation', 'other'], ['moss.transcription', 'knowledge']],

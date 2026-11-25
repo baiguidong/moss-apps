@@ -216,6 +216,19 @@
         "vite": "7.1.10",
       },
     },
+    "apps/dingtalk-channel": {
+      "name": "@moss/dingtalk-app",
+      "version": "0.1.2",
+      "dependencies": {
+        "@moss/bot-channels": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "bun-types": "latest",
+        "typescript": "^5.9.3",
+      },
+    },
     "apps/document-converter": {
       "name": "@moss/document-converter-app",
       "version": "0.4.5",
@@ -698,6 +711,36 @@
         "playwright": "1.58.2",
       },
     },
+    "apps/wecom-channel": {
+      "name": "@moss/wecom-app",
+      "version": "0.1.1",
+      "dependencies": {
+        "@moss/bot-channels": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "bun-types": "latest",
+        "typescript": "^5.9.3",
+      },
+    },
+    "apps/weixin": {
+      "name": "@moss/weixin-app",
+      "version": "0.1.1",
+      "dependencies": {
+        "@moss/app-sdk": "workspace:*",
+        "antd": "5.29.3",
+        "qrcode.react": "4.2.0",
+        "react": "19.2.0",
+        "react-dom": "19.2.0",
+      },
+      "devDependencies": {
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "bun-types": "latest",
+        "typescript": "^5.9.3",
+      },
+    },
     "apps/workflow": {
       "name": "@moss/workflow-app",
       "version": "0.1.21",
@@ -741,6 +784,23 @@
         "@types/react": "19.2.2",
         "@types/react-dom": "19.2.2",
         "typescript": "5.9.3",
+      },
+    },
+    "packages/bot-channels": {
+      "name": "@moss/bot-channels",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moss/app-sdk": "workspace:*",
+        "antd": "5.29.3",
+        "qrcode.react": "4.2.0",
+        "react": "19.2.0",
+        "react-dom": "19.2.0",
+      },
+      "devDependencies": {
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "bun-types": "latest",
+        "typescript": "^5.9.3",
       },
     },
     "packages/creation-apps": {
@@ -1210,6 +1270,8 @@
 
     "@moss/backup-app": ["@moss/backup-app@workspace:apps/backup"],
 
+    "@moss/bot-channels": ["@moss/bot-channels@workspace:packages/bot-channels"],
+
     "@moss/browser-use-app": ["@moss/browser-use-app@workspace:apps/browser-use"],
 
     "@moss/buddy": ["@moss/buddy@workspace:apps/buddy"],
@@ -1225,6 +1287,8 @@
     "@moss/database-app": ["@moss/database-app@workspace:apps/database"],
 
     "@moss/devtools-app": ["@moss/devtools-app@workspace:apps/devtools"],
+
+    "@moss/dingtalk-app": ["@moss/dingtalk-app@workspace:apps/dingtalk-channel"],
 
     "@moss/document-converter-app": ["@moss/document-converter-app@workspace:apps/document-converter"],
 
@@ -1279,6 +1343,10 @@
     "@moss/transcription-app": ["@moss/transcription-app@workspace:apps/transcription"],
 
     "@moss/visualize-app": ["@moss/visualize-app@workspace:apps/visualize"],
+
+    "@moss/wecom-app": ["@moss/wecom-app@workspace:apps/wecom-channel"],
+
+    "@moss/weixin-app": ["@moss/weixin-app@workspace:apps/weixin"],
 
     "@moss/workflow-app": ["@moss/workflow-app@workspace:apps/workflow"],
 
@@ -3464,7 +3532,11 @@
 
     "@moss/audit-app/tailwindcss": ["tailwindcss@4.2.0", "https://registry.npmmirror.com/tailwindcss/-/tailwindcss-4.2.0.tgz", {}, "sha512-yYzTZ4++b7fNYxFfpnberEEKu43w44aqDMNM9MHMmcKuCH7lL8jJ4yJ7LGHv7rSwiqM0nkiobF9I6cLlpS2P7Q=="],
 
+    "@moss/bot-channels/bun-types": ["bun-types@1.4.5", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.5.tgz", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-ECHn+9dhL3wv0G6u0+7dQvrnaimXiRDxxerYBmhTaLyJEEuvTPWk2Fye3XIf5Y++JIIiHKfQw4Z7V5D8KuiXbg=="],
+
     "@moss/devtools-app/bun-types": ["bun-types@1.4.2", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.2.tgz", { "dependencies": { "@types/node": "*" } }, "sha512-bxV1FgK7yBIzjRe5zBozIM4Bem11ZJcCXSrjWRG3YWLt8yFDePu4cLjpebO8OvPeIE9trbyPF4fuj3Cia4Fj3w=="],
+
+    "@moss/dingtalk-app/bun-types": ["bun-types@1.4.5", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.5.tgz", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-ECHn+9dhL3wv0G6u0+7dQvrnaimXiRDxxerYBmhTaLyJEEuvTPWk2Fye3XIf5Y++JIIiHKfQw4Z7V5D8KuiXbg=="],
 
     "@moss/drive-app/bun-types": ["bun-types@1.4.2", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.2.tgz", { "dependencies": { "@types/node": "*" } }, "sha512-bxV1FgK7yBIzjRe5zBozIM4Bem11ZJcCXSrjWRG3YWLt8yFDePu4cLjpebO8OvPeIE9trbyPF4fuj3Cia4Fj3w=="],
 
@@ -3495,6 +3567,8 @@
     "@moss/trace-app/bun-types": ["bun-types@1.4.2", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.2.tgz", { "dependencies": { "@types/node": "*" } }, "sha512-bxV1FgK7yBIzjRe5zBozIM4Bem11ZJcCXSrjWRG3YWLt8yFDePu4cLjpebO8OvPeIE9trbyPF4fuj3Cia4Fj3w=="],
 
     "@moss/trace-app/tailwindcss": ["tailwindcss@4.2.0", "https://registry.npmmirror.com/tailwindcss/-/tailwindcss-4.2.0.tgz", {}, "sha512-yYzTZ4++b7fNYxFfpnberEEKu43w44aqDMNM9MHMmcKuCH7lL8jJ4yJ7LGHv7rSwiqM0nkiobF9I6cLlpS2P7Q=="],
+
+    "@moss/wecom-app/bun-types": ["bun-types@1.4.5", "https://registry.npmmirror.com/bun-types/-/bun-types-1.4.5.tgz", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-ECHn+9dhL3wv0G6u0+7dQvrnaimXiRDxxerYBmhTaLyJEEuvTPWk2Fye3XIf5Y++JIIiHKfQw4Z7V5D8KuiXbg=="],
 
     "@moss/workflow-app/@xyflow/react": ["@xyflow/react@12.12.0", "https://registry.npmmirror.com/@xyflow/react/-/react-12.12.0.tgz", { "dependencies": { "@xyflow/system": "0.0.83", "classcat": "^5.0.3", "zustand": "^4.4.0" }, "peerDependencies": { "@types/react": ">=17", "@types/react-dom": ">=17", "react": ">=17", "react-dom": ">=17" }, "optionalPeers": ["@types/react", "@types/react-dom"] }, "sha512-74oXI0Rgm1Eu33cHQAd74J6oVgCH9mbFyTVQbsGgp2kmWwh0HdtBr2VP04z8mbPD+M/xO69nqG5dDEt7/EN2rQ=="],
 

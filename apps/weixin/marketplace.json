@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.weixin",
+  "summary": "扫码连接个人微信，在微信中与 Moss 对话。",
+  "description": "使用微信扫码绑定账号，设置回复方式、回复助手和可用工具。",
+  "platforms": [
+    "darwin-arm64",
+    "win32-x64",
+    "linux-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/weixin",
+  "repository": "https://github.com/baiguidong/moss-apps"
+}

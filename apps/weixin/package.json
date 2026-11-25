@@ -1,0 +1,24 @@
+{
+  "name": "@moss/weixin-app",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "bun test",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@moss/app-sdk": "workspace:*",
+    "antd": "5.29.3",
+    "qrcode.react": "4.2.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.9.3",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2"
+  }
+}

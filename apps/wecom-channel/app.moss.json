@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.wecom-channel",
+  "version": "0.1.1",
+  "displayName": "企业微信渠道",
+  "category": "communication",
+  "keywords": [
+    "企业微信",
+    "机器人",
+    "渠道"
+  ],
+  "description": "扫码或填写机器人凭据连接企业微信，在聊天中使用 Moss。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.23.1",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 460,
+      "height": 720,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "actions": [
+      {
+        "name": "status.get"
+      },
+      {
+        "name": "login.start"
+      },
+      {
+        "name": "login.poll"
+      },
+      {
+        "name": "login.stop"
+      }
+    ],
+    "configuration": {
+      "schema": "schemas/config.json",
+      "secrets": "schemas/secrets.json"
+    }
+  },
+  "permissions": [
+    "agent:catalog:read",
+    "agent:bindings:read",
+    "agent:bindings:write",
+    "agent:turns:read",
+    "agent:turns:write",
+    "platform:external-links"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "channels",
+        "title": "企业微信",
+        "route": "#/channels",
+        "icon": "forum",
+        "order": 200
+      }
+    ],
+    "settings": [
+      {
+        "id": "channel-configuration",
+        "title": "通道设置",
+        "group": "integrations",
+        "viewId": "channels"
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.agent/v1",
+      "moss.runtimes/v1",
+      "moss.platform/v1"
+    ]
+  },
+  "navigation": {
+    "location": "details"
+  },
+  "overview": {
+    "description": "扫码或填写机器人凭据连接企业微信，在聊天中使用 Moss。"
+  },
+  "discovery": {
+    "group": "online",
+    "kind": "app",
+    "authMethods": [
+      "browser",
+      "credentials"
+    ]
+  }
+}

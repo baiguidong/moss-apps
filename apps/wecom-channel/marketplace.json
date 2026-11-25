@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "appId": "moss.wecom-channel",
+  "summary": "扫码或填写机器人凭据连接企业微信，在聊天中使用 Moss。",
+  "description": "扫码或填写机器人凭据连接企业微信，在聊天中使用 Moss。",
+  "platforms": [
+    "darwin-arm64",
+    "win32-x64",
+    "linux-x64"
+  ],
+  "homepage": "https://github.com/baiguidong/moss-apps/tree/main/apps/wecom-channel",
+  "repository": "https://github.com/baiguidong/moss-apps"
+}

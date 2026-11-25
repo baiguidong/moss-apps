@@ -1,0 +1,20 @@
+{
+  "name": "@moss/dingtalk-app",
+  "version": "0.1.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ../../packages/bot-channels/build.mjs",
+    "check": "tsc --noEmit",
+    "test": "bun test ../../packages/bot-channels/src/backend/turn.test.ts"
+  },
+  "dependencies": {
+    "@moss/bot-channels": "workspace:*"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.9.3",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2"
+  }
+}

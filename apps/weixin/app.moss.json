@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 2,
+  "id": "moss.weixin",
+  "version": "0.1.1",
+  "displayName": "微信",
+  "category": "communication",
+  "keywords": [
+    "微信",
+    "个人微信",
+    "iLink",
+    "消息"
+  ],
+  "description": "扫码连接个人微信，在微信中与 Moss 对话。",
+  "icon": "assets/icon.svg",
+  "hostApi": "^3.23.1",
+  "publisher": {
+    "id": "moss",
+    "name": "Moss"
+  },
+  "ui": {
+    "entry": "dist/ui/index.html",
+    "window": {
+      "width": 460,
+      "height": 720,
+      "resizable": true
+    }
+  },
+  "backend": {
+    "entry": "dist/backend/main.mjs",
+    "runtime": "node",
+    "apiVersion": 1,
+    "lifecycle": "persistent",
+    "actions": [
+      {
+        "name": "status.get"
+      },
+      {
+        "name": "weixin.login.start"
+      },
+      {
+        "name": "weixin.login.poll"
+      },
+      {
+        "name": "weixin.login.stop"
+      }
+    ],
+    "configuration": {
+      "schema": "schemas/config.json",
+      "secrets": "schemas/secrets.json"
+    }
+  },
+  "permissions": [
+    "agent:catalog:read",
+    "agent:bindings:read",
+    "agent:bindings:write",
+    "agent:turns:read",
+    "agent:turns:write"
+  ],
+  "contributes": {
+    "views": [
+      {
+        "id": "channels",
+        "title": "微信",
+        "route": "#/channels",
+        "icon": "forum",
+        "order": 200
+      }
+    ],
+    "settings": [
+      {
+        "id": "channel-configuration",
+        "title": "通道设置",
+        "group": "integrations",
+        "viewId": "channels"
+      }
+    ]
+  },
+  "host": {
+    "protocols": [
+      "moss.agent/v1",
+      "moss.runtimes/v1"
+    ]
+  },
+  "navigation": {
+    "location": "details"
+  },
+  "overview": {
+    "description": "扫码连接个人微信，在微信中与 Moss 对话。"
+  },
+  "discovery": {
+    "group": "online",
+    "kind": "app",
+    "authMethods": [
+      "browser"
+    ]
+  }
+}
