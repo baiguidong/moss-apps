@@ -1,12 +1,10 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import ExcelJS from 'exceljs'
-import SSF from 'ssf'
 import { HyperFormula } from 'hyperformula'
 import { creationEngine, validateTitle, inputFile, safeName, escapeHtml as h } from '@moss/creation-apps'
 import { JSZip, officeZip, xml, serialize } from '@moss/creation-apps/office'
-import { workbookPreview } from './preview.mjs'
-import { editorRoute, registerEditor } from './editor.mjs'
+import { registerEditor } from './editor.mjs'
 const columnName=number=>{let result='';for(let n=number;n>0;n=Math.floor((n-1)/26))result=String.fromCharCode(65+(n-1)%26)+result;return result}
 const NS='http://schemas.openxmlformats.org/spreadsheetml/2006/main'
 const primitive=v=>v===null||['string','number','boolean'].includes(typeof v)
@@ -39,27 +37,6 @@ function display(cell) {
   const value=cell.formula?(cell.result??'='+cell.formula):cell.value
   if(value instanceof Date)return value.toISOString()
   return value?.richText?.map(r=>r.text).join('')??value?.text??value?.error??(primitive(value)?value:'')??''
-}
-function formatted(cell,book) {
-  const raw=cell.formula?cell.result:cell.value
-  const value=raw instanceof Date?raw:display(cell)
-  if(typeof value==='number'||value instanceof Date){
-    // ExcelJS decodes date serials as UTC. SSF's Date handling uses local time,
-    // so restore the workbook serial before formatting to preserve its date.
-    const serial=value instanceof Date?25569+value.getTime()/86400000-(book.properties.date1904?1462:0):value
-    try{return SSF.format(cell.numFmt||(value instanceof Date?'yyyy-mm-dd':'General'),serial,{date1904:book.properties.date1904})}
-    catch {return display(cell)}
-  }
-  return value
-}
-function renderCharts(sheet, charts = []) {
-  return charts.map(chart => {
-    const labels = rangeValues(sheet, chart.labels), series = chart.series.map(s => ({name:s.name, values:rangeValues(sheet,s.range)})), colors=['#2563eb','#16a34a','#ea580c','#9333ea']
-    const all=series.flatMap(s=>s.values),low=Math.min(0,...all),high=Math.max(1,...all),scale=high-low,y=v=>240-(v-low)/scale*200,x=i=>50+(i+.5)*500/labels.length;let shapes=''
-    if(chart.type==='pie'){let a=-Math.PI/2;const sum=series[0].values.reduce((a,b)=>a+b,0);series[0].values.forEach((v,i)=>{const b=a+v/sum*2*Math.PI;shapes+=v===sum?`<circle cx="180" cy="140" r="100" fill="${colors[i%4]}"/>`:`<path d="M180,140 L${180+100*Math.cos(a)},${140+100*Math.sin(a)} A100,100 0 ${b-a>Math.PI?1:0},1 ${180+100*Math.cos(b)},${140+100*Math.sin(b)} Z" fill="${colors[i%4]}"/>`;shapes+=`<text x="320" y="${40+i*22}" fill="currentColor">${h(labels[i])}: ${v}</text>`;a=b})}
-    else {shapes+=`<path d="M40,${y(0)}H570" stroke="#94a3b8"/>`;series.forEach((s,j)=>{if(chart.type==='line')shapes+=`<polyline points="${s.values.map((v,i)=>x(i)+','+y(v)).join(' ')}" fill="none" stroke="${colors[j%4]}" stroke-width="3"/>`;else s.values.forEach((v,i)=>{const w=400/labels.length/series.length;shapes+=`<rect x="${x(i)-200/labels.length+j*w}" y="${Math.min(y(0),y(v))}" width="${w*.85}" height="${Math.abs(y(v)-y(0))}" fill="${colors[j%4]}"/>`})});labels.forEach((v,i)=>shapes+=`<text x="${x(i)}" y="270" font-size="12" text-anchor="middle" fill="currentColor">${h(v)}</text>`)}
-    return `<figure><figcaption>${h(chart.title||sheet.name)}</figcaption><svg role="img" aria-label="${h(chart.title||sheet.name)}" viewBox="0 0 600 300" style="width:100%;max-width:800px">${shapes}</svg></figure>`
-  }).join('')
 }
 function rangeValues(sheet,range) {
   const match=/^([A-Z]{1,3})([1-9]\d*):([A-Z]{1,3})([1-9]\d*)$/.exec(range||'')
@@ -143,26 +120,32 @@ const engine={id:'spreadsheets',spec:{version:'0.1.1'},validate,
   for(const edit of edits){const sheet=book.getWorksheet(edit.sheet);if(!sheet||!/^([A-Z]{1,3})([1-9]\d{0,5})$/.test(edit.cell))throw new Error('修改的工作表或单元格无效');const cell=sheet.getCell(edit.cell);if(cell.row>10000||cell.col>200)throw new Error('修改超出 10000 行、200 列的上限');cell.value=edit.formula?{formula:edit.formula.replace(/^=/,'')}:edit.value??null}
   if(book.worksheets.reduce((n,s)=>n+s.rowCount*s.columnCount,0)>100000)throw new Error('工作簿超出 100000 单元格的处理上限')
   if(input.mode!=='read')recalculate(book)
-  const output=path.join(ctx.directory,safeName(input.title)+'.xlsx'),preview=path.join(ctx.directory,'preview.html')
+  const output=path.join(ctx.directory,safeName(input.title)+'.xlsx')
   if(source&&path.extname(source).toLowerCase()==='.xlsx')await fs.writeFile(output,input.mode==='read'?await fs.readFile(source):await patchImported(source,book,edits))
   else await fs.writeFile(output,await addCharts(await book.xlsx.writeBuffer(),book,input.sheets||[]))
-  await fs.writeFile(preview,await workbookPreview(book,input.sheets||[],formatted,renderCharts))
   const data=path.join(ctx.directory,'workbook.json');await fs.writeFile(data,JSON.stringify(book.worksheets.map(s=>({name:s.name,rows:Array.from({length:s.rowCount},(_,r)=>Array.from({length:s.columnCount},(_,c)=>cellValue(s.getCell(r+1,c+1))))})),null,2))
-  return {artifacts:[{name:path.basename(output),path:output,kind:'document'},{name:'交互表格预览',path:preview,kind:'html',purpose:'interactive-preview'},{name:'工作簿数据.json',path:data,kind:'json'}],result:{sheets:book.worksheets.map(s=>({name:s.name,rows:s.rowCount,columns:s.columnCount})),previewIndex:1},message:'工作簿已生成'}
+  return {artifacts:[{name:path.basename(output),path:output,kind:'document'},{name:'工作簿数据.json',path:data,kind:'json'}],result:{sheets:book.worksheets.map(s=>({name:s.name,rows:s.rowCount,columns:s.columnCount})),previewIndex:0},message:'工作簿已生成'}
  }}
 const creation = creationEngine(engine,{scheme:'moss-spreadsheets',title:'表格',tools:['spreadsheet_create','spreadsheet_status','spreadsheet_read']})
 export default {
   ...creation,
+  taskView(task) {
+    const result = task.result
+    if (!result?.visualReview && !result?.interactivePreview && !result?.quality) return task
+    const { visualReview, rendering, quality, interactivePreview, ...current } = result
+    const primary = result.presentation?.items.find(item => item.role === 'primary')
+    if (primary) {
+      current.presentation = { ...result.presentation, items: [primary] }
+      current.displayMarkdown = result.displayMarkdown?.split('\n')[0]
+    }
+    current.downloads = result.downloads?.filter((file, index) =>
+      !['interactive-preview', 'render'].includes(task.artifacts[index]?.purpose))
+    current.nextAction = '使用 inspect 读取单元格内容及引用。'
+    // Keep historical artifact indices stable for previously shared file references.
+    return { ...task, result: current }
+  },
   async register(backend, context, tasks) {
     await creation.register(backend, context)
     if (tasks) registerEditor(backend, context, tasks, engine.execute)
-  },
-  async execute(input, context) {
-    const output = await creation.execute(input, context)
-    if (context.sessionId && output.result?.displayMarkdown) {
-      const id = path.basename(context.directory)
-      output.result.displayMarkdown += '\n\n[编辑工作簿](' + editorRoute(id, context.sessionId) + ')'
-    }
-    return output
   },
 }

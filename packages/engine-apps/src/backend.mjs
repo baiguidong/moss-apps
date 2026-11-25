@@ -125,6 +125,7 @@ export function startBackend(engine, worker, { sessionScoped = false, workbenchA
     return { url: await promise, size: stat.size }
   }
   async function view(task, { urls = true } = {}) {
+    if (engine.taskView) task = engine.taskView(task)
     if (hostArtifactUrls) {
       if (!urls) return { ...task, artifacts: task.artifacts.map(file => ({ ...file, url: '' })) }
       const artifacts = await mapLimited(task.artifacts, 8, async (file, index) => {

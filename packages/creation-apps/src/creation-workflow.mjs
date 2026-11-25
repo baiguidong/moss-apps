@@ -27,10 +27,10 @@ export async function finishInspection(output, input, ctx, baseline, scheme, res
     if(media&&!output.artifacts.some(a=>a.path===media))output.artifacts.push({name:'对比图片'+path.extname(media),path:media,kind:'image',purpose:'comparison-media'})
   }
   output.result={...output.result,inspection:{index,sourceSha256:snapshot.sourceSha256,complete:snapshot.complete,units:snapshot.units.length},
-    rendering:renderingSummary(visual),
-    quality:{state:snapshot.checks.some(c=>c.severity==='error')?'needs-repair':'pending',checks:snapshot.checks,reviewedPages:0,totalPages:visual?.pageCount||null,visualReview:'pending'},
+    ...(scheme!=='moss-spreadsheets' && {rendering:renderingSummary(visual),
+    quality:{state:snapshot.checks.some(c=>c.severity==='error')?'needs-repair':'pending',checks:snapshot.checks,reviewedPages:0,totalPages:visual?.pageCount||null,visualReview:'pending'}}),
     references:snapshot.units.filter(u=>u.location).slice(0,8).map(u=>citation(uri,u.location,u.label)),
-    nextAction:'使用 inspect 读取内容及精确引用。查看 visualReview.pages 的真实图片后调用 verify 记录逐页 observations 和 issues；有问题创建带 parentId 的修正版并重新核验。'}
+    nextAction:scheme==='moss-spreadsheets'?'使用 inspect 读取单元格内容及引用。':'使用 inspect 读取内容及精确引用。查看 visualReview.pages 的真实图片后调用 verify 记录逐页 observations 和 issues；有问题创建带 parentId 的修正版并重新核验。'}
   if(baseline){
     const comparison=compareDocuments(baseline.snapshot,snapshot)
     // A source imported from elsewhere is copied into this task so comparison remains reproducible.
@@ -52,14 +52,20 @@ const rangeOf=value=>{const m=/^([A-Z]{1,3})([1-9]\d*)(?::([A-Z]{1,3})([1-9]\d*)
 export function registerWorkflow(backend,store,scheme) {
   const locks=new Map()
   backend.registerAction('creation.inspect',async({id,page,sheet,range,offset=0,limit=50})=>{
-    const task=await store.get(id),snapshot=await indexOf(task)
-    if(await hash(native(task.artifacts).path)!==snapshot.sourceSha256)throw new Error('文件已在外部变化，请重新读取作品')
+    const task=await store.get(id)
+    let snapshot=await indexOf(task)
+    const source=native(task.artifacts).path
+    if(await hash(source)!==snapshot.sourceSha256){
+      if(scheme!=='moss-spreadsheets')throw new Error('文件已在外部变化，请重新读取作品')
+      snapshot=await inspectDocument(source)
+    }
     if(!Number.isInteger(offset)||offset<0||!Number.isInteger(limit)||limit<1||limit>200)throw new Error('读取分页无效')
     const bounds=range?rangeOf(range):null
     if(bounds&&!sheet)throw new Error('读取范围需要工作表名称')
     const units=snapshot.units.filter(u=>(page===undefined||u.location?.page===page)&&(sheet===undefined||u.location?.sheet===sheet)).filter(u=>{if(!bounds)return true;const cell=rangeOf(u.location.range);return cell.left>=bounds.left&&cell.left<=bounds.right&&cell.top>=bounds.top&&cell.top<=bounds.bottom})
     return {sourceSha256:snapshot.sourceSha256,total:units.length,offset,hasMore:offset+limit<units.length,checks:snapshot.checks,units:units.slice(offset,offset+limit).map(({signature,...u})=>({...u,...(u.location?{citation:citation(task.result.resourceUri,u.location,u.label)}:{})}))}
   })
+  if(scheme==='moss-spreadsheets')return
   backend.registerAction('creation.verify',(input,context={})=>{
     const previous=locks.get(input.id)||Promise.resolve()
     const pending=previous.catch(()=>{}).then(async()=>{

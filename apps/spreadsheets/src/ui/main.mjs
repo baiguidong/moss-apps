@@ -3,7 +3,7 @@ import './workbench.css'
 
 const bridge = window.mossApp
 const app = bridge && createAppClient(bridge)
-const ui = Object.fromEntries(['import', 'recent', 'sample', 'status', 'error', 'undo', 'redo', 'save', 'back', 'grid', 'empty', 'activity', 'inspection', 'changes', 'change-list', 'history', 'history-panel', 'history-count', 'history-close', 'history-list', 'current', 'leave'].map(id => [id, document.getElementById(id)]))
+const ui = Object.fromEntries(['import', 'recent', 'sample', 'status', 'error', 'undo', 'redo', 'save', 'mode', 'grid', 'empty', 'activity', 'inspection', 'changes', 'change-list', 'history', 'history-panel', 'history-count', 'history-close', 'history-list', 'current', 'leave'].map(id => [id, document.getElementById(id)]))
 const historyDate = new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
 const historyTime = new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
 const recentKey = 'moss.spreadsheets.recent-workbooks.v1'
@@ -49,7 +49,7 @@ function setState(message = '') {
   for (const control of [ui.import, ui.sample, ui.recent]) control.disabled = busy || !app
   for (const control of [ui.undo, ui.redo]) control.disabled = busy || !current || Boolean(current.historical)
   ui.save.disabled = busy || !dirty || !current || Boolean(current.historical)
-  ui.back.disabled = busy
+  ui.mode.disabled = busy
   ui.current.disabled = busy
   ui.grid.inert = busy
   void app?.view.setState({ busy, dirty }).catch(() => {})
@@ -376,7 +376,7 @@ ui['history-close'].addEventListener('click', () => {
 })
 ui.current.addEventListener('click', () => perform('正在打开当前文件…', () => openWorkbook(currentFile.uri)))
 
-async function leavePreview() {
+async function leavePreview(previewMode) {
   if (leaving || busy) return
   leaving = true
   try {
@@ -385,6 +385,7 @@ async function leavePreview() {
       updateDirty()
     }
     if (dirty) {
+      ui.leave.returnValue = 'cancel'
       ui.leave.showModal()
       const choice = await new Promise(resolve => ui.leave.addEventListener('close', () => resolve(ui.leave.returnValue), { once: true }))
       if (!choice || choice === 'cancel') return
@@ -395,12 +396,16 @@ async function leavePreview() {
     }
     const sheet = book?.getActiveSheet()?.getSheetName()
     const cell = book?.getActiveCell()?.getA1Notation()
-    await app.view.setState({ busy: false, dirty: false, returnToPreview: true, saved: previewChanged, sheet, cell })
+    await app.view.setState({ busy: false, dirty: false, returnToPreview: true, previewMode, saved: previewChanged, sheet, cell })
   } catch (error) { feedback(error) }
   finally { leaving = false }
 }
-ui.back.hidden = !inline
-ui.back.addEventListener('click', leavePreview)
+ui.mode.hidden = !inline
+ui.mode.addEventListener('change', () => {
+  const destination = ui.mode.value
+  ui.mode.value = 'edit'
+  if (destination !== 'edit') void leavePreview(destination)
+})
 if (inline) {
   document.documentElement.dataset.editorInline = ''
   ui.import.hidden = true

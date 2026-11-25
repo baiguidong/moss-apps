@@ -25,6 +25,8 @@ export async function cli(engine, { sessionScoped = false } = {}) {
       result=await executeTask(engine,store,await store.create(input,'agent-skill'))
       if(result.status!=='succeeded') process.exitCode=1
     } else throw new Error('Unknown command. Use help.')
+    if (engine.taskView && command === 'list') result = result.map(engine.taskView)
+    if (engine.taskView && command === 'show') result = engine.taskView(result)
     process.stdout.write(JSON.stringify(result,null,2)+'\n')
   } catch(error) { process.stdout.write(JSON.stringify({error:error.message})+'\n'); process.exitCode=1 }
   finally { await engine.close?.() }

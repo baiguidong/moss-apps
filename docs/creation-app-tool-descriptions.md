@@ -53,13 +53,12 @@ Core 的 `AppContributionTool.prompt()` 现在直接采用 `instructionsText || 
 | 工具 | 修正后的描述 |
 | --- | --- |
 | `spreadsheet_create` | 创建、读取或修改表格。mode=create 用 sheets 生成 XLSX，支持公式重算、格式和柱形/折线/饼图；mode=read/edit 用 sourcePath 导入 XLSX、CSV 或 TSV，edit 用 edits 修改单元格。返回任务 id，用 spreadsheet_status 查询。关联旧版本时传 parentId，源文件保留。 |
-| `spreadsheet_status` | 按任务 id 查询状态、日志和产物；成功后返回工作表概况、文件引用及核验状态。交付前用 spreadsheet_verify 检查实际页图；展示使用 moss_present(result.presentation)，回复使用 result.displayMarkdown。 |
+| `spreadsheet_status` | 按任务 id 查询状态、日志和产物；成功后返回工作表概况、工作簿引用；展示使用 moss_present(result.presentation)，回复使用 result.displayMarkdown。 |
 | `spreadsheet_list` | 列出表格任务的 id、输入参数、状态和产物清单，用于查找已有工作簿、源文件和历史版本。 |
 | `spreadsheet_read` | 按任务 id 和产物 index 读取工作簿数据 JSON、创作参数或 HTML 预览等 UTF-8 文本，返回 text，单文件最多 2 MiB。按工作表或单元格范围读取内容请用 spreadsheet_inspect。 |
 | `spreadsheet_export` | 将任务 id 和产物 index 指定的 XLSX 或辅助文件复制到用户选择的目录；同名文件自动另取名。返回保存路径 path，取消选择时返回 canceled=true。 |
 | `spreadsheet_guide` | 获取 create/read/edit 模式、支持的图表类型和完整参数 JSON Schema，用于构造 spreadsheet_create 的输入。 |
 | `spreadsheet_inspect` | 读取成功任务的工作簿内容索引，返回单元格位置、值、公式、检查结果和可点击引用。可按 sheet 与 range（如 B2:C8）筛选，并用 offset/limit 分页；指定 range 时必须同时提供 sheet。 |
-| `spreadsheet_verify` | 检查成功任务的工作簿：仅传 id 获取实际打印页图、文件指纹和核验进度；带 sourceSha256 和 render 分批生成页图；查看图片后带同一指纹及 pages 提交逐页观察和问题。生成页图与提交观察分开调用，发现错误后创建新版本再核验。 |
 
 **演示文稿 · moss.presentations · 8 个工具**
 

@@ -64,12 +64,6 @@ function metadata(sheet, index) {
   }
 }
 
-export function editorRoute(id, sessionId) {
-  const link = new URL('moss-app://moss.spreadsheets/runs/' + id)
-  if (sessionId) link.searchParams.set('session', sessionId)
-  return link.href
-}
-
 export function registerEditor(backend, context, tasks, render) {
   let cache
   const saving = new Map()

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "moss.spreadsheets",
-  "version": "0.2.17",
+  "version": "0.2.18",
   "displayName": "表格",
   "category": "knowledge",
   "keywords": [
@@ -103,12 +103,6 @@
         "timeoutMs": 300000
       },
       {
-        "name": "creation.verify",
-        "inputSchema": "schemas/verify.json",
-        "outputSchema": "schemas/result.json",
-        "timeoutMs": 300000
-      },
-      {
         "name": "session.close",
         "inputSchema": "schemas/empty.json",
         "outputSchema": "schemas/result.json",
@@ -192,7 +186,7 @@
       {
         "id": "spreadsheet_status",
         "title": "查看任务",
-        "description": "按任务 id 查询状态、日志和产物；成功后返回工作表概况、文件引用及核验状态。交付前用 spreadsheet_verify 检查实际页图；展示使用 moss_present(result.presentation)，回复使用 result.displayMarkdown。 同时返回可排序、搜索、分页的交互表格预览链接 interactivePreview，操作仅改变预览。",
+        "description": "按任务 id 查询状态、工作表概况和工作簿引用。成功后使用 moss_present(result.presentation) 展示 XLSX，并使用 result.displayMarkdown 回复。",
         "action": "tasks.get",
         "inputSchema": "schemas/id.json",
         "effect": "read"
@@ -208,7 +202,7 @@
       {
         "id": "spreadsheet_read",
         "title": "读取产物",
-        "description": "按任务 id 和产物 index 读取工作簿数据 JSON、创作参数或 HTML 预览等 UTF-8 文本，返回 text，单文件最多 2 MiB。按工作表或单元格范围读取内容请用 spreadsheet_inspect。",
+        "description": "按任务 id 和产物 index 读取工作簿数据 JSON、创作参数等 UTF-8 文本，返回 text，单文件最多 2 MiB。按工作表或单元格范围读取内容请用 spreadsheet_inspect。",
         "action": "artifacts.read",
         "inputSchema": "schemas/artifact.json",
         "effect": "read"
@@ -236,14 +230,6 @@
         "action": "creation.inspect",
         "inputSchema": "schemas/inspect.json",
         "effect": "read"
-      },
-      {
-        "id": "spreadsheet_verify",
-        "title": "检查作品与记录核验",
-        "description": "检查成功任务的工作簿：仅传 id 获取实际打印页图、文件指纹和核验进度；带 sourceSha256 和 render 分批生成页图；查看图片后带同一指纹及 pages 提交逐页观察和问题。生成页图与提交观察分开调用，发现错误后创建新版本再核验。",
-        "action": "creation.verify",
-        "inputSchema": "schemas/verify.json",
-        "effect": "write"
       }
     ],
     "resourceProviders": [

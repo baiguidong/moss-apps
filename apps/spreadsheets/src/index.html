@@ -16,10 +16,14 @@
           </select>
         </div>
         <div class="workbook-actions">
+          <select id="mode" aria-label="工作簿模式" hidden>
+            <option value="original">原始预览</option>
+            <option value="sheets">工作表视图</option>
+            <option value="edit" selected>编辑工作簿</option>
+          </select>
+          <button type="button" id="save" class="primary" disabled>保存</button>
           <button type="button" id="undo" class="history-icon" aria-label="撤销" title="撤销" disabled>↶</button>
           <button type="button" id="redo" class="history-icon" aria-label="重做" title="重做" disabled>↷</button>
-          <button type="button" id="save" class="primary" disabled>保存</button>
-          <button type="button" id="back" hidden>返回预览</button>
           <div id="activity" hidden>
             <button type="button" id="changes" aria-expanded="false" aria-controls="change-list">修改记录</button>
             <button type="button" id="history" aria-expanded="false" aria-controls="history-panel">历史记录</button>
@@ -58,7 +62,7 @@
           <div class="workbook-actions">
             <button value="cancel" autofocus>继续编辑</button>
             <button value="discard">放弃修改</button>
-            <button value="save" class="primary">保存并返回</button>
+            <button value="save" class="primary">保存并切换</button>
           </div>
         </form>
       </dialog>

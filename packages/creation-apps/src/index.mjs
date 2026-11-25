@@ -20,6 +20,7 @@ export function validateTitle(input) {
   if (input.parentId !== undefined && !/^[a-f0-9-]{36}$/.test(input.parentId)) throw new Error('原作品 ID 无效')
 }
 export function creationEngine(engine, { scheme, title, tools }) {
+  const reviewPages = scheme !== 'moss-spreadsheets'
   return {
     ...engine,
     async register(backend, context) {
@@ -34,11 +35,22 @@ export function creationEngine(engine, { scheme, title, tools }) {
           const parts = uri.pathname.slice(1).split('/'), storeId=parts[0]
           if (!['works','files'].includes(uri.hostname) || (uri.hostname==='works' ? parts.length!==1 : parts.length!==2 || !/^\d{1,4}$/.test(parts[1]))) throw new Error('作品引用无效')
           const task=await store.get(storeId)
-          const index=uri.hostname==='works' ? task.result?.previewIndex ?? 0 : Number(parts[1]), file=task.artifacts[index]
+          const requested=uri.hostname==='works' ? task.result?.previewIndex ?? 0 : Number(parts[1])
+          const index=!reviewPages && task.artifacts[requested]?.purpose==='interactive-preview' ? task.result.previewIndex : requested
+          const file=task.artifacts[index]
           if(task.status!=='succeeded'||!file)throw new Error('作品尚未生成')
           const target=await fs.realpath(file.path), relative=path.relative(await fs.realpath(store.directory(task.id)),target)
           if(!relative||relative==='..'||relative.startsWith('../')||path.isAbsolute(relative)||(await fs.stat(target)).isDirectory())throw new Error('文件不属于当前作品')
-          return {kind:'file',name:file.name,path:target,resourceUri:input.uri,workId:task.result.workId,version:task.result.version,creation:{...(index===task.result.previewIndex?{sourceSha256:task.result.inspection?.sourceSha256}:{}),version:task.result.version,quality:task.result.quality,comparison:task.result.comparison,rendering:task.result.rendering,...(index===task.result.previewIndex?{previewPdfPath:task.result.visualReview?.pdfPath}:{})},...(file.purpose==='comparison'?{presentation:{type:'document-comparison'}}:file.kind==='html'?{presentation:{type:'interactive-html'}}:{})}
+          const creation = { version:task.result.version, comparison:task.result.comparison }
+          if (reviewPages) {
+            creation.quality=task.result.quality
+            creation.rendering=task.result.rendering
+            if(index===task.result.previewIndex){
+              creation.sourceSha256=task.result.inspection?.sourceSha256
+              creation.previewPdfPath=task.result.visualReview?.pdfPath
+            }
+          }
+          return {kind:'file',name:file.name,path:target,resourceUri:input.uri,workId:task.result.workId,version:task.result.version,creation,...(file.purpose==='comparison'?{presentation:{type:'document-comparison'}}:file.kind==='html'?{presentation:{type:'interactive-html'}}:{})}
         }
         if(!['create','edit','use'].includes(input.intent))throw new Error('请选择创作或继续修改')
         const task=input.ref?.taskId?await store.get(input.ref.taskId):null
@@ -61,7 +73,7 @@ export function creationEngine(engine, { scheme, title, tools }) {
       const nativeIndex=artifacts.findIndex(a=>officeExtensions.has(path.extname(a.path).toLowerCase()))
       const nativePdfIndex=artifacts.findIndex(a=>a.kind==='pdf')
       let previewIndex=nativeIndex >= 0 ? nativeIndex : nativePdfIndex >= 0 ? nativePdfIndex : output.result?.previewIndex ?? Math.max(0,artifacts.findIndex(a=>a.kind==='html'))
-      if((nativeIndex >= 0 || (supportsWorkflow(scheme)&&nativePdfIndex >= 0)) && !output.result?.visualReview){
+      if(reviewPages && (nativeIndex >= 0 || (supportsWorkflow(scheme)&&nativePdfIndex >= 0)) && !output.result?.visualReview){
         const rendered=await renderOfficeFile(artifacts[nativeIndex >= 0 ? nativeIndex : nativePdfIndex].path,path.join(ctx.directory,'office-preview'),ctx)
         artifacts.push(...rendered.files)
         output.result={...output.result,visualReview:rendered.result}
@@ -71,11 +83,10 @@ export function creationEngine(engine, { scheme, title, tools }) {
 
       if(artifacts[previewIndex].kind==='html'&&(await fs.stat(artifacts[previewIndex].path)).size>2*1024**2)throw new Error('预览超过 2 MiB，请缩小内容或图片后重新生成')
       const resourceUri=sessionResourceUri(`${scheme}://works/${id}`,ctx.sessionId),downloads=artifacts.map((a,index)=>({name:a.name,resourceUri:sessionResourceUri(`${scheme}://files/${id}/${index}`,ctx.sessionId),kind:a.kind}))
-      const interactivePreview = downloads.find((_, index) => artifacts[index].purpose === 'interactive-preview')
       const display=artifacts[previewIndex].kind==='html'?'```moss-visualization\n'+JSON.stringify({resource_uri:resourceUri,title:name})+'\n```':`[${name.replace(/[\[\]]/g,'')}](${resourceUri})`
-      return {...output,artifacts,result:{...output.result,title:name,workId,version,parentId:input.parentId||null,previewIndex,resourceUri,downloads,...(interactivePreview?{interactivePreview}:{}),
+      return {...output,artifacts,result:{...output.result,title:name,workId,version,parentId:input.parentId||null,previewIndex,resourceUri,downloads,
         presentation:{items:[{resource_uri:resourceUri,title:name,role:'primary'},
-          ...downloads.flatMap((file,index)=>index!==previewIndex&&(artifacts[index].purpose==='interactive-preview'||file.kind!=='json'&&!artifacts[index].purpose&&file.kind!=='html')?[{resource_uri:file.resourceUri,title:file.name,role:'supporting'}]:[])],mode:'auto'},displayMarkdown:display+(interactivePreview?`\n\n[交互表格预览](${interactivePreview.resourceUri})`:'')}}
+          ...downloads.flatMap((file,index)=>index!==previewIndex&&(file.kind!=='json'&&!artifacts[index].purpose&&file.kind!=='html')?[{resource_uri:file.resourceUri,title:file.name,role:'supporting'}]:[])],mode:'auto'},displayMarkdown:display}}
     },
   }
 }
